@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SIGNAL</title>
+<style>
+:root {
+  --bg:     #07090e;
+  --bg2:    #0c1018;
+  --bg3:    #101620;
+  --bdr:    #1c2a3c;
+  --txt:    #6a90a8;
+  --hi:     #aecce0;
+  --dim:    #38505e;
+  --blue:   #1e5080;
+  --green:  #1a5030;
+  --red:    #7a1c1c;
+  --amber:  #8a5a10;
+  --purple: #4a1868;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);color:var(--txt);display:flex;flex-direction:column}
+
+/* ── SETUP ── */
+#setup{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
+.sbox{background:var(--bg2);border:1px solid var(--bdr);padding:36px 44px;max-width:460px;width:92%}
+.sbox h1{font-size:2.2rem;letter-spacing:.55em;color:var(--hi);font-weight:normal;margin-bottom:4px}
+.ssub{font-size:.7rem;color:var(--dim);margin-bottom:32px;letter-spacing:.08em}
+.slbl{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.ssec{margin-bottom:22px}
+.crow{display:flex;gap:6px}
+.cbtn{background:var(--bg3);border:1px solid var(--bdr);color:var(--txt);padding:8px 16px;cursor:pointer;font-family:inherit;font-size:1rem;transition:all .12s}
+.cbtn:hover,.cbtn.sel{background:var(--blue);border-color:#2a70b0;color:var(--hi)}
+#plist{display:flex;flex-direction:column;gap:8px}
+.prow{display:flex;align-items:center;gap:10px}
+.pdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pi{background:var(--bg3);border:1px solid var(--bdr);color:var(--hi);padding:7px 10px;font-family:inherit;font-size:.85rem;flex:1;outline:none}
+.pi:focus{border-color:var(--blue)}
+.sbtn{width:100%;padding:12px;background:var(--blue);border:1px solid #2a70b0;color:var(--hi);font-family:inherit;font-size:.9rem;letter-spacing:.2em;cursor:pointer;margin-top:6px;text-transform:uppercase}
+.sbtn:hover{background:#245890}
+
+/* ── GAME ── */
+#game{display:none;flex-direction:column;height:100%}
+#hdr{display:flex;align-items:center;gap:14px;padding:5px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr);height:38px;flex-shrink:0}
+.hlogo{font-size:1rem;letter-spacing:.4em;color:var(--hi)}
+.hsep{color:var(--bdr)}
+#hturn{font-size:.7rem}
+#hphase{font-size:.62rem;padding:2px 8px;border:1px solid currentColor;letter-spacing:.1em;text-transform:uppercase}
+.ph-roll{color:#4a80a8}.ph-move{color:#4aa860}.ph-act{color:#a89040}.ph-end{color:#a85040}
+#hsig{font-size:.68rem;color:var(--dim);margin-left:auto}
+#main{display:flex;flex:1;overflow:hidden}
+#bwrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+#bsvg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
+#bsvg.drag{cursor:grabbing}
+
+/* ── SIDE ── */
+#side{width:196px;background:var(--bg2);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sec{padding:10px 12px;border-bottom:1px solid var(--bdr)}
+.shd{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;font-weight:normal}
+#spname{font-size:.95rem;color:var(--hi);margin-bottom:8px}
+.rrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.rlbl{font-size:.68rem;color:var(--dim)}
+.tset{display:flex;gap:3px}
+.t{width:13px;height:13px;border-radius:50%;display:inline-block}
+.rf{background:#2d6535;border:1px solid #4a9850}
+.re{background:var(--bg3);border:1px solid #1e3828}
+.of{background:#1e4878;border:1px solid #2e68a8}
+.oe{background:var(--bg3);border:1px solid #182840}
+.hf{background:#6a2020;border:1px solid #9a3030}
+.he{background:var(--bg3);border:1px solid #381818}
+#smvp{font-size:1.6rem;color:var(--hi);text-align:center}
+.smvl{font-size:.6rem;color:var(--dim);text-align:center;margin-top:2px}
+#sloc{font-size:.66rem;color:var(--dim);margin-top:4px}
+
+/* ── BUTTONS ── */
+.btn{width:100%;background:var(--bg3);border:1px solid var(--bdr);color:var(--txt);padding:7px 10px;font-family:inherit;font-size:.7rem;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;transition:all .12s;text-align:left}
+.btn:hover:not(:disabled){border-color:#2a60a0;color:var(--hi)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.pri{background:var(--blue);border-color:#2a70b0;color:var(--hi)}
+.btn.pri:hover:not(:disabled){background:#245890}
+.btn.wrn{border-color:var(--amber);color:#c09050}
+.btn.wrn:hover:not(:disabled){background:rgba(138,90,16,.15)}
+.btn.dng{border-color:var(--red);color:#c06060}
+.btn.dng:hover:not(:disabled){background:rgba(122,28,28,.15)}
+
+/* ── ALL PLAYERS ── */
+#aplst{overflow-y:auto;flex:1}
+.pcrd{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.pname{font-size:.72rem;color:var(--hi);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.pdot2{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pstat{font-size:.62rem;color:var(--dim)}
+
+/* ── LOG ── */
+#log{overflow-y:auto;max-height:140px;border-top:1px solid var(--bdr);flex-shrink:0}
+.le{font-size:.65rem;padding:3px 12px;border-bottom:1px solid rgba(255,255,255,.02);line-height:1.4}
+.le.imp{color:var(--txt)}.le.good{color:#60a060}.le.crit{color:#b06060}
+
+/* ── MODAL ── */
+#mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:50;align-items:center;justify-content:center}
+#mov.show{display:flex}
+#mbox{background:var(--bg2);border:1px solid var(--bdr);padding:24px;max-width:360px;width:90%}
+#mtit{font-size:.8rem;letter-spacing:.2em;color:var(--hi);margin-bottom:12px;text-transform:uppercase;font-weight:normal}
+#mbod{font-size:.78rem;line-height:1.65;margin-bottom:16px;white-space:pre-line}
+.pvnote{font-size:.62rem;color:#8a4040;margin-bottom:10px;border-left:2px solid #8a4040;padding-left:8px}
+#mact{display:flex;gap:8px}
+#mact .btn{margin-bottom:0}
+
+/* ── DICE ROLL DISPLAY ── */
+.dicerow{display:flex;gap:8px;justify-content:center;margin:10px 0}
+.die{width:38px;height:38px;background:var(--bg3);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--hi);font-weight:bold}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="sbox">
+    <h1>SIGNAL</h1>
+    <p class="ssub">Endymion 7 · Emergency Protocol · Crew Initialization</p>
+    <div class="ssec">
+      <div class="slbl">Crew Size</div>
+      <div class="crow" id="crow"></div>
+    </div>
+    <div class="ssec">
+      <div class="slbl">Crew Manifest</div>
+      <div id="plist"></div>
+    </div>
+    <button class="sbtn" onclick="startGame()">Initialize Mission</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <div id="hdr">
+    <span class="hlogo">SIGNAL</span>
+    <span class="hsep">|</span>
+    <span id="hturn">Turn 1</span>
+    <span class="hsep">|</span>
+    <span id="hphase" class="ph-roll">Roll</span>
+    <span id="hsig">0 fragments · signal offline</span>
+  </div>
+  <div id="main">
+    <div id="bwrap"><svg id="bsvg"></svg></div>
+    <div id="side">
+      <div class="sec">
+        <h3 class="shd">Active Crew</h3>
+        <div id="spname">—</div>
+        <div class="rrow"><span class="rlbl">Rations</span><span class="tset" id="tr"></span></div>
+        <div class="rrow"><span class="rlbl">O2 Tanks</span><span class="tset" id="to"></span></div>
+        <div class="rrow"><span class="rlbl">Health</span><span class="tset" id="th"></span></div>
+        <div class="rrow"><span class="rlbl">Fragments</span><span id="sfrags" style="font-size:.7rem">0 carried</span></div>
+        <div id="sloc" class="rlbl" style="margin-top:4px">Core Wreckage</div>
+      </div>
+      <div class="sec">
+        <h3 class="shd">Movement</h3>
+        <div id="smvp">—</div>
+        <div class="smvl">points remaining</div>
+      </div>
+      <div class="sec">
+        <h3 class="shd">Actions</h3>
+        <button class="btn pri" id="broll" onclick="doRoll()">Roll Movement</button>
+        <button class="btn" id="bact" onclick="doInvestigate()" disabled>Investigate POI</button>
+        <button class="btn wrn" id="bfrag" onclick="doActivateFrag()" disabled>Activate Fragment</button>
+        <button class="btn wrn" id="bsig" onclick="doSignalRoll()" disabled>Roll Signal</button>
+        <button class="btn dng" id="bend" onclick="doEndTurn()" disabled>End Turn</button>
+      </div>
+      <div class="sec" style="flex-shrink:0"><h3 class="shd">All Crew</h3></div>
+      <div id="aplst"></div>
+      <div id="log"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="mov">
+  <div id="mbox">
+    <h2 id="mtit"></h2>
+    <div id="mbod"></div>
+    <div id="mact"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════
+// HEX MATH  (pointy-top, axial coords)
+// ═══════════════════════════════════════════
+const SQRT3 = Math.sqrt(3);
+const SZ = 52; // hex size px
+const DIRS = [[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+
+function h2p(q, r) { return [SZ*SQRT3*(q+r/2), SZ*1.5*r]; }
+
+function p2h(x, y) {
+  const q = (x*SQRT3/3 - y/3)/SZ, r = (y*2/3)/SZ, s = -q-r;
+  let rq=Math.round(q), rr=Math.round(r), rs=Math.round(s);
+  if(Math.abs(rq-q)>Math.abs(rr-r)&&Math.abs(rq-q)>Math.abs(rs-s)) rq=-rr-rs;
+  else if(Math.abs(rr-r)>Math.abs(rs-s)) rr=-rq-rs;
+  return [rq,rr];
+}
+
+function hexPts(cx, cy, sz) {
+  sz = sz||SZ-2;
+  let s='';
+  for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;s+=`${(cx+sz*Math.cos(a)).toFixed(1)},${(cy+sz*Math.sin(a)).toFixed(1)} `;}
+  return s.trim();
+}
+
+const hk = (q,r) => `${q},${r}`;
+const hparse = k => k.split(',').map(Number);
+const hnbr = (q,r) => DIRS.map(([dq,dr])=>[q+dq,r+dr]);
+const hdist = (q1,r1,q2,r2) => (Math.abs(q1-q2)+Math.abs(q1+r1-q2-r2)+Math.abs(r1-r2))/2;
+
+function bfsReach(fq, fr, mp) {
+  const dist = new Map([[hk(fq,fr),0]]);
+  const q = [[fq,fr]];
+  while(q.length) {
+    const [cq,cr] = q.shift();
+    const cd = dist.get(hk(cq,cr));
+    if(cd >= mp) continue;
+    for(const [nq,nr] of hnbr(cq,cr)) {
+      const k = hk(nq,nr);
+      if(!dist.has(k) && G.tiles.has(k)) { dist.set(k,cd+1); q.push([nq,nr]); }
+    }
+  }
+  dist.delete(hk(fq,fr));
+  return dist;
+}
+
+function bfsPath(fq, fr, tq, tr) {
+  if(fq===tq && fr===tr) return [];
+  const prev = new Map([[hk(fq,fr),null]]);
+  const q = [[fq,fr]];
+  while(q.length) {
+    const [cq,cr] = q.shift();
+    for(const [nq,nr] of hnbr(cq,cr)) {
+      const k = hk(nq,nr);
+      if(prev.has(k)||!G.tiles.has(k)) continue;
+      prev.set(k, hk(cq,cr));
+      if(nq===tq && nr===tr) {
+        const path=[]; let cur=k;
+        while(cur){const p=prev.get(cur);if(p)path.unshift(hparse(cur));cur=p;}
+        return path;
+      }
+      q.push([nq,nr]);
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════
+// DEFINITIONS
+// ═══════════════════════════════════════════
+const PCOLORS = ['#4a8fbd','#c04444','#4ab04a','#c09040','#9040c0','#40b0b0'];
+const PNAMES  = ['Vasquez','Okonkwo','Reyes','Kim','Halvorsen','Tran'];
+
+const CRASH_HEXES = [
+  {q:0,  r:0,  name:'Core Wreckage',   short:'CORE'},
+  {q:1,  r:0,  name:'Medical Bay',     short:'MED'},
+  {q:1,  r:-1, name:'Signal Array',    short:'SIG·ARR'},
+  {q:0,  r:-1, name:'Landing Struts',  short:'LNDG'},
+  {q:-1, r:0,  name:'Equipment Locker',short:'EQUIP'},
+  {q:-1, r:1,  name:'Landing Struts',  short:'LNDG'},
+  {q:0,  r:1,  name:'Cargo Hold',      short:'CARGO'},
+];
+
+const ANOMALIES = [
+  'Stasis Pod','Temporal Rift','Portal','Gravitational Well',
+  'Dead Signal','Echo Chamber','Inversion Field',
+];
+
+const TTEMPLATES = [
+  {pois:['Fuselage','Outpost']},    {pois:['Cave','Wreckage Field']},
+  {pois:['Signal Tower']},          {pois:['Outpost','Dead End']},
+  {pois:['Fuselage','Cave']},       {pois:['Wreckage Field','Dead End']},
+  {pois:['Outpost','Outpost']},     {pois:['Fuselage','Signal Tower']},
+  {pois:['Cave','Dead End']},       {pois:['Dead End','Dead End']},
+  {pois:['Cave','Outpost']},        {pois:['Wreckage Field','Fuselage']},
+  {pois:['Signal Tower','Dead End']},{pois:['Cave','Cave']},
+  {pois:['Fuselage']},              {pois:['Outpost']},
+  {pois:['Wreckage Field']},
+];
+
+const POI_COLOR = {
+  'Fuselage':'#4a8080','Cave':'#3a6040','Outpost':'#8a7040',
+  'Signal Tower':'#4080a0','Wreckage Field':'#806040','Dead End':'#404040',
+};
+
+const EVENT_CARDS = {
+  'Signal Tower':[
+    {text:'Radio Fragment recovered at the tower base. The component is intact.',pub:true,rf:true},
+    {text:'Tower badly damaged on impact. No fragment recoverable.',pub:true,rf:false},
+  ],
+  'Fuselage':[
+    {text:'Equipment locker intact inside the fuselage. Draw 1 Equipment card from the Crash Site.',pub:true,rf:false},
+    {text:'The fuselage is unstable. Structural risk — flip 1 Ration to EMPTY on exit.',pub:true,rf:false},
+    {text:'You found something. A data chip, still readable. The contents are yours.',pub:false,rf:false},
+  ],
+  'Outpost':[
+    {text:'Supply cache intact. Roll 1 die for Ration yield and flip that many EMPTY Rations to FULL.',pub:true,rf:false},
+    {text:'Cache stripped. Someone — or something — got here first.',pub:true,rf:false},
+  ],
+  'Cave':[
+    {text:'Shelter. The cave blocks atmospheric sensors. Skip your O2 Tank flip this round.',pub:true,rf:false},
+    {text:'You rested here alone. Nobody needs to know what you found.',pub:false,rf:false},
+  ],
+  'Wreckage Field':[
+    {text:'Scattered hull plating and cargo containers.\nRoll 1 die: 1–3 = nothing; 4–5 = 1 Ration; 6 = 1 Equipment card.',pub:true,rf:false},
+    {text:'The wreckage field is toxic. Crossing cost: flip 1 Ration to EMPTY immediately.',pub:true,rf:false},
+  ],
+  'Dead End':[
+    {text:'Nothing here. Hostile terrain, no shelter, no path forward.',pub:true,rf:false},
+    {text:'Dead end. You are alone. Nobody is watching.',pub:false,rf:false},
+  ],
+  'Airlock':[
+    {text:'Airlock pressurized. All O2 Tanks refilled to FULL.',pub:true,rf:false},
+  ],
+  'Emergency Bay':[
+    {text:'Emergency Bay active. Restore 1 Health token to HEALTHY.',pub:true,rf:false},
+  ],
+  'Supply Cache':[
+    {text:'Supply Cache intact. Roll 1 die and flip that many EMPTY Rations to FULL.',pub:true,rf:false},
+  ],
+};
+
+function buildDeck() {
+  const deck = [];
+  for(let i=0;i<40;i++) {
+    const t = TTEMPLATES[i%TTEMPLATES.length];
+    const pois = [...t.pois];
+    const rf = pois.includes('Signal Tower') && Math.random() < 0.7;
+    deck.push({type:'terrain',pois,radioFragment:rf,investigated:false});
+  }
+  ANOMALIES.forEach(a => deck.push({type:'anomaly',anomaly:a,pois:[],investigated:false}));
+  for(let i=0;i<3;i++) deck.push({type:'ship_section',pois:['Airlock','Emergency Bay','Supply Cache'],investigated:false});
+  for(let i=deck.length-1;i>0;i--){const j=0|Math.random()*(i+1);[deck[i],deck[j]]=[deck[j],deck[i]];}
+  return deck;
+}
+
+// ═══════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════
+let G = null;
+
+function cp() { return G.players[G.currentPlayer]; }
+
+function newGame(names) {
+  const tiles = new Map();
+  CRASH_HEXES.forEach(h => tiles.set(hk(h.q,h.r), {...h,type:'crash_site',revealed:true}));
+
+  const players = names.map((name,i) => ({
+    id:i, name, color:PCOLORS[i],
+    q:0, r:0, rations:10, o2:3, health:3,
+    radioFragments:0, incapacitated:0, alive:true, location:'Core Wreckage',
+  }));
+
+  G = {
+    players, currentPlayer:0, tiles,
+    terrainDeck: buildDeck(),
+    radioFragmentsActivated: 0,
+    turn:1, phase:'roll', movementLeft:0,
+    reach: new Map(),
+  };
+  expandFrontier();
+}
+
+function expandFrontier() {
+  const toAdd = new Set();
+  for(const [k,t] of G.tiles) {
+    if(!t.revealed) continue;
+    const [q,r] = hparse(k);
+    for(const [nq,nr] of hnbr(q,r)) {
+      const nk = hk(nq,nr);
+      if(!G.tiles.has(nk)) toAdd.add(nk);
+    }
+  }
+  toAdd.forEach(k => {
+    const [q,r] = hparse(k);
+    G.tiles.set(k, {q,r,type:'face_down',revealed:false,pois:[]});
+  });
+}
+
+function revealAt(q, r) {
+  const k = hk(q,r);
+  const t = G.tiles.get(k);
+  if(!t || t.revealed) return;
+  if(!G.terrainDeck.length) {
+    G.tiles.set(k, {...t,type:'terrain',revealed:true,pois:['Dead End'],radioFragment:false,investigated:false});
+    addLog('Terrain deck exhausted — barren ground.');
+    expandFrontier(); return;
+  }
+  const drawn = G.terrainDeck.pop();
+  G.tiles.set(k, {...t,...drawn,q,r,revealed:true,investigated:false});
+  const nt = G.tiles.get(k);
+  if(nt.type==='anomaly')      addLog(`Anomaly: ${nt.anomaly}`, 'crit');
+  else if(nt.type==='ship_section') addLog('Ship Section discovered!', 'good');
+  else addLog(`Terrain: ${nt.pois.join(', ')}`);
+  expandFrontier();
+}
+
+function tileName(t) {
+  if(!t) return 'Unknown';
+  if(t.name) return t.name;
+  if(t.type==='anomaly') return t.anomaly||'Anomaly';
+  if(t.type==='ship_section') return 'Ship Section';
+  if(t.pois&&t.pois.length) return t.pois[0];
+  return 'Terrain';
+}
+
+// ═══════════════════════════════════════════
+// TURN ACTIONS
+// ═══════════════════════════════════════════
+function doRoll() {
+  if(G.phase !== 'roll') return;
+  const r = 1 + (0|Math.random()*6);
+  G.movementLeft = r;
+  G.phase = 'move';
+  G.reach = bfsReach(cp().q, cp().r, r);
+  addLog(`${cp().name} rolled ${r}.`, 'imp');
+  updateUI(); render();
+}
+
+function doMove(q, r) {
+  const p = cp();
+  if(G.phase!=='move' && G.phase!=='action') return;
+  if(!G.movementLeft) return;
+
+  const path = bfsPath(p.q, p.r, q, r);
+  if(!path || !path.length) return;
+  if(path.length > G.movementLeft) return;
+
+  // Step through path — reveal face-down tiles en route
+  path.forEach(([pq,pr]) => {
+    if(!G.tiles.get(hk(pq,pr))?.revealed) revealAt(pq,pr);
+  });
+
+  p.q = q; p.r = r;
+  G.movementLeft -= path.length;
+
+  const t = G.tiles.get(hk(q,r));
+  p.location = tileName(t);
+
+  // Refill O2 at crash site
+  if(t?.type==='crash_site' && p.o2<3) {
+    p.o2=3;
+    addLog(`${p.name} O2 refilled at Crash Site.`);
+  }
+
+  // Anomaly on entry
+  if(t?.type==='anomaly') triggerAnomaly(t);
+
+  G.phase = 'action';
+  G.reach = bfsReach(p.q, p.r, G.movementLeft);
+  addLog(`${p.name} moved to ${p.location}.`);
+  updateUI(); render();
+}
+
+function doInvestigate() {
+  const p = cp();
+  if(G.phase !== 'action') return;
+  const t = G.tiles.get(hk(p.q,p.r));
+  if(!t || !t.revealed || t.type==='crash_site') return;
+  if(t.investigated) { showModal('Already Investigated','This location has already been investigated.',true,()=>{}); return; }
+
+  const poi = t.pois && t.pois[0];
+  const opts = EVENT_CARDS[poi] || EVENT_CARDS['Dead End'];
+  const evt = opts[0|Math.random()*opts.length];
+
+  if(evt.rf) { p.radioFragments++; addLog(`${p.name} found a Radio Fragment!`,'good'); }
+  t.investigated = true;
+
+  showModal(evt.pub ? '[PUBLIC] Event' : '[PRIVATE] Event', evt.text, evt.pub, () => { updateUI(); render(); });
+}
+
+function doActivateFrag() {
+  const p = cp();
+  if(p.radioFragments<=0) return;
+  const t = G.tiles.get(hk(p.q,p.r));
+  if(t?.name !== 'Signal Array') return;
+  if(G.radioFragmentsActivated >= 5) return;
+  p.radioFragments--;
+  G.radioFragmentsActivated++;
+  const thr = [null,18,16,14,12,10][G.radioFragmentsActivated];
+  addLog(`Fragment activated. Array: ${G.radioFragmentsActivated}/5. Threshold: ${thr}+`, 'good');
+  updateUI(); render();
+}
+
+function doSignalRoll() {
+  const p = cp();
+  if(G.phase !== 'action') return;
+  const t = G.tiles.get(hk(p.q,p.r));
+  if(t?.name !== 'Signal Array') return;
+  if(!G.radioFragmentsActivated) return;
+
+  const thr = [null,18,16,14,12,10][G.radioFragmentsActivated];
+  const d = [1+(0|Math.random()*6), 1+(0|Math.random()*6), 1+(0|Math.random()*6)];
+  const total = d[0]+d[1]+d[2];
+  const success = total >= thr;
+
+  const body = `Dice: ${d[0]}, ${d[1]}, ${d[2]}\nTotal: ${total}\nNeeded: ${thr} or higher\n\n${success
+    ? 'SIGNAL RECEIVED.\nA rescue craft has entered orbit.'
+    : 'No response. Signal insufficient.'}`;
+
+  addLog(`Signal Roll: ${total} vs ${thr} — ${success?'SUCCESS':'FAIL'}`, success?'good':'crit');
+
+  if(success) {
+    showModal('RESCUE SIGNAL RECEIVED', body, true, () => {
+      showModal('MISSION COMPLETE',
+        'Rescue confirmed. All surviving crew whose goal is rescue have won.\n\nThe planet keeps everyone else.',
+        true, () => {});
+    }, 'Confirm');
+  } else {
+    showModal('Signal Roll', body, true, () => {});
+  }
+}
+
+function doEndTurn() {
+  if(G.phase === 'roll') return;
+  const p = cp();
+  const onBase = G.tiles.get(hk(p.q,p.r))?.type === 'crash_site';
+
+  if(p.rations > 0) {
+    p.rations--;
+  } else {
+    if(p.health>0) p.health--;
+    addLog(`${p.name} is starving — Health reduced (${p.health}/3).`, 'crit');
+  }
+
+  if(!onBase) {
+    if(p.o2 > 0) {
+      p.o2--;
+    } else {
+      if(p.health>0) p.health--;
+      addLog(`${p.name} has no O2 — Health reduced (${p.health}/3).`, 'crit');
+    }
+  }
+
+  if(p.health === 0 && p.alive) {
+    p.incapacitated++;
+    if(p.incapacitated >= 2) {
+      p.alive = false;
+      addLog(`${p.name} has DIED. Supplies left at ${p.location}.`, 'crit');
+    } else {
+      addLog(`${p.name} is INCAPACITATED (${p.incapacitated}/2). Needs rescue.`, 'crit');
+    }
+  }
+
+  advanceTurn();
+}
+
+function advanceTurn() {
+  const alive = G.players.filter(p => p.alive);
+  if(!alive.length) {
+    showModal('All Dead', 'All crew have perished.\nNobody wins.', true, ()=>{});
+    return;
+  }
+  let next = (G.currentPlayer+1) % G.players.length;
+  let tries = 0;
+  while(!G.players[next].alive && tries++ < G.players.length) next=(next+1)%G.players.length;
+  if(next <= G.currentPlayer) G.turn++;
+  G.currentPlayer = next;
+  G.phase = 'roll';
+  G.movementLeft = 0;
+  G.reach = new Map();
+  addLog(`Turn ${G.turn}: ${G.players[next].name}.`, 'imp');
+  updateUI(); render();
+}
+
+// ═══════════════════════════════════════════
+// ANOMALY EFFECTS
+// ═══════════════════════════════════════════
+function triggerAnomaly(t) {
+  const p = cp();
+  switch(t.anomaly) {
+    case 'Temporal Rift': {
+      const r = 1+(0|Math.random()*6);
+      if(r<=3){const lost=Math.min(p.rations,r);p.rations-=lost;addLog(`Temporal Rift: lost ${lost} Ration(s).`,'crit');}
+      else{const gain=Math.min(10-p.rations,r);p.rations+=gain;addLog(`Temporal Rift: recovered ${gain} Ration(s).`,'good');}
+      break;
+    }
+    case 'Portal':
+      showModal('Portal Anomaly',
+        'You may immediately move your pawn to the Crash Site. Your turn ends.',
+        true,
+        () => {p.q=0;p.r=0;p.location='Core Wreckage';G.movementLeft=0;G.phase='action';
+               addLog(`${p.name} used Portal — returned to Core Wreckage.`,'imp');updateUI();render();},
+        'Use Portal', ()=>{}, 'Decline');
+      break;
+    case 'Inversion Field':
+      showModal('Inversion Field',
+        'Choose another crew member. Swap your Ration tokens with theirs. They cannot refuse.\n\n(Resolve manually at the table.)',
+        true, ()=>{addLog('Inversion Field: swap Rations with another player.','crit');});
+      break;
+    case 'Gravitational Well':
+      showModal('Gravitational Well',
+        'Roll 1 die. The player to your left moves your pawn that many points in any direction.\n\n(Resolve manually at the table.)',
+        true, ()=>{addLog('Gravitational Well: player left moves your pawn.','crit');});
+      break;
+    case 'Dead Signal':
+      addLog('Dead Signal: no Signal Roll occurs this round.', 'crit');
+      break;
+    case 'Echo Chamber':
+      addLog('Echo Chamber: resolve the most recent Public Event again.', 'imp');
+      break;
+    case 'Stasis Pod':
+      showModal('Stasis Pod',
+        'You may enter the Stasis Pod.\n\nTurn pawn sideways. Skip Resource Flip each round inside. Cannot move or act. Exit any time on your turn.\n\n(Track stasis state at the table.)',
+        true, ()=>{addLog('Stasis Pod: player may enter stasis.','imp');});
+      break;
+    default:
+      addLog(`Anomaly triggered: ${t.anomaly}.`, 'imp');
+  }
+}
+
+// ═══════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════
+const NS = 'http://www.w3.org/2000/svg';
+let pan = {x:0,y:0}, zoom = 1;
+
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  if(attrs) Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
+  return e;
+}
+
+function render() {
+  const svg = document.getElementById('bsvg');
+  const W = svg.clientWidth||800, H = svg.clientHeight||600;
+  svg.innerHTML = '';
+
+  svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#07090e'}));
+
+  const g = svgEl('g',{transform:`translate(${W/2+pan.x} ${H/2+pan.y}) scale(${zoom})`});
+  svg.appendChild(g);
+
+  for(const [,t] of G.tiles) drawTile(g,t);
+
+  // Movement reach highlights
+  if((G.phase==='move'||G.phase==='action') && G.movementLeft>0) {
+    for(const [k] of G.reach) {
+      const [q,r] = hparse(k);
+      const [cx,cy] = h2p(q,r);
+      g.appendChild(svgEl('polygon',{
+        points:hexPts(cx,cy,SZ-1),
+        fill:'rgba(30,80,128,.18)',stroke:'#2a6090','stroke-width':'1.2',
+        'pointer-events':'none',
+      }));
+    }
+  }
+
+  G.players.forEach(p => { if(p.alive) drawPawn(g,p); });
+}
+
+const TCFG = {
+  crash_site:  {fill:'#071525',stroke:'#1a4060',sw:1.5},
+  terrain:     {fill:'#0a140a',stroke:'#1a2a1a',sw:1},
+  anomaly:     {fill:'#14091e',stroke:'#4a1870',sw:1.5},
+  ship_section:{fill:'#071520',stroke:'#1a4870',sw:1.5},
+  face_down:   {fill:'#0b1018',stroke:'#14202e',sw:.8},
+};
+
+function drawTile(g, t) {
+  const [cx,cy] = h2p(t.q,t.r);
+  const cfg = TCFG[t.type]||TCFG.face_down;
+  const pts = hexPts(cx,cy,SZ-2);
+
+  const poly = svgEl('polygon',{
+    points:pts, fill:cfg.fill, stroke:cfg.stroke, 'stroke-width':cfg.sw,
+    style:'cursor:pointer', 'data-q':t.q, 'data-r':t.r,
+  });
+  poly.addEventListener('click', () => onHexClick(t.q,t.r));
+  g.appendChild(poly);
+
+  if(!t.revealed) {
+    [[-14,-14,14,14],[14,-14,-14,14]].forEach(([dx1,dy1,dx2,dy2]) => {
+      g.appendChild(svgEl('line',{
+        x1:cx+dx1,y1:cy+dy1,x2:cx+dx2,y2:cy+dy2,
+        stroke:'#162028','stroke-width':'0.8','pointer-events':'none',
+      }));
+    });
+    return;
+  }
+
+  if(t.type==='crash_site') {
+    txt(g,cx,cy+3,t.short||t.name,'7.5','#3a7aaa');
+  } else if(t.type==='anomaly') {
+    txt(g,cx,cy-6,'ANOMALY','7','#7a30b0');
+    txt(g,cx,cy+6,(t.anomaly||'').slice(0,13),'6','#5a2090');
+  } else if(t.type==='ship_section') {
+    txt(g,cx,cy-5,'SHIP','7','#3a7aaa');
+    txt(g,cx,cy+5,'SECTION','7','#3a7aaa');
+  } else if(t.type==='terrain') {
+    const n = t.pois.length;
+    t.pois.forEach((poi,i) => {
+      const py = cy + (i-(n-1)/2)*13 - 1;
+      g.appendChild(svgEl('circle',{cx:cx-16,cy:py,r:2.5,fill:POI_COLOR[poi]||'#505050','pointer-events':'none'}));
+      txt(g,cx-10,py+3.5,poi.slice(0,12),'5.8','#4a6878','start');
+    });
+    if(t.radioFragment) txt(g,cx+16,cy-14,'RF','7.5','#60c030');
+    if(t.investigated)  txt(g,cx,cy+18,'· investigated ·','5.5','#2a4a3a');
+  }
+}
+
+function txt(g, x, y, str, fs, fill, anchor) {
+  const e = svgEl('text',{x,y,'text-anchor':anchor||'middle','font-family':'Courier New,monospace','font-size':fs,fill,'pointer-events':'none'});
+  e.textContent = str;
+  g.appendChild(e);
+}
+
+function drawPawn(g, p) {
+  const [cx,cy] = h2p(p.q,p.r);
+  const same = G.players.filter(x=>x.alive&&x.q===p.q&&x.r===p.r);
+  const ox = (same.indexOf(p)-(same.length-1)/2)*14;
+  if(p.id===G.currentPlayer)
+    g.appendChild(svgEl('circle',{cx:cx+ox,cy:cy+15,r:11,fill:'none',stroke:p.color,'stroke-width':'1',opacity:'.45','pointer-events':'none'}));
+  g.appendChild(svgEl('circle',{cx:cx+ox,cy:cy+15,r:8,fill:p.color,stroke:'#fff','stroke-width':'1.5','pointer-events':'none'}));
+  const lbl = svgEl('text',{x:cx+ox,y:cy+19,'text-anchor':'middle','font-family':'Courier New,monospace','font-size':'6.5',fill:'#fff','font-weight':'bold','pointer-events':'none'});
+  lbl.textContent = p.name.slice(0,2).toUpperCase();
+  g.appendChild(lbl);
+}
+
+// ═══════════════════════════════════════════
+// HEX CLICK
+// ═══════════════════════════════════════════
+function onHexClick(q, r) {
+  if(!G || (G.phase!=='move' && G.phase!=='action')) return;
+  if(!G.movementLeft) return;
+  const p = cp();
+  if(q===p.q && r===p.r) return;
+  if(!G.reach.has(hk(q,r))) return;
+  doMove(q,r);
+}
+
+// ═══════════════════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════════════════
+function updateUI() {
+  if(!G) return;
+  const p = cp();
+
+  document.getElementById('hturn').textContent = `Turn ${G.turn} · ${p.name}`;
+
+  const ph = document.getElementById('hphase');
+  const PHM = {roll:['Roll','ph-roll'],move:['Move','ph-move'],action:['Action','ph-act']};
+  const [pt,pc] = PHM[G.phase]||['—',''];
+  ph.textContent=pt; ph.className=`hphase ${pc}`;  // keep id, set class
+
+  const frags = G.radioFragmentsActivated;
+  const THR = [null,18,16,14,12,10];
+  document.getElementById('hsig').textContent = frags
+    ? `${frags}/5 fragments · threshold ${THR[frags]}+`
+    : '0 fragments activated · signal offline';
+
+  document.getElementById('spname').textContent = p.name;
+  document.getElementById('spname').style.color = p.color;
+  toks('tr',p.rations,10,'rf','re');
+  toks('to',p.o2,3,'of','oe');
+  toks('th',p.health,3,'hf','he');
+  document.getElementById('sfrags').textContent = `${p.radioFragments} carried`;
+  document.getElementById('sloc').textContent = p.location;
+  document.getElementById('smvp').textContent = G.phase==='roll'?'—':G.movementLeft;
+
+  document.getElementById('broll').disabled = G.phase!=='roll';
+  document.getElementById('bend').disabled  = G.phase==='roll';
+
+  const t = G.tiles.get(hk(p.q,p.r));
+  document.getElementById('bact').disabled  = !(G.phase==='action' && t?.revealed && t.type!=='crash_site' && !t?.investigated);
+  const atArr = t?.name==='Signal Array';
+  document.getElementById('bfrag').disabled = !(G.phase==='action' && atArr && p.radioFragments>0 && G.radioFragmentsActivated<5);
+  document.getElementById('bsig').disabled  = !(G.phase==='action' && atArr && G.radioFragmentsActivated>0);
+
+  // All players list
+  const apc = document.getElementById('aplst');
+  apc.innerHTML = '';
+  G.players.forEach(pl => {
+    const d = document.createElement('div');
+    d.className = 'pcrd';
+    const badge = !pl.alive ? '<span style="font-size:.6rem;color:#604040;margin-left:4px">DEAD</span>'
+      : pl.incapacitated ? '<span style="font-size:.6rem;color:#a06020;margin-left:4px">INCAP</span>' : '';
+    d.innerHTML = `
+      <div class="pname"><span class="pdot2" style="background:${pl.color}"></span>
+        <span style="color:${pl.color}">${pl.name}</span>${badge}</div>
+      <div class="pstat">R:${pl.rations}&nbsp;&nbsp;O₂:${pl.o2}&nbsp;&nbsp;HP:${pl.health}${pl.radioFragments?'&nbsp;&nbsp;RF:'+pl.radioFragments:''}</div>
+    `;
+    apc.appendChild(d);
+  });
+}
+
+function toks(id, full, total, fc, ec) {
+  const c = document.getElementById(id);
+  c.innerHTML='';
+  for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`t ${i<full?fc:ec}`;c.appendChild(s);}
+}
+
+// ═══════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════
+function addLog(msg, cls) {
+  const l = document.getElementById('log');
+  const d = document.createElement('div');
+  d.className = 'le'+(cls?' '+cls:'');
+  d.textContent = msg;
+  l.appendChild(d);
+  l.scrollTop = l.scrollHeight;
+}
+
+// ═══════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════
+function showModal(title, body, isPub, onOk, okLbl, onCancel, cancelLbl) {
+  document.getElementById('mtit').textContent = title;
+  const mb = document.getElementById('mbod');
+  mb.innerHTML = '';
+  if(!isPub) {
+    const n = document.createElement('div');
+    n.className='pvnote';
+    n.textContent='PRIVATE — read silently. Show only to crew on your tile.';
+    mb.appendChild(n);
+  }
+  const tb = document.createElement('div');
+  tb.textContent = body;
+  mb.appendChild(tb);
+
+  const ma = document.getElementById('mact');
+  ma.innerHTML = '';
+  if(onCancel && cancelLbl) {
+    const b = document.createElement('button');
+    b.className='btn'; b.textContent=cancelLbl;
+    b.onclick=()=>{document.getElementById('mov').classList.remove('show');onCancel();};
+    ma.appendChild(b);
+  }
+  const ob = document.createElement('button');
+  ob.className='btn pri'; ob.textContent=okLbl||'OK';
+  ob.onclick=()=>{document.getElementById('mov').classList.remove('show');onOk();};
+  ma.appendChild(ob);
+  document.getElementById('mov').classList.add('show');
+}
+
+// ═══════════════════════════════════════════
+// PAN / ZOOM / TOUCH
+// ═══════════════════════════════════════════
+function initBoard() {
+  const wrap = document.getElementById('bwrap');
+  const svg  = document.getElementById('bsvg');
+  let dragging=false, df=null;
+
+  wrap.addEventListener('mousedown', e => {
+    if(e.target.hasAttribute('data-q')) return;
+    dragging=true; df={x:e.clientX,y:e.clientY}; svg.classList.add('drag');
+  });
+  document.addEventListener('mousemove', e => {
+    if(!dragging||!df) return;
+    pan.x+=e.clientX-df.x; pan.y+=e.clientY-df.y; df={x:e.clientX,y:e.clientY}; render();
+  });
+  document.addEventListener('mouseup', () => {dragging=false;df=null;svg.classList.remove('drag');});
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(.3, Math.min(3, zoom*(e.deltaY>0?.88:1.13)));
+    render();
+  }, {passive:false});
+
+  let lt=null;
+  wrap.addEventListener('touchstart', e=>{if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+  wrap.addEventListener('touchmove',  e=>{
+    if(e.touches.length===1&&lt){
+      pan.x+=e.touches[0].clientX-lt.x; pan.y+=e.touches[0].clientY-lt.y;
+      lt={x:e.touches[0].clientX,y:e.touches[0].clientY}; render();
+    }
+  },{passive:true});
+  wrap.addEventListener('touchend',()=>{lt=null;});
+
+  // Tap to move
+  svg.addEventListener('touchend', e=>{
+    if(e.changedTouches.length!==1) return;
+    const T=e.changedTouches[0], rect=svg.getBoundingClientRect();
+    const W=svg.clientWidth, H=svg.clientHeight;
+    const lx=(T.clientX-rect.left-W/2-pan.x)/zoom;
+    const ly=(T.clientY-rect.top-H/2-pan.y)/zoom;
+    const [q,r]=p2h(lx,ly);
+    onHexClick(q,r);
+  });
+}
+
+// ═══════════════════════════════════════════
+// SETUP SCREEN
+// ═══════════════════════════════════════════
+let setupN = 2;
+
+function buildSetup() {
+  const row = document.getElementById('crow');
+  row.innerHTML='';
+  for(let i=1;i<=6;i++){
+    const b=document.createElement('button');
+    b.className='cbtn'+(i===setupN?' sel':'');
+    b.textContent=i;
+    b.onclick=()=>{setupN=i;buildSetup();};
+    row.appendChild(b);
+  }
+  const nl = document.getElementById('plist');
+  const prev = [...nl.querySelectorAll('input')].map(x=>x.value);
+  nl.innerHTML='';
+  for(let i=0;i<setupN;i++){
+    const d=document.createElement('div');
+    d.className='prow';
+    d.innerHTML=`<span class="pdot" style="background:${PCOLORS[i]}"></span>
+      <input class="pi" type="text" id="pn-${i}" value="${prev[i]||PNAMES[i]}" maxlength="16" placeholder="Crew ${i+1}">`;
+    nl.appendChild(d);
+  }
+}
+
+function startGame() {
+  const names=[];
+  for(let i=0;i<setupN;i++){
+    const v=(document.getElementById(`pn-${i}`)?.value||'').trim();
+    names.push(v||`Crew ${i+1}`);
+  }
+  newGame(names);
+  document.getElementById('setup').style.display='none';
+  document.getElementById('game').style.display='flex';
+  setTimeout(()=>{
+    initBoard(); render(); updateUI();
+    addLog(`Mission initialized. ${names.length} crew active.`,'imp');
+    addLog(`Turn 1: ${names[0]}. Roll for movement.`);
+  },40);
+}
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', buildSetup);
+</script>
+</body>
+</html>
