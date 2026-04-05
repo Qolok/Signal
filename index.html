@@ -737,7 +737,60 @@ function buildTerrainDeck(){
 const POI_COLOR={
   'Fuselage':'#3a7080','Cave':'#2a5030','Outpost':'#7a6030',
   'Signal Tower':'#2870a0','Wreckage Field':'#705030','Dead End':'#303030',
+  'Recovered Terminal':'#2060a8',
 };
+
+// ── SPRITE SHEET ──────────────────────────────────────────────
+// img/Tiles.png: 1407×768, 6 cols × 4 rows, 224×181px per sprite, 9px padding
+const SHEET_W=1407,SHEET_H=768,SPRITE_W=224,SPRITE_H=181,SPRITE_PAD=9;
+const SPRITE_STRIDE_W=SPRITE_W+SPRITE_PAD; // 233
+const SPRITE_STRIDE_H=SPRITE_H+SPRITE_PAD; // 190
+const SPRITE_SCALE=(SZ*2)/SPRITE_H;        // scales sprite to fill hex height
+
+// Grid layout (col, row) — matches Tiles.png left-to-right, top-to-bottom
+const TILE_SPRITE_MAP={
+  // Row 0
+  'Crash Site':         {col:0,row:0},
+  'Cave':               {col:1,row:0},
+  'Equipment Locker':   {col:2,row:0},
+  'Signal Array':       {col:3,row:0},
+  'Watch Tower':        {col:4,row:0},
+  'Medical Bay':        {col:5,row:0},
+  // Row 1
+  'Cargo Hold':         {col:0,row:1},
+  'Airlock':            {col:1,row:1},
+  'Signal Tower':       {col:2,row:1},
+  'Outpost':            {col:3,row:1},
+  'Fuselage':           {col:4,row:1},
+  'Wreckage Field':     {col:5,row:1},
+  // Row 2
+  'Recovered Terminal': {col:0,row:2},
+  'Stasis Pod':         {col:1,row:2},
+  'Temporal Rift':      {col:2,row:2},
+  'Portal':             {col:3,row:2},
+  'Gravitational Well': {col:4,row:2},
+  'Echo Chamber':       {col:5,row:2},
+  // Row 3
+  'Dead Signal':        {col:0,row:3},
+  'Inversion Field':    {col:1,row:3},
+  'Ship Section':       {col:2,row:3},
+  'face_down':          {col:3,row:3},
+};
+
+let tilesImgLoaded=false;
+const tilesImg=new Image();
+tilesImg.onload=()=>{tilesImgLoaded=true;if(typeof G!=='undefined'&&G)render();};
+tilesImg.src='img/Tiles.png';
+
+function getSpritePos(t){
+  let key;
+  if(t.type==='crash_site')key=t.name;
+  else if(t.type==='terrain')key=t.pois?.[0];
+  else if(t.type==='anomaly')key=t.anomaly;
+  else if(t.type==='ship_section')key='Ship Section';
+  else if(t.type==='face_down')key='face_down';
+  return TILE_SPRITE_MAP[key]||null;
+}
 
 const EQ_CARDS=[
   {id:'plasma_cutter', name:'Plasma Cutter',    cat:'Tool',   txt:'Move through a tile edge with no printed path connection.'},
@@ -784,6 +837,11 @@ const EVENT_CARDS={
     {text:'Nothing here. Hostile terrain, no shelter, no path forward.',pub:true},
     {text:'Dead end. You are alone. Nobody is watching.',pub:false},
   ],
+  'Recovered Terminal':[
+    {text:'The terminal is still drawing power from somewhere. Ship manifests, personnel records, last-known positions. The data is intact.',pub:false},
+    {text:'Encrypted. Whatever was stored here, someone locked it before the crash. You can see file names but nothing else.',pub:false},
+    {text:'Crew log. Someone survived longer than the official record shows. You now know something the others don\'t.',pub:false},
+  ],
   'Airlock':[
     {text:'Airlock pressurized. O₂ reserves refilled.',pub:true},
   ],
@@ -809,6 +867,7 @@ const TILE_TIPS={
   'Fuselage':          {desc:'Hull section from the Endymion 7. Still holds cargo.',        act:'Investigate: May yield Equipment cards or a Radio Fragment. Draw an Event card.'},
   'Wreckage Field':    {desc:'Debris scattered across the terrain — hazardous, but potentially useful.',act:'Investigate: Roll for salvage. Draw an Event card.'},
   'Dead End':          {desc:'Nothing visible. The terrain offers no shelter or resources.',  act:'Investigate: Draws an Event card regardless. The planet is watching.'},
+  'Recovered Terminal':{desc:'A functional console partially salvaged from the wreckage, still drawing power.',act:'Investigate: Draw a Private Event card. The data is yours alone.'},
   'Stasis Pod':        {desc:'Alien preservation technology. Time moves differently inside.', act:'Enter: Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time.'},
   'Temporal Rift':     {desc:'Spacetime distortion. Past and future Rations flicker.',       act:'Automatic: Roll 1 die. 1–3: lose that many Rations. 4–6: recover that many empty Rations.'},
   'Portal':            {desc:'Instantaneous transit point. Origin unknown.',                  act:'Option: Move pawn immediately to Crash Site. Turn ends.'},
@@ -1376,14 +1435,48 @@ const GRAD_STOPS={
 
 function drawTile(g,t){
   const[cx,cy]=h2p(t.q,t.r);
-  const gradId=t.type==='crash_site'?'gr-crash':t.type==='anomaly'?'gr-anomaly':t.type==='ship_section'?'gr-ship':t.type==='face_down'?'gr-fd':'gr-terrain';
-  const strokeC=t.type==='anomaly'?'#3a1060':t.type==='ship_section'?'#1a4070':t.type==='crash_site'?'#1a3a60':t.type==='face_down'?'#101c28':'#1a2e1a';
-  const poly=svgEl('polygon',{points:hexPts(cx,cy,SZ-1),fill:`url(#${gradId})`,stroke:strokeC,'stroke-width':t.type==='face_down'?'.6':'1.2',style:'cursor:pointer','data-q':t.q,'data-r':t.r});
+  const strokeC=t.type==='anomaly'?'#4a1870':t.type==='ship_section'?'#1a4070':t.type==='crash_site'?'#1a3a60':t.type==='face_down'?'#101c28':'#1a2e1a';
+  const sw=t.type==='face_down'?'.6':'1.4';
+  const hexPoly=hexPts(cx,cy,SZ-1);
+
+  const sp=tilesImgLoaded?getSpritePos(t):null;
+  if(sp){
+    // Clip path for this hex — added to SVG defs (in root coord space of g group)
+    const clipId=`tc_${t.q}_${t.r}`;
+    const svgDefs=document.getElementById('bsvg').querySelector('defs');
+    if(!svgDefs.querySelector(`#${clipId}`)){
+      const cp=svgEl('clipPath',{id:clipId});
+      cp.appendChild(svgEl('polygon',{points:hexPoly}));
+      svgDefs.appendChild(cp);
+    }
+    const sc=SPRITE_SCALE;
+    const spCx=(SPRITE_PAD+sp.col*SPRITE_STRIDE_W+SPRITE_W/2)*sc;
+    const spCy=(SPRITE_PAD+sp.row*SPRITE_STRIDE_H+SPRITE_H/2)*sc;
+    g.appendChild(svgEl('image',{
+      href:'img/Tiles.png',
+      x:cx-spCx,y:cy-spCy,
+      width:SHEET_W*sc,height:SHEET_H*sc,
+      'clip-path':`url(#${clipId})`,
+      'pointer-events':'none',
+      preserveAspectRatio:'xMidYMid meet',
+    }));
+    // Subtle dark vignette so labels and icons stay legible
+    g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(0,0,0,.32)','pointer-events':'none'}));
+  } else {
+    // Gradient fallback
+    const gradId=t.type==='crash_site'?'gr-crash':t.type==='anomaly'?'gr-anomaly':t.type==='ship_section'?'gr-ship':t.type==='face_down'?'gr-fd':'gr-terrain';
+    g.appendChild(svgEl('polygon',{points:hexPoly,fill:`url(#${gradId})`,'pointer-events':'none'}));
+    if(!t.revealed){drawFaceDown(g,cx,cy);}
+  }
+
+  // Hex border + event receiver (transparent fill, on top)
+  const poly=svgEl('polygon',{points:hexPoly,fill:'transparent',stroke:strokeC,'stroke-width':sw,style:'cursor:pointer','data-q':t.q,'data-r':t.r});
   poly.addEventListener('click',()=>onHexClick(t.q,t.r));
   poly.addEventListener('mouseenter',e=>startTooltip(t,e));
   poly.addEventListener('mouseleave',cancelTooltip);
   g.appendChild(poly);
-  if(!t.revealed){drawFaceDown(g,cx,cy);return;}
+
+  if(!t.revealed)return;
   drawTileArtwork(g,cx,cy,t);
   drawTileLabel(g,cx,cy,t);
 }
