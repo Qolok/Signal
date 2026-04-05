@@ -87,18 +87,32 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
 #bsvg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
 #bsvg.drag{cursor:grabbing}
 
-/* ── DICE RESULT (HUD, above roll button) ── */
-#diceroll{
-  display:none;padding:6px 8px 5px;border:1px solid var(--bdr);
-  background:var(--bg3);margin-bottom:4px;
+/* ── TABLETOP DICE ── */
+#tabletop-dice{
+  position:absolute;bottom:16px;right:16px;z-index:20;
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+  pointer-events:all;
 }
-#diceroll.show{display:block}
-.dr-label{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
-.dr-row{display:flex;align-items:center;gap:6px}
-.dr-dice{display:flex;gap:4px;flex:1}
-.dr-die{font-size:1.55rem;color:var(--hi);line-height:1;animation:dicepin .25s ease-out both}
-.dr-total{font-size:1rem;color:#4a90a0;font-weight:bold;white-space:nowrap}
-@keyframes dicepin{0%{transform:rotate(-25deg) scale(.4);opacity:0}65%{transform:rotate(6deg) scale(1.1)}100%{transform:rotate(0) scale(1);opacity:1}}
+.td-label{font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);text-align:right;margin-bottom:2px;}
+.td-row{display:flex;gap:8px;align-items:flex-end;}
+.td-die{
+  width:52px;height:52px;background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;line-height:1;color:var(--hi);
+  box-shadow:0 3px 12px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
+  position:relative;
+}
+.td-die.clickable{cursor:pointer;border-color:#2a5080;}
+.td-die.clickable:hover{border-color:#4090c0;box-shadow:0 3px 18px rgba(30,100,180,.4),inset 0 1px 0 rgba(255,255,255,.1);}
+.td-die.rolling{animation:tdroll .35s ease-out both;}
+.td-total{font-size:.95rem;color:#4a90a0;font-weight:bold;
+  padding:4px 8px;background:var(--bg3);border:1px solid var(--bdr);min-width:36px;text-align:center;}
+@keyframes tdroll{
+  0%{transform:rotate(-20deg) scale(.7);opacity:.3;}
+  50%{transform:rotate(10deg) scale(1.12);}
+  100%{transform:rotate(0) scale(1);opacity:1;}
+}
 
 /* ── DECK OVERLAYS ── */
 #decks{position:absolute;bottom:12px;left:12px;display:flex;gap:10px;pointer-events:all;z-index:10}
@@ -228,13 +242,18 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
 
 /* HUD action buttons */
 .hudact{
-  width:145px;flex-shrink:0;padding:8px;
-  display:flex;flex-direction:column;gap:4px;justify-content:center;
+  width:145px;flex-shrink:0;padding:6px 8px;
+  display:flex;flex-direction:column;gap:3px;justify-content:flex-start;
+  overflow-y:auto;
 }
+.hudact::-webkit-scrollbar{width:3px}
+.hudact::-webkit-scrollbar-track{background:var(--bg3)}
+.hudact::-webkit-scrollbar-thumb{background:var(--bdr)}
 .btn{
   width:100%;background:var(--bg3);border:1px solid var(--bdr);color:var(--txt);
-  padding:5px 8px;font-family:inherit;font-size:.62rem;cursor:pointer;
-  letter-spacing:.06em;text-transform:uppercase;transition:all .1s;text-align:left;
+  padding:4px 7px;font-family:inherit;font-size:.6rem;cursor:pointer;
+  letter-spacing:.05em;text-transform:uppercase;transition:all .1s;text-align:left;
+  flex-shrink:0;
 }
 .btn:hover:not(:disabled){border-color:#2a60a0;color:var(--hi)}
 .btn:disabled{opacity:.28;cursor:not-allowed}
@@ -367,7 +386,10 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
   </div>
   <div id="sbfooter">
     <div style="font-size:.62rem;color:var(--dim)">Click a tile card, then click a highlighted hex to place it.</div>
-    <button id="sblaunbtn" disabled onclick="finalizeGame()">Launch Mission</button>
+    <div style="display:flex;gap:8px;">
+      <button class="sbtn" style="flex:0;padding:10px 18px;font-size:.72rem;" onclick="randomBuilder()">Random Layout</button>
+      <button id="sblaunbtn" disabled onclick="finalizeGame()" style="flex:1">Launch Mission</button>
+    </div>
   </div>
 </div>
 
@@ -398,6 +420,11 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
         <div class="dkn" id="equpn">30</div>
         <div class="dksub">cards</div>
       </div>
+    </div>
+    <!-- Tabletop dice — bottom right of board -->
+    <div id="tabletop-dice">
+      <div class="td-label" id="td-label"></div>
+      <div class="td-row" id="td-row"></div>
     </div>
     <div id="htip">
       <div class="tiptit" id="tiptit"></div>
@@ -448,13 +475,6 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
     </div>
     <!-- Actions -->
     <div class="hudact">
-      <div id="diceroll">
-        <div class="dr-label" id="dr-label"></div>
-        <div class="dr-row">
-          <div class="dr-dice" id="dr-dice"></div>
-          <div class="dr-total" id="dr-total"></div>
-        </div>
-      </div>
       <button class="btn pri" id="broll"  onclick="doRoll()">Roll Movement</button>
       <button class="btn"     id="bact"   onclick="doInvestigate()" disabled>Investigate POI</button>
       <button class="btn"     id="bmed"   onclick="doMedBay()" disabled>Restore Health</button>
@@ -1001,33 +1021,77 @@ function resolvePoiEvent(t, poiIdx, onDone){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// TURN ACTIONS
+// TABLETOP DICE
 // ═══════════════════════════════════════════════════════════════
-function showDiceRoll(values, label){
-  const FACES=['⚀','⚁','⚂','⚃','⚄','⚅'];
-  document.getElementById('dr-label').textContent=label;
-  const ddice=document.getElementById('dr-dice');
-  ddice.innerHTML='';
-  values.forEach((v,i)=>{
-    const span=document.createElement('span');
-    span.className='dr-die';
-    span.style.animationDelay=(i*0.1)+'s';
-    span.textContent=FACES[v-1];
-    ddice.appendChild(span);
+const FACES=['⚀','⚁','⚂','⚃','⚄','⚅'];
+let diceState={mode:'move',values:[],rolled:false};
+
+function showTableDice(mode){
+  // mode: 'move' (1 clickable die) | 'signal' (3 clickable dice) | 'result' (locked after roll)
+  diceState.mode=mode;
+  const count=mode==='signal'?3:1;
+  diceState.values=new Array(count).fill(null);
+  diceState.rolled=false;
+  renderTableDice();
+}
+
+function renderTableDice(){
+  const label=document.getElementById('td-label');
+  const row=document.getElementById('td-row');
+  if(!diceState.values.length){label.textContent='';row.innerHTML='';return;}
+
+  label.textContent=diceState.mode==='signal'?'Signal Roll':'Movement Roll';
+  row.innerHTML='';
+
+  const clickable=!diceState.rolled;
+  diceState.values.forEach((v,i)=>{
+    const die=document.createElement('div');
+    die.className='td-die'+(clickable?' clickable':'');
+    die.textContent=v===null?'?':FACES[v-1];
+    if(v!==null)die.classList.add('rolling');
+    die.style.animationDelay=(i*0.08)+'s';
+    if(clickable)die.onclick=rollTableDice;
+    row.appendChild(die);
   });
-  const total=values.reduce((a,b)=>a+b,0);
-  document.getElementById('dr-total').textContent=total;
-  document.getElementById('diceroll').classList.add('show');
+
+  if(diceState.rolled&&diceState.values.length>1){
+    const tot=document.createElement('div');
+    tot.className='td-total';
+    tot.textContent=diceState.values.reduce((a,b)=>a+b,0);
+    row.appendChild(tot);
+  }
+}
+
+function rollTableDice(){
+  if(diceState.rolled)return;
+  diceState.values=diceState.values.map(()=>1+(0|Math.random()*6));
+  diceState.rolled=true;
+  renderTableDice();
+
+  if(diceState.mode==='move'){
+    const r=diceState.values[0];
+    if(!G||G.phase!=='roll')return;
+    G.movementLeft=r;G.phase='move';
+    G.reach=bfsReach(cp().q,cp().r,r);
+    addLog(`${cp().name} rolled ${r}.`,'imp');
+    updateUI();render();
+  } else if(diceState.mode==='signal'){
+    finishSignalRoll(diceState.values);
+  }
+}
+
+function hideTableDice(){
+  diceState.values=[];
+  document.getElementById('td-label').textContent='';
+  document.getElementById('td-row').innerHTML='';
 }
 
 function doRoll(){
   if(G.phase!=='roll')return;
-  const r=1+(0|Math.random()*6);
-  G.movementLeft=r;G.phase='move';
-  G.reach=bfsReach(cp().q,cp().r,r);
-  addLog(`${cp().name} rolled ${r}.`,'imp');
-  showDiceRoll([r],'Movement Roll');
-  updateUI();render();
+  showTableDice('move');
+  // broll button still shows but effectively clicking the die triggers the roll
+  document.getElementById('broll').disabled=true;
+  // label update only — actual resolution happens in rollTableDice
 }
 
 function doMove(q,r){
@@ -1118,10 +1182,14 @@ function doSignalRoll(){
   const p=cp();if(G.phase!=='action')return;
   const t=G.tiles.get(hk(p.q,p.r));if(t?.name!=='Signal Array')return;
   if(!G.radioFragmentsActivated)return;
+  // Put 3 clickable dice on the table — resolution happens in finishSignalRoll()
+  showTableDice('signal');
+  document.getElementById('bsig').disabled=true;
+}
+
+function finishSignalRoll(d){
   const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
-  const d=[1+(0|Math.random()*6),1+(0|Math.random()*6),1+(0|Math.random()*6)];
   const total=d[0]+d[1]+d[2];const success=total>=thr;
-  showDiceRoll(d,'Signal Roll');
   const body=`Dice: ${d[0]}  ${d[1]}  ${d[2]}\nTotal: ${total}\nNeeded: ${thr} or higher\n\n${success?'SIGNAL RECEIVED.\nRescue craft entering orbit.':'No response. Signal insufficient.'}`;
   addLog(`Signal Roll: ${total} vs ${thr} — ${success?'SUCCESS':'FAIL'}`,success?'good':'crit');
   if(success){showModal('RESCUE SIGNAL RECEIVED',body,true,()=>{
@@ -1220,6 +1288,7 @@ function advanceTurn(){
   if(next<=G.currentPlayer)G.turn++;
   G.currentPlayer=next;G.phase='roll';G.movementLeft=0;G.reach=new Map();
   addLog(`Turn ${G.turn}: ${G.players[next].name}.`,'imp');
+  showTableDice('move');
   updateUI();render();
 }
 
@@ -1723,7 +1792,12 @@ function updateUI(){
     }
   }
   document.getElementById('bact').disabled=!canInv;
-  // Base camp actions
+  // Base camp actions — visible only when on base
+  const show=v=>v?'':'none';
+  document.getElementById('bmed').style.display=   show(atBase);
+  document.getElementById('bequip').style.display=  show(atBase);
+  document.getElementById('bcargo').style.display=  show(atBase);
+  document.getElementById('bwatch').style.display=  show(atBase);
   document.getElementById('bmed').disabled=   !(act&&t?.name==='Medical Bay'&&p.health<3);
   document.getElementById('bequip').disabled=  !(act&&t?.name==='Equipment Locker');
   document.getElementById('bcargo').disabled=  !(act&&t?.name==='Cargo Hold');
@@ -2156,6 +2230,26 @@ function resetBuilder(){
   updateBuilderProgress();
 }
 
+function randomBuilder(){
+  initBuilder();
+  // Shuffle palette
+  const pal=[...builderState.palette];
+  for(let i=pal.length-1;i>0;i--){const j=0|Math.random()*(i+1);[pal[i],pal[j]]=[pal[j],pal[i]];}
+  // Place each tile on a random valid adjacent hex
+  for(const item of pal){
+    const valid=[];
+    for(let q=-3;q<=3;q++)for(let r=-3;r<=3;r++){if(isValidBuilderPos(q,r))valid.push([q,r]);}
+    if(!valid.length)break;
+    const[q,r]=valid[0|Math.random()*valid.length];
+    builderState.placed.set(hk(q,r),{q,r,name:item.name,short:item.short});
+    item.placed=true;
+  }
+  builderState.selectedIdx=-1;
+  renderPalette();
+  renderSiteBuilder();
+  updateBuilderProgress();
+}
+
 function renderPalette(){
   const pal=document.getElementById('sbpalette');
   pal.innerHTML='<div class="sbpaltit">Crash Site Tiles</div>';
@@ -2242,6 +2336,7 @@ function finalizeGame(){
   newGame(pendingNames,placedMap);
   setTimeout(()=>{
     initBoard();render();updateUI();
+    showTableDice('move');
     addLog(`Mission initialized. ${pendingNames.length} crew active.`,'imp');
     addLog(`Turn 1: ${pendingNames[0]}. Roll for movement.`);
   },40);
