@@ -87,19 +87,18 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
 #bsvg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
 #bsvg.drag{cursor:grabbing}
 
-/* ── DICE ROLL OVERLAY ── */
+/* ── DICE RESULT (HUD, above roll button) ── */
 #diceroll{
-  display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  background:rgba(7,9,14,.93);border:1px solid #2a507a;
-  padding:18px 28px;z-index:40;text-align:center;pointer-events:none;
-  min-width:160px;box-shadow:0 6px 30px rgba(0,0,0,.8);
+  display:none;padding:6px 8px 5px;border:1px solid var(--bdr);
+  background:var(--bg3);margin-bottom:4px;
 }
 #diceroll.show{display:block}
-.dr-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
-.dr-dice{display:flex;gap:10px;justify-content:center;margin-bottom:6px}
-.dr-die{font-size:2.2rem;color:var(--hi);animation:dicepin .3s ease-out}
-.dr-total{font-size:.75rem;color:#4a90a0;margin-top:4px}
-@keyframes dicepin{0%{transform:rotate(-30deg) scale(.5);opacity:0}60%{transform:rotate(8deg) scale(1.15)}100%{transform:rotate(0) scale(1);opacity:1}}
+.dr-label{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.dr-row{display:flex;align-items:center;gap:6px}
+.dr-dice{display:flex;gap:4px;flex:1}
+.dr-die{font-size:1.55rem;color:var(--hi);line-height:1;animation:dicepin .25s ease-out both}
+.dr-total{font-size:1rem;color:#4a90a0;font-weight:bold;white-space:nowrap}
+@keyframes dicepin{0%{transform:rotate(-25deg) scale(.4);opacity:0}65%{transform:rotate(6deg) scale(1.1)}100%{transform:rotate(0) scale(1);opacity:1}}
 
 /* ── DECK OVERLAYS ── */
 #decks{position:absolute;bottom:12px;left:12px;display:flex;gap:10px;pointer-events:all;z-index:10}
@@ -400,11 +399,6 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
         <div class="dksub">cards</div>
       </div>
     </div>
-    <div id="diceroll">
-      <div class="dr-label" id="dr-label"></div>
-      <div class="dr-dice" id="dr-dice"></div>
-      <div class="dr-total" id="dr-total"></div>
-    </div>
     <div id="htip">
       <div class="tiptit" id="tiptit"></div>
       <div class="tipdesc" id="tipdesc"></div>
@@ -454,8 +448,19 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
     </div>
     <!-- Actions -->
     <div class="hudact">
+      <div id="diceroll">
+        <div class="dr-label" id="dr-label"></div>
+        <div class="dr-row">
+          <div class="dr-dice" id="dr-dice"></div>
+          <div class="dr-total" id="dr-total"></div>
+        </div>
+      </div>
       <button class="btn pri" id="broll"  onclick="doRoll()">Roll Movement</button>
       <button class="btn"     id="bact"   onclick="doInvestigate()" disabled>Investigate POI</button>
+      <button class="btn"     id="bmed"   onclick="doMedBay()" disabled>Restore Health</button>
+      <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Draw Equipment</button>
+      <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
+      <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
       <button class="btn trd" id="btrd"   onclick="openTrade()" disabled>Trade</button>
       <button class="btn wrn" id="bfrag"  onclick="doActivateFrag()" disabled>Activate Fragment</button>
       <button class="btn wrn" id="bsig"   onclick="doSignalRoll()" disabled>Roll Signal</button>
@@ -681,12 +686,12 @@ const PCOLORS=['#4a8fbd','#c04444','#4ab04a','#c09040','#9040c0','#40b0b0'];
 const PNAMES=['Vasquez','Okonkwo','Reyes','Kim','Halvorsen','Tran'];
 
 const CRASH_HEXES_DEFAULT=[
-  {q:0,r:0,  name:'Core Wreckage',   short:'CORE'},
+  {q:0,r:0,  name:'Crash Site',      short:'CRASH'},
   {q:1,r:0,  name:'Medical Bay',     short:'MED'},
   {q:1,r:-1, name:'Signal Array',    short:'SIG\nARR'},
-  {q:0,r:-1, name:'Landing Struts',  short:'LNDG'},
+  {q:0,r:-1, name:'Watch Tower',     short:'WATCH'},
   {q:-1,r:0, name:'Equipment Locker',short:'EQUIP'},
-  {q:-1,r:1, name:'Landing Struts',  short:'LNDG'},
+  {q:-1,r:1, name:'Airlock',         short:'AIR'},
   {q:0,r:1,  name:'Cargo Hold',      short:'CARGO'},
 ];
 
@@ -791,12 +796,13 @@ const EVENT_CARDS={
 };
 
 const TILE_TIPS={
-  'Core Wreckage':     {desc:'Starting point for all crew. Does not trigger events.',       act:'No actions available here beyond taking in the view.'},
+  'Crash Site':        {desc:'Starting point for all crew. The heart of Base Camp.',         act:'No specific action — this is your anchor point.'},
   'Medical Bay':       {desc:'Emergency medical equipment salvaged from the wreckage.',      act:'Action: Restore 1 Health token to HEALTHY.'},
   'Signal Array':      {desc:'The ship\'s emergency transmitter. Fits one player at a time.',act:'Action: Activate Radio Fragments. Roll Signal dice if fragments are activated. Contest occupancy if blocked.'},
   'Equipment Locker':  {desc:'The crew\'s tool cache. Raided but not empty.',               act:'Action: Draw 1 Equipment card.'},
   'Cargo Hold':        {desc:'Communal food and supply storage.',                            act:'Action: Deposit or withdraw Rations freely.'},
-  'Landing Struts':    {desc:'Entry and exit points connecting the crash site to the terrain.',act:'Move through freely. No actions available.'},
+  'Airlock':           {desc:'The pressurized entry point from the field. O₂ reserves partially restored on re-entry.',act:'Passive: Refill 1 O₂ Tank automatically when entering from terrain.'},
+  'Watch Tower':       {desc:'An elevated vantage point over the surrounding terrain.',      act:'Action: Reveal all face-down tiles adjacent to any crew member currently in the field.'},
   'Signal Tower':      {desc:'A broadcasting structure, origin unknown. Possibly from a prior expedition.',act:'Investigate: Draw an Event card. May yield a Radio Fragment.'},
   'Cave':              {desc:'Natural shelter. Atmospheric sensors can\'t reach inside.',    act:'Investigate: Skip O2 Tank flip this round. Draw an Event card.'},
   'Outpost':           {desc:'A supply depot, damaged but stocked.',                         act:'Investigate: Roll 1 die for Ration yield. Draw an Event card.'},
@@ -840,7 +846,7 @@ function newGame(names, placedMap){
   const players=names.map((name,i)=>{
     const equipment=eqDeck.splice(0,3).map(c=>({...c,uid:++cardUid}));
     return{id:i,name,color:PCOLORS[i],q:0,r:0,rations:10,o2:3,health:3,
-           radioFragments:0,equipment,incapacitated:0,alive:true,location:'Core Wreckage',skipO2:false};
+           radioFragments:0,equipment,incapacitated:0,alive:true,location:'Crash Site',skipO2:false};
   });
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
      eqDeck,eqDeckCount:eqDeck.length,evtDeckCount:80,
@@ -938,31 +944,21 @@ function resolvePoiEvent(t, poiIdx, onDone){
 // ═══════════════════════════════════════════════════════════════
 // TURN ACTIONS
 // ═══════════════════════════════════════════════════════════════
-let diceRollTimer=null;
 function showDiceRoll(values, label){
   const FACES=['⚀','⚁','⚂','⚃','⚄','⚅'];
-  const dr=document.getElementById('diceroll');
-  const dlbl=document.getElementById('dr-label');
+  document.getElementById('dr-label').textContent=label;
   const ddice=document.getElementById('dr-dice');
-  const dtotal=document.getElementById('dr-total');
-  dlbl.textContent=label;
   ddice.innerHTML='';
   values.forEach((v,i)=>{
     const span=document.createElement('span');
     span.className='dr-die';
-    span.style.animationDelay=(i*0.12)+'s';
+    span.style.animationDelay=(i*0.1)+'s';
     span.textContent=FACES[v-1];
     ddice.appendChild(span);
   });
   const total=values.reduce((a,b)=>a+b,0);
-  dtotal.textContent=values.length>1?`Total: ${total}`:'';
-  dr.classList.add('show');
-  dr.style.opacity='1';
-  if(diceRollTimer)clearTimeout(diceRollTimer);
-  diceRollTimer=setTimeout(()=>{
-    dr.style.transition='opacity .5s';dr.style.opacity='0';
-    setTimeout(()=>{dr.classList.remove('show');dr.style.transition='';dr.style.opacity='1';},520);
-  },3000);
+  document.getElementById('dr-total').textContent=total;
+  document.getElementById('diceroll').classList.add('show');
 }
 
 function doRoll(){
@@ -978,12 +974,17 @@ function doRoll(){
 function doMove(q,r){
   const p=cp();if(G.phase!=='move'&&G.phase!=='action')return;if(!G.movementLeft)return;
   const path=bfsPath(p.q,p.r,q,r);if(!path||!path.length)return;if(path.length>G.movementLeft)return;
+  const fromTile=G.tiles.get(hk(p.q,p.r));
+  const comingFromTerrain=fromTile?.type!=='crash_site';
   const wasRevealed=G.tiles.get(hk(q,r))?.revealed;
   path.forEach(([pq,pr])=>{if(!G.tiles.get(hk(pq,pr))?.revealed)revealAt(pq,pr);});
   p.q=q;p.r=r;G.movementLeft-=path.length;
   const t=G.tiles.get(hk(q,r));
   p.location=tileName(t);
-  if(t?.type==='crash_site'&&p.o2<3){p.o2=3;addLog(`${p.name} O₂ refilled at Crash Site.`);}
+  if(t?.type==='crash_site'){
+    // Airlock: refill 1 O2 when entering from outside base camp
+    if(t.name==='Airlock'&&comingFromTerrain&&p.o2<3){p.o2=Math.min(3,p.o2+1);addLog(`${p.name} passed through Airlock. +1 O₂.`);}
+  }
   if(t?.type==='anomaly')triggerAnomaly(t);
   // Auto-event for first POI on terrain tile flip
   if(!wasRevealed&&t&&t.type==='terrain'&&t.pois&&t.pois.length>0){
@@ -1069,9 +1070,77 @@ function doSignalRoll(){
   else showModal('Signal Roll',body,true,()=>{});
 }
 
+// ── BASE CAMP ACTIONS ──────────────────────────────────────────
+function doMedBay(){
+  const p=cp();if(G.phase!=='action')return;
+  if(G.tiles.get(hk(p.q,p.r))?.name!=='Medical Bay')return;
+  if(p.health>=3){addLog(`${p.name}: Health already full.`);return;}
+  p.health=Math.min(3,p.health+1);
+  addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');
+  updateUI();
+}
+function doEquipLocker(){
+  const p=cp();if(G.phase!=='action')return;
+  if(G.tiles.get(hk(p.q,p.r))?.name!=='Equipment Locker')return;
+  const c=drawEqCard(p);
+  if(c)addLog(`${p.name} drew ${c.name} from Equipment Locker.`,'good');
+  else addLog('Equipment Locker: deck empty.');
+  updateUI();
+}
+function doCargo(){
+  const p=cp();if(G.phase!=='action')return;
+  if(G.tiles.get(hk(p.q,p.r))?.name!=='Cargo Hold')return;
+  // Build communal store display
+  const comm=G.cargoHold||0;
+  showModal('Cargo Hold',
+    `Communal Rations in hold: ${comm}\nYour Rations: ${p.rations}/10\n\nDeposit: move FULL Rations from your stack to the hold.\nWithdraw: take from the hold (up to your capacity).`,
+    true,
+    ()=>{renderCargoModal();},
+    'Open Cargo',()=>{},'Cancel');
+}
+function renderCargoModal(){
+  const p=cp();
+  const hold=G.cargoHold||0;
+  const cap=10-p.rations;// room on player
+  const body=`Hold: ${hold} rations\nYours: ${p.rations}/10\n\nChoose action:`;
+  const ma=document.getElementById('mact');
+  document.getElementById('mtit').textContent='Cargo Hold';
+  document.getElementById('mbod').textContent=body;
+  ma.innerHTML='';
+  // Deposit 1
+  const d1=document.createElement('button');d1.className='btn';d1.textContent='Deposit 1';d1.disabled=p.rations<=0;
+  d1.onclick=()=>{if(p.rations>0){p.rations--;G.cargoHold=(G.cargoHold||0)+1;addLog(`${p.name} deposited 1 Ration. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
+  // Withdraw 1
+  const w1=document.createElement('button');w1.className='btn wrn';w1.textContent='Withdraw 1';w1.disabled=hold<=0||cap<=0;
+  w1.onclick=()=>{if(hold>0&&cap>0){G.cargoHold--;p.rations++;addLog(`${p.name} withdrew 1 Ration. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
+  // Close
+  const cl=document.createElement('button');cl.className='btn pri';cl.textContent='Done';
+  cl.onclick=()=>document.getElementById('mov').classList.remove('show');
+  ma.appendChild(d1);ma.appendChild(w1);ma.appendChild(cl);
+  document.getElementById('mov').classList.add('show');
+}
+function doWatchTower(){
+  const p=cp();if(G.phase!=='action')return;
+  if(G.tiles.get(hk(p.q,p.r))?.name!=='Watch Tower')return;
+  // Find all alive players in terrain (not on base camp)
+  const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
+  if(!inField.length){showModal('Watch Tower','No crew are currently in the field. There are no tiles to reveal.',true,()=>{});return;}
+  // Reveal all face-down tiles adjacent to each field player
+  let revealed=0;
+  inField.forEach(fp=>{
+    hnbr(fp.q,fp.r).forEach(([nq,nr])=>{
+      const nt=G.tiles.get(hk(nq,nr));
+      if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
+    });
+  });
+  const names=inField.map(x=>x.name).join(', ');
+  addLog(`Watch Tower: ${revealed} tile${revealed!==1?'s':''} revealed around ${names}.`,'good');
+  render();updateUI();
+}
+
 function doEndTurn(){
   if(G.phase==='roll')return;
-  const p=cp();const onBase=G.tiles.get(hk(p.q,p.r))?.type==='crash_site';
+  const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
   if(p.rations>0)p.rations--;
   else{if(p.health>0)p.health--;addLog(`${p.name} is starving. Health: ${p.health}/3.`,'crit');}
   if(!onBase&&!p.skipO2){
@@ -1102,7 +1171,7 @@ function triggerAnomaly(t){
       if(r<=3){const lost=Math.min(p.rations,r);p.rations-=lost;addLog(`Temporal Rift: lost ${lost} Ration(s).`,'crit');}
       else{const gain=Math.min(10-p.rations,r);p.rations+=gain;addLog(`Temporal Rift: +${gain} Ration(s).`,'good');}break;}
     case'Portal':showModal('Portal Anomaly','You may immediately move your pawn to the Crash Site. Your turn ends.',true,
-      ()=>{p.q=0;p.r=0;p.location='Core Wreckage';p.o2=3;G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal.`,'imp');updateUI();render();},
+      ()=>{p.q=0;p.r=0;p.location='Crash Site';G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal — returned to Crash Site.`,'imp');updateUI();render();},
       'Use Portal',()=>{},'Decline');break;
     case'Inversion Field':showModal('Inversion Field','Choose another crew member. Swap your Ration tokens with theirs. They cannot refuse.\n\n(Resolve at the table.)',true,()=>{addLog('Inversion Field: swap Rations.','crit');});break;
     case'Gravitational Well':showModal('Gravitational Well','Roll 1 die. The player to your left moves your pawn that many points in any direction.\n\n(Resolve at the table.)',true,()=>{addLog('Gravitational Well: player left moves your pawn.','crit');});break;
@@ -1377,7 +1446,7 @@ function drawPoiArt(g,cx,cy,poi,hasRF){
 function drawCrashArt(g,cx,cy,t){
   const ic=svgEl('g',{'pointer-events':'none'});
   switch(t.name){
-    case'Core Wreckage':
+    case'Crash Site':
       ic.appendChild(svgEl('circle',{cx,cy,r:16,fill:'none',stroke:'#1a3a60','stroke-width':'1'}));
       ic.appendChild(svgEl('circle',{cx,cy,r:7,fill:'#0e1e30',stroke:'#2a5a90','stroke-width':'1.5'}));
       for(let i=0;i<6;i++){const a=i*Math.PI/3;ic.appendChild(svgEl('line',{x1:cx+7*Math.cos(a),y1:cy+7*Math.sin(a),x2:cx+16*Math.cos(a),y2:cy+16*Math.sin(a),stroke:'#1a3a60','stroke-width':'1'}));}
@@ -1401,9 +1470,24 @@ function drawCrashArt(g,cx,cy,t){
     case'Cargo Hold':
       [[-8,-8],[4,-8],[-8,4],[4,4]].forEach(([ox,oy])=>ic.appendChild(svgEl('rect',{x:cx+ox,y:cy+oy,width:10,height:10,fill:'none',stroke:'#4a4020','stroke-width':'1'})));
       break;
-    case'Landing Struts':
-      ic.appendChild(svgEl('line',{x1:cx-14,y1:cy-8,x2:cx+14,y2:cy+8,stroke:'#2a4a60','stroke-width':'2'}));
-      ic.appendChild(svgEl('line',{x1:cx-14,y1:cy+8,x2:cx+14,y2:cy-8,stroke:'#2a4a60','stroke-width':'2'}));
+    case'Watch Tower':
+      // Elevated platform with four corner posts and a small platform top
+      [[-9,-9],[9,-9],[-9,9],[9,9]].forEach(([ox,oy])=>{
+        ic.appendChild(svgEl('line',{x1:cx+ox*0.4,y1:cy+oy*0.4,x2:cx+ox,y2:cy+oy,stroke:'#3a5a40','stroke-width':'1.2'}));
+        ic.appendChild(svgEl('circle',{cx:cx+ox,cy:cy+oy,r:1.5,fill:'#3a5a40'}));
+      });
+      ic.appendChild(svgEl('rect',{x:cx-10,y:cy-10,width:20,height:20,fill:'none',stroke:'#3a5a40','stroke-width':'1'}));
+      // Binocular/scope shape at top
+      ic.appendChild(svgEl('rect',{x:cx-6,y:cy-16,width:5,height:6,rx:1,fill:'none',stroke:'#4a8050','stroke-width':'1.2'}));
+      ic.appendChild(svgEl('rect',{x:cx+1, y:cy-16,width:5,height:6,rx:1,fill:'none',stroke:'#4a8050','stroke-width':'1.2'}));
+      break;
+    case'Airlock':
+      // Double-ring pressure door
+      ic.appendChild(svgEl('circle',{cx,cy,r:14,fill:'none',stroke:'#1a4868','stroke-width':'1'}));
+      ic.appendChild(svgEl('circle',{cx,cy,r:9, fill:'none',stroke:'#2060a0','stroke-width':'1.5'}));
+      ic.appendChild(svgEl('circle',{cx,cy,r:3, fill:'#102848',stroke:'#3070b0','stroke-width':'1'}));
+      // Locking bolts at cardinal points
+      [[0,-14],[14,0],[0,14],[-14,0]].forEach(([ox,oy])=>ic.appendChild(svgEl('rect',{x:cx+ox-2,y:cy+oy-2,width:4,height:4,rx:1,fill:'#1a4070'})));
       break;
     default:
       // Generic crash site tile
@@ -1534,25 +1618,27 @@ function updateUI(){
   document.getElementById('broll').disabled=G.phase!=='roll';
   document.getElementById('bend').disabled=G.phase==='roll';
   const t=G.tiles.get(hk(p.q,p.r));
+  const act=G.phase==='action';
   const atArr=t?.name==='Signal Array';
-  // Investigate enabled when terrain tile has un-investigated POIs (beyond first auto-flip)
+  const atBase=t?.type==='crash_site';
+  // Investigate: terrain / ship_section with remaining POIs
   let canInv=false;
-  if(G.phase==='action'&&t?.revealed&&t.type!=='crash_site'){
-    if(t.type==='terrain'){
+  if(act&&t?.revealed&&!atBase){
+    if(t.type==='terrain'||t.type==='ship_section'){
       const ic=typeof t.investigatedCount==='number'?t.investigatedCount:0;
       canInv=ic<t.pois.length;
-    } else if(t.type==='ship_section'){
-      const ic=typeof t.investigatedCount==='number'?t.investigatedCount:0;
-      canInv=ic<t.pois.length;
-    } else if(t.type==='anomaly'){
-      canInv=false;
     }
   }
   document.getElementById('bact').disabled=!canInv;
-  document.getElementById('bfrag').disabled=!(G.phase==='action'&&atArr&&p.radioFragments>0&&G.radioFragmentsActivated<5);
-  document.getElementById('bsig').disabled=!(G.phase==='action'&&atArr&&G.radioFragmentsActivated>0);
+  // Base camp actions
+  document.getElementById('bmed').disabled=   !(act&&t?.name==='Medical Bay'&&p.health<3);
+  document.getElementById('bequip').disabled=  !(act&&t?.name==='Equipment Locker');
+  document.getElementById('bcargo').disabled=  !(act&&t?.name==='Cargo Hold');
+  document.getElementById('bwatch').disabled=  !(act&&t?.name==='Watch Tower');
+  document.getElementById('bfrag').disabled=!(act&&atArr&&p.radioFragments>0&&G.radioFragmentsActivated<5);
+  document.getElementById('bsig').disabled=!(act&&atArr&&G.radioFragmentsActivated>0);
   const hereOthers=G.players.filter(x=>x.alive&&x.id!==p.id&&x.q===p.q&&x.r===p.r);
-  document.getElementById('btrd').disabled=!(G.phase==='action'&&hereOthers.length>0);
+  document.getElementById('btrd').disabled=!(act&&hereOthers.length>0);
   const apc=document.getElementById('aplst');apc.innerHTML='';
   G.players.forEach(pl=>{
     const d=document.createElement('div');
@@ -1643,22 +1729,29 @@ Somewhere out there, scattered across the terrain, are pieces of your radio. Fin
 2. Shuffle all Terrain tiles and Anomaly tiles together face-down into one draw stack.
 3. Shuffle the Event deck. Shuffle the Equipment deck separately.
 4. Fill all frontier empty spaces with face-down tiles — the play area is always enveloped in face-down tiles until they run out.
-5. Each player places their pawn on the Core Wreckage hex of the Crash Site.
+5. Each player places their pawn on the Crash Site hex (the central Base Camp tile).
 6. Each player draws 3 Equipment cards.
 7. Each player takes 10 Ration tokens (all FULL), 3 O2 Tank tokens (all FULL), and 3 Health tokens (all HEALTHY).
 8. Roll to see who goes first.`},
-{id:'crash',h:1,title:'The Crash Site',body:`The Crash Site is a 7-hex cluster — your main base of operations. Refill all O2 Tanks by ending a turn here.
+{id:'crash',h:1,title:'Base Camp',body:`Base Camp is a 7-hex cluster — your anchor point on the planet. O2 Tanks do **not** deplete when you end a turn on any Base Camp tile.
+
+The layout of Base Camp is chosen by players during setup — the six surrounding modules can be arranged in any connected shape around the central Crash Site hex.
 
 | Location | Effect |
 |---|---|
-| Core Wreckage | All players begin here. |
-| Medical Bay | Restore 1 Health token to HEALTHY as an action. |
-| Equipment Locker | Draw 1 Equipment card as an action. |
-| Cargo Hold | Communal Ration storage. Deposit or withdraw freely as an action. |
-| Signal Array | Activate Radio Fragments and roll for rescue. Capacity: 1 player only. |
-| Landing Struts ×2 | The two outer entry/exit hexes connecting to the wider map. |
+| Crash Site | All players begin here. No specific action. |
+| Medical Bay | Action: Restore 1 Health token to HEALTHY. |
+| Equipment Locker | Action: Draw 1 Equipment card. |
+| Cargo Hold | Action: Deposit or withdraw Rations from communal storage. |
+| Signal Array | Action: Activate Radio Fragments and roll for rescue. Capacity: 1 player only. |
+| Airlock | Passive: Refill 1 O₂ Tank automatically when entering from terrain. |
+| Watch Tower | Action: Reveal all face-down tiles adjacent to any crew member currently in the field. |
 
-The Signal Array fits one player at a time. While occupied, no other player may enter. The occupant decides each round whether to roll. They are never required to roll. If another player wants the occupant out, both roll 1 die, keep rolling until one wins.`},
+**Signal Array:** Fits one player at a time. While occupied, no other player may enter. The occupant decides each round whether to roll — they are never required to. If another player wants the occupant out, both roll 1 die and keep rolling until one wins.
+
+**Airlock:** The O₂ refill triggers only when entering from outside Base Camp (i.e., returning from terrain). Moving between Base Camp hexes does not trigger it.
+
+**Watch Tower:** Reveals the fog of war around your scouts without requiring anyone to be in danger. The more crew in the field, the more tiles revealed.`},
 {id:'terrain',h:1,title:'Terrain & Tiles',body:`All terrain tiles begin face-down in a single shuffled stack. The map expands outward from the Crash Site as players explore.
 
 **Frontier Rule:** The play area is always enveloped in face-down tiles. Every hex adjacent to any revealed tile that does not yet have a tile is immediately filled with a face-down tile. This happens automatically — the board stays wrapped in mystery until the deck runs out.
@@ -1907,19 +2000,19 @@ function initBoard(){
 // CRASH SITE BUILDER
 // ═══════════════════════════════════════════════════════════════
 const BUILDER_PALETTE=[
-  {name:'Medical Bay',     short:'MED',  desc:'Restore 1 Health per action here.'},
-  {name:'Signal Array',    short:'SIG',  desc:'Activate fragments & roll for rescue.'},
-  {name:'Equipment Locker',short:'EQUIP',desc:'Draw 1 Equipment card as an action.'},
-  {name:'Cargo Hold',      short:'CARGO',desc:'Communal Ration storage.'},
-  {name:'Landing Struts',  short:'LNDG', desc:'Entry/exit hex to terrain.'},
-  {name:'Landing Struts',  short:'LNDG', desc:'Entry/exit hex to terrain.'},
+  {name:'Medical Bay',     short:'MED',  desc:'Action: Restore 1 Health token to HEALTHY.'},
+  {name:'Signal Array',    short:'SIG',  desc:'Action: Activate fragments & roll for rescue.'},
+  {name:'Equipment Locker',short:'EQUIP',desc:'Action: Draw 1 Equipment card.'},
+  {name:'Cargo Hold',      short:'CARGO',desc:'Action: Deposit or withdraw Rations freely.'},
+  {name:'Watch Tower',     short:'WATCH',desc:'Action: Reveal tiles adjacent to any frontier player.'},
+  {name:'Airlock',         short:'AIR',  desc:'On entry from terrain: refill 1 O₂ Tank.'},
 ];
 
 let builderState=null;
 
 function initBuilder(){
   builderState={
-    placed:new Map([[hk(0,0),{q:0,r:0,name:'Core Wreckage',short:'CORE'}]]),
+    placed:new Map([[hk(0,0),{q:0,r:0,name:'Crash Site',short:'CRASH'}]]),
     palette:[...BUILDER_PALETTE.map((p,i)=>({...p,idx:i,placed:false}))],
     selectedIdx:-1
   };
