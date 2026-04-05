@@ -534,7 +534,7 @@ body{font-family:'Courier New',monospace;font-size:13px;background:var(--bg);col
 // ═══════════════════════════════════════════════════════════════
 // PORTRAITS  (inline SVG → data URIs)
 // ═══════════════════════════════════════════════════════════════
-const PORTRAIT_SVG = [
+const PORTRAIT_SVG_UNUSED = [
 /* 0 Vasquez — warm brown skin, dark bun, navy suit */
 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
 <rect width="60" height="72" fill="#07101c"/>
@@ -661,7 +661,24 @@ const PORTRAIT_SVG = [
 <path d="M24,38 Q30,41 36,38" stroke="#7a5030" stroke-width="1.5" fill="none"/>
 </svg>`,
 ];
-const PORTRAIT_URI = PORTRAIT_SVG.map(s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s));
+// Portrait sprites sliced from img/Crew.png (3×2 grid, 469×384 per portrait)
+// Populated on image load; fallback is a solid colour placeholder
+let PORTRAIT_URI = ['','','','','',''];
+const CREW_PW=469, CREW_PH=384;
+const crewSheetImg=new Image();
+crewSheetImg.onload=function(){
+  for(let i=0;i<6;i++){
+    const col=i%3, row=Math.floor(i/3);
+    const cv=document.createElement('canvas');
+    cv.width=CREW_PW; cv.height=CREW_PH;
+    cv.getContext('2d').drawImage(crewSheetImg, col*CREW_PW, row*CREW_PH, CREW_PW, CREW_PH, 0, 0, CREW_PW, CREW_PH);
+    PORTRAIT_URI[i]=cv.toDataURL('image/jpeg',0.88);
+  }
+  // Re-draw wherever portraits appear
+  if(typeof buildSetup==='function')buildSetup();
+  if(typeof G!=='undefined'&&G){render();updateUI();}
+};
+crewSheetImg.src='img/Crew.png';
 
 // ═══════════════════════════════════════════════════════════════
 // HEX MATH  (pointy-top, axial)
