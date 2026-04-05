@@ -127,9 +127,13 @@ The Crash Site is a 7-hex cluster — your main base of operations. Refill all O
 
 All terrain tiles begin face-down in a single shuffled stack. The map is built outward from the Crash Site as players explore. Every tile is identical on its back — there is no way to know what a tile contains until a crew member is placed on it and it is flipped.
 
+**The Frontier**
+
+The play area is always enveloped in face-down tiles. Every hex adjacent to any revealed tile that does not yet have a tile is immediately filled with a face-down tile. This happens automatically — whenever a tile is revealed, the surrounding empty hexes are filled with face-down tiles from the terrain deck. The board is always wrapped in a layer of mystery until the terrain deck is exhausted.
+
 **Placing Tiles**
 
-Players move from hex corner point to hex corner point. Each corner point is shared by three hexes. When a player's movement brings their pawn to a corner point where one or two of those three hexes have no tile yet, they immediately draw and place tiles face-down to fill those empty slots. This happens as part of movement — it costs no additional points. The board grows naturally as players explore the frontier.
+When a player moves into a face-down hex, they flip it immediately upon entry. Its internal contents are now visible to everyone. The player is placed at the nearest Point of Interest on the tile. Revealing a tile triggers the frontier rule — any new adjacent empty hexes are filled face-down at once.
 
 **Entering a Face-Down Tile**
 
