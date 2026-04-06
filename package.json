@@ -1,0 +1,7 @@
+{
+  "name": "signal",
+  "private": true,
+  "scripts": {
+    "start": "npx serve . --listen 3000 --no-clipboard"
+  }
+}
