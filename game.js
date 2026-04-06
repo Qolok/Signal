@@ -1084,6 +1084,15 @@ function render(){
   svg.appendChild(defs);
   svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
   const g=svgEl('g',{transform:`translate(${W/2+pan.x} ${H/2+pan.y}) scale(${zoom})`});
+  // Hex grid texture: explicit path inside <g> so it pans/zooms with the board.
+  // Drawn as a single path to avoid any SVG pattern clipping artifacts.
+  {const GR=22,pd=[];
+  for(let q=-GR;q<=GR;q++)for(let r=-GR;r<=GR;r++){
+    const[cx,cy]=h2p(q,r);
+    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
+      pd.push(`${i===0?'M':'L'}${(cx+SZ*Math.cos(a)).toFixed(1)},${(cy+SZ*Math.sin(a)).toFixed(1)}`);}
+    pd.push('Z');}
+  g.appendChild(svgEl('path',{d:pd.join(' '),fill:'none',stroke:'rgba(255,255,255,0.03)','stroke-width':'0.7','pointer-events':'none'}));}
   svg.appendChild(g);
   for(const[,t]of G.tiles)drawTile(g,t);
   if((G.phase==='move'||G.phase==='action')&&G.movementLeft>0){
