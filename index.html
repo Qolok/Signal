@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SIGNAL</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── SETUP: player names ── -->
+<div id="setup">
+  <div class="sbox">
+    <h1>SIGNAL</h1>
+    <p class="ssub">Endymion 7 · Emergency Protocol · Crew Initialization</p>
+    <div class="ssec">
+      <div class="slbl">Crew Size</div>
+      <div class="crow" id="crow"></div>
+    </div>
+    <div class="ssec">
+      <div class="slbl">Crew Manifest</div>
+      <div id="plist"></div>
+    </div>
+    <button class="sbtn" onclick="goToSiteBuilder()">Next: Build Crash Site</button>
+  </div>
+</div>
+
+<!-- ── CRASH SITE BUILDER ── -->
+<div id="setup-site">
+  <div id="sbhdr">
+    <h1>SIGNAL · CRASH SITE BUILDER</h1>
+    <span id="sbprogress">0 / 6 placed</span>
+    <span class="sbreset" onclick="resetBuilder()">Reset</span>
+  </div>
+  <div id="sbmain">
+    <div id="sbsvg-wrap">
+      <svg id="sbsvg" viewBox="-320 -320 640 640" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <div id="sbpanel">
+      <div id="sbpalette">
+        <!-- filled by renderPalette() -->
+      </div>
+      <div id="sbpanel-foot">
+        <div style="font-size:.62rem;color:var(--dim)">Click a tile card, then click a highlighted hex to place it.</div>
+        <button class="sbtn" style="padding:12px 18px;font-size:.72rem;" onclick="randomBuilder()">Random Layout</button>
+      </div>
+    </div>
+  </div>
+  <div id="sbfooter">
+    <button id="sblaunbtn" disabled onclick="finalizeGame()" style="flex:1;">Launch Mission</button>
+  </div>
+</div>
+
+<!-- ── GAME ── -->
+<div id="game">
+  <!-- Header -->
+  <div id="hdr">
+    <h1 class="hlogo">SIGNAL</h1>
+    <span class="hsep">|</span>
+    <span id="hturn">Turn 1</span>
+    <span class="hsep">|</span>
+    <span id="hphase" class="ph-roll">Roll</span>
+    <span id="hsig">0 fragments · signal offline</span>
+    <button class="hbtn" onclick="toggleLog()">Log</button>
+    <button class="hbtn" onclick="openRulebook()">Field Guide</button>
+  </div>
+
+  <!-- Board -->
+  <div id="bwrap">
+    <svg id="bsvg"></svg>
+    <div id="htip">
+      <div class="tip-hero"><div class="tip-hero-img" id="tip-hero-img"></div></div>
+      <div class="tip-body">
+        <div class="tiptit" id="tiptit"></div>
+        <div class="tip-rule"></div>
+        <div class="tipdesc" id="tipdesc"></div>
+        <div class="tipact" id="tipact"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log popup -->
+  <div id="logpop">
+    <div id="log"></div>
+  </div>
+
+  <!-- HUD: active player -->
+  <div id="hud">
+    <!-- LEFT: Player HUD -->
+    <div id="hud-player">
+      <!-- Player card with crew tabs -->
+      <div class="hudcard" id="hcrd">
+        <div id="hctabs"></div>
+        <div id="hcbody">
+          <div class="hcport" id="hcport">
+            <div id="hcimg" style="width:100%;height:100%;"></div>
+          </div>
+          <div class="hcoverlay">
+            <div class="hcname" id="hcname">—</div>
+            <div class="hcloc" id="hcloc">—</div>
+          </div>
+        </div>
+      </div>
+      <!-- Resources -->
+      <div class="hudres">
+        <div class="shd">Resources</div>
+        <div>
+          <div class="rlbl">Food</div>
+          <div class="tokgrid" id="htr"></div>
+        </div>
+        <div>
+          <div class="rlbl">Oxygen</div>
+          <div class="tokrow" id="hto"></div>
+        </div>
+        <div>
+          <div class="rlbl">Health</div>
+          <div class="tokrow" id="hth"></div>
+        </div>
+        <div id="hud-frags" style="display:none">
+          <div class="rlbl">Fragments</div>
+          <div class="tokrow" id="htfrag"></div>
+        </div>
+      </div>
+      <!-- Equipment gallery -->
+      <div class="hudeq">
+        <div class="shd">Equipment</div>
+        <div class="eq-gallery">
+          <button class="eq-nav" id="eq-prev" onclick="eqNav(-1)" disabled>&#9664;</button>
+          <div class="eq-viewport" id="eqhand"></div>
+          <button class="eq-nav" id="eq-next" onclick="eqNav(1)" disabled>&#9654;</button>
+        </div>
+      </div>
+    </div>
+    <!-- RIGHT: Action HUD -->
+    <div id="hud-action">
+      <div id="decks">
+        <div class="deckpile" id="evtdeck" title="Event Deck">
+          <span class="dk-symbol">◈</span>
+          <div class="dklbl">Event</div>
+          <div class="dkn" id="evtn">80</div>
+          <div class="dksub">cards</div>
+        </div>
+        <div class="deckpile" id="equpdeck" title="Equipment Deck">
+          <span class="dk-symbol">◆</span>
+          <div class="dklbl">Equip</div>
+          <div class="dkn" id="equpn">30</div>
+          <div class="dksub">cards</div>
+        </div>
+      </div>
+      <div id="tabletop-dice">
+        <div class="shd">Move</div>
+        <div class="td-row" id="td-row"></div>
+        <div id="td-moves"></div>
+      </div>
+      <div class="hudact">
+        <button class="btn"     id="bmed"   onclick="doMedBay()" disabled>Restore Health</button>
+        <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Draw Equipment</button>
+        <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
+        <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
+        <button class="btn trd" id="btrd"   onclick="openTrade()" disabled>Trade</button>
+        <button class="btn wrn" id="bfrag"  onclick="doActivateFrag()" disabled>Activate Fragment</button>
+        <button class="btn wrn" id="bsig"   onclick="doSignalRoll()" disabled>Roll Signal</button>
+        <button class="btn dng" id="bend"   onclick="doEndTurn()" disabled>End Turn</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TILE REVEAL OVERLAY ── -->
+<div id="trov" style="display:none">
+  <div id="tr-hex"></div>
+  <div id="tr-name"></div>
+  <div id="tr-desc"></div>
+  <div id="tr-deck" title="Click to draw Event Card">
+    <div id="tr-deck-pile">
+      <span class="dk-symbol">◈</span>
+      <div class="dkn" id="tr-evtn">—</div>
+      <div class="dksub">cards</div>
+    </div>
+    <div id="tr-deck-lbl">Draw Event</div>
+  </div>
+</div>
+
+<!-- ── EQUIP DRAW OVERLAY ── -->
+<div id="eqdov" style="display:none">
+  <div id="eqd-title">Equipment Locker</div>
+  <div id="eqd-desc">Draw 1 card from the equipment deck.</div>
+  <div id="eqd-deck" title="Click to draw Equipment Card">
+    <div id="eqd-deck-pile">
+      <span class="dk-symbol">◆</span>
+      <div class="dkn" id="eqd-equpn">—</div>
+      <div class="dksub">cards</div>
+    </div>
+    <div id="eqd-deck-lbl">Draw Equipment</div>
+  </div>
+</div>
+
+<!-- ── RULEBOOK MODAL ── -->
+<div id="rbmodal">
+  <div id="rbhdr">
+    <h2>SIGNAL · FIELD GUIDE</h2>
+    <input id="rbsearch" type="text" placeholder="Search guide..." oninput="rbSearch(this.value)">
+    <button id="rbclose" onclick="closeRulebook()">✕</button>
+  </div>
+  <div id="rbbody">
+    <nav id="rbtoc"></nav>
+    <div id="rbcontent"></div>
+  </div>
+</div>
+
+<!-- ── EVENT / GENERAL MODAL ── -->
+<div id="mov" class="moverlay">
+  <div class="mbox">
+    <h2 class="mtit" id="mtit"></h2>
+    <div class="mbod" id="mbod"></div>
+    <div class="mact" id="mact"></div>
+  </div>
+</div>
+
+<!-- ── EVENT CARD ── -->
+<div id="evc-ov">
+  <div class="evc" id="evc">
+    <div class="evc-inner">
+      <div class="evc-corners"><span>◈</span><span>◈</span></div>
+      <div class="evc-badge" id="evc-badge"></div>
+      <h3 class="evc-loc" id="evc-loc"></h3>
+      <div class="evc-rule"></div>
+      <div class="evc-body" id="evc-body"></div>
+      <div class="evc-pills" id="evc-pills"></div>
+      <div class="evc-outcome" id="evc-outcome" style="display:none"></div>
+      <div class="evc-brand">◈ &nbsp; ENDYMION 7 &nbsp; ◈</div>
+      <div class="evc-bot-corners"><span>◈</span><span>◈</span></div>
+    </div>
+  </div>
+  <div id="evc-die" style="display:none"></div>
+  <button id="evc-btn">Acknowledge</button>
+</div>
+
+<!-- ── TRADE MODAL ── -->
+<div id="trademodal">
+  <div id="trhdr">
+    <h2>TRADE</h2>
+    <button id="trclose" onclick="closeTrade()">✕</button>
+  </div>
+  <div id="trbody"><!-- built by renderTradeModal() --></div>
+  <div id="trfooter">
+    <button class="btn pri" onclick="confirmTrade()">Confirm Trade</button>
+    <button class="btn" onclick="closeTrade()">Cancel</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
