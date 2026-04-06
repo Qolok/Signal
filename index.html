@@ -5,8 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>SIGNAL</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+
+<!-- ── INTRO ── -->
+<div id="intro">
+  <div class="sbox intro-box">
+    <h1>SIGNAL</h1>
+    <p class="ssub">1–6 Players · Ages 14+ · 45–90 Minutes</p>
+    <div class="intro-story">
+      <p>You are the crew of the Endymion 7, a deep-range mining vessel. Your ship has crash-landed on an uncharted alien planet. You don't know what brought you down. You don't know what's out there. You have what survived the crash, and each other—for now.</p>
+      <p>Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and rebuild the Signal Array. Rescue is possible but not guaranteed. And the longer you're stranded, the more the planet changes you.</p>
+      <p>SIGNAL is a game of survival, exploration, and eroding trust — where rescue is uncertain, and the greatest threat may be sitting across the table.</p>
+    </div>
+    <button class="sbtn" onclick="showCrewSetup()">Start Game</button>
+  </div>
+</div>
 
 <!-- ── SETUP: player names ── -->
 <div id="setup">
@@ -21,7 +36,7 @@
       <div class="slbl">Crew Manifest</div>
       <div id="plist"></div>
     </div>
-    <button class="sbtn" onclick="goToSiteBuilder()">Next: Build Crash Site</button>
+    <button class="sbtn" onclick="goToSiteBuilder()">Next: Build Crash Site →</button>
   </div>
 </div>
 
@@ -34,7 +49,7 @@
   </div>
   <div id="sbmain">
     <div id="sbsvg-wrap">
-      <svg id="sbsvg" viewBox="-320 -320 640 640" preserveAspectRatio="xMidYMid meet"></svg>
+      <svg id="sbsvg"></svg>
     </div>
     <div id="sbpanel">
       <div id="sbpalette">
@@ -246,6 +261,23 @@
   <div id="trfooter">
     <button class="btn pri" onclick="confirmTrade()">Confirm Trade</button>
     <button class="btn" onclick="closeTrade()">Cancel</button>
+  </div>
+</div>
+
+
+<!-- ── CONTROLS MODAL ── -->
+<div id="ctrl-modal">
+  <div class="ctrl-box">
+    <div class="ctrl-title">MISSION CONTROLS</div>
+    <div class="ctrl-grid">
+      <div class="ctrl-row"><span class="ctrl-key">Left-click hex</span><span class="ctrl-desc">Move / interact</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Right-click drag</span><span class="ctrl-desc">Pan the board</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Scroll wheel</span><span class="ctrl-desc">Zoom in / out</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Hover hex</span><span class="ctrl-desc">Tile info tooltip</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Log</span><span class="ctrl-desc">View turn history</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Field Guide</span><span class="ctrl-desc">Rules &amp; reference</span></div>
+    </div>
+    <button class="sbtn ctrl-dismiss" onclick="dismissControls()">Begin Mission</button>
   </div>
 </div>
 
