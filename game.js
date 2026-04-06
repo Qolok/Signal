@@ -1079,7 +1079,7 @@ function render(){
   for(const[,t]of G.tiles)drawTile(g,t);
   if((G.phase==='move'||G.phase==='action')&&G.movementLeft>0){
     for(const[k]of G.reach){const[q,r]=hparse(k);const[cx,cy]=h2p(q,r);
-      g.appendChild(svgEl('polygon',{points:hexPts(cx,cy,SZ-1),fill:'rgba(20,70,120,.2)',stroke:'#205888','stroke-width':'1.5','pointer-events':'none'}));}}
+      g.appendChild(svgEl('polygon',{points:hexPts(cx,cy,SZ-4),fill:'rgba(20,70,120,.2)',stroke:'#205888','stroke-width':'1','pointer-events':'none'}));}}
   G.players.forEach(p=>{if(p.alive)drawPawn(g,p);});
 }
 
@@ -1649,9 +1649,10 @@ function rbSearch(query){
 function initBoard(){
   const wrap=document.getElementById('bwrap'),svg=document.getElementById('bsvg');
   let dragging=false,df=null;
-  wrap.addEventListener('mousedown',e=>{if(e.target.hasAttribute('data-q'))return;dragging=true;df={x:e.clientX,y:e.clientY};svg.classList.add('drag');});
+  wrap.addEventListener('mousedown',e=>{if(e.button!==2)return;e.preventDefault();dragging=true;df={x:e.clientX,y:e.clientY};svg.classList.add('drag');});
+  wrap.addEventListener('contextmenu',e=>{e.preventDefault();});
   document.addEventListener('mousemove',e=>{if(!dragging||!df)return;pan.x+=e.clientX-df.x;pan.y+=e.clientY-df.y;df={x:e.clientX,y:e.clientY};render();});
-  document.addEventListener('mouseup',()=>{dragging=false;df=null;svg.classList.remove('drag');});
+  document.addEventListener('mouseup',e=>{if(e.button!==2)return;dragging=false;df=null;svg.classList.remove('drag');});
   wrap.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.88:1.13)));render();},{passive:false});
   let lt=null;
   wrap.addEventListener('touchstart',e=>{if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});

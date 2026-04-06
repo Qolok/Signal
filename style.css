@@ -84,7 +84,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 
 /* ── BOARD ── */
 #bwrap{grid-area:brd;position:relative;overflow:hidden;background:var(--bg)}
-#bsvg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
+#bsvg{position:absolute;inset:0;width:100%;height:100%}
 #bsvg.drag{cursor:grabbing}
 
 /* ── TABLETOP DICE ── */
@@ -372,16 +372,20 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #hud-player{
   position:absolute;bottom:0;left:0;z-index:20;
   height:204px;display:flex;gap:0;overflow:hidden;
-  background:var(--bg2);
-  border:1px solid var(--bdr);border-bottom:none;
-  box-shadow:0 -4px 24px rgba(0,0,0,.7);
+  background:rgba(12,16,24,.7);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  border:1px solid var(--bdr);border-bottom:none;border-left:none;
+  border-radius:0 10px 0 0;
+  box-shadow:0 -4px 10px rgba(0,0,0,.5),inset 0 1px 0 rgba(100,160,220,.06);
 }
 #hud-action{
   position:absolute;bottom:0;right:0;z-index:20;
   height:204px;display:flex;gap:0;overflow:hidden;
-  background:var(--bg2);
-  border:1px solid var(--bdr);border-bottom:none;
-  box-shadow:0 -4px 24px rgba(0,0,0,.7);
+  background:rgba(12,16,24,.7);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  border:1px solid var(--bdr);border-bottom:none;border-right:none;
+  border-radius:10px 0 0 0;
+  box-shadow:0 -4px 10px rgba(0,0,0,.5),inset 0 1px 0 rgba(100,160,220,.06);
 }
 
 /* Player card */
