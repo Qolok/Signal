@@ -2027,10 +2027,11 @@ function goToSiteBuilder(){
   sb.style.display='flex';sb.classList.add('show');
   initBuilder();
   updateBuilderProgress();
-  e7ScreenSeq('e7-builder-msg',[
-    [0,   'sys', '> Hull breach confirmed.'],
-    [300, 'sys', '> Signal Array: OFFLINE.'],
-    [500, '',    'Establish the base camp by placing life support structures near the crash site.'],
+  e7ScreenSeq('sb-e7-log',[
+    [0,   'sys', '> ENDYMION 7 - EMERGENCY PROTOCOLS'],
+    [300, 'crit', '> Signal Array: OFFLINE.'],
+    [500, '',    'You must recover Radio Fragments to restore the Signal Array.'],
+    [800, '',    'Establish your base camp by placing life support structures near the crash site.'],
   ]);
 }
 
@@ -2039,10 +2040,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   e7ScreenSeq('e7-intro-msg',[
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
     [400, 'sys', '> Primary diagnostics: complete. Life support: NOMINAL.'],
-    [600, '',    'Welcome aboard. I am your ship\'s emergency computer. You are the crew of the Endymion 7, a deep-range mining vessel. You have crash-landed on an uncharted alien planet. The cause of the accident is unknown.'],
-    [500, '',    'Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array.'],
+    [600, '',    'Welcome aboard. I am E7, your ship\'s emergency computer. You are the crew of the Endymion 7, a deep-range mining vessel. You have crash-landed on an uncharted planet. The cause of the accident is unknown.'],
+    [500, '',    'Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array to call for rescue.'],
     [400, '',    'You have a 1 in 10,358 chance of survival.'],
-    [300, '',    'Please confirm.'],
+    [300, '',    'Please acknowledge.'],
   ]);
 });
 function showCrewSetup(){
@@ -2050,7 +2051,7 @@ function showCrewSetup(){
   document.getElementById('setup').style.display='flex';
   buildSetup();
   e7ScreenSeq('e7-setup-msg',[
-    [0,   'sys', '> Crew initialization protocol active.'],
+    [0,   'sys', '> ENDYMION 7 — CREW INITIALIZATION...'],
     [400, '',    'Please confirm the surviving crew members.'],
   ]);
 }

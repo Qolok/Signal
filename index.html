@@ -37,7 +37,7 @@
 <div id="setup">
   <div class="sbox">
     <h1>SIGNAL</h1>
-    <p class="ssub">Endymion 7 · Emergency Protocol · Crew Initialization</p>
+    <p class="ssub">Endymion 7 · Crew Initialization</p>
     <div class="ssec">
       <div class="slbl">Crew Size</div>
       <div class="crow" id="crow"></div>
@@ -47,14 +47,14 @@
       <div id="plist"></div>
     </div>
     <div id="e7-setup-msg" class="e7-screen-msg"></div>
-    <button class="sbtn" onclick="goToSiteBuilder()">Next: Build Crash Site →</button>
+    <button class="sbtn" onclick="goToSiteBuilder()">Confirm</button>
   </div>
 </div>
 
-<!-- ── CRASH SITE BUILDER ── -->
+<!-- ── BASE CAMP BUILDER ── -->
 <div id="setup-site">
   <div id="sbhdr">
-    <h1>SIGNAL · CRASH SITE BUILDER</h1>
+    <h1>SIGNAL · ESTABLISH BASE CAMP</h1>
     <span id="sbprogress">0 / 6 placed</span>
     <span class="sbreset" onclick="resetBuilder()">Reset</span>
   </div>
@@ -62,13 +62,24 @@
     <div id="sbsvg-wrap">
       <svg id="sbsvg"></svg>
     </div>
-    <div id="sbpanel">
-      <div id="sbpalette">
-        <!-- filled by renderPalette() -->
+    <div id="sb-right">
+      <div id="sb-e7">
+        <div id="sb-e7-hdr">
+          <div class="e7title">
+            <span class="e7logo">ENDYMION 7</span>
+            <span class="e7status">● ONLINE</span>
+          </div>
+          <div class="e7sub">SHIP COMPUTER</div>
+        </div>
+        <div id="sb-e7-log"></div>
       </div>
-      <div id="sbpanel-foot">
-        <div id="e7-builder-msg" class="e7-screen-msg e7-screen-msg--builder"></div>
-        <button class="sbtn" style="padding:12px 18px;font-size:.72rem;" onclick="randomBuilder()">Random Layout</button>
+      <div id="sbpanel">
+        <div id="sbpalette">
+          <!-- filled by renderPalette() -->
+        </div>
+        <div id="sbpanel-foot">
+          <button class="sbtn" style="padding:12px 18px;font-size:.72rem;" onclick="randomBuilder()">Random Layout</button>
+        </div>
       </div>
     </div>
   </div>
