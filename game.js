@@ -241,64 +241,44 @@ const POI_COLOR={
   'Recovered Terminal':'#2060a8',
 };
 
-// ── SPRITE SHEET ──────────────────────────────────────────────
-// img/Tiles.png: 1407×768, 6 cols × 4 rows, 224×181px per sprite, 9px padding
-const SHEET_W=1407,SHEET_H=768,SPRITE_W=224,SPRITE_H=181,SPRITE_PAD=9;
-const SPRITE_STRIDE_W=SPRITE_W+SPRITE_PAD; // 233
-const SPRITE_STRIDE_H=SPRITE_H+SPRITE_PAD; // 190
-const SPRITE_SCALE=(SZ*2)/SPRITE_H;        // scales sprite to fill hex height
-
-// Grid layout (col, row) — matches Tiles.png left-to-right, top-to-bottom
-const TILE_SPRITE_MAP={
-  // Row 0
-  'Crash Site':         {col:0,row:0},
-  'Cave':               {col:1,row:0},
-  'Equipment Locker':   {col:2,row:0},
-  'Signal Array':       {col:3,row:0},
-  'Watch Tower':        {col:4,row:0},
-  'Medical Bay':        {col:5,row:0},
-  // Row 1
-  'Cargo Hold':         {col:0,row:1},
-  'Airlock':            {col:1,row:1},
-  'Signal Tower':       {col:2,row:1},
-  'Outpost':            {col:3,row:1},
-  'Fuselage':           {col:4,row:1},
-  'Wreckage Field':     {col:5,row:1},
-  // Row 2
-  'Recovered Terminal': {col:0,row:2},
-  'Stasis Pod':         {col:1,row:2},
-  'Temporal Rift':      {col:2,row:2},
-  'Portal':             {col:3,row:2},
-  'Gravitational Well': {col:4,row:2},
-  'Echo Chamber':       {col:5,row:2},
-  // Row 3
-  'Dead Signal':        {col:0,row:3},
-  'Inversion Field':    {col:1,row:3},
-  'Ship Section':       {col:2,row:3},
-  'face_down':          {col:3,row:3},
+// ── TILE IMAGES ───────────────────────────────────────────────
+// Individual PNG files in img/Tiles/ — one per tile/POI name
+const TILE_IMAGE_MAP={
+  'Crash Site':         'crash-site.png',
+  'Cave':               'cave.png',
+  'Equipment Locker':   'locker.png',
+  'Signal Array':       'signal-array.png',
+  'Watch Tower':        'watch-tower.png',
+  'Medical Bay':        'medbay.png',
+  'Cargo Hold':         'cargo.png',
+  'Airlock':            'airlock.png',
+  'Signal Tower':       'signal-tower.png',
+  'Outpost':            'outpost1.png',
+  'Fuselage':           'fuselage.png',
+  'Wreckage Field':     'wreckage.png',
+  'Recovered Terminal': 'terminal.png',
+  'Stasis Pod':         'stasis.png',
+  'Temporal Rift':      'temporal-distortion.png',
+  'Gravitational Well': 'gravity-well.png',
+  'Echo Chamber':       'echo-chamber.png',
+  'Dead Signal':        'dead-signal.png',
+  'Inversion Field':    'inversion-field.png',
+  'Ship Section':       'ship-section1.png',
 };
 
-let tilesImgLoaded=false;
-const tilesImg=new Image();
-tilesImg.onload=()=>{tilesImgLoaded=true;if(typeof G!=='undefined'&&G)render();if(builderState){renderPalette();renderSiteBuilder();}};
-tilesImg.src='img/Tiles.png';
-
-function getSpritePos(t){
+function getTileImg(t){
   let key;
   if(t.type==='crash_site')key=t.name;
   else if(t.type==='terrain')key=t.pois?.[0];
   else if(t.type==='anomaly')key=t.anomaly;
   else if(t.type==='ship_section')key='Ship Section';
-  else if(t.type==='face_down')key='face_down';
-  return TILE_SPRITE_MAP[key]||null;
+  const file=TILE_IMAGE_MAP[key];
+  return file?`img/Tiles/${file}`:null;
 }
-function spriteCssForName(name,w,h){
-  const sp=TILE_SPRITE_MAP[name];
-  if(!sp||!tilesImgLoaded)return'background-color:#0e1e30';
-  const sc=h/SPRITE_H;
-  const spCx=(SPRITE_PAD+sp.col*SPRITE_STRIDE_W+SPRITE_W/2)*sc;
-  const spCy=(SPRITE_PAD+sp.row*SPRITE_STRIDE_H+SPRITE_H/2)*sc;
-  return`background:#0e1e30 url(img/Tiles.png) ${Math.round(w/2-spCx)}px ${Math.round(h/2-spCy)}px/${Math.round(SHEET_W*sc)}px ${Math.round(SHEET_H*sc)}px no-repeat`;
+function spriteCssForName(name){
+  const file=TILE_IMAGE_MAP[name];
+  if(!file)return'background-color:#0e1e30';
+  return`background:#0e1e30 url(img/Tiles/${file}) center/cover no-repeat`;
 }
 
 const EQ_CARDS=[
@@ -452,26 +432,18 @@ function tileName(t){
 // ═══════════════════════════════════════════════════════════════
 // TILE REVEAL + EVENT DRAW
 // ═══════════════════════════════════════════════════════════════
-function setTileHeroSprite(el,t,pw,ph){
-  const sp=getSpritePos(t);
-  if(!sp||!tilesImgLoaded){el.style.backgroundImage='none';return;}
-  const sc=SPRITE_SCALE*2.4;
-  const spCx=(SPRITE_PAD+sp.col*SPRITE_STRIDE_W+SPRITE_W/2)*sc;
-  const spCy=(SPRITE_PAD+sp.row*SPRITE_STRIDE_H+SPRITE_H/2)*sc;
-  el.style.backgroundImage='url(img/Tiles.png)';
-  el.style.backgroundSize=`${Math.round(SHEET_W*sc)}px ${Math.round(SHEET_H*sc)}px`;
-  el.style.backgroundPosition=`${-(spCx-pw/2)}px ${-(spCy-ph/2)}px`;
+function setTileHeroSprite(el,t){
+  const img=getTileImg(t);
+  if(!img){el.style.backgroundImage='none';return;}
+  el.style.backgroundImage=`url(${img})`;
+  el.style.backgroundSize='cover';
+  el.style.backgroundPosition='center';
 }
 
 function tileImgHtml(t){
-  // kept for anomaly modals that still use showModal
-  const sp=getSpritePos(t);
-  if(!sp||!tilesImgLoaded)return'';
-  const sc=SPRITE_SCALE*2.2;
-  const pw=200,ph=140;
-  const spCx=(SPRITE_PAD+sp.col*SPRITE_STRIDE_W+SPRITE_W/2)*sc;
-  const spCy=(SPRITE_PAD+sp.row*SPRITE_STRIDE_H+SPRITE_H/2)*sc;
-  return `<div style="width:${pw}px;height:${ph}px;background:url(img/Tiles.png) ${-(spCx-pw/2)}px ${-(spCy-ph/2)}px / ${Math.round(SHEET_W*sc)}px ${Math.round(SHEET_H*sc)}px no-repeat;border-radius:4px;margin:0 auto 10px;overflow:hidden;display:block"></div>`;
+  const img=getTileImg(t);
+  if(!img)return'';
+  return `<div style="width:200px;height:140px;background:url(${img}) center/cover no-repeat;border-radius:4px;margin:0 auto 10px;overflow:hidden;display:block"></div>`;
 }
 
 function showTileRevealModal(t, onDismiss){
@@ -495,7 +467,7 @@ function showTileRevealModal(t, onDismiss){
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
-  setTileHeroSprite(document.getElementById('tr-hex'),t,320,220);
+  setTileHeroSprite(document.getElementById('tr-hex'),t);
   document.getElementById('tr-name').textContent=title.toUpperCase();
   document.getElementById('tr-desc').textContent=desc||'Unknown terrain.';
   const deck=document.getElementById('tr-deck');
@@ -1137,8 +1109,8 @@ function drawTile(g,t){
 
   const strokeC=t.type==='anomaly'?'#6a28a8':t.type==='ship_section'?'#2060a8':t.type==='crash_site'?'#e07820':'#1a2e1a';
   const sw=t.type==='crash_site'?'2.2':'1.4';
-  const sp=tilesImgLoaded?getSpritePos(t):null;
-  if(sp){
+  const tileImg=getTileImg(t);
+  if(tileImg){
     // Clip path for this hex — added to SVG defs (in root coord space of g group)
     const clipId=`tc_${t.q}_${t.r}`;
     const svgDefs=document.getElementById('bsvg').querySelector('defs');
@@ -1147,21 +1119,18 @@ function drawTile(g,t){
       cp.appendChild(svgEl('polygon',{points:hexPoly}));
       svgDefs.appendChild(cp);
     }
-    const sc=SPRITE_SCALE;
-    const spCx=(SPRITE_PAD+sp.col*SPRITE_STRIDE_W+SPRITE_W/2)*sc;
-    const spCy=(SPRITE_PAD+sp.row*SPRITE_STRIDE_H+SPRITE_H/2)*sc;
+    const hw=SZ*SQRT3,hh=SZ*2;
     g.appendChild(svgEl('image',{
-      href:'img/Tiles.png',
-      x:cx-spCx,y:cy-spCy,
-      width:SHEET_W*sc,height:SHEET_H*sc,
+      href:tileImg,
+      x:cx-hw/2,y:cy-hh/2,
+      width:hw,height:hh,
       'clip-path':`url(#${clipId})`,
       'pointer-events':'none',
-      preserveAspectRatio:'xMidYMid meet',
+      preserveAspectRatio:'xMidYMid slice',
     }));
     // Subtle dark vignette so labels and icons stay legible
     g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(0,0,0,.32)','pointer-events':'none'}));
   } else {
-    // Gradient fallback
     const gradId=t.type==='crash_site'?'gr-crash':t.type==='anomaly'?'gr-anomaly':t.type==='ship_section'?'gr-ship':t.type==='face_down'?'gr-fd':'gr-terrain';
     g.appendChild(svgEl('polygon',{points:hexPoly,fill:`url(#${gradId})`,'pointer-events':'none'}));
   }
@@ -1180,7 +1149,7 @@ function drawTile(g,t){
 
 
 
-// Tile artwork is handled by the sprite sheet (Tiles.png).
+// Tile artwork uses individual images from img/Tiles/.
 // Radio Fragment indicator drawn for Signal Tower tiles.
 function drawTileArtwork(g,cx,cy,t){
   if(t.type==='terrain'&&t.radioFragment){
@@ -1301,16 +1270,15 @@ function showHexTip(t){
   document.getElementById('tipact').textContent=t.type==='face_down'?'':info.act;
   // Hero image
   const heroEl=document.getElementById('tip-hero-img');
-  const sp=getSpritePos(t);
-  if(sp&&tilesImgLoaded){
-    const sc=SPRITE_SCALE*1.8;
-    const spCx=(SPRITE_PAD+sp.col*SPRITE_STRIDE_W+SPRITE_W/2)*sc;
-    const spCy=(SPRITE_PAD+sp.row*SPRITE_STRIDE_H+SPRITE_H/2)*sc;
-    heroEl.style.backgroundImage='url(img/Tiles.png)';
-    heroEl.style.backgroundSize=`${Math.round(SHEET_W*sc)}px ${Math.round(SHEET_H*sc)}px`;
-    heroEl.style.backgroundPosition=`${-(spCx-80)}px ${-(spCy-60)}px`;
+  const tImg=getTileImg(t);
+  if(tImg){
+    heroEl.style.backgroundImage=`url(${tImg})`;
+    heroEl.style.backgroundSize='cover';
+    heroEl.style.backgroundPosition='center';
+    heroEl.textContent='';
   } else {
     heroEl.style.backgroundImage='none';
+    heroEl.textContent='?';
   }
   // Position — follow mouse, flip if near edges
   const tw=460,th=130;
@@ -1778,7 +1746,7 @@ function initBuilder(){
     palette:[...BUILDER_PALETTE.map((p,i)=>({...p,idx:i,placed:false}))],
     selectedIdx:-1
   };
-  sbPan={x:0,y:0};sbZoom=1;
+  sbPan={x:0,y:0};sbZoom=Math.min(4,window.innerHeight/(SZB*8));
   if(!sbEventsInit){
     sbEventsInit=true;
     const wrap=document.getElementById('sbsvg-wrap');
@@ -1876,27 +1844,46 @@ function renderSiteBuilder(){
   const ns=NS;
   const W=svg.clientWidth||640,H=svg.clientHeight||640;
   const defs=document.createElementNS(ns,'defs');svg.appendChild(defs);
+  // Hex grid fade mask (same as game board)
+  const hgGrad=document.createElementNS(ns,'radialGradient');
+  hgGrad.setAttribute('id','sb-hg-fade');hgGrad.setAttribute('gradientUnits','userSpaceOnUse');
+  hgGrad.setAttribute('cx','0');hgGrad.setAttribute('cy','0');hgGrad.setAttribute('r','900');
+  ['0%,1','55%,0.5','100%,0'].forEach(s=>{const[off,op]=s.split(',');const st=document.createElementNS(ns,'stop');st.setAttribute('offset',off);st.setAttribute('stop-color','white');st.setAttribute('stop-opacity',op);hgGrad.appendChild(st);});
+  const hgMask=document.createElementNS(ns,'mask');hgMask.setAttribute('id','sb-hg-mask');
+  const hgMaskRect=document.createElementNS(ns,'rect');hgMaskRect.setAttribute('x','-5000');hgMaskRect.setAttribute('y','-5000');hgMaskRect.setAttribute('width','10000');hgMaskRect.setAttribute('height','10000');hgMaskRect.setAttribute('fill','url(#sb-hg-fade)');
+  hgMask.appendChild(hgMaskRect);defs.appendChild(hgGrad);defs.appendChild(hgMask);
   svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
   const g=document.createElementNS(ns,'g');
   g.setAttribute('transform',`translate(${W/2+sbPan.x} ${H/2+sbPan.y}) scale(${sbZoom})`);
   svg.appendChild(g);
-  const sc_b=(SZB*2)/SPRITE_H;
+  // Hex grid texture (same style as game board, using builder hex size)
+  {const GR=22,pd=[];
+  for(let q=-GR;q<=GR;q++)for(let r=-GR;r<=GR;r++){
+    const[cx,cy]=h2pb(q,r);
+    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
+      pd.push(`${i===0?'M':'L'}${(cx+SZB*Math.cos(a)).toFixed(1)},${(cy+SZB*Math.sin(a)).toFixed(1)}`);}
+    pd.push('Z');}
+  const gridPath=document.createElementNS(ns,'path');
+  gridPath.setAttribute('d',pd.join(' '));gridPath.setAttribute('fill','none');
+  gridPath.setAttribute('stroke','rgba(255,255,255,0.06)');gridPath.setAttribute('stroke-width','0.7');
+  gridPath.setAttribute('pointer-events','none');gridPath.setAttribute('mask','url(#sb-hg-mask)');
+  g.appendChild(gridPath);}
   // Draw placed tiles
   builderState.placed.forEach((info)=>{
     const[cx,cy]=h2pb(info.q,info.r);
     const pts=hexPtsB(cx,cy,SZB-2);
-    const sp=tilesImgLoaded?TILE_SPRITE_MAP[info.name]:null;
-    if(sp){
+    const bFile=TILE_IMAGE_MAP[info.name];
+    if(bFile){
       const clipId='bc_'+info.q+'_'+info.r;
       const cp=document.createElementNS(ns,'clipPath');cp.setAttribute('id',clipId);
       const cpPoly=document.createElementNS(ns,'polygon');cpPoly.setAttribute('points',pts);
       cp.appendChild(cpPoly);defs.appendChild(cp);
-      const spCx=(SPRITE_PAD+sp.col*SPRITE_STRIDE_W+SPRITE_W/2)*sc_b;
-      const spCy=(SPRITE_PAD+sp.row*SPRITE_STRIDE_H+SPRITE_H/2)*sc_b;
+      const hw=SZB*SQRT3,hh=SZB*2;
       const img=document.createElementNS(ns,'image');
-      img.setAttribute('href','img/Tiles.png');
-      img.setAttribute('x',cx-spCx);img.setAttribute('y',cy-spCy);
-      img.setAttribute('width',Math.round(SHEET_W*sc_b));img.setAttribute('height',Math.round(SHEET_H*sc_b));
+      img.setAttribute('href',`img/Tiles/${bFile}`);
+      img.setAttribute('x',cx-hw/2);img.setAttribute('y',cy-hh/2);
+      img.setAttribute('width',hw);img.setAttribute('height',hh);
+      img.setAttribute('preserveAspectRatio','xMidYMid slice');
       img.setAttribute('clip-path','url(#'+clipId+')');img.setAttribute('pointer-events','none');
       g.appendChild(img);
       const vig=document.createElementNS(ns,'polygon');
@@ -2053,7 +2040,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
     [400, 'sys', '> Primary diagnostics: complete. Life support: NOMINAL.'],
     [600, '',    'Welcome aboard. I am your ship\'s emergency computer. You are the crew of the Endymion 7, a deep-range mining vessel. You have crash-landed on an uncharted alien planet. The cause of the accident is unknown.'],
-    [500, '',    'Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array. You have a 1 in 10,358 chance of survival. Please confirm.'],
+    [500, '',    'Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array.'],
+    [400, '',    'You have a 1 in 10,358 chance of survival.'],
+    [300, '',    'Please confirm.'],
   ]);
 });
 function showCrewSetup(){
