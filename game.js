@@ -438,9 +438,9 @@ function revealAt(q,r){
   const drawn=G.terrainDeck.pop();
   G.tiles.set(k,{...t,...drawn,q,r,revealed:true,investigatedCount:0});
   const nt=G.tiles.get(k);
-  if(nt.type==='anomaly')addLog(`Tile revealed: Anomaly — ${nt.anomaly}`,'crit');
-  else if(nt.type==='ship_section')addLog('Ship Section discovered!','good');
-  else addLog(`Tile revealed: ${nt.pois.join(', ')}`);
+  if(nt.type==='anomaly')addLog(`Tile revealed: Anomaly — ${nt.anomaly}`,'tile');
+  else if(nt.type==='ship_section')addLog('Ship Section discovered!','tile');
+  else addLog(`Tile revealed: ${nt.pois.join(', ')}`,'tile');
   expandFrontier();
 }
 
@@ -490,7 +490,7 @@ function showTileRevealModal(t, onDismiss){
   }
   if(t.radioFragment){
     const p=cp();p.radioFragments++;t.radioFragment=false;
-    addLog(`${p.name} recovered a Radio Fragment from the Signal Tower.`,'good');
+    addLog(`${p.name} recovered a Radio Fragment from the Signal Tower.`,'frag');
     desc=(desc?desc+'\n\n':'')+'\u25c8 Radio Fragment recovered from this tower.';
   }
   // Populate overlay
@@ -530,17 +530,17 @@ function drawTileEvent(t){
   G.evtDeckCount=Math.max(0,G.evtDeckCount-1);
   const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
   // Apply guaranteed (non-roll) effects immediately
-  if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'good');}
+  if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');}
   if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}.`,'good');}
   if(evt.loseRation){const lost=Math.min(p.rations,evt.loseRation);p.rations-=lost;addLog(`${p.name} lost ${lost} Ration(s).`,'crit');}
-  if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.','imp');}
+  if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.');}
   const locName=t.pois&&t.pois.length?t.pois.join(' \u00b7 '):(t.name||'');
   let rollCallback=null;
   if(evt.rollRations){
-    rollCallback=r=>{const gained=Math.min(10-p.rations,r);p.rations+=gained;addLog(`Loot roll: ${r} \u2014 +${gained} Ration(s).`,gained?'good':'imp');return`Rolled ${r} \u2014 gained ${gained} Ration${gained!==1?'s':''}.`;};
+    rollCallback=r=>{const gained=Math.min(10-p.rations,r);p.rations+=gained;addLog(`Loot roll: ${r} \u2014 +${gained} Ration(s).`,gained?'good':'');return`Rolled ${r} \u2014 gained ${gained} Ration${gained!==1?'s':''}.`;};
   } else if(evt.rollWreckage){
     rollCallback=r=>{
-      if(r<=3){addLog(`Wreckage roll: ${r} \u2014 nothing found.`,'imp');return`Rolled ${r} \u2014 nothing found.`;}
+      if(r<=3){addLog(`Wreckage roll: ${r} \u2014 nothing found.`);return`Rolled ${r} \u2014 nothing found.`;}
       if(r<=5){const gained=Math.min(10-p.rations,1);p.rations+=gained;addLog(`Wreckage roll: ${r} \u2014 +1 Ration.`,'good');return`Rolled ${r} \u2014 gained 1 Ration.`;}
       const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
     };
@@ -673,7 +673,7 @@ function rollTableDice(){
       if(!G||G.phase!=='roll')return;
       G.movementLeft=r;G.phase='move';
       G.reach=bfsReach(cp().q,cp().r,r);
-      addLog(`${cp().name} rolled ${r}.`,'imp');
+      addLog(`${cp().name} rolled ${r}.`);
       renderTableDice();
       updateUI();render();
     } else if(diceState.mode==='signal'){
@@ -707,7 +707,7 @@ function doMove(q,r){
   p.location=tileName(t);
   if(t?.type==='crash_site'){
     // Airlock: refill 1 O2 when entering from outside base camp
-    if(t.name==='Airlock'&&comingFromTerrain&&p.o2<3){p.o2=Math.min(3,p.o2+1);addLog(`${p.name} passed through Airlock. +1 O₂.`);}
+    if(t.name==='Airlock'&&comingFromTerrain&&p.o2<3){p.o2=Math.min(3,p.o2+1);addLog(`${p.name} passed through Airlock. +1 O₂.`,'good');}
   }
   const isNewAnomaly=!wasRevealed&&t?.type==='anomaly';
   if(t?.type==='anomaly'&&!isNewAnomaly)triggerAnomaly(t);
@@ -737,7 +737,7 @@ function useCard(playerIdx,uid){
   if(c.use==='medpack'){if(p.health<3){p.health++;p.equipment.splice(ci,1);addLog(`${p.name} used MedPack. Health: ${p.health}/3.`,'good');}else{addLog('Health already full.');return;}}
   else if(c.use==='emer_rations'){const gain=Math.min(3,10-p.rations);p.rations+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Rations. +${gain} Rations.`,'good');}
   else if(c.use==='compressed_o2'){const gain=Math.min(2,3-p.o2);p.o2+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Compressed O₂. +${gain} O₂.`,'good');}
-  else if(c.use==='excavator'){p.equipment.splice(ci,1);closeCardModal();G.excavatorMode=true;addLog('Excavator: click an adjacent face-down tile to reveal it.','imp');updateUI();render();return;}
+  else if(c.use==='excavator'){p.equipment.splice(ci,1);closeCardModal();G.excavatorMode=true;addLog('Excavator: click an adjacent face-down tile to reveal it.','act');updateUI();render();return;}
   closeCardModal();updateUI();
 }
 
@@ -747,7 +747,7 @@ function doActivateFrag(){
   if(G.radioFragmentsActivated>=5)return;
   p.radioFragments--;G.radioFragmentsActivated++;
   const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
-  addLog(`Fragment activated. Array: ${G.radioFragmentsActivated}/5. Threshold: ${thr}+`,'good');
+  addLog(`Fragment activated. Array: ${G.radioFragmentsActivated}/5. Threshold: ${thr}+`,'frag');
   updateUI();render();
 }
 
@@ -853,7 +853,7 @@ function doWatchTower(){
     });
   });
   const names=inField.map(x=>x.name).join(', ');
-  addLog(`Watch Tower: ${revealed} tile${revealed!==1?'s':''} revealed around ${names}.`,'good');
+  addLog(`Watch Tower: ${revealed} tile${revealed!==1?'s':''} revealed around ${names}.`,'tile');
   render();updateUI();
 }
 
@@ -879,7 +879,7 @@ function advanceTurn(){
   while(!G.players[next].alive&&tries++<G.players.length)next=(next+1)%G.players.length;
   if(next<=G.currentPlayer)G.turn++;
   G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.excavatorMode=false;
-  addLog(`Turn ${G.turn}: ${G.players[next].name}.`,'imp');
+  addLog(`Turn ${G.turn}: ${G.players[next].name}.`,'act');
   showTableDice('move');
   updateUI();render();
 }
@@ -895,15 +895,15 @@ function triggerAnomaly(t){
     }
     case'Portal':
       showModal('Portal Anomaly','Use the portal to return to the Crash Site?',true,
-        ()=>{p.q=0;p.r=0;p.location='Crash Site';G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal — returned to Crash Site.`,'imp');updateUI();render();},
+        ()=>{p.q=0;p.r=0;p.location='Crash Site';G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal — returned to Crash Site.`);updateUI();render();},
         'Use Portal',()=>{addLog(`${p.name} declined the Portal.`);updateUI();},'Decline');
       break;
-    case'Inversion Field':addLog('Inversion Field: swap Rations with another player. (Resolve at the table.)','crit');updateUI();break;
-    case'Gravitational Well':addLog('Gravitational Well: player to your left moves your pawn 1 die roll. (Resolve at the table.)','crit');break;
-    case'Dead Signal':addLog('Dead Signal: no Signal Roll occurs this round.','crit');break;
-    case'Echo Chamber':addLog('Echo Chamber: resolve the most recent Public Event again. (Resolve at the table.)','imp');break;
-    case'Stasis Pod':addLog('Stasis Pod: you may enter stasis — turn pawn sideways. (Resolve at the table.)','imp');break;
-    default:addLog(`Anomaly: ${t.anomaly}.`,'imp');
+    case'Inversion Field':addLog('Inversion Field: swap Rations with another player. (Resolve at the table.)','act');updateUI();break;
+    case'Gravitational Well':addLog('Gravitational Well: player to your left moves your pawn 1 die roll. (Resolve at the table.)','act');break;
+    case'Dead Signal':addLog('Dead Signal: no Signal Roll occurs this round.');break;
+    case'Echo Chamber':addLog('Echo Chamber: resolve the most recent Public Event again. (Resolve at the table.)','act');break;
+    case'Stasis Pod':addLog('Stasis Pod: you may enter stasis — turn pawn sideways. (Resolve at the table.)','act');break;
+    default:addLog(`Anomaly: ${t.anomaly}.`);
   }
 }
 
@@ -1241,13 +1241,13 @@ function onHexClick(q,r){
   if(G.excavatorMode){
     const p=cp();
     const t=G.tiles.get(hk(q,r));
-    if(!t||t.revealed){addLog('Excavator: select a face-down tile.');return;}
+    if(!t||t.revealed){addLog('Excavator: select a face-down tile.','act');return;}
     // Must be adjacent to current player
     const adj=hnbr(p.q,p.r).some(([aq,ar])=>aq===q&&ar===r);
-    if(!adj){addLog('Excavator: tile must be adjacent to you.');return;}
+    if(!adj){addLog('Excavator: tile must be adjacent to you.','act');return;}
     revealAt(q,r);
     G.excavatorMode=false;
-    addLog(`${p.name} revealed a tile with the Excavator.`,'good');
+    addLog(`${p.name} revealed a tile with the Excavator.`,'tile');
     // Show the reveal modal if it has POIs
     const nt=G.tiles.get(hk(q,r));
     if(nt&&(nt.type==='terrain'||nt.type==='ship_section')&&nt.pois?.length>0){
@@ -1563,11 +1563,17 @@ function e7Scroll(){
   const p=document.getElementById('e7panel');
   if(p?.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;}
 }
+// Type text character-by-character into an existing element
+function e7Type(el,msg,charDelay=15){
+  el.textContent='';
+  for(let i=0;i<msg.length;i++)setTimeout(()=>{el.textContent=msg.slice(0,i+1);e7Scroll();},i*charDelay);
+}
 // Ship computer voice message
-function addE7(msg,type=''){
+function addE7(msg,type='',charDelay=15){
   const l=document.getElementById('e7log');
   const d=document.createElement('div');
-  d.className='e7m'+(type?' '+type:'');d.textContent=msg;l.appendChild(d);e7Scroll();
+  d.className='e7m'+(type?' '+type:'');l.appendChild(d);e7Scroll();
+  e7Type(d,msg,charDelay);
 }
 // Horizontal divider in the E7 log
 function addE7Div(){
@@ -1575,10 +1581,11 @@ function addE7Div(){
   const d=document.createElement('div');d.className='e7div';l.appendChild(d);e7Scroll();
 }
 // Standard game-event log entry (now lives inside the E7 panel)
-function addLog(msg,cls){
+function addLog(msg,cls,charDelay=15){
   const l=document.getElementById('e7log');
   const d=document.createElement('div');
-  d.className='le'+(cls?' '+cls:'');d.textContent=msg;l.appendChild(d);e7Scroll();
+  d.className='le'+(cls?' '+cls:'');l.appendChild(d);e7Scroll();
+  e7Type(d,msg,charDelay);
 }
 // Prompt bar — updated on every updateUI call
 function updateE7Prompt(){
@@ -1629,41 +1636,58 @@ function toggleE7(){
   if(p.classList.contains('show')){e7Scroll();updateE7Prompt();}
 }
 // Write a timed narrative into the floating E7 panel (#e7log)
-// steps: [[delayMs, type, msg], ...] type: 'sys'|''|'div'|'log'|'log-imp'
-function e7Seq(steps){
-  steps.forEach(([delay,type,msg])=>{
-    setTimeout(()=>{
-      if(type==='div')addE7Div();
-      else if(type==='sys')addE7(msg,'sys');
-      else if(type==='log-imp')addLog(msg,'imp');
-      else if(type==='log')addLog(msg);
-      else addE7(msg);
-    },delay);
+// steps: [[gapMs, type, msg], ...] — gapMs is pause after previous entry finishes typing
+// type: 'sys'|''|'div'|'log'|'log-imp'   charDelay: ms per character
+function e7Seq(steps,charDelay=15){
+  let t=0;
+  steps.forEach(([gap,type,msg])=>{
+    t+=gap;
+    if(type==='div'){
+      const at=t;setTimeout(()=>addE7Div(),at);
+    } else {
+      const at=t;
+      setTimeout(()=>{
+        if(type==='sys')addE7(msg,'sys',charDelay);
+        else if(type==='log-imp')addLog(msg,'imp',charDelay);
+        else if(type==='log-act')addLog(msg,'act',charDelay);
+        else if(type==='log')addLog(msg,'',charDelay);
+        else addE7(msg,'',charDelay);
+      },at);
+      t+=msg.length*charDelay;
+    }
   });
 }
-// Write a timed narrative into an inline setup-screen terminal
-// steps: [[delayMs, type, msg], ...] same types (no 'log' variants)
-function e7ScreenSeq(containerId,steps){
+// Write a timed narrative into an inline setup-screen terminal (typewriter effect)
+// steps: [[gapMs, type, msg], ...] — gapMs is delay after previous element finishes
+// type: 'sys'|''|'div'   charDelay: ms between characters
+function e7ScreenSeq(containerId,steps,charDelay=20){
   const container=document.getElementById(containerId);
   if(!container)return;
-  steps.forEach(([delay,type,msg])=>{
-    setTimeout(()=>{
-      if(type==='div'){
+  let t=0;
+  steps.forEach(([gap,type,msg])=>{
+    t+=gap;
+    if(type==='div'){
+      const at=t;
+      setTimeout(()=>{
         const d=document.createElement('div');d.className='e7div';container.appendChild(d);
-      } else {
+        container.scrollTop=container.scrollHeight;
+      },at);
+    } else {
+      const at=t;
+      setTimeout(()=>{
         const d=document.createElement('div');
-        d.className='e7m'+(type?' '+type:'');d.textContent=msg;container.appendChild(d);
-      }
-      container.scrollTop=container.scrollHeight;
-    },delay);
+        d.className='e7m'+(type?' '+type:'');
+        d.textContent='';
+        container.appendChild(d);
+        for(let i=0;i<msg.length;i++){
+          setTimeout(()=>{d.textContent=msg.slice(0,i+1);container.scrollTop=container.scrollHeight;},i*charDelay);
+        }
+      },at);
+      t+=msg.length*charDelay;
+    }
   });
 }
-// During setup, don't close on outside click (player needs to interact with setup UI)
-document.addEventListener('click',e=>{
-  const p=document.getElementById('e7panel');
-  if(p&&p.classList.contains('show')&&G&&!p.contains(e.target)&&!e.target.closest('#e7btn'))
-    p.classList.remove('show');
-});
+// E7 panel stays open until explicitly closed via the ✕ button or E7 toggle
 
 function openRulebook(){
   const modal=document.getElementById('rbmodal');
@@ -1948,10 +1972,22 @@ function finalizeGame(){
   setTimeout(()=>{
     initBoard();render();updateUI();
     showTableDice('move');
-    // Seed the E7 panel log (panel starts closed; player opens with E7 button)
+    // Open E7 panel and seed with mission controls + game log
+    document.getElementById('e7panel').classList.add('show');
     const crew=pendingNames;
-    addLog(`Mission initialized. ${crew.length} crew active.`,'imp');
-    addLog(`Turn 1: ${crew[0]}. Roll for movement.`);
+    e7Seq([
+      [0,   'sys', '> MISSION CONTROLS'],
+      [0,   'div', null],
+      [0,   '',    'Left-click — Interact'],
+      [0,   '',    'Right-click — Pan'],
+      [0,   '',    'Scroll wheel — Zoom'],
+      [0,   'div', null],
+      [0,   '',    'Explore the planet to recover radio fragments. Your food and oxygen dwindle each round. Find caches or return to the base to heal.'],
+      [0,   'div', null],
+      [0,   'log-act', `Mission initialized. ${crew.length} crew active.`],
+      [0,   'log-act', `Turn 1: ${crew[0]}. Roll for movement.`],
+    ]);
+    updateE7Prompt();
   },40);
 }
 
@@ -2005,13 +2041,9 @@ function goToSiteBuilder(){
   initBuilder();
   updateBuilderProgress();
   e7ScreenSeq('e7-builder-msg',[
-    [0,   'sys', '> Hull breach confirmed. The ship will not fly again.'],
-    [400, '',    'Cause of impact: unknown. Emergency beacon: offline.'],
-    [1000,'',    'Your mission: locate 6 radio fragments and restore the Signal Array.'],
-    [1700,'div', null],
-    [1850,'sys', '> Establish base camp before launch.'],
-    [2200,'',    'Place all 6 structures on the hex grid.'],
-    [2700,'',    'Keep the Signal Array accessible. Place the Airlock within reach.'],
+    [0,   'sys', '> Hull breach confirmed.'],
+    [300, 'sys', '> Signal Array: OFFLINE.'],
+    [500, '',    'Establish the base camp by placing life support structures near the crash site.'],
   ]);
 }
 
@@ -2019,12 +2051,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('setup').style.display='none';
   e7ScreenSeq('e7-intro-msg',[
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-    [700, 'sys', '> Primary diagnostics: complete. Life support: NOMINAL.'],
-    [1100,'',    'Welcome aboard. I am your ship\'s emergency computer.'],
-    [1800,'',    'The Endymion 7 has crash-landed on an uncharted planet.'],
-    [2500,'',    'I will guide you through mission preparation.'],
-    [3100,'div', null],
-    [3250,'',    'Confirm your crew manifest to begin.'],
+    [400, 'sys', '> Primary diagnostics: complete. Life support: NOMINAL.'],
+    [600, '',    'Welcome aboard. I am your ship\'s emergency computer. You are the crew of the Endymion 7, a deep-range mining vessel. You have crash-landed on an uncharted alien planet. The cause of the accident is unknown.'],
+    [500, '',    'Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array. You have a 1 in 10,358 chance of survival. Please confirm.'],
   ]);
 });
 function showCrewSetup(){
@@ -2033,7 +2062,6 @@ function showCrewSetup(){
   buildSetup();
   e7ScreenSeq('e7-setup-msg',[
     [0,   'sys', '> Crew initialization protocol active.'],
-    [400, '',    'Enter names and assign portraits for each crew member.'],
-    [1100,'',    'When your manifest is complete, proceed to the crash site survey.'],
+    [400, '',    'Please confirm the surviving crew members.'],
   ]);
 }

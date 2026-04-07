@@ -75,6 +75,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
   background:rgba(12,16,24,.7);
   backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
   border-bottom:1px solid var(--bdr);
+  box-shadow:0 8px 32px rgba(0,0,0,.7),inset 0 1px 0 rgba(100,160,220,.05);
 }
 .hlogo{font-size:1rem;letter-spacing:.4em;color:var(--hi);font-weight:normal}
 .hsep{color:var(--bdr)}
@@ -367,7 +368,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
   width:290px;max-height:380px;z-index:40;flex-direction:column;
   background:rgba(10,14,22,.92);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid var(--bdr);border-top:none;border-radius:0 0 10px 10px;
+  border:1px solid var(--bdr);border-top:none;border-radius:0 0 0 10px;
   box-shadow:0 8px 32px rgba(0,0,0,.7),inset 0 1px 0 rgba(100,160,220,.05)}
 #e7panel.show{display:flex}
 #e7hdr{
@@ -390,13 +391,14 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 /* Log entries */
 .le{font-size:.62rem;padding:2px 14px;border-bottom:1px solid rgba(255,255,255,.02);line-height:1.4}
 .le.imp{color:var(--txt)}.le.good{color:#60a060}.le.crit{color:#b06060}
+.le.tile{color:#4a80b8}.le.frag{color:#8870b8}.le.act{color:#b08840}
 /* E7 prompt bar */
 #e7prompt{flex-shrink:0;padding:7px 14px;border-top:1px solid var(--bdr);font-size:.58rem;
   color:#a08040;background:rgba(0,0,0,.2);min-height:30px;line-height:1.4;border-radius:0 0 9px 9px}
 #e7prompt.warn{color:#c05050}
 /* ── E7 inline screen terminals (inside setup modals) ── */
 .e7-screen-msg{margin-top:14px;padding:8px 0 2px;border-top:1px solid var(--bdr);
-  max-height:200px;overflow-y:auto;min-height:0}
+  max-height:200px;overflow-y:auto;min-height:0;text-align:left}
 .e7-screen-msg .e7m{padding:2px 0;font-size:.62rem}
 .e7-screen-msg .e7div{margin:4px 0}
 .e7-screen-msg--builder{margin-top:0;border-top:none;border-bottom:1px solid var(--bdr);
