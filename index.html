@@ -9,16 +9,26 @@
 </head>
 <body>
 
+<!-- ── E7 SHIP COMPUTER (global — visible across all screens) ── -->
+<div id="e7panel">
+  <div id="e7hdr">
+    <div class="e7title">
+      <span class="e7logo">ENDYMION 7</span>
+      <span class="e7status">● ONLINE</span>
+    </div>
+    <div class="e7sub">SHIP COMPUTER</div>
+    <button class="e7close" onclick="toggleE7()">✕</button>
+  </div>
+  <div id="e7log"></div>
+  <div id="e7prompt"></div>
+</div>
+
 <!-- ── INTRO ── -->
 <div id="intro">
   <div class="sbox intro-box">
     <h1>SIGNAL</h1>
     <p class="ssub">1–6 Players · Ages 14+ · 45–90 Minutes</p>
-    <div class="intro-story">
-      <p>You are the crew of the Endymion 7, a deep-range mining vessel. Your ship has crash-landed on an uncharted alien planet. You don't know what brought you down. You don't know what's out there. You have what survived the crash, and each other—for now.</p>
-      <p>Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and rebuild the Signal Array. Rescue is possible but not guaranteed. And the longer you're stranded, the more the planet changes you.</p>
-      <p>SIGNAL is a game of survival, exploration, and eroding trust — where rescue is uncertain, and the greatest threat may be sitting across the table.</p>
-    </div>
+    <div id="e7-intro-msg" class="e7-screen-msg"></div>
     <button class="sbtn" onclick="showCrewSetup()">Start Game</button>
   </div>
 </div>
@@ -36,6 +46,7 @@
       <div class="slbl">Crew Manifest</div>
       <div id="plist"></div>
     </div>
+    <div id="e7-setup-msg" class="e7-screen-msg"></div>
     <button class="sbtn" onclick="goToSiteBuilder()">Next: Build Crash Site →</button>
   </div>
 </div>
@@ -56,7 +67,7 @@
         <!-- filled by renderPalette() -->
       </div>
       <div id="sbpanel-foot">
-        <div style="font-size:.62rem;color:var(--dim)">Click a tile card, then click a highlighted hex to place it.</div>
+        <div id="e7-builder-msg" class="e7-screen-msg e7-screen-msg--builder"></div>
         <button class="sbtn" style="padding:12px 18px;font-size:.72rem;" onclick="randomBuilder()">Random Layout</button>
       </div>
     </div>
@@ -76,7 +87,7 @@
     <span class="hsep">|</span>
     <span id="hphase" class="ph-roll">Roll</span>
     <span id="hsig">0 fragments · signal offline</span>
-    <button class="hbtn" onclick="toggleLog()">Log</button>
+    <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
     <button class="hbtn" onclick="openRulebook()">Field Guide</button>
   </div>
 
@@ -92,11 +103,6 @@
         <div class="tipact" id="tipact"></div>
       </div>
     </div>
-  </div>
-
-  <!-- Log popup -->
-  <div id="logpop">
-    <div id="log"></div>
   </div>
 
   <!-- HUD: active player -->
@@ -265,20 +271,6 @@
 </div>
 
 
-<!-- ── CONTROLS MODAL ── -->
-<div id="ctrl-modal">
-  <div class="ctrl-box">
-    <div class="ctrl-title">MISSION CONTROLS</div>
-    <div class="ctrl-grid">
-      <div class="ctrl-row"><span class="ctrl-key">Left-click</span><span class="ctrl-desc">Interact</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">Right-click</span><span class="ctrl-desc">Move the board</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">Scroll wheel</span><span class="ctrl-desc">Zoom in / out</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">Log</span><span class="ctrl-desc">View turn history</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">Field Guide</span><span class="ctrl-desc">Rules &amp; reference</span></div>
-    </div>
-    <button class="sbtn ctrl-dismiss" onclick="dismissControls()">Begin Mission</button>
-  </div>
-</div>
 
 <script src="game.js"></script>
 </body>

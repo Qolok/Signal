@@ -1084,6 +1084,14 @@ function render(){
   svg.appendChild(defs);
   svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
   const g=svgEl('g',{transform:`translate(${W/2+pan.x} ${H/2+pan.y}) scale(${zoom})`});
+  // Radial gradient mask: full opacity at origin (base camp), fades to nothing at edges
+  const hgGrad=svgEl('radialGradient',{id:'hg-fade',gradientUnits:'userSpaceOnUse',cx:'0',cy:'0',r:'900'});
+  hgGrad.appendChild(svgEl('stop',{offset:'0%','stop-color':'white','stop-opacity':'1'}));
+  hgGrad.appendChild(svgEl('stop',{offset:'55%','stop-color':'white','stop-opacity':'0.5'}));
+  hgGrad.appendChild(svgEl('stop',{offset:'100%','stop-color':'white','stop-opacity':'0'}));
+  const hgMask=svgEl('mask',{id:'hg-mask'});
+  hgMask.appendChild(svgEl('rect',{x:'-5000',y:'-5000',width:'10000',height:'10000',fill:'url(#hg-fade)'}));
+  defs.appendChild(hgGrad);defs.appendChild(hgMask);
   // Hex grid texture: explicit path inside <g> so it pans/zooms with the board.
   // Drawn as a single path to avoid any SVG pattern clipping artifacts.
   {const GR=22,pd=[];
@@ -1092,7 +1100,7 @@ function render(){
     for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
       pd.push(`${i===0?'M':'L'}${(cx+SZ*Math.cos(a)).toFixed(1)},${(cy+SZ*Math.sin(a)).toFixed(1)}`);}
     pd.push('Z');}
-  g.appendChild(svgEl('path',{d:pd.join(' '),fill:'none',stroke:'rgba(255,255,255,0.03)','stroke-width':'0.7','pointer-events':'none'}));}
+  g.appendChild(svgEl('path',{d:pd.join(' '),fill:'none',stroke:'rgba(255,255,255,0.06)','stroke-width':'0.7','pointer-events':'none',mask:'url(#hg-mask)'}));}
   svg.appendChild(g);
   for(const[,t]of G.tiles)drawTile(g,t);
   if((G.phase==='move'||G.phase==='action')&&G.movementLeft>0){
@@ -1383,6 +1391,7 @@ function updateUI(){
   document.getElementById('bsig').disabled=!((act||G.phase==='roll')&&atArr&&G.radioFragmentsActivated>0);
   const hereOthers=G.players.filter(x=>x.alive&&x.id!==p.id&&x.q===p.q&&x.r===p.r);
   document.getElementById('btrd').disabled=!(act&&hereOthers.length>0);
+  updateE7Prompt();
 }
 
 function buildTokGrid(id,full,total,fc,ec,rows,cols){
@@ -1548,12 +1557,39 @@ function showEventCard(evt, locName, onOk, rollCallback){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LOG
+// ENDYMION 7 — SHIP COMPUTER
 // ═══════════════════════════════════════════════════════════════
+function e7Scroll(){
+  const p=document.getElementById('e7panel');
+  if(p?.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;}
+}
+// Ship computer voice message
+function addE7(msg,type=''){
+  const l=document.getElementById('e7log');
+  const d=document.createElement('div');
+  d.className='e7m'+(type?' '+type:'');d.textContent=msg;l.appendChild(d);e7Scroll();
+}
+// Horizontal divider in the E7 log
+function addE7Div(){
+  const l=document.getElementById('e7log');
+  const d=document.createElement('div');d.className='e7div';l.appendChild(d);e7Scroll();
+}
+// Standard game-event log entry (now lives inside the E7 panel)
 function addLog(msg,cls){
-  const l=document.getElementById('log');const d=document.createElement('div');
-  d.className='le'+(cls?' '+cls:'');d.textContent=msg;l.appendChild(d);
-  if(document.getElementById('logpop')?.classList.contains('show'))l.scrollTop=l.scrollHeight;
+  const l=document.getElementById('e7log');
+  const d=document.createElement('div');
+  d.className='le'+(cls?' '+cls:'');d.textContent=msg;l.appendChild(d);e7Scroll();
+}
+// Prompt bar — updated on every updateUI call
+function updateE7Prompt(){
+  const el=document.getElementById('e7prompt');if(!el)return;
+  if(!G){el.textContent='';el.className='';return;}
+  const p=cp();let text='',warn=false;
+  if(p.o2<=1){text=`⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;warn=true;}
+  else if(G.phase==='roll')text=`${p.name}: roll the die to move.`;
+  else if(G.phase==='move')text=`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — choose a hex.`;
+  else if(G.phase==='action'){text=`At ${p.location}. Take an action or end your turn.`;}
+  el.textContent=text;el.className=warn?'warn':'';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1587,14 +1623,46 @@ fetch('docs/FieldGuide.md')
   .catch(()=>{RULEBOOK_SECTIONS=[{id:'error',h:1,title:'Field Guide',body:'Could not load docs/FieldGuide.md.'}];});
 
 
-function toggleLog(){
-  const p=document.getElementById('logpop');
+function toggleE7(){
+  const p=document.getElementById('e7panel');
   p.classList.toggle('show');
-  if(p.classList.contains('show')){const l=document.getElementById('log');l.scrollTop=l.scrollHeight;}
+  if(p.classList.contains('show')){e7Scroll();updateE7Prompt();}
 }
+// Write a timed narrative into the floating E7 panel (#e7log)
+// steps: [[delayMs, type, msg], ...] type: 'sys'|''|'div'|'log'|'log-imp'
+function e7Seq(steps){
+  steps.forEach(([delay,type,msg])=>{
+    setTimeout(()=>{
+      if(type==='div')addE7Div();
+      else if(type==='sys')addE7(msg,'sys');
+      else if(type==='log-imp')addLog(msg,'imp');
+      else if(type==='log')addLog(msg);
+      else addE7(msg);
+    },delay);
+  });
+}
+// Write a timed narrative into an inline setup-screen terminal
+// steps: [[delayMs, type, msg], ...] same types (no 'log' variants)
+function e7ScreenSeq(containerId,steps){
+  const container=document.getElementById(containerId);
+  if(!container)return;
+  steps.forEach(([delay,type,msg])=>{
+    setTimeout(()=>{
+      if(type==='div'){
+        const d=document.createElement('div');d.className='e7div';container.appendChild(d);
+      } else {
+        const d=document.createElement('div');
+        d.className='e7m'+(type?' '+type:'');d.textContent=msg;container.appendChild(d);
+      }
+      container.scrollTop=container.scrollHeight;
+    },delay);
+  });
+}
+// During setup, don't close on outside click (player needs to interact with setup UI)
 document.addEventListener('click',e=>{
-  const p=document.getElementById('logpop');
-  if(p&&p.classList.contains('show')&&!p.contains(e.target)&&!e.target.closest('.hbtn'))p.classList.remove('show');
+  const p=document.getElementById('e7panel');
+  if(p&&p.classList.contains('show')&&G&&!p.contains(e.target)&&!e.target.closest('#e7btn'))
+    p.classList.remove('show');
 });
 
 function openRulebook(){
@@ -1880,9 +1948,10 @@ function finalizeGame(){
   setTimeout(()=>{
     initBoard();render();updateUI();
     showTableDice('move');
-    document.getElementById('ctrl-modal').classList.add('show');
-    addLog(`Mission initialized. ${pendingNames.length} crew active.`,'imp');
-    addLog(`Turn 1: ${pendingNames[0]}. Roll for movement.`);
+    // Seed the E7 panel log (panel starts closed; player opens with E7 button)
+    const crew=pendingNames;
+    addLog(`Mission initialized. ${crew.length} crew active.`,'imp');
+    addLog(`Turn 1: ${crew[0]}. Roll for movement.`);
   },40);
 }
 
@@ -1935,17 +2004,36 @@ function goToSiteBuilder(){
   sb.style.display='flex';sb.classList.add('show');
   initBuilder();
   updateBuilderProgress();
+  e7ScreenSeq('e7-builder-msg',[
+    [0,   'sys', '> Hull breach confirmed. The ship will not fly again.'],
+    [400, '',    'Cause of impact: unknown. Emergency beacon: offline.'],
+    [1000,'',    'Your mission: locate 6 radio fragments and restore the Signal Array.'],
+    [1700,'div', null],
+    [1850,'sys', '> Establish base camp before launch.'],
+    [2200,'',    'Place all 6 structures on the hex grid.'],
+    [2700,'',    'Keep the Signal Array accessible. Place the Airlock within reach.'],
+  ]);
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  // Show intro; setup screen stays hidden until user clicks Start Game
   document.getElementById('setup').style.display='none';
+  e7ScreenSeq('e7-intro-msg',[
+    [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
+    [700, 'sys', '> Primary diagnostics: complete. Life support: NOMINAL.'],
+    [1100,'',    'Welcome aboard. I am your ship\'s emergency computer.'],
+    [1800,'',    'The Endymion 7 has crash-landed on an uncharted planet.'],
+    [2500,'',    'I will guide you through mission preparation.'],
+    [3100,'div', null],
+    [3250,'',    'Confirm your crew manifest to begin.'],
+  ]);
 });
 function showCrewSetup(){
   document.getElementById('intro').style.display='none';
   document.getElementById('setup').style.display='flex';
   buildSetup();
-}
-function dismissControls(){
-  document.getElementById('ctrl-modal').classList.remove('show');
+  e7ScreenSeq('e7-setup-msg',[
+    [0,   'sys', '> Crew initialization protocol active.'],
+    [400, '',    'Enter names and assign portraits for each crew member.'],
+    [1100,'',    'When your manifest is complete, proceed to the crash site survey.'],
+  ]);
 }
