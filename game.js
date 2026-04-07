@@ -200,35 +200,31 @@ const ANOMALIES=['Stasis Pod','Temporal Rift','Portal','Gravitational Well','Dea
 // ═══════════════════════════════════════════════════════════════
 function buildTerrainDeck(){
   const deck=[];
-  // 3 Ship Sections
-  for(let i=0;i<3;i++)deck.push({type:'ship_section',pois:['Airlock','Emergency Bay','Supply Cache'],investigatedCount:0});
+  // 3 Ship Sections — alternate image variants
+  const shipImgs=['ship-section1.png','ship-section2.png','ship-section1.png'];
+  for(let i=0;i<3;i++)deck.push({type:'ship_section',pois:['Airlock','Emergency Bay','Supply Cache'],investigatedCount:0,imgOverride:shipImgs[i]});
   // 7 Anomalies
   ANOMALIES.forEach(a=>deck.push({type:'anomaly',anomaly:a,pois:[],investigatedCount:0}));
-  // 33 Terrain tiles
+  // 33 Terrain tiles — single POI per tile
   const terrainSpec=[
-    {pois:['Signal Tower'],radioFragment:true,  count:2},
-    {pois:['Signal Tower'],radioFragment:false, count:1},
-    {pois:['Signal Tower','Fuselage'],radioFragment:true, count:2},
-    {pois:['Signal Tower'],radioFragment:true,  count:1},
-    {pois:['Signal Tower','Cave'],   radioFragment:false,count:1},
-    {pois:['Fuselage'],               radioFragment:false,count:2},
-    {pois:['Fuselage','Cave'],        radioFragment:false,count:2},
-    {pois:['Fuselage','Outpost'],     radioFragment:false,count:2},
-    {pois:['Fuselage','Wreckage Field'],radioFragment:false,count:1},
-    {pois:['Cave'],                   radioFragment:false,count:3},
-    {pois:['Cave','Outpost'],         radioFragment:false,count:2},
-    {pois:['Cave','Wreckage Field'],  radioFragment:false,count:2},
-    {pois:['Outpost'],                radioFragment:false,count:3},
-    {pois:['Outpost','Wreckage Field'],radioFragment:false,count:2},
-    {pois:['Wreckage Field'],         radioFragment:false,count:2},
-    {pois:['Wreckage Field'],         radioFragment:false,count:2},
-    {pois:['Wreckage Field'],         radioFragment:false,count:4},
-    {pois:['Cave','Signal Tower'],   radioFragment:true, count:2},
-    {pois:['Fuselage'],               radioFragment:false,count:2},
-    {pois:['Outpost','Cave'],         radioFragment:false,count:2},
+    {pois:['Signal Tower'],        radioFragment:true,  count:5},
+    {pois:['Fuselage'],            radioFragment:false, count:2},
+    {pois:['Cave'],                radioFragment:false, count:9},
+    {pois:['Outpost'],             radioFragment:false, count:2},
+    {pois:['Wreckage Field'],      radioFragment:false, count:9},
+    {pois:['Cache'],               radioFragment:false, count:3},
+    {pois:['Recovered Terminal'],  radioFragment:false, count:1},
+    {pois:['Passage'],             radioFragment:false, count:1},
+    {pois:['Bloody Passage'],      radioFragment:false, count:1},
   ];
+  const outpostImgs=['outpost1.png','outpost2.png'];
+  let outpostIdx=0;
   terrainSpec.forEach(spec=>{
-    for(let i=0;i<spec.count;i++)deck.push({type:'terrain',pois:[...spec.pois],radioFragment:spec.radioFragment,investigatedCount:0});
+    for(let i=0;i<spec.count;i++){
+      const tile={type:'terrain',pois:[...spec.pois],radioFragment:spec.radioFragment,investigatedCount:0};
+      if(spec.pois[0]==='Outpost'){tile.imgOverride=outpostImgs[outpostIdx++%outpostImgs.length];}
+      deck.push(tile);
+    }
   });
   // shuffle
   for(let i=deck.length-1;i>0;i--){const j=0|Math.random()*(i+1);[deck[i],deck[j]]=[deck[j],deck[i]];}
@@ -238,7 +234,8 @@ function buildTerrainDeck(){
 const POI_COLOR={
   'Fuselage':'#3a7080','Cave':'#2a5030','Outpost':'#7a6030',
   'Signal Tower':'#2870a0','Wreckage Field':'#705030',
-  'Recovered Terminal':'#2060a8',
+  'Recovered Terminal':'#2060a8','Cache':'#507040',
+  'Passage':'#4a4a60','Bloody Passage':'#702020',
 };
 
 // ── TILE IMAGES ───────────────────────────────────────────────
@@ -257,6 +254,9 @@ const TILE_IMAGE_MAP={
   'Fuselage':           'fuselage.png',
   'Wreckage Field':     'wreckage.png',
   'Recovered Terminal': 'terminal.png',
+  'Cache':              'cache.png',
+  'Passage':            'passage.png',
+  'Bloody Passage':     'passage-bloody.png',
   'Stasis Pod':         'stasis.png',
   'Temporal Rift':      'temporal-distortion.png',
   'Gravitational Well': 'gravity-well.png',
@@ -268,6 +268,7 @@ const TILE_IMAGE_MAP={
 };
 
 function getTileImg(t){
+  if(t.imgOverride)return`img/Tiles/${t.imgOverride}`;
   let key;
   if(t.type==='crash_site')key=t.name;
   else if(t.type==='terrain')key=t.pois?.[0];
@@ -306,7 +307,7 @@ const EVENT_CARDS=[
   {text:'Emergency supplies found, partially intact. Roll 1 die for Ration yield.',pub:true,rollRations:true},
   {text:'Salvageable material nearby. Roll 1 die: 1–3 = nothing; 4–5 = 1 Ration; 6 = Equipment card.',pub:true,rollWreckage:true},
   {text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true},
-  {text:'A Radio Fragment — yours, ejected on impact. Still functional.',pub:true,rf:true},
+  {text:'A Radio Fragment — yours, ejected on impact. Still functional.',pub:true},
   {text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true},
   // Public — hazards
   {text:'Structural instability. The ground shifts — brace yourself. Flip 1 Ration to EMPTY.',pub:true,loseRation:1},
@@ -341,6 +342,9 @@ const TILE_TIPS={
   'Fuselage':          {desc:'Hull section from the Endymion 7. Still holds cargo.',        act:'Investigate: May yield Equipment cards or a Radio Fragment. Draw an Event card.'},
   'Wreckage Field':    {desc:'Debris scattered across the terrain — hazardous, but potentially useful.',act:'Investigate: Roll for salvage. Draw an Event card.'},
   'Recovered Terminal':{desc:'A functional console partially salvaged from the wreckage, still drawing power.',act:'Investigate: Draw a Private Event card. The data is yours alone.'},
+  'Cache':             {desc:'A sealed supply cache — military or civilian, hard to tell.',              act:'Investigate: Roll 1 die for Ration yield. Draw an Event card.'},
+  'Passage':           {desc:'A narrow route through the terrain. Something passed through here recently.',act:'Investigate: Draw an Event card.'},
+  'Bloody Passage':    {desc:'A narrow route marked with signs of violence. Whatever happened here was recent.',act:'Investigate: Draw an Event card.'},
   'Stasis Pod':        {desc:'Alien preservation technology. Time moves differently inside.', act:'Enter: Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time.'},
   'Temporal Rift':     {desc:'Spacetime distortion. Past and future Rations flicker.',       act:'Automatic: Roll 1 die. 1–3: lose that many Rations. 4–6: recover that many empty Rations.'},
   'Portal':            {desc:'Instantaneous transit point. Origin unknown.',                  act:'Option: Move pawn immediately to Crash Site. Turn ends.'},
@@ -474,16 +478,28 @@ function showTileRevealModal(t, onDismiss){
   document.getElementById('tr-name').textContent=title.toUpperCase();
   e7Type(document.getElementById('tr-desc'),desc||'Unknown terrain.');
   const deck=document.getElementById('tr-deck');
+  const actionsEl=document.getElementById('tr-actions');
+  actionsEl.innerHTML='';
+  document.getElementById('trov-cancel').style.display='none';
   const dismiss=()=>{
     trov.onclick=null;
     deck.onclick=null;
+    actionsEl.innerHTML='';
     trov.classList.remove('show','anomaly-mode');
     trov.style.display='none';
     trov.style.backgroundImage='';
     if(onDismiss)onDismiss();
     else drawTileEvent(t);
   };
-  if(isAnomaly){
+  if(isAnomaly&&t.anomaly==='Portal'){
+    deck.style.display='none';
+    const p=cp();
+    const useBtn=document.createElement('button');useBtn.className='btn pri';useBtn.textContent='Use Portal';
+    useBtn.onclick=()=>{dismiss();p.q=0;p.r=0;p.location='Crash Site';G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal — returned to Crash Site.`);updateUI();render();};
+    const decBtn=document.createElement('button');decBtn.className='btn';decBtn.textContent='Decline';
+    decBtn.onclick=()=>{dismiss();addLog(`${p.name} declined the Portal.`);updateUI();};
+    actionsEl.appendChild(decBtn);actionsEl.appendChild(useBtn);
+  } else if(isAnomaly){
     deck.style.display='none';
     trov.classList.add('anomaly-mode');
     trov.onclick=e=>{if(e.target===trov)dismiss();};
@@ -775,12 +791,13 @@ function doSignalRoll(){
         btn.onclick=()=>{
           closeOv();
           showModal('RESCUE SIGNAL RECEIVED','',true,
-            ()=>{showModal('MISSION COMPLETE','Rescue confirmed.\n\nAll surviving crew whose goal is rescue have won.',true,()=>{});},
+            ()=>{},
             undefined,undefined,undefined,
             '<div id="mov-e7log" class="mov-e7log"></div>');
           e7ScreenSeq('mov-e7log',[
             [300,'sys','> SIGNAL RECEIVED.'],
             [500,'','Rescue craft entering orbit.'],
+            [1200,'good','> All surviving crew have been rescued.'],
           ],22);
         };
       }
@@ -797,48 +814,59 @@ function doSignalRoll(){
 
 // ── BASE CAMP ACTIONS ──────────────────────────────────────────
 function doEquipLocker(){
-  const p=cp();if(G.phase!=='action')return;
+  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Equipment Locker')return;
+  G.phase='action';
   if(G.tileActionUsed){showModal('Already Used','You have already used a tile action this turn.',true,()=>{});return;}
-  // Show equipment draw overlay
-  document.getElementById('eqd-equpn').textContent=G.eqDeckCount;
-  document.getElementById('eqd-desc').textContent=G.eqDeckCount>0?'Draw 1 card from the equipment deck.':'The equipment deck is empty.';
-  const deck=document.getElementById('eqd-deck');
-  deck.onclick=()=>{
+  cancelTooltip();
+  const trov=document.getElementById('trov');
+  trov.style.backgroundImage='url(img/Tiles/locker.png)';
+  trov.classList.add('equip-locker');
+  document.getElementById('tr-name').textContent='EQUIPMENT LOCKER';
+  const empty=G.eqDeckCount<=0;
+  e7Type(document.getElementById('tr-desc'),empty?'The equipment deck is empty.':'Draw 1 card from the equipment deck.');
+  document.getElementById('tr-evtn').textContent=G.eqDeckCount;
+  document.getElementById('tr-deck-lbl').textContent='Draw Equipment';
+  const deck=document.getElementById('tr-deck');
+  deck.style.display=empty?'none':'';
+  const cancelBtn=document.getElementById('trov-cancel');
+  cancelBtn.style.display='';
+  const dismiss=()=>{
     deck.onclick=null;
-    document.getElementById('eqdov').classList.remove('show');
-    document.getElementById('eqdov').style.display='none';
+    cancelBtn.onclick=null;
+    cancelBtn.style.display='none';
+    trov.classList.remove('show','equip-locker');
+    trov.style.display='none';
+    trov.style.backgroundImage='';
+  };
+  deck.onclick=()=>{
+    dismiss();
     const c=drawEqCard(p);
     G.tileActionUsed=true;
     if(c){
       addLog(`${p.name} drew ${c.name} from Equipment Locker.`,'good');
-      // Show the drawn card immediately
-      openCardModal(p.id,c);
-    } else {
-      addLog('Equipment Locker: deck empty.');
-    }
+      openCardModal(p.id,c,'url(img/Tiles/locker.png)');
+    } else{addLog('Equipment Locker: deck empty.');}
     updateUI();
   };
-  cancelTooltip();
-  document.getElementById('eqdov').style.display='flex';
-  document.getElementById('eqdov').classList.add('show');
+  cancelBtn.onclick=dismiss;
+  trov.onclick=null;
+  trov.style.display='flex';
+  trov.classList.add('show');
 }
 function doCargo(){
-  const p=cp();if(G.phase!=='action')return;
+  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Cargo Hold')return;
-  // Build communal store display
-  const comm=G.cargoHold||0;
-  showModal('Cargo Hold',
-    `Communal Rations in hold: ${comm}\nYour Rations: ${p.rations}/10\n\nDeposit: move FULL Rations from your stack to the hold.\nWithdraw: take from the hold (up to your capacity).`,
-    true,
-    ()=>{renderCargoModal();},
-    'Open Cargo',()=>{},'Cancel');
+  G.phase='action';
+  renderCargoModal();
 }
 function renderCargoModal(){
   const p=cp();
   const hold=G.cargoHold||0;
   const cap=10-p.rations;// room on player
   const body=`Hold: ${hold} rations\nYours: ${p.rations}/10\n\nChoose action:`;
+  const mov=document.getElementById('mov');
+  mov.classList.add('cargo');
   const ma=document.getElementById('mact');
   document.getElementById('mtit').textContent='Cargo Hold';
   document.getElementById('mbod').textContent=body;
@@ -851,27 +879,49 @@ function renderCargoModal(){
   w1.onclick=()=>{if(hold>0&&cap>0){G.cargoHold--;p.rations++;addLog(`${p.name} withdrew 1 Ration. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
   // Close
   const cl=document.createElement('button');cl.className='btn pri';cl.textContent='Done';
-  cl.onclick=()=>document.getElementById('mov').classList.remove('show');
+  cl.onclick=()=>{const m=document.getElementById('mov');m.classList.remove('show','cargo');};
   ma.appendChild(d1);ma.appendChild(w1);ma.appendChild(cl);
   document.getElementById('mov').classList.add('show');
 }
 function doWatchTower(){
-  const p=cp();if(G.phase!=='action')return;
+  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Watch Tower')return;
-  // Find all alive players in terrain (not on base camp)
+  G.phase='action';
   const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
-  if(!inField.length){showModal('Watch Tower','No crew are currently in the field. There are no tiles to reveal.',true,()=>{});return;}
-  // Reveal all face-down tiles adjacent to each field player
-  let revealed=0;
-  inField.forEach(fp=>{
-    hnbr(fp.q,fp.r).forEach(([nq,nr])=>{
-      const nt=G.tiles.get(hk(nq,nr));
-      if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
+  let msg;
+  if(!inField.length){
+    msg='No crew are currently in the field.\n\nThere are no tiles to reveal.';
+  } else {
+    let revealed=0;
+    inField.forEach(fp=>{
+      hnbr(fp.q,fp.r).forEach(([nq,nr])=>{
+        const nt=G.tiles.get(hk(nq,nr));
+        if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
+      });
     });
-  });
-  const names=inField.map(x=>x.name).join(', ');
-  addLog(`Watch Tower: ${revealed} tile${revealed!==1?'s':''} revealed around ${names}.`,'tile');
-  render();updateUI();
+    const names=inField.map(x=>x.name).join(', ');
+    addLog(`Watch Tower: ${revealed} tile${revealed!==1?'s':''} revealed around ${names}.`,'tile');
+    msg=`Scanning terrain around ${names}.\n\n${revealed} tile${revealed!==1?'s':''} revealed.`;
+    render();updateUI();
+  }
+  cancelTooltip();
+  const trov=document.getElementById('trov');
+  trov.style.backgroundImage='url(img/Tiles/watch-tower.png)';
+  trov.classList.add('watch-tower');
+  document.getElementById('tr-name').textContent='WATCH TOWER';
+  e7Type(document.getElementById('tr-desc'),msg);
+  const deck=document.getElementById('tr-deck');
+  deck.style.display='none';
+  const dismiss=()=>{
+    trov.onclick=null;
+    trov.classList.remove('show','anomaly-mode','watch-tower');
+    trov.style.display='none';
+    trov.style.backgroundImage='';
+  };
+  trov.classList.add('anomaly-mode');
+  trov.onclick=e=>{if(e.target===trov)dismiss();};
+  trov.style.display='flex';
+  trov.classList.add('show');
 }
 
 function doEndTurn(){
@@ -920,11 +970,7 @@ function triggerAnomaly(t){
       else{const gain=Math.min(10-p.rations,r);p.rations+=gain;addLog(`Temporal Rift: rolled ${r} — gained ${gain} Ration(s).`,'good');}
       updateUI();break;
     }
-    case'Portal':
-      showModal('Portal Anomaly','Use the portal to return to the Crash Site?',true,
-        ()=>{p.q=0;p.r=0;p.location='Crash Site';G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal — returned to Crash Site.`);updateUI();render();},
-        'Use Portal',()=>{addLog(`${p.name} declined the Portal.`);updateUI();},'Decline');
-      break;
+    case'Portal':break;// handled on tile reveal screen
     case'Inversion Field':addLog('Inversion Field: swap Rations with another player. (Resolve at the table.)','act');updateUI();break;
     case'Gravitational Well':addLog('Gravitational Well: player to your left moves your pawn 1 die roll. (Resolve at the table.)','act');break;
     case'Dead Signal':addLog('Dead Signal: no Signal Roll occurs this round.');break;
@@ -1157,7 +1203,7 @@ function drawTile(g,t){
   // Face-down tiles: dashed border + plus sign (matches site builder candidate style)
   if(t.type==='face_down'){
     g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(20,50,100,.15)','pointer-events':'none'}));
-    const poly=svgEl('polygon',{points:hexPoly,fill:'transparent',stroke:'#2a70d0','stroke-width':'1.2','stroke-dasharray':'4.33 3.24','stroke-dashoffset':'5.95',style:'cursor:pointer','data-q':t.q,'data-r':t.r});
+    const poly=svgEl('polygon',{points:hexPoly,fill:'transparent',stroke:'#0c1d35','stroke-width':'1',style:'cursor:pointer','data-q':t.q,'data-r':t.r});
     poly.addEventListener('click',()=>onHexClick(t.q,t.r));
     poly.addEventListener('mouseenter',e=>startTooltip(t,e));
     poly.addEventListener('mouseleave',cancelTooltip);
@@ -1168,8 +1214,8 @@ function drawTile(g,t){
     return;
   }
 
-  const strokeC=t.type==='anomaly'?'#6a28a8':t.type==='ship_section'?'#2060a8':t.type==='crash_site'?'#b2dbee':'#1a2e1a';
-  const sw=t.type==='crash_site'?'2.2':'1.4';
+  const strokeC=t.type==='anomaly'?'#6a28a8':t.type==='crash_site'?'#b2dbee':'none';
+  const sw='1.5';
   const tileImg=getTileImg(t);
   if(tileImg){
     // Clip path for this hex — added to SVG defs (in root coord space of g group)
@@ -1212,6 +1258,16 @@ function drawTile(g,t){
 
 // Tile artwork uses individual images from img/Tiles/.
 // Radio Fragment indicator drawn for Signal Tower tiles.
+const BASECAMP_ICON_MAP={
+  'Crash Site':         'rocket-solid-full.svg',
+  'Medical Bay':        'heart-solid-full.svg',
+  'Signal Array':       'satellite-dish-solid-full.svg',
+  'Watch Tower':        'eye-solid-full.svg',
+  'Equipment Locker':   'wrench-solid-full.svg',
+  'Airlock':            'mask-ventilator-solid-full.svg',
+  'Cargo Hold':         'cubes-solid-full.svg',
+};
+
 function drawTileArtwork(g,cx,cy,t){
   if(t.type==='terrain'&&t.radioFragment){
     const poi=t.pois?.[0];
@@ -1220,22 +1276,36 @@ function drawTileArtwork(g,cx,cy,t){
       lbl(g,cx+18,cy-17,'RF','5.5','#60c040');
     }
   }
-  if(t.type==='crash_site'&&t.name==='Signal Array'&&G?.radioFragmentsActivated){
-    lbl(g,cx,cy+14,`${G.radioFragmentsActivated}/5`,'7','#60c040');
+  if(t.type==='crash_site'){
+    const icon=BASECAMP_ICON_MAP[t.name];
+    if(icon){
+      const filterId='basecamp-icon-tint';
+      const svgDefs=document.getElementById('bsvg').querySelector('defs');
+      if(!svgDefs.querySelector(`#${filterId}`)){
+        const filt=svgEl('filter',{id:filterId,x:'0',y:'0',width:'1',height:'1'});
+        const flood=svgEl('feFlood',{'flood-color':'#b2dbee',result:'color'});
+        const comp=svgEl('feComposite',{in:'color',in2:'SourceGraphic',operator:'in'});
+        filt.appendChild(flood);filt.appendChild(comp);
+        svgDefs.appendChild(filt);
+      }
+      const sz=28;
+      g.appendChild(svgEl('image',{
+        href:`img/Icons/${icon}`,
+        x:cx-sz/2, y:cy-sz/2,
+        width:sz, height:sz,
+        opacity:'0.55',
+        filter:`url(#${filterId})`,
+        'pointer-events':'none',
+      }));
+    }
+    if(t.name==='Signal Array'&&G?.radioFragmentsActivated){
+      lbl(g,cx,cy+22,`${G.radioFragmentsActivated}/5`,'7','#60c040');
+    }
   }
 }
 
-function drawTileLabel(g,cx,cy,t){
-  if(t.type==='crash_site'){
-    lbl(g,cx,cy+26,t.short||t.name,'6','#2a6090','middle');
-  } else if(t.type==='anomaly'){
-    lbl(g,cx,cy+28,t.anomaly,'6','#5a1880','middle');
-  } else if(t.type==='ship_section'){
-    lbl(g,cx,cy+28,'SHIP SECTION','5.5','#204878','middle');
-  } else if(t.type==='terrain'){
-    const cnt=typeof t.investigatedCount==='number'?t.investigatedCount:0;
-    if(cnt>0&&cnt>=t.pois.length)lbl(g,cx,cy+30,'· investigated ·','5','#1e3a2a','middle');
-  }
+function drawTileLabel(){
+  // no text labels on any tiles
 }
 
 function lbl(g,x,y,str,fs,fill,anchor){
@@ -1248,7 +1318,16 @@ function drawPawn(g,p){
   const idx=same.indexOf(p);
   const ox=same.length>1?(idx-(same.length-1)/2)*14:0;
   const px=cx+ox,py=cy+15;
-  if(p.id===G.currentPlayer)g.appendChild(svgEl('circle',{cx:px,cy:py,r:13,fill:'none',stroke:p.color,'stroke-width':'1.5',opacity:'.35','pointer-events':'none'}));
+  if(p.id===G.currentPlayer){
+    if(!document.getElementById('beacon-style')){
+      const s=document.createElement('style');s.id='beacon-style';
+      s.textContent='@keyframes beacon{0%{r:13;opacity:.6;stroke-width:1.5}100%{r:26;opacity:0;stroke-width:.4}}';
+      document.head.appendChild(s);
+    }
+    const beacon=svgEl('circle',{cx:px,cy:py,r:13,fill:'none',stroke:p.color,'stroke-width':'1.5',opacity:'.6','pointer-events':'none'});
+    beacon.style.animation='beacon 1.6s ease-out infinite';
+    g.appendChild(beacon);
+  }
   const cid=`pc-${p.id}`;
   const defs=document.getElementById('bsvg').querySelector('defs');
   const cp2=svgEl('clipPath',{id:cid});
@@ -1444,14 +1523,15 @@ function updateUI(){
   document.getElementById('bend').disabled=G.phase==='roll';
   const t=G.tiles.get(hk(p.q,p.r));
   const act=G.phase==='action';
+  const actOrMove=act||G.phase==='move';
   const atArr=t?.name==='Signal Array';
   const show=v=>v?'':'none';
   document.getElementById('bequip').style.display=  show(t?.name==='Equipment Locker');
   document.getElementById('bcargo').style.display=  show(t?.name==='Cargo Hold');
   document.getElementById('bwatch').style.display=  show(t?.name==='Watch Tower');
-  document.getElementById('bequip').disabled=  !(act&&t?.name==='Equipment Locker');
-  document.getElementById('bcargo').disabled=  !(act&&t?.name==='Cargo Hold');
-  document.getElementById('bwatch').disabled=  !(act&&t?.name==='Watch Tower');
+  document.getElementById('bequip').disabled=  !(actOrMove&&t?.name==='Equipment Locker'&&!G.tileActionUsed);
+  document.getElementById('bcargo').disabled=  !(actOrMove&&t?.name==='Cargo Hold');
+  document.getElementById('bwatch').disabled=  !(actOrMove&&t?.name==='Watch Tower');
   document.getElementById('bfrag').style.display= show(atArr);
   document.getElementById('bsig').style.display=  show(atArr);
   document.getElementById('bfrag').disabled=!(act&&atArr&&p.radioFragments>0&&G.radioFragmentsActivated<5);
@@ -1514,12 +1594,12 @@ function buildEqHand(p){
 // CARD DETAIL MODAL
 // ═══════════════════════════════════════════════════════════════
 let selectedCardUid=null;
-function openCardModal(playerIdx,c){
+function openCardModal(playerIdx,c,bgImage){
   const isOwner=playerIdx===G.currentPlayer;
   // set category CSS vars on the overlay card
   const card=document.getElementById('evc');
   const ov=document.getElementById('evc-ov');
-  ov.style.backgroundImage='';
+  ov.style.backgroundImage=bgImage||'';
   ov.className=`cc-${c.cat}`;
   card.className='evc eq';
   document.getElementById('evc-badge').textContent=c.cat.toUpperCase();
@@ -1546,6 +1626,7 @@ function closeCardModal(){
   const ov=document.getElementById('evc-ov');
   ov.className='';
   ov.classList.remove('show');
+  ov.style.backgroundImage='';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1553,7 +1634,7 @@ function closeCardModal(){
 // ═══════════════════════════════════════════════════════════════
 function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml){
   const mov=document.getElementById('mov');
-  const isRescue=title==='RESCUE SIGNAL RECEIVED'||title==='MISSION COMPLETE';
+  const isRescue=title==='RESCUE SIGNAL RECEIVED';
   const isAllDead=title==='ALL CREW LOST';
   mov.classList.toggle('rescue',isRescue);
   mov.classList.toggle('all-dead',isAllDead);
@@ -1565,7 +1646,7 @@ function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml){
   const ma=document.getElementById('mact');ma.innerHTML='';
   if(onCancel&&cancelLbl){const b=document.createElement('button');b.className='btn';b.textContent=cancelLbl;
     b.onclick=()=>{document.getElementById('mov').classList.remove('show');onCancel();};ma.appendChild(b);}
-  const ob=document.createElement('button');ob.className='btn pri';ob.textContent=okLbl||'End Mission';
+  const ob=document.createElement('button');ob.className='btn pri';ob.textContent=okLbl||'OK';
   ob.onclick=()=>{document.getElementById('mov').classList.remove('show');onOk();};ma.appendChild(ob);
   document.getElementById('mov').classList.add('show');
 }

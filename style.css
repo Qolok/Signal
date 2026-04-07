@@ -28,7 +28,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .parr{background:none;border:none;color:var(--dim);cursor:pointer;padding:2px 5px;font-size:1.1rem;line-height:1;font-family:inherit}
 .parr:hover{color:var(--hi)}
 /* ── unified terminal button ── */
-.sbtn,#evc-btn,#sig-btn,.mact .btn.pri{
+.sbtn,#evc-btn,#trov-cancel,#sig-btn,.mact .btn.pri{
   padding:12px;
   background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px),var(--blue);
   border:1px solid #2a70b0;color:var(--hi);font-family:inherit;
@@ -38,7 +38,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .sbtn{margin-top:6px;}
 #sig-btn{margin-top:4px;}
 #evc-btn{width:175px;position:relative;z-index:1;margin-top:6px;}
-.sbtn:hover,.sbtn:focus,#evc-btn:hover,#sig-btn:hover,.mact .btn.pri:hover{
+.sbtn:hover,.sbtn:focus,#evc-btn:hover,#trov-cancel:hover,#sig-btn:hover,.mact .btn.pri:hover{
   background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px),#245890;
 }
 .sbtn:disabled,#evc-btn:disabled,#sig-btn:disabled,.mact .btn.pri:disabled{opacity:.4;cursor:not-allowed;}
@@ -328,6 +328,8 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
   text-align:left;width:100%;white-space:pre-line;
   height:130px;overflow:hidden;flex-shrink:0;
 }
+#trov.equip-locker #tr-desc{height:40px;}
+#trov.watch-tower #tr-desc{height:80px;}
 #tr-deck{
   position:relative;z-index:2;
   margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:14px;
@@ -358,6 +360,9 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #tr-deck-pile .dkn{font-size:1.1rem;color:#2a6090;font-weight:bold;}
 #tr-deck-pile .dksub{font-size:.48rem;color:#1a3850;letter-spacing:.08em;}
 #tr-deck-lbl{font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;color:#2a6090;}
+#tr-actions{position:relative;z-index:2;display:flex;gap:10px;margin-top:8px;width:100%;}
+#tr-actions .btn{flex:1;font-size:.72rem;}
+#trov-cancel{width:175px;position:relative;z-index:1;margin-top:6px;}
 
 /* ── EQUIPMENT DRAW OVERLAY ── */
 #eqdov{
@@ -612,6 +617,10 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #mov.rescue::before{background:rgba(2,5,10,.55);}
 #mov.all-dead{background:url(img/Tiles/all-dead.png) center/cover no-repeat;}
 #mov.all-dead::before{background:rgba(2,5,10,.65);}
+#mov.cargo{background:url(img/Tiles/cargo.png) center/cover no-repeat;}
+#mov.cargo::before{background:rgba(2,5,10,.55);}
+#mov.equip-locker{background:url(img/Tiles/locker.png) center/cover no-repeat;}
+#mov.equip-locker::before{background:rgba(2,5,10,.55);}
 .moverlay.show{display:flex}
 .mbox{position:relative;z-index:1;overflow:hidden;background:rgba(7,9,14,.98);border:1px solid var(--bdr);border-radius:10px;padding:28px;max-width:400px;width:92%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 0 0 1px rgba(30,80,128,.2),0 8px 40px rgba(0,0,0,.9),inset 0 0 60px rgba(0,0,0,.5),inset 0 0 0 1px rgba(100,160,220,.04)}
 .mbox::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(100,160,220,.1) 0%,transparent 100%);pointer-events:none;z-index:0}
@@ -755,8 +764,6 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .evc.eq .evc-body{color:var(--cc-body);}
 .evc.eq .evc-brand{color:var(--cc-dim);}
 .evc.eq #evc-die{background:var(--cc-bg);border:1px solid var(--cc-bdr);color:var(--cc-loc);}
-#evc-btn.eq{border:1px solid var(--cc-bdr);color:var(--cc-badge);}
-#evc-btn.eq:hover{border-color:var(--cc-rule);color:var(--cc-loc);}
 
 /* ── SIGNAL ROLL OVERLAY ── */
 #sig-ov{display:none;position:fixed;inset:0;z-index:107;align-items:center;justify-content:center;

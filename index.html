@@ -186,6 +186,7 @@
         <div id="td-moves"></div>
       </div>
       <div class="hudact">
+        <div class="shd">Actions</div>
         <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Draw Equipment</button>
         <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
         <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
@@ -203,6 +204,7 @@
   <div id="tr-box">
     <div id="tr-name"></div>
     <div id="tr-desc"></div>
+    <div id="tr-actions"></div>
     <div id="tr-deck" title="Click to draw Event Card">
       <div id="tr-deck-pile">
         <span class="dk-symbol">◈</span>
@@ -212,6 +214,7 @@
       <div id="tr-deck-lbl">Draw Event</div>
     </div>
   </div>
+  <button id="trov-cancel" style="display:none">Cancel</button>
 </div>
 
 <!-- ── EQUIP DRAW OVERLAY ── -->
