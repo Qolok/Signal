@@ -262,6 +262,7 @@ const TILE_IMAGE_MAP={
   'Gravitational Well': 'gravity-well.png',
   'Echo Chamber':       'echo-chamber.png',
   'Dead Signal':        'dead-signal.png',
+  'Portal':             'portal.png',
   'Inversion Field':    'inversion-field.png',
   'Ship Section':       'ship-section1.png',
 };
@@ -467,16 +468,18 @@ function showTileRevealModal(t, onDismiss){
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
-  setTileHeroSprite(document.getElementById('tr-hex'),t);
-  document.getElementById('tr-name').textContent=title.toUpperCase();
-  document.getElementById('tr-desc').textContent=desc||'Unknown terrain.';
-  const deck=document.getElementById('tr-deck');
   const trov=document.getElementById('trov');
+  const tileImg=getTileImg(t);
+  trov.style.backgroundImage=tileImg?`url(${tileImg})`:'none';
+  document.getElementById('tr-name').textContent=title.toUpperCase();
+  e7Type(document.getElementById('tr-desc'),desc||'Unknown terrain.');
+  const deck=document.getElementById('tr-deck');
   const dismiss=()=>{
     trov.onclick=null;
     deck.onclick=null;
     trov.classList.remove('show','anomaly-mode');
     trov.style.display='none';
+    trov.style.backgroundImage='';
     if(onDismiss)onDismiss();
     else drawTileEvent(t);
   };
@@ -517,6 +520,9 @@ function drawTileEvent(t){
       const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
     };
   }
+  const evImg=getTileImg(t);
+  const evOv=document.getElementById('evc-ov');
+  evOv.style.backgroundImage=evImg?`url(${evImg})`:'none';
   showEventCard(evt,locName,()=>{updateUI();render();},rollCallback);
 }
 
@@ -593,27 +599,33 @@ function renderTableDice(){
   const moveCounting=diceState.mode==='move'&&diceState.rolled&&G;
   row.innerHTML='';
 
+  const isSignal=diceState.mode==='signal';
+  const container=isSignal?(()=>{const g=document.createElement('div');g.className='td-signal-grid';return g;})():row;
+
   diceState.values.forEach((v,i)=>{
+    let el;
     if(!diceState.rolled&&!diceState.spinning){
-      const wrap=make3DDie('idle');
-      wrap.onclick=rollTableDice;
-      row.appendChild(wrap);
+      el=make3DDie('idle');
+      el.onclick=rollTableDice;
     } else if(diceState.spinning){
-      row.appendChild(make3DDie('rolling'));
+      el=make3DDie('rolling');
     } else {
-      const die=makeResultDie(v);
-      die.id='td-die-result';
-      die.style.animationDelay=(i*0.1)+'s';
+      el=makeResultDie(v);
+      el.id='td-die-result';
+      el.style.animationDelay=(i*0.1)+'s';
       if(moveCounting&&G.movementLeft>0){
         const ov=document.createElement('div');
         ov.className='td-die-moves';
         ov.id='td-die-moves-ov';
         ov.textContent=G.movementLeft;
-        die.appendChild(ov);
+        el.appendChild(ov);
       }
-      row.appendChild(die);
     }
+    if(isSignal&&i===0)el.classList.add('td-signal-top');
+    container.appendChild(el);
   });
+
+  if(isSignal)row.appendChild(container);
 
   if(diceState.rolled&&diceState.values.length>1){
     const tot=document.createElement('div');
@@ -733,13 +745,17 @@ function doSignalRoll(){
 }
 
 function finishSignalRoll(d){
+  const mov=document.getElementById('mov');
+  mov.style.backgroundImage='url(img/Tiles/signal-array.png)';
   const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
   const total=d[0]+d[1]+d[2];const success=total>=thr;
   const body=`Dice: ${d[0]}  ${d[1]}  ${d[2]}\nTotal: ${total}\nNeeded: ${thr} or higher\n\n${success?'SIGNAL RECEIVED.\nRescue craft entering orbit.':'No response. Signal insufficient.'}`;
   addLog(`Signal Roll: ${total} vs ${thr} — ${success?'SUCCESS':'FAIL'}`,success?'good':'crit');
+  const clearSignalBg=()=>{mov.style.backgroundImage='';};;
   if(success){showModal('RESCUE SIGNAL RECEIVED',body,true,()=>{
+    clearSignalBg();
     showModal('MISSION COMPLETE','Rescue confirmed.\n\nAll surviving crew whose goal is rescue have won.',true,()=>{});});}
-  else showModal('Signal Roll',body,true,()=>{});
+  else showModal('Signal Roll',body,true,()=>{clearSignalBg();});
 }
 
 // ── BASE CAMP ACTIONS ──────────────────────────────────────────
@@ -1310,8 +1326,48 @@ function buildCrewTabs(){
   });
 }
 
+function saveGame(){
+  if(!G)return;
+  try{
+    const s={
+      G:{...G,
+        tiles:[...G.tiles.entries()],
+        reach:[],                          // transient — recalculated
+        terrainDeck:[...G.terrainDeck],
+        eqDeck:[...G.eqDeck],
+      },
+      cardUid,viewedPlayer,pendingNames,pendingPortraits
+    };
+    s.G.players=G.players.map(p=>({...p,equipment:[...p.equipment]}));
+    localStorage.setItem('signal_save',JSON.stringify(s));
+  }catch(e){}
+}
+function loadGame(){
+  try{
+    const raw=localStorage.getItem('signal_save');
+    if(!raw)return false;
+    const s=JSON.parse(raw);
+    const sg=s.G;
+    sg.tiles=new Map(sg.tiles);
+    sg.reach=new Map();
+    G=sg;
+    cardUid=s.cardUid||0;
+    viewedPlayer=s.viewedPlayer||0;
+    pendingNames=s.pendingNames||[];
+    pendingPortraits=s.pendingPortraits||[];
+    return true;
+  }catch(e){return false;}
+}
+function clearSave(){localStorage.removeItem('signal_save');}
+function confirmNewGame(){
+  showModal('New Game','Start a new game? All progress will be lost.',true,()=>{
+    clearSave();
+    location.reload();
+  },'New Game',()=>{},'Cancel');
+}
 function updateUI(){
   if(!G)return;
+  saveGame();
   const p=cp();                          // active player (actions)
   const v=G.players[viewedPlayer]||p;   // viewed player (card display)
   document.getElementById('hturn').textContent=`Turn ${G.turn} · ${p.name}`;
@@ -1419,7 +1475,9 @@ function openCardModal(playerIdx,c){
   const isOwner=playerIdx===G.currentPlayer;
   // set category CSS vars on the overlay card
   const card=document.getElementById('evc');
-  document.getElementById('evc-ov').className=`cc-${c.cat}`;
+  const ov=document.getElementById('evc-ov');
+  ov.style.backgroundImage='';
+  ov.className=`cc-${c.cat}`;
   card.className='evc eq';
   document.getElementById('evc-badge').textContent=c.cat.toUpperCase();
   document.getElementById('evc-loc').textContent=c.name;
@@ -1486,7 +1544,7 @@ function showEventCard(evt, locName, onOk, rollCallback){
   outEl.style.display='none';
   const dieEl=document.getElementById('evc-die');
   const btn=document.getElementById('evc-btn');
-  btn.className=isPub?'pub':'priv';
+  btn.className='';
   btn.textContent='Acknowledge';
   if(rollCallback){
     dieEl.innerHTML='';
@@ -1519,7 +1577,7 @@ function showEventCard(evt, locName, onOk, rollCallback){
   }
   const ov=document.getElementById('evc-ov');
   ov.className='';
-  btn.onclick=()=>{ov.classList.remove('show');onOk();};
+  btn.onclick=()=>{ov.classList.remove('show');ov.style.backgroundImage='';onOk();};
   cancelTooltip();
   ov.classList.add('show');
 }
@@ -1955,6 +2013,7 @@ function finalizeGame(){
   document.getElementById('setup-site').classList.remove('show');
   document.getElementById('setup-site').style.display='none';
   document.getElementById('game').className='running';
+  clearSave();
   newGame(pendingNames,pendingPortraits,placedMap);
   setTimeout(()=>{
     initBoard();render();updateUI();
@@ -2037,6 +2096,17 @@ function goToSiteBuilder(){
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('setup').style.display='none';
+  if(loadGame()){
+    // Resume saved game
+    document.getElementById('intro').style.display='none';
+    document.getElementById('game').className='running';
+    initBoard();render();updateUI();
+    showTableDice(G.phase==='roll'?'move':G.phase==='move'?'move':null);
+    if(G.phase==='move'&&G.movementLeft>0)G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
+    document.getElementById('e7panel').classList.add('show');
+    addE7('> Session restored.','sys');
+    return;
+  }
   e7ScreenSeq('e7-intro-msg',[
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
     [400, 'sys', '> Primary diagnostics: complete. Life support: NOMINAL.'],

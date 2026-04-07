@@ -1,3 +1,1 @@
 - Start with the online version. At the end of every game, give them a link to donate to the project to build a tabletop version.
-
-- Merge the log and the onboarding instructions as if they are the ship's computer communicating with me. It walks me through an explanation of the crash, waht my mission is (find radio fragments and restore signal to emergency beacon), how to set up base camp, etc. Then, once the game has started, it becomes the log but almost like a chatbot. They player should be able to toggle the computer (let's call it Endymion 7) on and off. It shows the log with a prompt at the bottom telling the player what to do (as in "Roll the die to move" or "Choose a direction to investigate" or reminders to return to the Airlock when the O2 is out, etc.)

@@ -27,7 +27,7 @@
 <div id="intro">
   <div class="sbox intro-box">
     <h1>SIGNAL</h1>
-    <p class="ssub">1–6 Players · Ages 14+ · 45–90 Minutes</p>
+    <p class="ssub">1–6 Players · Ages 14+ · 30–60 Minutes</p>
     <div id="e7-intro-msg" class="e7-screen-msg"></div>
     <button class="sbtn" onclick="showCrewSetup()">Start Game</button>
   </div>
@@ -100,6 +100,7 @@
     <span id="hsig">0 fragments · signal offline</span>
     <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
     <button class="hbtn" onclick="openRulebook()">Field Guide</button>
+    <button class="hbtn" onclick="confirmNewGame()">New Game</button>
   </div>
 
   <!-- Board -->
@@ -200,16 +201,17 @@
 
 <!-- ── TILE REVEAL OVERLAY ── -->
 <div id="trov" style="display:none">
-  <div id="tr-hex"></div>
-  <div id="tr-name"></div>
-  <div id="tr-desc"></div>
-  <div id="tr-deck" title="Click to draw Event Card">
-    <div id="tr-deck-pile">
-      <span class="dk-symbol">◈</span>
-      <div class="dkn" id="tr-evtn">—</div>
-      <div class="dksub">cards</div>
+  <div id="tr-box">
+    <div id="tr-name"></div>
+    <div id="tr-desc"></div>
+    <div id="tr-deck" title="Click to draw Event Card">
+      <div id="tr-deck-pile">
+        <span class="dk-symbol">◈</span>
+        <div class="dkn" id="tr-evtn">—</div>
+        <div class="dksub">cards</div>
+      </div>
+      <div id="tr-deck-lbl">Draw Event</div>
     </div>
-    <div id="tr-deck-lbl">Draw Event</div>
   </div>
 </div>
 
