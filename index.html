@@ -186,7 +186,6 @@
         <div id="td-moves"></div>
       </div>
       <div class="hudact">
-        <button class="btn"     id="bmed"   onclick="doMedBay()" disabled>Restore Health</button>
         <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Draw Equipment</button>
         <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
         <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
@@ -268,6 +267,18 @@
   </div>
   <div id="evc-die" style="display:none"></div>
   <button id="evc-btn">Acknowledge</button>
+</div>
+
+<!-- ── SIGNAL ROLL OVERLAY ── -->
+<div id="sig-ov">
+  <div id="sig-card">
+    <div id="sig-head">SIGNAL ROLL</div>
+    <div id="sig-frags"></div>
+    <div id="sig-dice"></div>
+    <div id="sig-out"></div>
+    <div id="sig-e7"></div>
+    <button id="sig-btn">Roll Dice</button>
+  </div>
 </div>
 
 <!-- ── TRADE MODAL ── -->
