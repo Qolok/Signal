@@ -84,7 +84,7 @@
     </div>
   </div>
   <div id="sbfooter">
-    <button id="sblaunbtn" disabled onclick="finalizeGame()" style="flex:1;">Launch Mission</button>
+    <button id="sblaunbtn" class="mbtn dng" disabled onclick="finalizeGame()" style="flex:1;">Launch Mission</button>
   </div>
 </div>
 
@@ -106,15 +106,6 @@
   <!-- Board -->
   <div id="bwrap">
     <svg id="bsvg"></svg>
-    <div id="htip">
-      <div class="tip-hero"><div class="tip-hero-img" id="tip-hero-img"></div></div>
-      <div class="tip-body">
-        <div class="tiptit" id="tiptit"></div>
-        <div class="tip-rule"></div>
-        <div class="tipdesc" id="tipdesc"></div>
-        <div class="tipact" id="tipact"></div>
-      </div>
-    </div>
   </div>
 
   <!-- HUD: active player -->
@@ -187,13 +178,13 @@
       </div>
       <div class="hudact">
         <div class="shd">Actions</div>
-        <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Draw Equipment</button>
+        <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Open Locker</button>
         <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
         <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
         <button class="btn trd" id="btrd"   onclick="openTrade()" disabled>Trade</button>
         <button class="btn wrn" id="bfrag"  onclick="doActivateFrag()" disabled>Activate Fragment</button>
         <button class="btn wrn" id="bsig"   onclick="doSignalRoll()" disabled>Roll Signal</button>
-        <button class="btn dng" id="bend"   onclick="doEndTurn()" disabled>End Turn</button>
+        <button class="btn" id="bend"   onclick="doEndTurn()" disabled>End Turn</button>
       </div>
     </div>
   </div>
@@ -264,8 +255,7 @@
       <div class="evc-body" id="evc-body"></div>
       <div class="evc-pills" id="evc-pills"></div>
       <div class="evc-outcome" id="evc-outcome" style="display:none"></div>
-      <div class="evc-brand">◈ &nbsp; ENDYMION 7 &nbsp; ◈</div>
-      <div class="evc-bot-corners"><span>◈</span><span>◈</span></div>
+      <div class="evc-bot-corners"><span>◈</span><span class="evc-brand">ENDYMION 7</span><span>◈</span></div>
     </div>
   </div>
   <div id="evc-die" style="display:none"></div>
@@ -292,12 +282,23 @@
   </div>
   <div id="trbody"><!-- built by renderTradeModal() --></div>
   <div id="trfooter">
-    <button class="btn pri" onclick="confirmTrade()">Confirm Trade</button>
-    <button class="btn" onclick="closeTrade()">Cancel</button>
+    <button class="mbtn pri" onclick="confirmTrade()">Confirm Trade</button>
+    <button class="mbtn" onclick="closeTrade()">Cancel</button>
   </div>
 </div>
 
 
+
+<!-- ── HEX TOOLTIP (global — used on game board and builder) ── -->
+<div id="htip">
+  <div class="tip-hero"><div class="tip-hero-img" id="tip-hero-img"></div></div>
+  <div class="tip-body">
+    <div class="tiptit" id="tiptit"></div>
+    <div class="tip-rule"></div>
+    <div class="tipdesc" id="tipdesc"></div>
+    <div class="tipact" id="tipact"></div>
+  </div>
+</div>
 
 <script src="game.js"></script>
 </body>

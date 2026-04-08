@@ -193,7 +193,7 @@ const CRASH_HEXES_DEFAULT=[
   {q:0,r:1,  name:'Cargo Hold',      short:'CARGO'},
 ];
 
-const ANOMALIES=['Stasis Pod','Temporal Rift','Portal','Gravitational Well','Dead Signal','Echo Chamber','Inversion Field'];
+const ANOMALIES=['Stasis Pod','Temporal Rift','Portal','Gravitational Well','Dead Zone','Echo Chamber','Inversion Field'];
 
 // ═══════════════════════════════════════════════════════════════
 // FIXED 43-TILE TERRAIN DECK SPEC
@@ -207,22 +207,23 @@ function buildTerrainDeck(){
   ANOMALIES.forEach(a=>deck.push({type:'anomaly',anomaly:a,pois:[],investigatedCount:0}));
   // 33 Terrain tiles — single POI per tile
   const terrainSpec=[
-    {pois:['Signal Tower'],        radioFragment:true,  count:5},
+    {pois:['Dead Tower'],          radioFragment:true,  requiresTool:'lockpick',      noEvent:true, count:1},
+    {pois:['Collapsed Tower'],     radioFragment:true,  requiresTool:'plasma_cutter', noEvent:true, count:1},
     {pois:['Fuselage'],            radioFragment:false, count:2},
     {pois:['Cave'],                radioFragment:false, count:9},
-    {pois:['Outpost'],             radioFragment:false, count:2},
+    {pois:['Abandoned Outpost'],   radioFragment:false, requiresTool:'lockpick',   toolReward:'rollFood', noEvent:true, count:1},
+    {pois:['Mysterious Outpost'],  radioFragment:false, requiresTool:'data_spike',  toolReward:'drawEq',      noEvent:true, count:1},
     {pois:['Wreckage Field'],      radioFragment:false, count:9},
     {pois:['Cache'],               radioFragment:false, count:3},
     {pois:['Recovered Terminal'],  radioFragment:false, count:1},
     {pois:['Passage'],             radioFragment:false, count:1},
     {pois:['Bloody Passage'],      radioFragment:false, count:1},
   ];
-  const outpostImgs=['outpost1.png','outpost2.png'];
-  let outpostIdx=0;
   terrainSpec.forEach(spec=>{
     for(let i=0;i<spec.count;i++){
-      const tile={type:'terrain',pois:[...spec.pois],radioFragment:spec.radioFragment,investigatedCount:0};
-      if(spec.pois[0]==='Outpost'){tile.imgOverride=outpostImgs[outpostIdx++%outpostImgs.length];}
+      const tile={type:'terrain',pois:[...spec.pois],radioFragment:spec.radioFragment,requiresTool:spec.requiresTool||null,toolReward:spec.toolReward||null,noEvent:spec.noEvent||false,investigatedCount:0};
+      if(spec.pois[0]==='Abandoned Outpost'){tile.imgOverride='outpost1.png';}
+      if(spec.pois[0]==='Mysterious Outpost'){tile.imgOverride='outpost2.png';}
       deck.push(tile);
     }
   });
@@ -232,8 +233,8 @@ function buildTerrainDeck(){
 }
 
 const POI_COLOR={
-  'Fuselage':'#3a7080','Cave':'#2a5030','Outpost':'#7a6030',
-  'Signal Tower':'#2870a0','Wreckage Field':'#705030',
+  'Fuselage':'#3a7080','Cave':'#2a5030','Abandoned Outpost':'#7a6030','Mysterious Outpost':'#305060',
+  'Dead Tower':'#2870a0','Collapsed Tower':'#1a5080','Wreckage Field':'#705030',
   'Recovered Terminal':'#2060a8','Cache':'#507040',
   'Passage':'#4a4a60','Bloody Passage':'#702020',
 };
@@ -249,8 +250,10 @@ const TILE_IMAGE_MAP={
   'Medical Bay':        'medbay.png',
   'Cargo Hold':         'cargo.png',
   'Airlock':            'airlock.png',
-  'Signal Tower':       'signal-tower.png',
-  'Outpost':            'outpost1.png',
+  'Dead Tower':         'signal-tower.png',
+  'Collapsed Tower':    'signal-tower.png',
+  'Abandoned Outpost':  'outpost1.png',
+  'Mysterious Outpost': 'outpost2.png',
   'Fuselage':           'fuselage.png',
   'Wreckage Field':     'wreckage.png',
   'Recovered Terminal': 'terminal.png',
@@ -261,7 +264,7 @@ const TILE_IMAGE_MAP={
   'Temporal Rift':      'temporal-distortion.png',
   'Gravitational Well': 'gravity-well.png',
   'Echo Chamber':       'echo-chamber.png',
-  'Dead Signal':        'dead-signal.png',
+  'Dead Zone':          'dead-zone.png',
   'Portal':             'portal.png',
   'Inversion Field':    'inversion-field.png',
   'Ship Section':       'ship-section1.png',
@@ -284,34 +287,39 @@ function spriteCssForName(name){
 }
 
 const EQ_CARDS=[
-  {id:'plasma_cutter', name:'Plasma Cutter',    cat:'Tool',   txt:'Move through a tile edge with no printed path connection.'},
-  {id:'grappling',     name:'Grappling Hook',   cat:'Tool',   txt:'Move to any adjacent tile ignoring path costs this turn.'},
-  {id:'excavator',     name:'Excavator',        cat:'Tool',   txt:'Reveal a face-down tile without entering it.',use:'excavator'},
-  {id:'lockpick',      name:'Lockpick',         cat:'Tool',   txt:'Reach any POI on your current tile regardless of path.'},
-  {id:'walkie',        name:'Walkie',           cat:'Tool',   txt:'Trade resources or share an Event card with a player on an adjacent tile.'},
-  {id:'medpack',       name:'MedPack',          cat:'Supply', txt:'Restore 1 Health to HEALTHY. Discard after use.', use:'medpack'},
-  {id:'emer_rations',  name:'Emergency Rations',cat:'Supply', txt:'Flip 3 EMPTY Rations to FULL. Discard after use.', use:'emer_rations'},
-  {id:'compressed_o2', name:'Compressed O2',    cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
-  {id:'hazard_suit',   name:'Hazard Suit',       cat:'Tech',   txt:'Do not flip a Ration when entering a Toxic terrain tile.'},
-  {id:'scanner',       name:'Scanner',           cat:'Tech',   txt:'When placing a new tile face-down, peek at it before others see it.'},
-  {id:'rebreather',    name:'Rebreather',        cat:'Tech',   txt:'Your O2 Tanks deplete every 2 rounds away from Crash Site instead of every round.'},
-  {id:'motion_sensor', name:'Motion Sensor',     cat:'Tech',   txt:'Once per turn, before moving, look at the top 3 tiles of the terrain stack.'},
-  {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile skips their next turn. No roll required.'},
-  {id:'flare_gun',     name:'Flare Gun',         cat:'Weapon', txt:'Force any player within 2 tiles to move to your tile immediately.'},
-  {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place face-down on any POI. The next player to investigate it flips 1 Health to WOUNDED.'},
-  {id:'jammer',        name:'Signal Jammer',     cat:'Weapon', txt:'No Signal Roll occurs this round, regardless of Radio Fragments.'},
+  {id:'plasma_cutter', name:'Plasma Cutter',     cat:'Tool',   txt:'Cut through sealed structures.'},
+  {id:'grappling',     name:'Grappling Hook',    cat:'Tool',   txt:'Move to any adjacent tile without using move points. Use once per round.'},
+  {id:'excavator',     name:'Excavator',         cat:'Tool',   txt:'Reveal a face-down tile without entering it.',use:'excavator'},
+  {id:'lockpick',      name:'Lockpick',          cat:'Tool',   txt:'Bypass mechanical locks on many structures.',},
+  {id:'walkie',        name:'Walkie',            cat:'Tool',   txt:'Trade resources with a player on an adjacent tile.',use:'walkie'},
+  {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health to HEALTHY. Discard after use.', use:'medpack'},
+  {id:'emer_food',     name:'Emergency Rations', cat:'Supply', txt:'Flip 3 EMPTY Food to FULL. Discard after use.', use:'emer_food'},
+  {id:'compressed_o2', name:'Compressed O2',     cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
+  {id:'hazard_suit',   name:'Hazard Suit',       cat:'Tech',   txt:'Negates Health loss from toxic exposure Event cards.'},
+  {id:'scanner',       name:'Scanner',           cat:'Tech',   txt:'Reveals all adjacent undiscovered tiles. Once per round, 3 charges total.',use:'scanner'},
+  {id:'rebreather',    name:'Rebreather',        cat:'Tech',   txt:'Your O\u2082 depletes every 2 turns in the field instead of every turn.'},
+  {id:'data_spike',    name:'Data Spike',        cat:'Tech',   txt:'Bypass electronic locks on high-tech structures.'},
+  {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile skips their next turn. Discard after use.',use:'stun_baton'},
+  {id:'flare_gun',     name:'Flare Gun',         cat:'Weapon', txt:'Force any player within 2 tiles to move to your tile immediately. Discard after use.',use:'flare_gun'},
+  {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place on your current tile. The next player to enter loses 1 Health. Discard after use.',use:'shock_trap'},
+  {id:'jammer',        name:'Signal Jammer',     cat:'Weapon', txt:'No Signal Roll occurs this round, regardless of Radio Fragments. Discard after use.',use:'jammer'},
 ];
 
+// Note: The Event Cards should be designed to sew distrust among the crew. They should also be based in the actual game mechanics with real consequences.
 const EVENT_CARDS=[
   // Public — yields
-  {text:'Emergency supplies found, partially intact. Roll 1 die for Ration yield.',pub:true,rollRations:true},
-  {text:'Salvageable material nearby. Roll 1 die: 1–3 = nothing; 4–5 = 1 Ration; 6 = Equipment card.',pub:true,rollWreckage:true},
+  {text:'Emergency supplies found, partially intact. Roll 1 die for Food yield.',pub:true,rollFood:true},
+  {text:'Salvageable material nearby. Roll 1 die: 1–3 = nothing; 4–5 = 1 Food; 6 = Equipment card.',pub:true,rollWreckage:true},
   {text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true},
-  {text:'A Radio Fragment — yours, ejected on impact. Still functional.',pub:true},
+  {text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true},
+  {text:'In a pile of rusted debris, you find a Radio Fragment, scavenged and re-housed in a makeshift casing. Someone wanted it to survive. If you take it back to the Signal Array, it might take a charge.',pub:true,rf:true},
+  {text:'You trip over a rock and uncover a Radio Fragment, wrapped in cloth. Whoever left it here thought they\'d come back.',pub:true,rf:true},
   {text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true},
   // Public — hazards
-  {text:'Structural instability. The ground shifts — brace yourself. Flip 1 Ration to EMPTY.',pub:true,loseRation:1},
-  {text:'Toxic residue from the crash. Flip 1 Ration to EMPTY.',pub:true,loseRation:1},
+  {text:'Structural instability. The ground shifts — brace yourself. Lose 1 Food.',pub:true,loseFood:1},
+  {text:'Toxic residue from the crash. Lose 1 Food.',pub:true,loseFood:1},
+  {text:'The air here reeks of chemical burn. Something toxic has seeped into the soil. Your lungs are burning.',pub:true,loseHealth:1},
+  {text:'Your suit registers a spike in atmospheric toxins. The source is somewhere in the wreckage above you. You inhale before you can seal the mask.',pub:true,loseHealth:1},
   // Public — narrative
   {text:'Nothing here. Whatever this place held has been taken by the terrain.',pub:true},
   {text:'Signs of prior occupation — too recent to be from the crash. Someone else was here.',pub:true},
@@ -319,12 +327,12 @@ const EVENT_CARDS=[
   {text:'Something jammed the sensors on the way in. You can\'t tell if it was the terrain or something else.',pub:true},
   // Private — resources
   {text:'A hidden cache — stowed deliberately, not by the crash. You pocket the contents before anyone else arrives.',pub:false,drawEq:true},
-  {text:'There\'s a ration here nobody logged. Take it. If anyone asks about your count, you found it in the field. That\'s true enough.',pub:false,gainRation:1},
+  {text:'There\'s food here nobody logged. Take it. If anyone asks about your count, you found it in the field. That\'s true enough.',pub:false,gainFood:1},
   {text:'You were at the equipment locker before your turn. Draw 1 Equipment card now and keep it face-down. Don\'t mention it.',pub:false,drawEqHidden:true},
-  {text:'You reached this cache first. Everything here is yours — you got here first. Take all Rations currently in the Cargo Hold. No rule says you have to share. There isn\'t one.',pub:false,takeAllCargo:true},
+  {text:'You reached this cache first. Refill your depleted Food from the Cargo Hold — take only what you\'re missing. No rule says you have to tell anyone.',pub:false,takeAllCargo:true},
   // Private — competing objectives
-  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll a 6 or higher. You are rescued. The others are not. The choice is yours.',pub:false},
-  {text:'Your original mission briefing had a clause the others weren\'t cleared for. If you are holding a Radio Fragment when the final signal is sent, your extraction is guaranteed. The manifest doesn\'t list everyone.',pub:false},
+  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll a 6 or higher to abandon the others and be rescued alone. The choice is yours.',pub:false,trackSignalArray:true},
+  {text:'Your mission briefing had a clause the others weren\'t cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.',pub:false,rfExtraction:true},
   // Private — psychological
   {text:'You\'re playing a different game than the others. Help when it\'s convenient. Nod along. But you know what you\'d do if it came down to it.',pub:false},
   {text:'Someone was at the Cargo Hold when they shouldn\'t have been. You didn\'t see who. Say nothing. Information is worth more than accusations.',pub:false},
@@ -336,26 +344,28 @@ const TILE_TIPS={
   'Medical Bay':       {desc:'Emergency medical equipment salvaged from the wreckage.',      act:'Passive: Restore 1 Health automatically when entering.'},
   'Signal Array':      {desc:'The ship\'s emergency transmitter. Fits one player at a time.',act:'Action: Activate Radio Fragments. Roll Signal dice if fragments are activated. Contest occupancy if blocked.'},
   'Equipment Locker':  {desc:'The crew\'s tool cache. Raided but not empty.',               act:'Action: Draw 1 Equipment card.'},
-  'Cargo Hold':        {desc:'Communal food and supply storage.',                            act:'Action: Deposit or withdraw Rations freely.'},
+  'Cargo Hold':        {desc:'Communal food and supply storage.',                            act:'Action: Deposit or withdraw Food freely.'},
   'Airlock':           {desc:'The pressurized entry point from the field. O₂ reserves fully restored on re-entry.',act:'Passive: Refill all O₂ Tanks automatically when entering from terrain.'},
   'Watch Tower':       {desc:'An elevated vantage point over the surrounding terrain.',      act:'Action: Reveal all face-down tiles adjacent to any crew member currently in the field.'},
-  'Signal Tower':      {desc:'A broadcasting structure, origin unknown. Possibly from a prior expedition.',act:'Investigate: Draw an Event card. May yield a Radio Fragment.'},
+  'Dead Tower':        {desc:'A broadcast tower, hand-built and long-abandoned. Inside, a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them. You salvage some Radio Fragments from the equipment.',act:'Investigate: Use Lockpick to recover 1 Radio Fragment.'},
+  'Collapsed Tower':   {desc:'A relay tower, partially collapsed. The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter. A crew member with a plasma cutter can get inside and salvage the Radio Fragment.',act:'Investigate: Use Plasma Cutter to recover 1 Radio Fragment.'},
   'Cave':              {desc:'Natural shelter. Atmospheric sensors can\'t reach inside.',    act:'Investigate: Skip O2 Tank flip this round. Draw an Event card.'},
-  'Outpost':           {desc:'A supply depot, damaged but stocked.',                         act:'Investigate: Roll 1 die for Ration yield. Draw an Event card.'},
+  'Abandoned Outpost': {desc:'The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.',act:'Use the Lockpick to enter. Roll 1 die for Food yield.'},
+  'Mysterious Outpost':{desc:'The structure doesn\'t match anything in the Endymion 7\'s manifest. The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize. Someone built this here and didn\'t want visitors. Or didn\'t expect any.',act:'Investigate: Use Data Spike to enter. Draw 1 Equipment card.'},
   'Fuselage':          {desc:'Hull section from the Endymion 7. Still holds cargo.',        act:'Investigate: May yield Equipment cards or a Radio Fragment. Draw an Event card.'},
   'Wreckage Field':    {desc:'Debris scattered across the terrain — hazardous, but potentially useful.',act:'Investigate: Roll for salvage. Draw an Event card.'},
-  'Recovered Terminal':{desc:'A functional console partially salvaged from the wreckage, still drawing power.',act:'Investigate: Draw a Private Event card. The data is yours alone.'},
-  'Cache':             {desc:'A sealed supply cache — military or civilian, hard to tell.',              act:'Investigate: Roll 1 die for Ration yield. Draw an Event card.'},
+  'Recovered Terminal':{desc:'The terminal still draws power from a source you can\'t locate. The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE. No crew names are listed. You weren\'t briefed on any prior missions to this planet.',act:'Investigate: Draw a Private Event card. The data is yours alone.'},
+  'Cache':             {desc:'A sealed supply cache — military or civilian, hard to tell.',              act:'Investigate: Roll 1 die for Food yield. Draw an Event card.'},
   'Passage':           {desc:'A narrow route through the terrain. Something passed through here recently.',act:'Investigate: Draw an Event card.'},
   'Bloody Passage':    {desc:'A narrow route marked with signs of violence. Whatever happened here was recent.',act:'Investigate: Draw an Event card.'},
   'Stasis Pod':        {desc:'Alien preservation technology. Time moves differently inside.', act:'Enter: Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time.'},
-  'Temporal Rift':     {desc:'Spacetime distortion. Past and future Rations flicker.',       act:'Automatic: Roll 1 die. 1–3: lose that many Rations. 4–6: recover that many empty Rations.'},
+  'Temporal Rift':     {desc:'Spacetime distortion. Past and future Food flickers.',       act:'Automatic: Roll 1 die. 1–3: lose that many Food. 4–6: recover that many Food.'},
   'Portal':            {desc:'Instantaneous transit point. Origin unknown.',                  act:'Option: Move pawn immediately to Crash Site. Turn ends.'},
   'Gravitational Well':{desc:'Intense localized gravity field.',                             act:'Automatic: Roll 1 die. The player to your left moves your pawn that many points in any direction.'},
-  'Dead Signal':       {desc:'Something blocks all transmission here.',                       act:'Automatic: No Signal Roll occurs this round for any player.'},
+  'Dead Zone':       {desc:'Something blocks all transmission here.',                       act:'Automatic: No Signal Roll occurs this round for any player.'},
   'Echo Chamber':      {desc:'The terrain resonates with past events.',                      act:'Automatic: Resolve the most recent Public Event card again in full.'},
-  'Inversion Field':   {desc:'Gravity inversion. Resources change hands involuntarily.',     act:'Automatic: Choose any other player. Swap your Ration tokens with theirs.'},
-  'Ship Section':      {desc:'A fragment of the Endymion 7 that came down separately.',      act:'Contains: Airlock (refill O2), Emergency Bay (restore Health), Supply Cache (roll for Rations).'},
+  'Inversion Field':   {desc:'Gravity inversion. Resources change hands involuntarily.',     act:'Automatic: Choose any other player. Swap your Food with theirs.'},
+  'Ship Section':      {desc:'A section of the Endymion 7 that came down separately. Emergency systems are still online.',act:'Investigate: Roll 1 die — 1–2: Food, 3–4: Oxygen, 5–6: Health.'},
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -386,12 +396,14 @@ function newGame(names, portraits, placedMap){
   const players=names.map((name,i)=>{
     const equipment=eqDeck.splice(0,3).map(c=>({...c,uid:++cardUid}));
     const portrait=(portraits&&portraits[i])||CREW_PORTRAITS[i%CREW_PORTRAITS.length].name;
-    return{id:i,name,color:PCOLORS[i],portrait,q:0,r:0,rations:10,o2:3,health:3,
-           radioFragments:0,equipment,incapacitated:0,alive:true,location:'Crash Site',skipO2:false};
+    return{id:i,name,color:PCOLORS[i],portrait,q:0,r:0,food:10,o2:3,health:3,
+           radioFragments:0,equipment,incapacitated:0,alive:true,location:'Crash Site',skipO2:false,
+           inStasis:false,signalArrayRounds:0,soloRescueActive:false,rfExtractionActive:false,
+           scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false};
   });
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
      eqDeck,eqDeckCount:eqDeck.length,evtDeckCount:80,
-     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:players.length*5};
+     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:players.length*5,lastPublicEvt:null,jammerActive:false};
   expandFrontier();
 }
 
@@ -463,15 +475,32 @@ function showTileRevealModal(t, onDismiss){
     if(!desc)desc='An anomaly of unknown origin.';
   } else if(t.type==='ship_section'){
     title='Ship Section — Endymion 7';
-    desc='A section of the Endymion 7 rests here, partially intact.\n\nFacilities: Airlock · Emergency Bay · Supply Cache';
+    desc='A section of the Endymion 7 that came down separately. Emergency systems are still online. Roll to see what you can salvage — 1–2: Food, 3–4: Oxygen, 5–6: Health.';
   } else {
     title=t.pois.join(' \u00b7 ');
     desc=t.pois.map(poi=>TILE_TIPS[poi]?.desc).filter(Boolean).join('\n\n');
   }
-  if(t.radioFragment){
+  if(t.requiresTool&&!t.radioFragment){
+    const p=cp();
+    const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
+    const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
+    const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
+    desc=(desc?desc+'\n\n':'')+
+      (hasTool?`\u25c8 You have a ${toolName}. You can enter.`
+              :`\u25c8 Requires ${toolName} to enter.`);
+  }
+  if(t.radioFragment&&!t.requiresTool){
     const p=cp();p.radioFragments++;t.radioFragment=false;
-    addLog(`${p.name} recovered a Radio Fragment from the Signal Tower.`,'frag');
-    desc=(desc?desc+'\n\n':'')+'\u25c8 Radio Fragment recovered from this tower.';
+    addLog(`${p.name} recovered a Radio Fragment.`,'frag');
+    desc=(desc?desc+'\n\n':'')+'\u25c8 Radio Fragment recovered.';
+  } else if(t.radioFragment&&t.requiresTool){
+    const p=cp();
+    const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
+    const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
+    const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
+    desc=(desc?desc+'\n\n':'')+
+      (hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`
+              :`\u25c8 Requires ${toolName} to access the Radio Fragment.`);
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
@@ -492,26 +521,154 @@ function showTileRevealModal(t, onDismiss){
     trov.style.display='none';
     trov.style.backgroundImage='';
     if(onDismiss)onDismiss();
+    else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'){updateUI();render();}
     else drawTileEvent(t);
   };
-  if(isAnomaly&&t.anomaly==='Portal'){
+  if(t.type==='ship_section'){
+    deck.style.display='none';
+    trov.onclick=null;
+    const descEl=document.getElementById('tr-desc');
+    const dieWrap=make3DDie('idle');
+    dieWrap.style.cssText='margin:0 auto;';
+    actionsEl.appendChild(dieWrap);
+    dieWrap.onclick=()=>{
+      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      const val=1+(0|Math.random()*6);
+      setTimeout(()=>{
+        actionsEl.innerHTML='';
+        const resDie=makeResultDie(val);
+        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
+        actionsEl.appendChild(resDie);
+        const p=cp();
+        let outcome='';
+        if(val<=2){const gained=Math.min(10-p.food,3);p.food+=gained;outcome=`Rolled ${val} — Food: +${gained}.`;addLog(`${p.name} salvaged ${gained} Food from Ship Section.`,'good');}
+        else if(val<=4){const gained=Math.min(3-p.o2,2);p.o2+=gained;outcome=`Rolled ${val} — Oxygen: +${gained}.`;addLog(`${p.name} refilled ${gained} O\u2082 from Ship Section.`,'good');}
+        else{if(p.health<3){p.health++;outcome=`Rolled ${val} — Health restored.`;addLog(`${p.name} treated at Ship Section. Health: ${p.health}/3.`,'good');}else{outcome=`Rolled ${val} — Health already full.`;addLog(`${p.name} searched Ship Section — health already full.`);}}
+        const outEl=document.createElement('div');
+        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
+        outEl.textContent=outcome;descEl.appendChild(outEl);
+        updateUI();
+        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
+        cont.onclick=dismiss;
+        actionsEl.appendChild(cont);
+      },1500);
+    };
+  } else if(isAnomaly&&t.anomaly==='Portal'){
     deck.style.display='none';
     const p=cp();
-    const useBtn=document.createElement('button');useBtn.className='btn pri';useBtn.textContent='Use Portal';
+    const useBtn=document.createElement('button');useBtn.className='mbtn pri';useBtn.textContent='Use Portal';
     useBtn.onclick=()=>{dismiss();p.q=0;p.r=0;p.location='Crash Site';G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal — returned to Crash Site.`);updateUI();render();};
-    const decBtn=document.createElement('button');decBtn.className='btn';decBtn.textContent='Decline';
+    const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Decline';
     decBtn.onclick=()=>{dismiss();addLog(`${p.name} declined the Portal.`);updateUI();};
     actionsEl.appendChild(decBtn);actionsEl.appendChild(useBtn);
+  } else if(isAnomaly&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravitational Well')){
+    deck.style.display='none';
+    trov.onclick=null;
+    const descEl=document.getElementById('tr-desc');
+    const dieWrap=make3DDie('idle');
+    dieWrap.style.cssText='margin:0 auto;';
+    actionsEl.appendChild(dieWrap);
+    dieWrap.onclick=()=>{
+      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      const val=1+(0|Math.random()*6);
+      setTimeout(()=>{
+        actionsEl.innerHTML='';
+        const resDie=makeResultDie(val);
+        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
+        actionsEl.appendChild(resDie);
+        let outcome='';
+        const p=cp();
+        if(t.anomaly==='Temporal Rift'){
+          if(val<=3){const lost=Math.min(p.food,val);p.food-=lost;outcome=`Rolled ${val} — lost ${lost} Food.`;addLog(`Temporal Rift: rolled ${val} — lost ${lost} Food.`,'crit');}
+          else{const gain=Math.min(10-p.food,val);p.food+=gain;outcome=`Rolled ${val} — gained ${gain} Food.`;addLog(`Temporal Rift: rolled ${val} — gained ${gain} Food.`,'good');}
+        } else if(t.anomaly==='Gravitational Well'){
+          let q=p.q,r=p.r;
+          for(let i=0;i<val;i++){const d=DIRS[0|Math.random()*6];const nq=q+d[0],nr=r+d[1];if(G.tiles.has(hk(nq,nr))){q=nq;r=nr;}}
+          p.q=q;p.r=r;const dest=G.tiles.get(hk(q,r));p.location=tileName(dest);
+          outcome=`Rolled ${val} — thrown to ${p.location}.`;
+          addLog(`Gravitational Well: rolled ${val} — ${p.name} thrown to ${p.location}.`,'crit');render();
+        }
+        const outEl=document.createElement('div');
+        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
+        outEl.textContent=outcome;descEl.appendChild(outEl);
+        updateUI();
+        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
+        cont.onclick=()=>{
+          trov.onclick=null;deck.onclick=null;actionsEl.innerHTML='';
+          trov.classList.remove('show','anomaly-mode');trov.style.display='none';trov.style.backgroundImage='';
+          if(onDismiss)onDismiss();else{updateUI();render();}
+        };
+        actionsEl.appendChild(cont);
+      },1500);
+    };
   } else if(isAnomaly){
     deck.style.display='none';
     trov.classList.add('anomaly-mode');
     trov.onclick=e=>{if(e.target===trov)dismiss();};
   } else {
-    deck.style.display='';
     trov.onclick=null;
-    document.getElementById('tr-evtn').textContent=G.evtDeckCount;
-    document.getElementById('tr-deck-lbl').textContent='Draw Event';
-    deck.onclick=dismiss;
+    if(t.noEvent){
+      deck.style.display='none';
+    } else {
+      deck.style.display='';
+      document.getElementById('tr-evtn').textContent=G.evtDeckCount;
+      document.getElementById('tr-deck-lbl').textContent='Draw Event';
+      deck.onclick=dismiss;
+    }
+    if(t.requiresTool&&!t.radioFragment){
+      const p=cp();
+      const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
+      const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
+      const toolName=TOOL_NAMES[t.requiresTool];
+      if(hasTool){
+        const enterBtn=document.createElement('button');
+        enterBtn.className='mbtn pri';
+        enterBtn.textContent=`Use ${toolName} — Enter`;
+        enterBtn.onclick=()=>{
+          const reward=t.toolReward;t.toolReward=null;t.investigatedCount=t.pois.length;
+          if(reward==='rollFood'){
+            dismiss();
+            showDieRoll('Search the outpost. Roll for Food yield.',val=>{
+              const gained=Math.min(10-p.food,val);
+              p.food+=gained;
+              addLog(`${p.name} searched the outpost — gained ${gained} Food.`,'good');
+              return`Rolled ${val} — gained ${gained} Food.`;
+            });
+          } else if(reward==='drawEq'){
+            const c=drawEqCard(p);
+            if(c)addLog(`${p.name} found ${c.name} inside.`,'good');
+            else addLog(`${p.name} searched the outpost — equipment cache empty.`);
+            dismiss();
+          }
+        };
+        actionsEl.appendChild(enterBtn);
+      } else {
+        const leaveBtn=document.createElement('button');
+        leaveBtn.className='mbtn';
+        leaveBtn.textContent='Leave';
+        leaveBtn.onclick=dismiss;
+        actionsEl.appendChild(leaveBtn);
+      }
+    }
+    if(t.radioFragment&&t.requiresTool){
+      const p=cp();
+      const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
+      if(hasTool){
+        const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
+        const toolName=TOOL_NAMES[t.requiresTool];
+        const fragBtn=document.createElement('button');
+        fragBtn.className='mbtn pri';
+        fragBtn.textContent=`Use ${toolName} — Recover Fragment`;
+        fragBtn.onclick=()=>{p.radioFragments++;t.radioFragment=false;t.investigatedCount=t.pois.length;addLog(`${p.name} used ${toolName} to recover a Radio Fragment.`,'frag');dismiss();};
+        actionsEl.appendChild(fragBtn);
+      } else {
+        const leaveBtn=document.createElement('button');
+        leaveBtn.className='mbtn';
+        leaveBtn.textContent='Leave';
+        leaveBtn.onclick=dismiss;
+        actionsEl.appendChild(leaveBtn);
+      }
+    }
   }
   cancelTooltip();
   trov.style.display='flex';
@@ -527,18 +684,25 @@ function drawTileEvent(t){
   if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');}
   if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}.`,'good');}
   if(evt.drawEqHidden){drawEqCard(p);}
-  if(evt.gainRation){p.rations=Math.min(10,p.rations+evt.gainRation);}
-  if(evt.takeAllCargo){const taken=G.cargoHold||0;p.rations=Math.min(10,p.rations+taken);G.cargoHold=0;}
-  if(evt.loseRation){const lost=Math.min(p.rations,evt.loseRation);p.rations-=lost;addLog(`${p.name} lost ${lost} Ration(s).`,'crit');}
+  if(evt.gainFood){p.food=Math.min(10,p.food+evt.gainFood);}
+  if(evt.takeAllCargo){const taken=Math.min(10-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
+  if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food.`,'crit');}
   if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.');}
+  if(evt.loseHealth){
+    if(p.equipment.some(c=>c.id==='hazard_suit')){addLog(`${p.name}'s Hazard Suit blocked toxic exposure.`,'good');}
+    else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
+  }
+  if(evt.pub)G.lastPublicEvt=evt;
+  if(evt.trackSignalArray){p.soloRescueActive=true;addLog(`${p.name} has a private objective.`,'act');}
+  if(evt.rfExtraction){p.rfExtractionActive=true;addLog(`${p.name} has a private objective.`,'act');}
   const locName=t.pois&&t.pois.length?t.pois.join(' \u00b7 '):(t.name||'');
   let rollCallback=null;
-  if(evt.rollRations){
-    rollCallback=r=>{const gained=Math.min(10-p.rations,r);p.rations+=gained;addLog(`Loot roll: ${r} \u2014 +${gained} Ration(s).`,gained?'good':'');return`Rolled ${r} \u2014 gained ${gained} Ration${gained!==1?'s':''}.`;};
+  if(evt.rollFood){
+    rollCallback=r=>{const gained=Math.min(10-p.food,r);p.food+=gained;addLog(`Loot roll: ${r} \u2014 +${gained} Food.`,gained?'good':'');return`Rolled ${r} \u2014 gained ${gained} Food.`;};
   } else if(evt.rollWreckage){
     rollCallback=r=>{
       if(r<=3){addLog(`Wreckage roll: ${r} \u2014 nothing found.`);return`Rolled ${r} \u2014 nothing found.`;}
-      if(r<=5){const gained=Math.min(10-p.rations,1);p.rations+=gained;addLog(`Wreckage roll: ${r} \u2014 +1 Ration.`,'good');return`Rolled ${r} \u2014 gained 1 Ration.`;}
+      if(r<=5){const gained=Math.min(10-p.food,1);p.food+=gained;addLog(`Wreckage roll: ${r} \u2014 +1 Food.`,'good');return`Rolled ${r} \u2014 gained 1 Food.`;}
       const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
     };
   }
@@ -716,15 +880,23 @@ function doMove(q,r){
     if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');}
     if(t.name==='Medical Bay'&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
   }
+  if(t?.shockTrap&&t.shockTrapOwner!==p.id){
+    t.shockTrap=false;t.shockTrapOwner=null;
+    if(p.health>0)p.health--;
+    addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3.`,'crit');
+  }
   const isNewAnomaly=!wasRevealed&&t?.type==='anomaly';
   if(t?.type==='anomaly'&&!isNewAnomaly)triggerAnomaly(t);
-  const needsDraw=!wasRevealed&&t&&(t.type==='terrain'||t.type==='ship_section')&&t.pois?.length>0;
-  if(needsDraw)t.investigatedCount=t.pois.length;
+  const wasInvestigated=(G.tiles.get(hk(q,r))?.investigatedCount||0)>0;
+  const stillPending=t?.requiresTool&&(t.radioFragment||t.toolReward);
+  const needsDraw=!wasInvestigated&&t&&(t.type==='terrain'||t.type==='ship_section')&&t.pois?.length>0||stillPending;
+  if(needsDraw&&!stillPending)t.investigatedCount=t.pois.length;
   G.phase='action';G.reach=bfsReach(p.q,p.r,G.movementLeft);
   addLog(`${p.name} → ${p.location}`);
   updateUI();render();
+  const rollingAnomaly=t?.type==='anomaly'&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravitational Well');
   if(needsDraw)showTileRevealModal(t);
-  else if(isNewAnomaly)showTileRevealModal(t,()=>triggerAnomaly(t));
+  else if(isNewAnomaly)showTileRevealModal(t,rollingAnomaly?()=>{updateUI();render();}:()=>triggerAnomaly(t));
 }
 
 
@@ -737,14 +909,74 @@ function drawEqCard(player){
   return card;
 }
 
+
+
 function useCard(playerIdx,uid){
   const p=G.players[playerIdx];const ci=p.equipment.findIndex(c=>c.uid===uid);if(ci<0)return;
   const c=p.equipment[ci];
   if(!c.use)return;
   if(c.use==='medpack'){if(p.health<3){p.health++;p.equipment.splice(ci,1);addLog(`${p.name} used MedPack. Health: ${p.health}/3.`,'good');}else{addLog('Health already full.');return;}}
-  else if(c.use==='emer_rations'){const gain=Math.min(3,10-p.rations);p.rations+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Rations. +${gain} Rations.`,'good');}
+  else if(c.use==='emer_food'){const gain=Math.min(3,10-p.food);p.food+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Food. +${gain} Food.`,'good');}
   else if(c.use==='compressed_o2'){const gain=Math.min(2,3-p.o2);p.o2+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Compressed O₂. +${gain} O₂.`,'good');}
   else if(c.use==='excavator'){p.equipment.splice(ci,1);closeCardModal();G.excavatorMode=true;addLog('Excavator: click an adjacent face-down tile to reveal it.','act');updateUI();render();return;}
+  else if(c.use==='scanner'){
+    if(p.scannerUsed){addLog('Scanner already used this round.','act');closeCardModal();return;}
+    if(p.scannerCharges<=0){addLog('Scanner is depleted.','act');closeCardModal();return;}
+    p.scannerUsed=true;
+    p.scannerCharges--;
+    let revealed=0;
+    hnbr(p.q,p.r).forEach(([nq,nr])=>{
+      const nt=G.tiles.get(hk(nq,nr));
+      if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
+    });
+    const chargesLeft=p.scannerCharges>0?` (${p.scannerCharges} charge${p.scannerCharges!==1?'s':''} remaining)`:'';
+    if(revealed>0)addLog(`${p.name} used Scanner — ${revealed} adjacent tile${revealed!==1?'s':''} revealed.${chargesLeft}`,'tile');
+    else addLog(`${p.name} used Scanner — no undiscovered tiles adjacent.${chargesLeft}`,'act');
+    if(p.scannerCharges<=0){p.equipment.splice(ci,1);addLog('Scanner battery depleted.','act');}
+    closeCardModal();render();updateUI();return;
+  }
+  else if(c.use==='stun_baton'){
+    const targets=G.players.filter(pl=>pl.alive&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r);
+    if(!targets.length){addLog('No crew on this tile to stun.','act');closeCardModal();return;}
+    const applyStun=target=>{target.stunned=true;p.equipment.splice(ci,1);addLog(`${p.name} stunned ${target.name}. They skip their next turn.`,'crit');closeCardModal();updateUI();render();};
+    if(targets.length===1){applyStun(targets[0]);return;}
+    showModal('STUN BATON','Select a crew member to stun.',true,()=>{},'Cancel',undefined,undefined,'');
+    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+    targets.forEach(tgt=>{const b=document.createElement('button');b.className='mbtn wrn';b.textContent=tgt.name;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyStun(tgt);};btns.appendChild(b);});
+    document.getElementById('mact').prepend(btns);return;
+  }
+  else if(c.use==='flare_gun'){
+    const targets=G.players.filter(pl=>{if(!pl.alive||pl.id===p.id)return false;const path=bfsPath(p.q,p.r,pl.q,pl.r);return path&&path.length<=2;});
+    if(!targets.length){addLog('No crew within range of the Flare Gun.','act');closeCardModal();return;}
+    const applyFlare=target=>{target.q=p.q;target.r=p.r;target.location=tileName(G.tiles.get(hk(p.q,p.r)));p.equipment.splice(ci,1);addLog(`${p.name} fired the Flare Gun — ${target.name} forced to this tile.`,'crit');closeCardModal();updateUI();render();};
+    if(targets.length===1){applyFlare(targets[0]);return;}
+    showModal('FLARE GUN','Select a crew member to pull to your position.',true,()=>{},'Cancel',undefined,undefined,'');
+    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+    targets.forEach(tgt=>{const b=document.createElement('button');b.className='mbtn wrn';b.textContent=`${tgt.name} (${bfsPath(p.q,p.r,tgt.q,tgt.r)?.length||'?'} tiles)`;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyFlare(tgt);};btns.appendChild(b);});
+    document.getElementById('mact').prepend(btns);return;
+  }
+  else if(c.use==='shock_trap'){
+    const t=G.tiles.get(hk(p.q,p.r));if(!t){closeCardModal();return;}
+    t.shockTrap=true;t.shockTrapOwner=p.id;p.equipment.splice(ci,1);
+    addLog(`${p.name} placed a Shock Trap on this tile.`,'act');closeCardModal();updateUI();return;
+  }
+  else if(c.use==='walkie'){
+    const adjacent=G.players.filter(pl=>{
+      if(!pl.alive||pl.id===p.id)return false;
+      return DIRS.some(([dq,dr])=>pl.q===p.q+dq&&pl.r===p.r+dr);
+    });
+    if(!adjacent.length){addLog('No crew on adjacent tiles.','act');closeCardModal();return;}
+    const openWith=partner=>{closeCardModal();initTradeModal(p,partner);};
+    if(adjacent.length===1){openWith(adjacent[0]);return;}
+    showModal('WALKIE','Select a crew member to trade with.',true,()=>{},'Cancel',undefined,undefined,'');
+    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+    adjacent.forEach(pl=>{const b=document.createElement('button');b.className='mbtn';b.textContent=pl.name;b.onclick=()=>{document.getElementById('mov').classList.remove('show');openWith(pl);};btns.appendChild(b);});
+    document.getElementById('mact').prepend(btns);return;
+  }
+  else if(c.use==='jammer'){
+    G.jammerActive=true;p.equipment.splice(ci,1);
+    addLog(`${p.name} activated the Signal Jammer — no Signal Roll this round.`,'act');closeCardModal();updateUI();return;
+  }
   closeCardModal();updateUI();
 }
 
@@ -764,6 +996,22 @@ function doSignalRoll(){
   if(G.signalRolled)return;
   const t=G.tiles.get(hk(p.q,p.r));if(t?.name!=='Signal Array')return;
   if(!G.radioFragmentsActivated)return;
+  if(G.jammerActive){addLog('Signal Jammer active — Signal Roll blocked this round.','crit');return;}
+  // Dead Zone blocks the roll if any player occupies that anomaly tile
+  const deadSignalActive=G.players.some(pl=>pl.alive&&G.tiles.get(hk(pl.q,pl.r))?.anomaly==='Dead Zone');
+  if(deadSignalActive){addLog('Dead Zone active — transmission blocked this round.','crit');return;}
+  // RF Extraction: auto-success if this player holds a Radio Fragment
+  if(p.rfExtractionActive&&p.radioFragments>0){
+    addLog(`${p.name} — Radio Fragment detected. Extraction guaranteed.`,'good');
+    showModal('RESCUE SIGNAL RECEIVED','',true,()=>{},undefined,undefined,undefined,
+      '<div id="mov-e7log" class="mov-e7log"></div>');
+    e7ScreenSeq('mov-e7log',[
+      [300,'sys',`> PRIORITY SIGNAL: ${p.name}.`],
+      [600,'','Manifest override confirmed.'],
+      [1200,'good','> All surviving crew have been rescued.'],
+    ],22);
+    return;
+  }
   const frags=G.radioFragmentsActivated;
   const thr=[null,18,16,14,12,10][frags];
   document.getElementById('sig-frags').textContent=`Establish rescue signal`;
@@ -829,34 +1077,70 @@ function doEquipLocker(){
   trov.style.backgroundImage='url(img/Tiles/locker.png)';
   trov.classList.add('equip-locker');
   document.getElementById('tr-name').textContent='EQUIPMENT LOCKER';
-  const empty=G.eqDeckCount<=0;
-  e7Type(document.getElementById('tr-desc'),empty?'The equipment deck is empty.':'Draw 1 card from the equipment deck.');
-  document.getElementById('tr-evtn').textContent=G.eqDeckCount;
-  document.getElementById('tr-deck-lbl').textContent='Draw Equipment';
   const deck=document.getElementById('tr-deck');
-  deck.style.display=empty?'none':'';
+  const actionsEl=document.getElementById('tr-actions');
+  actionsEl.innerHTML='';
   const cancelBtn=document.getElementById('trov-cancel');
   cancelBtn.style.display='';
   const dismiss=()=>{
     deck.onclick=null;
     cancelBtn.onclick=null;
     cancelBtn.style.display='none';
+    actionsEl.innerHTML='';actionsEl.style.cssText='';
     trov.classList.remove('show','equip-locker');
     trov.style.display='none';
     trov.style.backgroundImage='';
   };
-  deck.onclick=()=>{
-    dismiss();
-    const c=drawEqCard(p);
-    G.tileActionUsed=true;
-    if(c){
-      addLog(`${p.name} drew ${c.name} from Equipment Locker.`,'good');
-      openCardModal(p.id,c,'url(img/Tiles/locker.png)');
-    } else{addLog('Equipment Locker: deck empty.');}
-    updateUI();
-  };
   cancelBtn.onclick=dismiss;
   trov.onclick=null;
+  const hasCards=p.equipment&&p.equipment.length>0;
+  const deckEmpty=G.eqDeckCount<=0;
+  if(hasCards){
+    // Exchange mode: select a card to discard, then draw a replacement
+    deck.style.display='none';
+    e7Type(document.getElementById('tr-desc'),deckEmpty
+      ?'The equipment deck is empty — nothing to exchange.'
+      :'Select a card to discard. It will be replaced with a new one.');
+    if(!deckEmpty){
+      actionsEl.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px;';
+      p.equipment.forEach(card=>{
+        const d=document.createElement('div');
+        d.className=`eqcard exchange-target cc-${card.cat}`;
+        d.innerHTML=cardFaceHTML(card.cat,card.name,card.txt);
+        d.onclick=()=>{
+          const ci=p.equipment.findIndex(c=>c.uid===card.uid);
+          if(ci>=0){p.equipment.splice(ci,1);G.eqDeckCount++;}// return card to deck
+          dismiss();
+          const newCard=drawEqCard(p);
+          G.tileActionUsed=true;
+          if(newCard){
+            addLog(`${p.name} exchanged ${card.name} → ${newCard.name}.`,'good');
+            openCardModal(p.id,newCard,'url(img/Tiles/locker.png)');
+          } else {
+            addLog(`${p.name} discarded ${card.name} — deck is now empty.`);
+          }
+          updateUI();
+        };
+        actionsEl.appendChild(d);
+      });
+    }
+  } else {
+    // Draw mode: no existing cards, just draw one
+    e7Type(document.getElementById('tr-desc'),deckEmpty?'The equipment deck is empty.':'Draw 1 card from the equipment deck.');
+    document.getElementById('tr-evtn').textContent=G.eqDeckCount;
+    document.getElementById('tr-deck-lbl').textContent='Draw Equipment Card';
+    deck.style.display=deckEmpty?'none':'';
+    deck.onclick=()=>{
+      dismiss();
+      const c=drawEqCard(p);
+      G.tileActionUsed=true;
+      if(c){
+        addLog(`${p.name} drew ${c.name} from Equipment Locker.`,'good');
+        openCardModal(p.id,c,'url(img/Tiles/locker.png)');
+      } else {addLog('Equipment Locker: deck empty.');}
+      updateUI();
+    };
+  }
   trov.style.display='flex';
   trov.classList.add('show');
 }
@@ -869,8 +1153,8 @@ function doCargo(){
 function renderCargoModal(){
   const p=cp();
   const hold=G.cargoHold||0;
-  const cap=10-p.rations;// room on player
-  const body=`Hold: ${hold} rations\nYours: ${p.rations}/10\n\nChoose action:`;
+  const cap=10-p.food;// room on player
+  const body=`Hold: ${hold} Food\nYours: ${p.food} Food\n\nChoose action:`;
   const mov=document.getElementById('mov');
   mov.classList.add('cargo');
   const ma=document.getElementById('mact');
@@ -878,13 +1162,13 @@ function renderCargoModal(){
   document.getElementById('mbod').textContent=body;
   ma.innerHTML='';
   // Deposit 1
-  const d1=document.createElement('button');d1.className='btn';d1.textContent='Deposit 1';d1.disabled=p.rations<=0;
-  d1.onclick=()=>{if(p.rations>0){p.rations--;G.cargoHold=(G.cargoHold||0)+1;addLog(`${p.name} deposited 1 Ration. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
+  const d1=document.createElement('button');d1.className='mbtn';d1.textContent='Deposit 1';d1.disabled=p.food<=0;
+  d1.onclick=()=>{if(p.food>0){p.food--;G.cargoHold=(G.cargoHold||0)+1;addLog(`${p.name} deposited 1 Food. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
   // Withdraw 1
-  const w1=document.createElement('button');w1.className='btn wrn';w1.textContent='Withdraw 1';w1.disabled=hold<=0||cap<=0;
-  w1.onclick=()=>{if(hold>0&&cap>0){G.cargoHold--;p.rations++;addLog(`${p.name} withdrew 1 Ration. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
+  const w1=document.createElement('button');w1.className='mbtn wrn';w1.textContent='Withdraw 1';w1.disabled=hold<=0||cap<=0;
+  w1.onclick=()=>{if(hold>0&&cap>0){G.cargoHold--;p.food++;addLog(`${p.name} withdrew 1 Food. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
   // Close
-  const cl=document.createElement('button');cl.className='btn pri';cl.textContent='Done';
+  const cl=document.createElement('button');cl.className='mbtn pri';cl.textContent='Done';
   cl.onclick=()=>{const m=document.getElementById('mov');m.classList.remove('show','cargo');};
   ma.appendChild(d1);ma.appendChild(w1);ma.appendChild(cl);
   document.getElementById('mov').classList.add('show');
@@ -933,16 +1217,49 @@ function doWatchTower(){
 function doEndTurn(){
   if(G.phase==='roll')return;
   const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
-  if(p.rations>0)p.rations--;
+  // Stasis: skip all depletion
+  if(p.inStasis){
+    if(curTile?.anomaly!=='Stasis Pod'){p.inStasis=false;}
+    else{advanceTurn();return;}
+  }
+  if(p.food>0)p.food--;
   else{if(p.health>0)p.health--;addLog(`${p.name} is starving. Health: ${p.health}/3.`,'crit');}
   if(!onBase&&!p.skipO2){
-    if(p.o2>0)p.o2--;
-    else{if(p.health>0)p.health--;addLog(`${p.name} has no O₂. Health: ${p.health}/3.`,'crit');}
+    const hasRebreather=p.equipment.some(c=>c.id==='rebreather');
+    if(hasRebreather){p.rebreatherCycle=!p.rebreatherCycle;}
+    if(!hasRebreather||p.rebreatherCycle){
+      if(p.o2>0)p.o2--;
+      else{if(p.health>0)p.health--;addLog(`${p.name} has no O₂. Health: ${p.health}/3.`,'crit');}
+    }
   }
   p.skipO2=false;
   if(p.health===0&&p.alive){p.incapacitated++;
     if(p.incapacitated>=2){p.alive=false;addLog(`${p.name} has DIED.`,'crit');}
     else addLog(`${p.name} is INCAPACITATED (${p.incapacitated}/2).`,'crit');}
+  // Signal Array occupancy tracking
+  if(curTile?.name==='Signal Array'){
+    p.signalArrayRounds++;
+    if(p.soloRescueActive&&p.signalArrayRounds>=3){
+      showDieRoll(`${p.name} — Solo Extraction attempt. Roll 6 or higher to be rescued alone.`,val=>{
+        addLog(`${p.name} solo rescue: rolled ${val}.`,val>=6?'good':'crit');
+        if(val>=6){
+          p.alive=false;
+          showModal('SOLO EXTRACTION','',true,()=>{advanceTurn();},undefined,undefined,undefined,
+            '<div id="mov-e7log" class="mov-e7log"></div>');
+          e7ScreenSeq('mov-e7log',[
+            [300,'sys',`> SIGNAL ISOLATED: ${p.name}.`],
+            [600,'','Rescue craft locked on single life sign.'],
+            [1200,'good',`> ${p.name} has been extracted. The others remain.`],
+          ],22);
+          return`Rolled ${val} — EXTRACTED.`;
+        }
+        return`Rolled ${val} — signal not strong enough. Remain on the array.`;
+      },()=>advanceTurn());
+      return;
+    }
+  } else {
+    p.signalArrayRounds=0;
+  }
   advanceTurn();
 }
 
@@ -960,8 +1277,14 @@ function advanceTurn(){
   }
   let next=(G.currentPlayer+1)%G.players.length,tries=0;
   while(!G.players[next].alive&&tries++<G.players.length)next=(next+1)%G.players.length;
-  if(next<=G.currentPlayer)G.turn++;
+  if(next<=G.currentPlayer){G.turn++;G.jammerActive=false;}
   G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.excavatorMode=false;G.signalRolled=false;
+  G.players[next].scannerUsed=false;
+  if(G.players[next].stunned){
+    G.players[next].stunned=false;
+    addLog(`${G.players[next].name} is stunned — skipping turn.`,'crit');
+    advanceTurn();return;
+  }
   addLog(`Turn ${G.turn}: ${G.players[next].name}.`,'act');
   showTableDice('move');
   updateUI();render();
@@ -970,18 +1293,61 @@ function advanceTurn(){
 function triggerAnomaly(t){
   const p=cp();
   switch(t.anomaly){
-    case'Temporal Rift':{
-      const r=1+(0|Math.random()*6);
-      if(r<=3){const lost=Math.min(p.rations,r);p.rations-=lost;addLog(`Temporal Rift: rolled ${r} — lost ${lost} Ration(s).`,'crit');}
-      else{const gain=Math.min(10-p.rations,r);p.rations+=gain;addLog(`Temporal Rift: rolled ${r} — gained ${gain} Ration(s).`,'good');}
-      updateUI();break;
+    case'Temporal Rift':
+      showTileRevealModal(t,()=>{updateUI();render();});break;
+    case'Portal':showTileRevealModal(t,()=>{updateUI();render();});break;
+    case'Dead Zone':addLog('Dead Zone: transmission blocked. No Signal Roll can be made while this tile is occupied.');updateUI();break;
+    case'Gravitational Well':
+      showTileRevealModal(t,()=>{updateUI();render();});break;
+    case'Echo Chamber':{
+      if(!G.lastPublicEvt){addLog('Echo Chamber: no prior public event to repeat.','act');break;}
+      const evt=G.lastPublicEvt;
+      if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment! (Echo Chamber)`,'frag');}
+      if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}. (Echo Chamber)`,'good');}
+      if(evt.gainFood){p.food=Math.min(10,p.food+evt.gainFood);}
+      if(evt.takeAllCargo){const taken=Math.min(10-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
+      if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food. (Echo Chamber)`,'crit');}
+      if(evt.skipO2){p.skipO2=true;}
+      let rollCb=null;
+      if(evt.rollFood){rollCb=r=>{const g=Math.min(10-p.food,r);p.food+=g;addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`,g?'good':'');return`Rolled ${r} — gained ${g} Food.`;};}
+      else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(10-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
+      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();},rollCb);
+      break;
     }
-    case'Portal':break;// handled on tile reveal screen
-    case'Inversion Field':addLog('Inversion Field: swap Rations with another player. (Resolve at the table.)','act');updateUI();break;
-    case'Gravitational Well':addLog('Gravitational Well: player to your left moves your pawn 1 die roll. (Resolve at the table.)','act');break;
-    case'Dead Signal':addLog('Dead Signal: no Signal Roll occurs this round.');break;
-    case'Echo Chamber':addLog('Echo Chamber: resolve the most recent Public Event again. (Resolve at the table.)','act');break;
-    case'Stasis Pod':addLog('Stasis Pod: you may enter stasis — turn pawn sideways. (Resolve at the table.)','act');break;
+    case'Inversion Field':{
+      const others=G.players.filter(pl=>pl.alive&&pl.id!==p.id);
+      if(!others.length){addLog('Inversion Field: no other players to swap with.','act');break;}
+      const body='Gravity inversion — choose a crew member to swap Food with, or decline.';
+      const extraBtns=document.createElement('div');extraBtns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+      others.forEach(other=>{
+        const b=document.createElement('button');b.className='mbtn';
+        b.textContent=`Swap with ${other.name} (${other.food} Food)`;
+        b.onclick=()=>{
+          document.getElementById('mov').classList.remove('show');
+          const tmp=p.food;p.food=other.food;other.food=tmp;
+          addLog(`Inversion Field: ${p.name} swapped Food with ${other.name}.`,'crit');
+          updateUI();render();
+        };
+        extraBtns.appendChild(b);
+      });
+      showModal('INVERSION FIELD',body,true,()=>{addLog(`${p.name} declined the Inversion Field.`);updateUI();render();},'Decline',undefined,undefined,'');
+      document.getElementById('mact').prepend(extraBtns);
+      break;
+    }
+    case'Stasis Pod':{
+      if(p.inStasis){
+        showModal('STASIS POD','You are in stasis. Resource depletion is suspended. Exit stasis?',true,
+          ()=>{p.inStasis=false;addLog(`${p.name} exited stasis.`,'act');updateUI();render();},
+          'Exit Stasis',
+          ()=>{updateUI();render();},'Stay in Stasis');
+      } else {
+        showModal('STASIS POD','Alien preservation technology. Enter stasis to suspend all resource depletion. You cannot take actions while in stasis. Exit any time by choosing to leave.',true,
+          ()=>{p.inStasis=true;addLog(`${p.name} entered stasis.`,'act');updateUI();render();},
+          'Enter Stasis',
+          ()=>{updateUI();render();},'Decline');
+      }
+      break;
+    }
     default:addLog(`Anomaly: ${t.anomaly}.`);
   }
 }
@@ -1007,14 +1373,14 @@ function openTrade(){
 }
 
 function initTradeModal(pA,pB){
-  tradeState={pA,pB,stagedAtoB:new Set(),stagedBtoA:new Set(),aRat:0,bRat:0,aO2:0,bO2:0};
+  tradeState={pA,pB,stagedAtoB:new Set(),stagedBtoA:new Set(),aFood:0,bFood:0,aO2:0,bO2:0};
   renderTradeModal();
   document.getElementById('trademodal').classList.add('show');
 }
 
 function renderTradeModal(){
   if(!tradeState)return;
-  const{pA,pB,stagedAtoB,stagedBtoA,aRat,bRat,aO2,bO2}=tradeState;
+  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2}=tradeState;
   const body=document.getElementById('trbody');
   body.innerHTML='';
   [pA,pB].forEach((p,side)=>{
@@ -1032,11 +1398,11 @@ function renderTradeModal(){
     const nameSpan=document.createElement('span');
     nameSpan.className='trpname';nameSpan.style.color=p.color;nameSpan.textContent=p.name;
     function makeToks(full,total,fc,ec){const r=document.createElement('div');r.className='tokrow';for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;r.appendChild(s);}return r;}
-    const ratGrid=document.createElement('div');ratGrid.className='tokgrid';
-    for(let i=0;i<10;i++){const s=document.createElement('span');s.className=`tok ${i<p.rations?'rf':'re'}`;ratGrid.appendChild(s);}
+    const foodGrid=document.createElement('div');foodGrid.className='tokgrid';
+    for(let i=0;i<10;i++){const s=document.createElement('span');s.className=`tok ${i<p.food?'rf':'re'}`;foodGrid.appendChild(s);}
     const o2Row=makeToks(p.o2,3,'of','oe');
     const hpRow=makeToks(p.health,3,'hf','he');
-    nameBlock.appendChild(nameSpan);nameBlock.appendChild(ratGrid);nameBlock.appendChild(o2Row);nameBlock.appendChild(hpRow);
+    nameBlock.appendChild(nameSpan);nameBlock.appendChild(foodGrid);nameBlock.appendChild(o2Row);nameBlock.appendChild(hpRow);
     nameRow.appendChild(portEl);nameRow.appendChild(nameBlock);
     panel.appendChild(nameRow);
     // Equipment area label
@@ -1088,18 +1454,18 @@ function renderTradeModal(){
     });
     panel.appendChild(eqArea);
     // Resource controls
-    const ratGive=isA?aRat:bRat;
+    const ratGive=isA?aFood:bFood;
     const o2Give=isA?aO2:bO2;
-    const ratMax=p.rations;
+    const foodMax=p.food;
     const o2Max=p.o2;
     const resDiv=document.createElement('div');
     resDiv.style.marginTop='10px';
     resDiv.innerHTML=`
-      <div class="trresrow"><label>Give Rations</label>
-        <button class="trbtn" onclick="trAdj('${isA?'aRat':'bRat'}',-1)">−</button>
+      <div class="trresrow"><label>Give Food</label>
+        <button class="trbtn" onclick="trAdj('${isA?'aFood':'bFood'}',-1)">−</button>
         <span class="trcnt">${ratGive}</span>
-        <button class="trbtn" onclick="trAdj('${isA?'aRat':'bRat'}',1)">+</button>
-        <span style="font-size:.58rem;color:var(--dim)">/ ${ratMax}</span>
+        <button class="trbtn" onclick="trAdj('${isA?'aFood':'bFood'}',1)">+</button>
+        <span style="font-size:.58rem;color:var(--dim)">/ ${foodMax}</span>
       </div>
       <div class="trresrow" style="margin-top:6px"><label>Give O₂</label>
         <button class="trbtn" onclick="trAdj('${isA?'aO2':'bO2'}',-1)">−</button>
@@ -1115,14 +1481,14 @@ function renderTradeModal(){
 function trAdj(field,delta){
   if(!tradeState)return;
   const{pA,pB}=tradeState;
-  const maxMap={aRat:pA.rations,bRat:pB.rations,aO2:pA.o2,bO2:pB.o2};
+  const maxMap={aFood:pA.food,bFood:pB.food,aO2:pA.o2,bO2:pB.o2};
   tradeState[field]=Math.max(0,Math.min(maxMap[field],tradeState[field]+delta));
   renderTradeModal();
 }
 
 function confirmTrade(){
   if(!tradeState)return;
-  const{pA,pB,stagedAtoB,stagedBtoA,aRat,bRat,aO2,bO2}=tradeState;
+  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2}=tradeState;
   // Transfer equipment A→B
   stagedAtoB.forEach(uid=>{
     const ci=pA.equipment.findIndex(c=>c.uid===uid);
@@ -1134,8 +1500,8 @@ function confirmTrade(){
     if(ci>=0){pA.equipment.push(pB.equipment.splice(ci,1)[0]);}
   });
   // Resources
-  pA.rations=Math.max(0,Math.min(10,pA.rations-aRat+bRat));
-  pB.rations=Math.max(0,Math.min(10,pB.rations-bRat+aRat));
+  pA.food=Math.max(0,Math.min(10,pA.food-aFood+bFood));
+  pB.food=Math.max(0,Math.min(10,pB.food-bFood+aFood));
   pA.o2=Math.max(0,Math.min(3,pA.o2-aO2+bO2));
   pB.o2=Math.max(0,Math.min(3,pB.o2-bO2+aO2));
   addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`,'good');
@@ -1247,6 +1613,9 @@ function drawTile(g,t){
     const gradId=t.type==='crash_site'?'gr-crash':t.type==='anomaly'?'gr-anomaly':t.type==='ship_section'?'gr-ship':t.type==='face_down'?'gr-fd':'gr-terrain';
     g.appendChild(svgEl('polygon',{points:hexPoly,fill:`url(#${gradId})`,'pointer-events':'none'}));
   }
+  // Undiscovered overlay: revealed by Watch Tower but not yet visited
+  if(t.revealed&&!t.investigatedCount&&(t.type==='terrain'||t.type==='anomaly'||t.type==='ship_section'))
+    g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(20,50,100,0.55)','pointer-events':'none'}));
 
   // Hex border + event receiver (transparent fill, on top)
   const poly=svgEl('polygon',{points:hexPoly,fill:'transparent',stroke:strokeC,'stroke-width':sw,style:'cursor:pointer','data-q':t.q,'data-r':t.r});
@@ -1277,7 +1646,7 @@ const BASECAMP_ICON_MAP={
 function drawTileArtwork(g,cx,cy,t){
   if(t.type==='terrain'&&t.radioFragment){
     const poi=t.pois?.[0];
-    if(poi==='Signal Tower'){
+    if(poi==='Dead Tower'||poi==='Collapsed Tower'){
       g.appendChild(svgEl('circle',{cx:cx+18,cy:cy-20,r:5,fill:'#1a4010',stroke:'#60c040','stroke-width':'1.2','pointer-events':'none'}));
       lbl(g,cx+18,cy-17,'RF','5.5','#60c040');
     }
@@ -1436,6 +1805,19 @@ function showHexTip(t){
   tip.classList.add('show');
 }
 
+function startBuilderTooltip(info,e){
+  tipMx=e.clientX;tipMy=e.clientY;
+  clearTimeout(tipTimer);
+  const fakeTile={name:info.name,type:'crash_site',q:info.q,r:info.r};
+  tipTimer=setTimeout(()=>showHexTip(fakeTile),600);
+  document.getElementById('sbsvg').addEventListener('mousemove',trackMouse,{passive:true});
+}
+function cancelBuilderTooltip(){
+  clearTimeout(tipTimer);
+  document.getElementById('htip').classList.remove('show');
+  document.getElementById('sbsvg').removeEventListener('mousemove',trackMouse);
+}
+
 // ═══════════════════════════════════════════════════════════════
 // HUD + UI UPDATE
 // ═══════════════════════════════════════════════════════════════
@@ -1490,10 +1872,35 @@ function loadGame(){
 }
 function clearSave(){localStorage.removeItem('signal_save');}
 function confirmNewGame(){
-  showModal('New Game','Start a new game? All progress will be lost.',true,()=>{
-    clearSave();
-    location.reload();
-  },'New Game',()=>{},'Cancel');
+  let countdownInterval=null;
+  const doNewGame=()=>{clearInterval(countdownInterval);clearSave();location.reload();};
+  const doAbort=()=>{clearInterval(countdownInterval);};
+  showModal('SELF-DESTRUCT','',true,doNewGame,'Self-destruct',doAbort,'Abort','<div id="ng-e7log" class="mov-e7log"></div>','dng');
+  e7ScreenSeq('ng-e7log',[
+    [0,   'crit','> SELF-DESTRUCT SEQUENCE INITIATED.'],
+    [600, '',    'This ship will self-destruct in:'],
+  ],14);
+  const introMs=(37+32)*14+700;
+  setTimeout(()=>{
+    const container=document.getElementById('ng-e7log');
+    if(!container)return;
+    const el=document.createElement('div');
+    el.className='e7m crit';
+    let count=10;
+    el.textContent=String(count);
+    container.appendChild(el);
+    container.scrollTop=container.scrollHeight;
+    countdownInterval=setInterval(()=>{
+      count--;
+      if(count>0){
+        el.textContent=String(count);
+      } else {
+        el.textContent='> DETONATION IMMINENT.';
+        clearInterval(countdownInterval);
+        setTimeout(doNewGame,1200);
+      }
+    },900);
+  },introMs);
 }
 function updateUI(){
   if(!G)return;
@@ -1511,7 +1918,7 @@ function updateUI(){
   document.getElementById('hcname').textContent=v.name;
   document.getElementById('hcname').style.color=v.color;
   document.getElementById('hcloc').textContent=v.location;
-  buildTokGrid('htr',v.rations,10,'rf','re',2,5);
+  buildTokGrid('htr',v.food,10,'rf','re',2,5);
   buildTokRow('hto',v.o2,3,'of','oe');
   buildTokRow('hth',v.health,3,'hf','he');
   const fragRow=document.getElementById('hud-frags');
@@ -1562,10 +1969,14 @@ function eqNav(dir){
   eqGalleryOffset=Math.max(0,Math.min(Math.max(0,total-3),eqGalleryOffset+dir));
   buildEqHand(v);
 }
+const CAT_ICONS={Tool:'wrench-solid-full.svg',Supply:'cubes-solid-full.svg',Tech:'microchip-solid-full.svg',Weapon:'gun-solid-full.svg'};
+function catIconStyle(cat){const f=CAT_ICONS[cat];return f?`style="--eq-icon-url:url('img/Icons/${f}')"`:'';
+}
 function cardFaceHTML(cat,name,txt,brand='◆  ENDYMION 7  ◆'){
+  const iconHtml=CAT_ICONS[cat]?`<span class="eq-icon" ${catIconStyle(cat)}></span>`:'';
   return `<div class="eqcard-inner">
-    <div class="eqcorners"><span>◆</span><span>◆</span></div>
-    <div class="eqcat">${cat}</div>
+    ${iconHtml}
+    <div class="eqdivider"></div>
     <div class="eqname">${name}</div>
     <div class="eqdivider"></div>
     <div class="eqtxt">${txt}</div>
@@ -1608,13 +2019,15 @@ function openCardModal(playerIdx,c,bgImage){
   ov.style.backgroundImage=bgImage||'';
   ov.className=`cc-${c.cat}`;
   card.className='evc eq';
-  document.getElementById('evc-badge').textContent=c.cat.toUpperCase();
+  const badge=document.getElementById('evc-badge');
+  const iconHtml=CAT_ICONS[c.cat]?`<span class="evc-cat-icon" ${catIconStyle(c.cat)}></span>`:'';
+  badge.innerHTML=iconHtml||c.cat.toUpperCase();
   document.getElementById('evc-loc').textContent=c.name;
   document.getElementById('evc-body').textContent=c.txt;
   const pills=document.getElementById('evc-pills');pills.innerHTML='';
   if(c.use&&isOwner){
     const b=document.createElement('button');
-    b.className='btn wrn';b.textContent='Use Card';
+    b.className='mbtn wrn';b.textContent='Use Card';
     b.onclick=()=>useCard(playerIdx,c.uid);
     pills.appendChild(b);
   }
@@ -1638,21 +2051,23 @@ function closeCardModal(){
 // ═══════════════════════════════════════════════════════════════
 // MODAL
 // ═══════════════════════════════════════════════════════════════
-function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml){
+function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okClass){
   const mov=document.getElementById('mov');
   const isRescue=title==='RESCUE SIGNAL RECEIVED';
   const isAllDead=title==='ALL CREW LOST';
+  const isNewGame=title==='SELF-DESTRUCT';
   mov.classList.toggle('rescue',isRescue);
   mov.classList.toggle('all-dead',isAllDead);
+  mov.classList.toggle('new-game',isNewGame);
   document.getElementById('mtit').textContent=title;
   const mb=document.getElementById('mbod');mb.innerHTML='';
   if(!isPub){const n=document.createElement('div');n.className='pvnote';n.textContent='PRIVATE — read silently. Show only to crew on your tile.';mb.appendChild(n);}
   if(extraHtml){const xh=document.createElement('div');xh.innerHTML=extraHtml;mb.appendChild(xh);}
   const tb=document.createElement('div');tb.textContent=body;mb.appendChild(tb);
   const ma=document.getElementById('mact');ma.innerHTML='';
-  if(onCancel&&cancelLbl){const b=document.createElement('button');b.className='btn';b.textContent=cancelLbl;
+  if(onCancel&&cancelLbl){const b=document.createElement('button');b.className='mbtn';b.textContent=cancelLbl;
     b.onclick=()=>{document.getElementById('mov').classList.remove('show');onCancel();};ma.appendChild(b);}
-  const ob=document.createElement('button');ob.className='btn pri';ob.textContent=okLbl||'OK';
+  const ob=document.createElement('button');ob.className=`mbtn ${okClass||'pri'}`;ob.textContent=okLbl||'OK';
   ob.onclick=()=>{document.getElementById('mov').classList.remove('show');onOk();};ma.appendChild(ob);
   document.getElementById('mov').classList.add('show');
 }
@@ -1660,11 +2075,47 @@ function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml){
 // ═══════════════════════════════════════════════════════════════
 // EVENT CARD
 // ═══════════════════════════════════════════════════════════════
+function showDieRoll(prompt, onRoll, onDismiss){
+  const ov=document.getElementById('evc-ov');
+  ov.className='';ov.style.backgroundImage='';
+  const card=document.getElementById('evc');card.className='evc pub';
+  document.getElementById('evc-badge').textContent='ROLL';
+  document.getElementById('evc-loc').textContent='';
+  document.getElementById('evc-body').textContent=prompt;
+  document.getElementById('evc-pills').innerHTML='';
+  const outEl=document.getElementById('evc-outcome');outEl.style.display='none';
+  const dieEl=document.getElementById('evc-die');
+  const btn=document.getElementById('evc-btn');
+  btn.className='';btn.textContent='OK';btn.disabled=true;btn.style.opacity='.35';
+  dieEl.innerHTML='';dieEl.style.display='flex';
+  const wrap=make3DDie('idle');
+  dieEl.appendChild(wrap);
+  wrap.onclick=()=>{
+    wrap.className='td-die-wrap rolling';wrap.onclick=null;
+    const val=1+(0|Math.random()*6);
+    setTimeout(()=>{
+      dieEl.innerHTML='';
+      const res=document.createElement('div');res.className='evc-die-result';
+      res.appendChild(makeResultDie(val));dieEl.appendChild(res);
+      const outcome=onRoll(val);
+      if(outcome){outEl.textContent=outcome;outEl.style.display='';}
+      updateUI();
+      btn.disabled=false;btn.style.opacity='';
+    },1500);
+  };
+  btn.onclick=()=>{ov.classList.remove('show');ov.style.backgroundImage='';if(onDismiss)onDismiss();else{updateUI();render();}};
+  cancelTooltip();
+  ov.classList.add('show');
+}
+
 function showEventCard(evt, locName, onOk, rollCallback){
   const isPub=evt.pub;
   const card=document.getElementById('evc');
   card.className='evc '+(isPub?'pub':'priv');
-  document.getElementById('evc-badge').textContent=isPub?'PUBLIC EVENT':'\u2697  PRIVATE EVENT';
+  const evtBadge=document.getElementById('evc-badge');
+  const evtIcon=isPub?'group-solid-full.svg':'person-solid-full.svg';
+  const evtLbl=isPub?'PUBLIC EVENT':'PRIVATE EVENT';
+  evtBadge.innerHTML=`<span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/${evtIcon}')"></span><span class="evc-pub-lbl">${evtLbl}</span>`;
   document.getElementById('evc-loc').textContent=locName||'';
   document.getElementById('evc-body').textContent=evt.text;
   const pills=document.getElementById('evc-pills');pills.innerHTML='';
@@ -1672,11 +2123,12 @@ function showEventCard(evt, locName, onOk, rollCallback){
   if(evt.rf)           addPill('+ Radio Fragment','good');
   if(evt.drawEq)       addPill('+ Equipment Card','good');
   if(evt.drawEqHidden) addPill('+ Equipment Card','good');
-  if(evt.gainRation)   addPill('+ '+evt.gainRation+' Ration','good');
-  if(evt.takeAllCargo) addPill('+ Cargo Hold','good');
-  if(evt.rollRations)  addPill('Roll for Rations','good');
+  if(evt.gainFood)   addPill('+ '+evt.gainFood+' Food','good');
+  if(evt.takeAllCargo) addPill('+ Food (Cargo)','good');
+  if(evt.rollFood)  addPill('Roll for Food','good');
   if(evt.rollWreckage) addPill('Roll: Wreckage','good');
-  if(evt.loseRation)   addPill('\u2212 '+evt.loseRation+' Ration','bad');
+  if(evt.loseFood)   addPill('\u2212 '+evt.loseFood+' Food','bad');
+  if(evt.loseHealth)   addPill('\u2212 1 Health','bad');
   if(evt.skipO2)       addPill('O\u2082 Spared','good');
   const outEl=document.getElementById('evc-outcome');
   outEl.style.display='none';
@@ -1929,7 +2381,7 @@ const BUILDER_PALETTE=[
   {name:'Medical Bay',     short:'MED',  desc:'On entry: restore 1 Health token automatically.'},
   {name:'Signal Array',    short:'SIG',  desc:'Action: Activate fragments & roll for rescue.'},
   {name:'Equipment Locker',short:'EQUIP',desc:'Action: Draw 1 Equipment card.'},
-  {name:'Cargo Hold',      short:'CARGO',desc:'Action: Deposit or withdraw Rations freely.'},
+  {name:'Cargo Hold',      short:'CARGO',desc:'Action: Deposit or withdraw Food freely.'},
   {name:'Watch Tower',     short:'WATCH',desc:'Action: Reveal tiles adjacent to any frontier player.'},
   {name:'Airlock',         short:'AIR',  desc:'On entry from terrain: refill all O₂ Tanks.'},
 ];
@@ -2048,6 +2500,10 @@ function renderSiteBuilder(){
   const hgMask=document.createElementNS(ns,'mask');hgMask.setAttribute('id','sb-hg-mask');
   const hgMaskRect=document.createElementNS(ns,'rect');hgMaskRect.setAttribute('x','-5000');hgMaskRect.setAttribute('y','-5000');hgMaskRect.setAttribute('width','10000');hgMaskRect.setAttribute('height','10000');hgMaskRect.setAttribute('fill','url(#sb-hg-fade)');
   hgMask.appendChild(hgMaskRect);defs.appendChild(hgGrad);defs.appendChild(hgMask);
+  const sbFilt=document.createElementNS(ns,'filter');sbFilt.setAttribute('id','sb-icon-tint');sbFilt.setAttribute('x','0');sbFilt.setAttribute('y','0');sbFilt.setAttribute('width','1');sbFilt.setAttribute('height','1');
+  const sbFlood=document.createElementNS(ns,'feFlood');sbFlood.setAttribute('flood-color','#b2dbee');sbFlood.setAttribute('result','color');
+  const sbComp=document.createElementNS(ns,'feComposite');sbComp.setAttribute('in','color');sbComp.setAttribute('in2','SourceGraphic');sbComp.setAttribute('operator','in');
+  sbFilt.appendChild(sbFlood);sbFilt.appendChild(sbComp);defs.appendChild(sbFilt);
   svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
   const g=document.createElementNS(ns,'g');
   g.setAttribute('transform',`translate(${W/2+sbPan.x} ${H/2+sbPan.y}) scale(${sbZoom})`);
@@ -2092,14 +2548,22 @@ function renderSiteBuilder(){
     }
     const border=document.createElementNS(ns,'polygon');
     border.setAttribute('points',pts);border.setAttribute('fill','transparent');
-    border.setAttribute('stroke','#2a5a90');border.setAttribute('stroke-width','1.5');border.setAttribute('pointer-events','none');
+    border.setAttribute('stroke','#b2dbee');border.setAttribute('stroke-width','1.5');border.setAttribute('style','cursor:default');
+    border.addEventListener('mouseenter',e=>startBuilderTooltip(info,e));
+    border.addEventListener('mouseleave',cancelBuilderTooltip);
     g.appendChild(border);
-    const txt=document.createElementNS(ns,'text');
-    txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
-    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-family','Courier New,monospace');
-    txt.setAttribute('font-size','7');txt.setAttribute('fill','#c8dde8');txt.setAttribute('pointer-events','none');
-    txt.textContent=info.short||info.name;
-    g.appendChild(txt);
+    const icon=BASECAMP_ICON_MAP[info.name];
+    if(icon){
+      const sz=SZB*0.7;
+      const iconEl=document.createElementNS(ns,'image');
+      iconEl.setAttribute('href',`img/Icons/${icon}`);
+      iconEl.setAttribute('x',cx-sz/2);iconEl.setAttribute('y',cy-sz/2);
+      iconEl.setAttribute('width',sz);iconEl.setAttribute('height',sz);
+      iconEl.setAttribute('opacity','0.55');
+      iconEl.setAttribute('filter','url(#sb-icon-tint)');
+      iconEl.setAttribute('pointer-events','none');
+      g.appendChild(iconEl);
+    }
   });
   // Draw valid placement hexes
   if(builderState.selectedIdx>=0){

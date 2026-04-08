@@ -2,13 +2,13 @@
 
 You are the crew of the Endymion 7, a deep-range mining vessel. Your ship has crash-landed on an uncharted alien planet. You don't know what brought you down. You don't know what's out there. You have what survived the crash, and each other — for now.
 
-Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array. Rescue is possible but not guaranteed. And the longer you're stranded, the more the planet changes you.
+Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array. Rescue is possible but not guaranteed. And the longer you're stranded, the more the planet corrupts you.
 
 ## The Three Tensions
 
-- **Survival.** Rations and O2 Tanks deplete every round. The crash site is your lifeline. Venture too far and you may not make it back.
-- **Exploration.** Radio Fragments are out there, but finding them means pushing deeper into unknown terrain — away from safety, away from others, into situations only you will know about.
-- **Trust.** Corruption changes a player's win condition silently. The group must cooperate to survive, but cooperation requires trust the planet is quietly eroding.
+- **Survival.** FOOD and OXYGEN supplies deplete every round. The crash site is your lifeline. Venture too far and you may not make it back.
+- **Exploration.** RADIO FRAGMENTS are out there, but finding them means pushing deeper into unknown terrain — away from safety, away from others, into situations only you will know about.
+- **Trust.** CORRUPTION changes a player's win condition silently. The group must cooperate to survive, but cooperation requires trust the planet is quietly eroding.
 
 # Setup
 
@@ -17,12 +17,12 @@ Somewhere out there, scattered across the terrain, are pieces of your radio. Fin
 3. Shuffle the Event deck. Shuffle the Equipment deck separately.
 4. Each player places their pawn on the Crash Site hex.
 5. Each player draws 3 Equipment cards.
-6. Each player takes 10 Ration tokens (all FULL), 3 O2 Tank tokens (all FULL), and 3 Health tokens (all HEALTHY).
+6. Each player takes 10 FOOD tokens (all FULL), 3 OXYGEN tokens (all FULL), and 3 Health tokens (all HEALTHY).
 7. Roll to see who goes first.
 
 # Base Camp
 
-Base Camp is a 7-hex cluster — your anchor point on the planet. O2 Tanks do **not** deplete when you end a turn on any Base Camp tile.
+Base Camp is a 7-hex cluster — your anchor point on the planet. OXYGEN does **not** deplete when you end a turn on any Base Camp tile.
 
 The layout of Base Camp is chosen by players during setup — the six surrounding modules can be arranged in any connected shape around the central Crash Site hex.
 
@@ -31,7 +31,7 @@ The layout of Base Camp is chosen by players during setup — the six surroundin
 | Crash Site | All players begin here. No specific action — this is your anchor point. |
 | Medical Bay | Action: Restore 1 Health token to HEALTHY. |
 | Equipment Locker | Action: Draw 1 Equipment card. One draw per turn maximum. |
-| Cargo Hold | Action: Deposit or withdraw Rations from communal storage. |
+| Cargo Hold | Action: Deposit or withdraw FOOD from communal storage. |
 | Signal Array | Action: Activate Radio Fragments and roll for rescue. Capacity: 1 player only. |
 | Watch Tower | Action: Reveal all face-down tiles adjacent to any crew member currently in the field. |
 | Airlock | Passive: Refill 1 O₂ Tank automatically when returning from terrain. |
@@ -70,12 +70,12 @@ When a player enters a tile and flips it to find an Anomaly, the effect takes pl
 | Anomaly | Rule |
 |---|---|
 | Stasis Pod | You may enter. Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time on your turn. |
-| Temporal Rift | Roll 1 die. 1–3: flip that many Rations to EMPTY. 4–6: flip that many EMPTY Rations to FULL. |
+| Temporal Rift | Roll 1 die. 1–3: flip that many FOOD to EMPTY. 4–6: flip that many EMPTY FOOD to FULL. |
 | Portal | You may immediately move your pawn to the Crash Site. Your turn ends. You may decline. |
 | Gravitational Well | Roll 1 die. The player to your left moves your pawn that many hexes in any direction. |
 | Dead Signal | No Signal Roll occurs this round for any player. |
 | Echo Chamber | Resolve the most recent Public Event card again in full. |
-| Inversion Field | Choose any other player. Swap your Ration tokens with theirs. They cannot refuse. |
+| Inversion Field | Choose any other player. Swap your FOOD tokens with theirs. They cannot refuse. |
 
 ## Ship Section Tiles
 
@@ -83,9 +83,9 @@ Three Ship Section tiles are shuffled into the terrain deck. Indistinguishable f
 
 | Location | Effect |
 |---|---|
-| Airlock | Refill 1 O2 Tank to FULL. |
+| Airlock | Refill 1 OXYGEN to FULL. |
 | Emergency Bay | Restore 1 Health token to HEALTHY. |
-| Supply Cache | Roll 1 die and flip that many EMPTY Rations to FULL. |
+| Supply Cache | Roll 1 die and flip that many EMPTY FOOD to FULL. |
 
 Ship Sections do not contain a Signal Array. Radio Fragments cannot be activated here. They are refuge, not rescue.
 
@@ -97,7 +97,7 @@ On your turn, do three things — in any order that makes sense:
 
 **Take actions.** As many as you like: trade resources, draw Equipment, use the Signal Array, or use any Base Camp facility. Each action is available only at the appropriate location.
 
-**Flip your resources.** When done, flip 1 Ration to EMPTY. If not on Base Camp, flip 1 O2 Tank to EMPTY. This is always last.
+**Flip your resources.** When done, flip 1 FOOD to EMPTY. If not on Base Camp, flip 1 OXYGEN to EMPTY. This is always last.
 
 **Trading:** Resources and Equipment cards may be traded only with players sharing your current tile. The WALKIE extends this to an adjacent tile.
 
@@ -122,22 +122,22 @@ If the roll succeeds, rescue arrives. All surviving players whose win condition 
 
 # Resources
 
-**Rations:** 10 per player. One flipped to EMPTY each turn regardless of location. Always visible — no player may conceal how many they have. Cache yield: roll 1 die, flip that many EMPTY to FULL. Surplus beyond 10 may be shared immediately or is lost.
+**Food:** 10 per player. One flipped to EMPTY each turn regardless of location. Always visible — no player may conceal how many they have. Cache yield: roll 1 die, flip that many EMPTY to FULL. Surplus beyond 10 may be shared immediately or is lost.
 
-**O2 Tanks:** 3 per player. One flipped to EMPTY each turn spent away from Base Camp. Returning to Base Camp refills all O2 Tanks to FULL. **Finite — no new O2 Tanks enter the game.** Can only be redistributed via trading.
+**Oxygen Tanks:** 3 per player. One flipped to EMPTY each turn spent away from Base Camp. Returning to Base Camp refills all OXYGEN to FULL. **Finite — no new Oxygen Tanks enter the game. They can only be redistributed via trading.**
 
 **Health:** 3 tokens per player. Lost through starvation, certain events, and conflict.
 
 | Condition | Effect |
 |---|---|
-| 0 Rations at Resource Flip | Flip 1 Health to WOUNDED every turn. |
-| 0 O2 Tanks away from Base Camp | Flip 1 Health to WOUNDED every turn. |
+| 0 FOOD at Resource Flip | Flip 1 Health to WOUNDED every turn. |
+| 0 OXYGEN away from Base Camp | Flip 1 Health to WOUNDED every turn. |
 | All 3 Health WOUNDED | INCAPACITATED. |
 | 2 rounds INCAPACITATED | DEAD. |
 
-**Incapacitation:** Cannot move or act. May be saved if another player reaches their tile and donates at least 1 O2 Tank before their next turn begins.
+**Incapacitation:** Cannot move or act. May be saved if another player reaches their tile and donates at least 1 OXYGEN before their next turn begins.
 
-**Death:** Everything they were carrying — Rations, O2 Tanks, Equipment cards, Radio Fragments — is left at their current location. A dead player is out of the game. Their secrets die with them.
+**Death:** Everything they were carrying — FOOD, OXYGEN, Equipment cards, Radio Fragments — is left at their current location. A dead player is out of the game. Their secrets die with them.
 
 # Radio Fragments
 
@@ -184,16 +184,16 @@ Each card explains its own effect.
 | Card | Effect |
 |---|---|
 | MedPack | Restore 1 Health to HEALTHY. Discard after use. |
-| Emergency Rations | Flip 3 EMPTY Rations to FULL. Discard after use. |
-| Compressed O2 | Flip 2 EMPTY O2 Tanks to FULL. Discard after use. |
+| Emergency FOOD | Flip 3 EMPTY FOOD to FULL. Discard after use. |
+| Compressed O2 | Flip 2 EMPTY OXYGEN to FULL. Discard after use. |
 
 ## Tech
 
 | Card | Effect |
 |---|---|
-| Hazard Suit | Do not flip a Ration when entering a Toxic terrain tile. |
+| Hazard Suit | Do not flip a FOOD when entering a Toxic terrain tile. |
 | Scanner | When placing a new tile face-down, peek at it before others see it. |
-| Rebreather | Your O2 Tanks deplete every 2 rounds away from Base Camp instead of every round. |
+| Rebreather | Your OXYGEN depletes every 2 rounds away from Base Camp instead of every round. |
 | Motion Sensor | Once per turn, before moving, look at the top 3 tiles of the terrain stack. Return them in any order. |
 
 ## Weapons
@@ -216,10 +216,10 @@ Some cards have immediate mechanical effects. Others are purely narrative — in
 ## Sample Cards
 
 > **[PUBLIC] Emergency supplies found, partially intact.**
-> Roll 1 die for Ration yield.
+> Roll 1 die for FOOD yield.
 
 > **[PUBLIC] Salvageable material nearby.**
-> Roll 1 die: 1–3 = nothing; 4–5 = 1 Ration; 6 = Equipment card.
+> Roll 1 die: 1–3 = nothing; 4–5 = 1 FOOD; 6 = Equipment card.
 
 > **[PUBLIC] A sealed equipment cache. Contents intact.**
 > Draw 1 Equipment card.
@@ -231,7 +231,7 @@ Some cards have immediate mechanical effects. Others are purely narrative — in
 > The terrain blocks atmospheric sensors. Skip your O₂ flip this round.
 
 > **[PUBLIC] Structural instability.**
-> The ground shifts underfoot. Flip 1 Ration to EMPTY.
+> The ground shifts underfoot. Flip 1 FOOD to EMPTY.
 
 > **[PUBLIC] Nothing here.**
 > Whatever this place held has been taken by the terrain.
@@ -274,7 +274,7 @@ Once familiar with the base game, shuffle the Scenario cards and draw one before
 
 *The planet's atmosphere is technically breathable. What the readings didn't capture is how thin it is up here, how little each breath actually gives you.*
 
-> **RULE:** O2 Tanks deplete 2 per round away from Base Camp instead of 1.
+> **RULE:** Oxygen depletes 2 per round away from Base Camp instead of 1.
 
 ## Extreme Gravity
 
@@ -286,4 +286,4 @@ Once familiar with the base game, shuffle the Scenario cards and draw one before
 
 *The surface looks stable. It isn't. Every time you stop to investigate something, the planet takes a little more from you. Nothing out here is free.*
 
-> **RULE:** Investigating any POI costs 1 Ration in addition to normal effects.
+> **RULE:** Investigating any POI costs 1 Food in addition to normal effects.
