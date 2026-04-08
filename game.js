@@ -315,17 +315,20 @@ const EVENT_CARDS=[
   // Public — narrative
   {text:'Nothing here. Whatever this place held has been taken by the terrain.',pub:true},
   {text:'Signs of prior occupation — too recent to be from the crash. Someone else was here.',pub:true},
-  {text:'Structural damage beyond salvage. The area offers nothing useful.',pub:true},
   {text:'Clear. No hazards, no yield. Move on.',pub:true},
   {text:'Something jammed the sensors on the way in. You can\'t tell if it was the terrain or something else.',pub:true},
-  // Private
-  {text:'You find something personal. A crew member\'s effects, separated from the wreck. You keep it to yourself.',pub:false},
-  {text:'A data chip, still readable. The contents are for your eyes only.',pub:false},
-  {text:'You rest here alone. Nobody needs to know what you found.',pub:false},
-  {text:'Something moves at the edge of your vision. You say nothing to the others.',pub:false},
+  // Private — resources
   {text:'A hidden cache — stowed deliberately, not by the crash. You pocket the contents before anyone else arrives.',pub:false,drawEq:true},
-  {text:'A partial crew log from before the crash. Someone knew this was coming. You now know something the others don\'t.',pub:false},
-  {text:'You find a fragment of the ship\'s manifest. Names, cargo, discrepancies. Yours to keep.',pub:false},
+  {text:'There\'s a ration here nobody logged. Take it. If anyone asks about your count, you found it in the field. That\'s true enough.',pub:false,gainRation:1},
+  {text:'You were at the equipment locker before your turn. Draw 1 Equipment card now and keep it face-down. Don\'t mention it.',pub:false,drawEqHidden:true},
+  {text:'You reached this cache first. Everything here is yours — you got here first. Take all Rations currently in the Cargo Hold. No rule says you have to share. There isn\'t one.',pub:false,takeAllCargo:true},
+  // Private — competing objectives
+  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll a 6 or higher. You are rescued. The others are not. The choice is yours.',pub:false},
+  {text:'Your original mission briefing had a clause the others weren\'t cleared for. If you are holding a Radio Fragment when the final signal is sent, your extraction is guaranteed. The manifest doesn\'t list everyone.',pub:false},
+  // Private — psychological
+  {text:'You\'re playing a different game than the others. Help when it\'s convenient. Nod along. But you know what you\'d do if it came down to it.',pub:false},
+  {text:'Someone was at the Cargo Hold when they shouldn\'t have been. You didn\'t see who. Say nothing. Information is worth more than accusations.',pub:false},
+  {text:'You\'ve calculated the O\u2082 supply against the extraction window. It supports three people. Not four. You haven\'t corrected anyone\'s assumptions. You\'re still running the numbers.',pub:false},
 ];
 
 const TILE_TIPS={
@@ -523,6 +526,9 @@ function drawTileEvent(t){
   // Apply guaranteed (non-roll) effects immediately
   if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');}
   if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}.`,'good');}
+  if(evt.drawEqHidden){drawEqCard(p);}
+  if(evt.gainRation){p.rations=Math.min(10,p.rations+evt.gainRation);}
+  if(evt.takeAllCargo){const taken=G.cargoHold||0;p.rations=Math.min(10,p.rations+taken);G.cargoHold=0;}
   if(evt.loseRation){const lost=Math.min(p.rations,evt.loseRation);p.rations-=lost;addLog(`${p.name} lost ${lost} Ration(s).`,'crit');}
   if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.');}
   const locName=t.pois&&t.pois.length?t.pois.join(' \u00b7 '):(t.name||'');
@@ -1665,6 +1671,9 @@ function showEventCard(evt, locName, onOk, rollCallback){
   function addPill(txt,cls){const p=document.createElement('div');p.className='evc-pill '+cls;p.textContent=txt;pills.appendChild(p);}
   if(evt.rf)           addPill('+ Radio Fragment','good');
   if(evt.drawEq)       addPill('+ Equipment Card','good');
+  if(evt.drawEqHidden) addPill('+ Equipment Card','good');
+  if(evt.gainRation)   addPill('+ '+evt.gainRation+' Ration','good');
+  if(evt.takeAllCargo) addPill('+ Cargo Hold','good');
   if(evt.rollRations)  addPill('Roll for Rations','good');
   if(evt.rollWreckage) addPill('Roll: Wreckage','good');
   if(evt.loseRation)   addPill('\u2212 '+evt.loseRation+' Ration','bad');
