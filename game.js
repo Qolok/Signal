@@ -215,7 +215,7 @@ function buildTerrainDeck(){
     {pois:['Mysterious Outpost'],  radioFragment:false, requiresTool:'data_spike',  toolReward:'drawEq',      noEvent:true, count:1},
     {pois:['Wreckage Field'],      radioFragment:false, count:9},
     {pois:['Cache'],               radioFragment:false, count:3},
-    {pois:['Recovered Terminal'],  radioFragment:false, count:1},
+    {pois:['Recovered Terminal'],  radioFragment:false, requiresTool:'data_spike', toolReward:'drawPrivateEvent', noEvent:true, count:1},
     {pois:['Passage'],             radioFragment:false, count:1},
     {pois:['Bloody Passage'],      radioFragment:false, count:1},
   ];
@@ -312,7 +312,7 @@ const EVENT_CARDS=[
   {text:'Salvageable material nearby. Roll 1 die: 1–3 = nothing; 4–5 = 1 Food; 6 = Equipment card.',pub:true,rollWreckage:true},
   {text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true},
   {text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true},
-  {text:'In a pile of rusted debris, you find a Radio Fragment, scavenged and re-housed in a makeshift casing. Someone wanted it to survive. If you take it back to the Signal Array, it might take a charge.',pub:true,rf:true},
+  {text:'In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive. If you take it back to the Signal Array, it might take a charge.',pub:true,rf:true},
   {text:'You trip over a rock and uncover a Radio Fragment, wrapped in cloth. Whoever left it here thought they\'d come back.',pub:true,rf:true},
   {text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true},
   // Public — hazards
@@ -351,11 +351,11 @@ const TILE_TIPS={
   'Collapsed Tower':   {desc:'A relay tower, partially collapsed. The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter. A crew member with a plasma cutter can get inside and salvage the Radio Fragment.',act:'Investigate: Use Plasma Cutter to recover 1 Radio Fragment.'},
   'Cave':              {desc:'Natural shelter. Atmospheric sensors can\'t reach inside.',    act:'Investigate: Skip O2 Tank flip this round. Draw an Event card.'},
   'Abandoned Outpost': {desc:'The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.',act:'Use the Lockpick to enter. Roll 1 die for Food yield.'},
-  'Mysterious Outpost':{desc:'The structure doesn\'t match anything in the Endymion 7\'s manifest. The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize. Someone built this here and didn\'t want visitors. Or didn\'t expect any.',act:'Investigate: Use Data Spike to enter. Draw 1 Equipment card.'},
+  'Mysterious Outpost':{desc:'The structure doesn\'t match anything on your planetary scans. The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize. Someone built this here and didn\'t want visitors.',act:'Investigate: Use Data Spike to enter. Draw 1 Equipment card.'},
   'Fuselage':          {desc:'Hull section from the Endymion 7. Still holds cargo.',        act:'Investigate: May yield Equipment cards or a Radio Fragment. Draw an Event card.'},
   'Wreckage Field':    {desc:'Debris scattered across the terrain — hazardous, but potentially useful.',act:'Investigate: Roll for salvage. Draw an Event card.'},
   'Recovered Terminal':{desc:'The terminal still draws power from a source you can\'t locate. The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE. No crew names are listed. You weren\'t briefed on any prior missions to this planet.',act:'Investigate: Draw a Private Event card. The data is yours alone.'},
-  'Cache':             {desc:'A sealed supply cache — military or civilian, hard to tell.',              act:'Investigate: Roll 1 die for Food yield. Draw an Event card.'},
+  'Cache':             {desc:'A sealed supply cache — military or civilian, hard to tell. Roll 1 die. 1–2: +1 Food, 3–4: +2 Food, 5–6: +3 Food.',              act:'Investigate: Roll 1 die. 1–2: +1 Food, 3–4: +2 Food, 5–6: +3 Food.'},
   'Passage':           {desc:'A narrow route through the terrain. Something passed through here recently.',act:'Investigate: Draw an Event card.'},
   'Bloody Passage':    {desc:'A narrow route marked with signs of violence. Whatever happened here was recent.',act:'Investigate: Draw an Event card.'},
   'Stasis Pod':        {desc:'Alien preservation technology. Time moves differently inside.', act:'Enter: Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time.'},
@@ -521,7 +521,7 @@ function showTileRevealModal(t, onDismiss){
     trov.style.display='none';
     trov.style.backgroundImage='';
     if(onDismiss)onDismiss();
-    else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'){updateUI();render();}
+    else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'||t.pois?.includes('Cache')){updateUI();render();}
     else drawTileEvent(t);
   };
   if(t.type==='ship_section'){
@@ -547,6 +547,37 @@ function showTileRevealModal(t, onDismiss){
         const outEl=document.createElement('div');
         outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
         outEl.textContent=outcome;descEl.appendChild(outEl);
+        updateUI();
+        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
+        cont.onclick=dismiss;
+        actionsEl.appendChild(cont);
+      },1500);
+    };
+  } else if(t.pois&&t.pois.includes('Cache')){
+    deck.style.display='none';
+    trov.onclick=null;
+    const descEl=document.getElementById('tr-desc');
+    const dieWrap=make3DDie('idle');
+    dieWrap.style.cssText='margin:0 auto;';
+    actionsEl.appendChild(dieWrap);
+    dieWrap.onclick=()=>{
+      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      const val=1+(0|Math.random()*6);
+      setTimeout(()=>{
+        actionsEl.innerHTML='';
+        const resDie=makeResultDie(val);
+        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
+        actionsEl.appendChild(resDie);
+        const p=cp();
+        const yield_=val<=2?1:val<=4?2:3;
+        const gained=Math.min(10-p.food,yield_);
+        p.food+=gained;
+        const outcome=`Rolled ${val} — Food: +${gained}.`;
+        addLog(`${p.name} raided the cache — gained ${gained} Food.`,'good');
+        const outEl=document.createElement('div');
+        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
+        outEl.textContent=outcome;
+        descEl.appendChild(outEl);
         updateUI();
         const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
         cont.onclick=dismiss;
@@ -627,18 +658,27 @@ function showTileRevealModal(t, onDismiss){
         enterBtn.onclick=()=>{
           const reward=t.toolReward;t.toolReward=null;t.investigatedCount=t.pois.length;
           if(reward==='rollFood'){
+            const bg=getTileImg(t);
             dismiss();
             showDieRoll('Search the outpost. Roll for Food yield.',val=>{
               const gained=Math.min(10-p.food,val);
               p.food+=gained;
               addLog(`${p.name} searched the outpost — gained ${gained} Food.`,'good');
               return`Rolled ${val} — gained ${gained} Food.`;
-            });
+            },null,bg?`url(${bg})`:undefined);
           } else if(reward==='drawEq'){
             const c=drawEqCard(p);
             if(c)addLog(`${p.name} found ${c.name} inside.`,'good');
             else addLog(`${p.name} searched the outpost — equipment cache empty.`);
             dismiss();
+          } else if(reward==='drawPrivateEvent'){
+            dismiss();
+            const privCards=EVENT_CARDS.filter(e=>e.pub===false);
+            const evt=privCards[0|Math.random()*privCards.length];
+            G.evtDeckCount=Math.max(0,G.evtDeckCount-1);
+            const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
+            addLog(`${p.name} accessed the Recovered Terminal.`,'act');
+            showEventCard(evt,'Recovered Terminal',()=>{updateUI();render();},null);
           }
         };
         actionsEl.appendChild(enterBtn);
@@ -1292,6 +1332,7 @@ function advanceTurn(){
 
 function triggerAnomaly(t){
   const p=cp();
+  t.investigatedCount=1;
   switch(t.anomaly){
     case'Temporal Rift':
       showTileRevealModal(t,()=>{updateUI();render();});break;
@@ -1782,7 +1823,9 @@ function showHexTip(t){
   const title=t.name||(t.type==='anomaly'?t.anomaly:t.type==='ship_section'?'Ship Section':t.pois&&t.pois.length?t.pois.join(' · '):'Unknown');
   document.getElementById('tiptit').textContent=title.toUpperCase();
   document.getElementById('tipdesc').textContent=t.type==='face_down'?'Face-down tile. Enter to reveal what lies ahead.':info.desc;
-  document.getElementById('tipact').textContent=t.type==='face_down'?'':info.act;
+  const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
+  const toolNote=t.requiresTool&&(t.radioFragment||t.toolReward)?`\n*Requires ${TOOL_NAMES[t.requiresTool]||t.requiresTool}`:'';
+  document.getElementById('tipact').textContent=t.type==='face_down'?'':(info.act+(toolNote));
   // Hero image
   const heroEl=document.getElementById('tip-hero-img');
   const tImg=getTileImg(t);
@@ -2075,9 +2118,9 @@ function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okCl
 // ═══════════════════════════════════════════════════════════════
 // EVENT CARD
 // ═══════════════════════════════════════════════════════════════
-function showDieRoll(prompt, onRoll, onDismiss){
+function showDieRoll(prompt, onRoll, onDismiss, bgImage){
   const ov=document.getElementById('evc-ov');
-  ov.className='';ov.style.backgroundImage='';
+  ov.className='';ov.style.backgroundImage=bgImage||'';
   const card=document.getElementById('evc');card.className='evc pub';
   document.getElementById('evc-badge').textContent='ROLL';
   document.getElementById('evc-loc').textContent='';
@@ -2108,15 +2151,15 @@ function showDieRoll(prompt, onRoll, onDismiss){
   ov.classList.add('show');
 }
 
-function showEventCard(evt, locName, onOk, rollCallback){
+function showEventCard(evt, _locName, onOk, rollCallback){
   const isPub=evt.pub;
   const card=document.getElementById('evc');
   card.className='evc '+(isPub?'pub':'priv');
   const evtBadge=document.getElementById('evc-badge');
   const evtIcon=isPub?'group-solid-full.svg':'person-solid-full.svg';
   const evtLbl=isPub?'PUBLIC EVENT':'PRIVATE EVENT';
-  evtBadge.innerHTML=`<span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/${evtIcon}')"></span><span class="evc-pub-lbl">${evtLbl}</span>`;
-  document.getElementById('evc-loc').textContent=locName||'';
+  evtBadge.innerHTML=`<span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/${evtIcon}')"></span>`;
+  document.getElementById('evc-loc').textContent=evtLbl;
   document.getElementById('evc-body').textContent=evt.text;
   const pills=document.getElementById('evc-pills');pills.innerHTML='';
   function addPill(txt,cls){const p=document.createElement('div');p.className='evc-pill '+cls;p.textContent=txt;pills.appendChild(p);}
