@@ -1145,7 +1145,7 @@ function closeTrade(){
 // ═══════════════════════════════════════════════════════════════
 // BOARD RENDERING
 // ═══════════════════════════════════════════════════════════════
-let pan={x:0,y:0},zoom=1;
+let pan={x:0,y:0},zoom=2;
 let sbPan={x:0,y:0},sbZoom=1,sbEventsInit=false;
 function svgEl(tag,attrs){const e=document.createElementNS(NS,tag);if(attrs)Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));return e;}
 
