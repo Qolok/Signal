@@ -349,11 +349,11 @@ const TILE_TIPS={
   'Watch Tower':       [[0,'','An elevated vantage point over the surrounding terrain.'],[0,'act','Reveal all face-down tiles adjacent to any crew member currently in the field.']],
   'Dead Tower':        [[0,'','A broadcast tower, hand-built and long-abandoned. Inside, a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them. You salvage some Radio Fragments from the equipment.'],[0,'act','Use Lockpick to recover 1 Radio Fragment.']],
   'Collapsed Tower':   [[0,'','A relay tower, partially collapsed. The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter.'],[0,'act','A crew member with a plasma cutter can get inside and salvage the Radio Fragment.']],
-  'Cave':              [[0,'','Natural shelter. Atmospheric sensors can\'t reach inside.'],[0,'act','Skip O2 Tank flip this round. Draw an Event card.']],
+  'Cave':              [[0,'','Natural shelter. Atmospheric sensors can\'t reach inside.'],[0,'good','Skip O2 Tank flip this round.'],[0,'act','Draw an Event card.']],
   'Abandoned Outpost': [[0,'','The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.'],[0,'act','Use the Lockpick to enter.'],[0,'act','Roll 1 die for Food yield.']],
   'Mysterious Outpost':[[0,'','The structure doesn\'t match anything on your planetary scans. The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize. Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Draw 1 Equipment card.']],
   'Fuselage':          [[0,'','Hull section from the Endymion 7. Still holds cargo.'],[0,'act','May yield Equipment cards or a Radio Fragment. Draw an Event card.']],
-  'Wreckage Field':    [[0,'','Debris scattered across the terrain — hazardous, but potentially useful.'],[0,'act','Roll for salvage. Draw an Event card.']],
+  'Wreckage Field':    [[0,'','Debris scattered across the terrain — hazardous, but potentially useful.'],[0,'act','Draw an Event card.']],
   'Recovered Terminal':[[0,'','The terminal still draws power from a source you can\'t locate. The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE. No crew names are listed. You weren\'t briefed on any prior missions to this planet.'],[0,'act','Draw a Private Event card. The data is yours alone.']],
   'Cache':             [[0,'','A sealed supply cache — military or civilian, hard to tell.'],[0,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
   'Passage':           [[0,'','A narrow route through the terrain. Something passed through here recently.'],[0,'act','Draw an Event card.']],
@@ -489,7 +489,7 @@ function showTileRevealModal(t, onDismiss){
     const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
     const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    steps.push([0,'act',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
+    steps.push([0,'good',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
   }
   if(t.radioFragment&&!t.requiresTool){
     const p=cp();p.radioFragments++;t.radioFragment=false;
@@ -500,7 +500,7 @@ function showTileRevealModal(t, onDismiss){
     const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
     const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    steps.push([0,'act',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
+    steps.push([0,'good',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
@@ -911,7 +911,7 @@ function doMove(q,r){
   const destT=G.tiles.get(hk(q,r));
   if(destT?.name==='Signal Array'){
     const occupant=G.players.find(x=>x.alive&&x.id!==p.id&&x.q===q&&x.r===r);
-    if(occupant){showModal('Signal Array Occupied',`${occupant.name} is already at the Signal Array. Only one crew member can use it at a time.`,true,()=>{updateUI();render();});return;}
+    if(occupant){showModal('Signal Array Occupied',`${occupant.name} is already at the Signal Array. Only one crew member can use it at a time.`,true,()=>{updateUI();render();},'OK',null,null,null,null,'img/Tiles/signal-array.png');return;}
   }
   p.q=q;p.r=r;G.movementLeft-=path.length;renderTableDice();
   const t=G.tiles.get(hk(q,r));
@@ -1092,7 +1092,7 @@ function doSignalRoll(){
           e7ScreenSeq('mov-e7log',[
             [300,'sys','> SIGNAL RECEIVED.'],
             [500,'','Rescue craft entering orbit.'],
-            [1200,'','All surviving crew have been rescued.'],
+            [1200,'good','All surviving crew have been rescued.'],
           ],22);
         };
       }
@@ -2100,8 +2100,10 @@ function closeCardModal(){
 // ═══════════════════════════════════════════════════════════════
 // MODAL
 // ═══════════════════════════════════════════════════════════════
-function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okClass){
+function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okClass,bgImage){
   const mov=document.getElementById('mov');
+  mov.style.backgroundImage=bgImage?`url(${bgImage})`:'';
+  mov.style.backgroundSize='cover';mov.style.backgroundPosition='center';
   const isRescue=title==='RESCUE SIGNAL RECEIVED';
   const isAllDead=title==='ALL CREW LOST';
   const isNewGame=title==='SELF-DESTRUCT';
