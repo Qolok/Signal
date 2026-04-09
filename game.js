@@ -1560,6 +1560,7 @@ function closeTrade(){
 // ═══════════════════════════════════════════════════════════════
 let pan={x:0,y:0},zoom=2;
 let sbPan={x:0,y:0},sbZoom=1,sbEventsInit=false;
+let usesTrackpad=false;
 function svgEl(tag,attrs){const e=document.createElementNS(NS,tag);if(attrs)Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));return e;}
 
 function render(){
@@ -2400,11 +2401,16 @@ function rbSearch(query){
 function initBoard(){
   const wrap=document.getElementById('bwrap'),svg=document.getElementById('bsvg');
   let dragging=false,df=null;
-  wrap.addEventListener('mousedown',e=>{if(e.button!==2)return;e.preventDefault();dragging=true;df={x:e.clientX,y:e.clientY};svg.classList.add('drag');});
+  wrap.addEventListener('mousedown',e=>{if(e.button!==2&&e.button!==1)return;e.preventDefault();dragging=true;df={x:e.clientX,y:e.clientY};svg.classList.add('drag');});
   wrap.addEventListener('contextmenu',e=>{e.preventDefault();});
   document.addEventListener('mousemove',e=>{if(!dragging||!df)return;pan.x+=e.clientX-df.x;pan.y+=e.clientY-df.y;df={x:e.clientX,y:e.clientY};render();});
-  document.addEventListener('mouseup',e=>{if(e.button!==2)return;dragging=false;df=null;svg.classList.remove('drag');});
-  wrap.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.88:1.13)));render();},{passive:false});
+  document.addEventListener('mouseup',e=>{if(e.button!==2&&e.button!==1)return;dragging=false;df=null;svg.classList.remove('drag');});
+  wrap.addEventListener('wheel',e=>{
+    e.preventDefault();
+    if(e.ctrlKey){zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.985:1.015)));render();return;}
+    if(usesTrackpad){pan.x-=e.deltaX;pan.y-=e.deltaY;render();return;}
+    zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.88:1.13)));render();
+  },{passive:false});
   let lt=null;
   wrap.addEventListener('touchstart',e=>{if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   wrap.addEventListener('touchmove',e=>{if(e.touches.length===1&&lt){pan.x+=e.touches[0].clientX-lt.x;pan.y+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};render();}},{passive:true});
@@ -2442,11 +2448,16 @@ function initBuilder(){
     sbEventsInit=true;
     const wrap=document.getElementById('sbsvg-wrap');
     let sbDragging=false,sbDf=null;
-    wrap.addEventListener('mousedown',e=>{if(e.button!==2)return;e.preventDefault();sbDragging=true;sbDf={x:e.clientX,y:e.clientY};wrap.style.cursor='grabbing';});
+    wrap.addEventListener('mousedown',e=>{if(e.button!==2&&e.button!==1)return;e.preventDefault();sbDragging=true;sbDf={x:e.clientX,y:e.clientY};wrap.style.cursor='grabbing';});
     wrap.addEventListener('contextmenu',e=>e.preventDefault());
     document.addEventListener('mousemove',e=>{if(!sbDragging||!sbDf)return;sbPan.x+=e.clientX-sbDf.x;sbPan.y+=e.clientY-sbDf.y;sbDf={x:e.clientX,y:e.clientY};renderSiteBuilder();});
-    document.addEventListener('mouseup',e=>{if(e.button!==2)return;sbDragging=false;sbDf=null;wrap.style.cursor='';});
-    wrap.addEventListener('wheel',e=>{e.preventDefault();sbZoom=Math.max(.3,Math.min(4,sbZoom*(e.deltaY>0?.88:1.13)));renderSiteBuilder();},{passive:false});
+    document.addEventListener('mouseup',e=>{if(e.button!==2&&e.button!==1)return;sbDragging=false;sbDf=null;wrap.style.cursor='';});
+    wrap.addEventListener('wheel',e=>{
+      e.preventDefault();
+      if(e.ctrlKey){sbZoom=Math.max(.3,Math.min(4,sbZoom*(e.deltaY>0?.97:1.03)));renderSiteBuilder();return;}
+      if(usesTrackpad){sbPan.x-=e.deltaX;sbPan.y-=e.deltaY;renderSiteBuilder();return;}
+      sbZoom=Math.max(.3,Math.min(4,sbZoom*(e.deltaY>0?.88:1.13)));renderSiteBuilder();
+    },{passive:false});
   }
   renderPalette();
   renderSiteBuilder();
@@ -2666,12 +2677,21 @@ function finalizeGame(){
     // Open E7 panel and seed with mission controls + game log
     document.getElementById('e7panel').classList.add('show');
     const crew=pendingNames;
+    const ctrlLines=usesTrackpad
+      ?[
+        [0,'','Left-click — Interact'],
+        [0,'','Two-finger scroll — Pan'],
+        [0,'','Pinch — Zoom'],
+      ]
+      :[
+        [0,'','Left-click — Interact'],
+        [0,'','Right-click or middle-click drag — Pan'],
+        [0,'','Scroll wheel — Zoom'],
+      ];
     e7Seq([
       [0,   'sys', '> MISSION CONTROLS'],
       [0,   'div', null],
-      [0,   '',    'Left-click — Interact'],
-      [0,   '',    'Right-click — Pan'],
-      [0,   '',    'Scroll wheel — Zoom'],
+      ...ctrlLines,
       [0,   'div', null],
       [0,   '',    'Explore the planet to recover radio fragments. Your food and oxygen dwindle each round. Find caches or return to the base to heal.'],
       [0,   'div', null],
@@ -2739,6 +2759,7 @@ function goToSiteBuilder(){
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
+  window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>2||e.ctrlKey)usesTrackpad=true;},{passive:true,once:false,capture:true});
   document.querySelectorAll('.hud-vtab').forEach(tab=>{
     const parent=tab.parentElement;
     tab.addEventListener('click',()=>parent?.classList.toggle('hud-collapsed'));
