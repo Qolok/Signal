@@ -2732,14 +2732,18 @@ function goToSiteBuilder(){
   initBuilder();
   updateBuilderProgress();
   e7ScreenSeq('sb-e7-log',[
-    [0,   'sys', '> ENDYMION 7 - EMERGENCY PROTOCOLS'],
-    [300, 'crit', '> Signal Array: OFFLINE.'],
-    [500, '',    'You must recover Radio Fragments to restore the Signal Array.'],
-    [800, '',    'Establish your base camp by placing life support structures near the crash site.'],
+    [0, 'crit', '> Signal Array: OFFLINE.'],
+    [300, '',    'You must recover Radio Fragments to restore the Signal Array.'],
+    [500, '',    'Establish your base camp by placing life support structures near the crash site.'],
   ]);
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.hud-vtab').forEach(tab=>{
+    const parent=tab.parentElement;
+    tab.addEventListener('click',()=>parent?.classList.toggle('hud-collapsed'));
+  });
+
   document.getElementById('setup').style.display='none';
   if(loadGame()){
     // Resume saved game

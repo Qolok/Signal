@@ -146,29 +146,41 @@
         </div>
       </div>
       <!-- Equipment gallery -->
-      <div class="hudeq">
-        <div class="shd">Equipment</div>
-        <div class="eq-gallery">
-          <button class="eq-nav" id="eq-prev" onclick="eqNav(-1)" disabled>&#9664;</button>
-          <div class="eq-viewport" id="eqhand"></div>
-          <button class="eq-nav" id="eq-next" onclick="eqNav(1)" disabled>&#9654;</button>
+      <div class="hudeq" id="hudeq">
+        <div class="hud-tab-body">
+          <div class="shd">Equipment</div>
+          <div class="eq-gallery">
+            <button type="button" class="eq-nav" id="eq-prev" onclick="eqNav(-1)" disabled>&#9664;</button>
+            <div class="eq-viewport" id="eqhand"></div>
+            <button type="button" class="eq-nav" id="eq-next" onclick="eqNav(1)" disabled>&#9654;</button>
+          </div>
+        </div>
+        <div class="hud-vtab">
+          <span class="hud-vtab-caret">&#9660;</span>
+          <span class="hud-vtab-lbl">Equipment</span>
         </div>
       </div>
     </div>
     <!-- RIGHT: Action HUD -->
     <div id="hud-action">
-      <div id="decks">
-        <div class="deckpile" id="evtdeck" title="Event Deck">
-          <span class="dk-symbol">◈</span>
-          <div class="dklbl">Event</div>
-          <div class="dkn" id="evtn">80</div>
-          <div class="dksub">cards</div>
+      <div id="decks" class="hud-collapsed">
+        <div class="hud-vtab">
+          <span class="hud-vtab-caret">&#9660;</span>
+          <span class="hud-vtab-lbl">Decks</span>
         </div>
-        <div class="deckpile" id="equpdeck" title="Equipment Deck">
-          <span class="dk-symbol">◆</span>
-          <div class="dklbl">Equip</div>
-          <div class="dkn" id="equpn">30</div>
-          <div class="dksub">cards</div>
+        <div class="hud-tab-body">
+          <div class="deckpile" id="evtdeck" title="Event Deck">
+            <span class="dk-symbol">◈</span>
+            <div class="dklbl">Event</div>
+            <div class="dkn" id="evtn">80</div>
+            <div class="dksub">cards</div>
+          </div>
+          <div class="deckpile" id="equpdeck" title="Equipment Deck">
+            <span class="dk-symbol">◆</span>
+            <div class="dklbl">Equip</div>
+            <div class="dkn" id="equpn">30</div>
+            <div class="dksub">cards</div>
+          </div>
         </div>
       </div>
       <div id="tabletop-dice">
