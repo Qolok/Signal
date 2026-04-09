@@ -314,7 +314,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .tiptit{font-size:14px;color:var(--hi);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;}
 .tip-rule{height:1px;background:linear-gradient(90deg,#1a3a5a,transparent);margin:0;flex-shrink:0;}
 .tipdesc{font-size:12px;color:var(--txt);line-height:1.6;white-space:pre-line;flex:1;}
-.tipact{font-size:11px;color:#4a8aaa;padding-top:6px;border-top:1px solid #1a3050;flex-shrink:0;}
+.tipact{font-size:11px;color:#4a8aaa;padding-top:6px;border-top:1px solid #1a3050;flex-shrink:0;white-space:pre-line;}
 /* ── TILE REVEAL OVERLAY ── */
 #trov{
   display:none;position:fixed;inset:0;z-index:210;
@@ -353,10 +353,10 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 }
 #tr-desc{
   position:relative;z-index:2;
-  font-size:13px;color:#5a9870;line-height:1.55;
-  text-align:left;width:100%;white-space:pre-line;
-  height:160px;overflow:hidden;flex-shrink:0;
+  text-align:left;width:100%;
+  height:160px;overflow-y:auto;flex:1;
 }
+#tr-desc .e7m{font-size:13px;padding:2px 0;}
 #trov.equip-locker #tr-desc{height:50px;}
 #trov.watch-tower #tr-desc{height:100px;}
 #tr-deck{
@@ -456,10 +456,11 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .e7close:hover{color:var(--hi)}
 #e7log{flex:1;overflow-y:auto;padding:4px 0;min-height:0}
 /* E7 computer voice messages */
-.e7m{font-size:16px;padding:3px 14px;color:#5a9870;line-height:1.55}
+.e7m{font-size:16px;padding:3px 14px;color:var(--dim);line-height:1.55}
 #e7log .e7m,#sb-e7-log .e7m{font-size:13px}
-.e7m.sys{color:var(--dim)}
-.e7m.crit{color:var(--red)}
+.e7m.sys{color:#4a80b8}
+.e7m.good{color:#60a060}.e7m.crit{color:var(--red)}
+.e7m.act{color:#b08840}
 .e7div{height:1px;background:var(--bdr);margin:5px 14px;opacity:.35}
 /* Log entries */
 .le{font-size:11px;padding:2px 14px;border-bottom:1px solid rgba(255,255,255,.02);line-height:1.4}
@@ -738,7 +739,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 /* ── EVENT CARD ── */
 #evc-ov{display:none;position:fixed;inset:0;z-index:106;
   background:var(--bg) center/cover no-repeat;
-  align-items:center;justify-content:center;flex-direction:column;gap:18px}
+  align-items:center;justify-content:center;flex-direction:column;gap:20px}
 #evc-ov::before{content:'';position:absolute;inset:0;
   background:rgba(2,5,10,.3);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
@@ -831,8 +832,6 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #sig-dice .td-die-wrap{will-change:transform;}
 #sig-out{font-size:15px;text-align:center;min-height:1.2em;font-weight:bold;letter-spacing:.05em}
 #sig-e7{width:100%;border-bottom:1px solid var(--bdr);padding-bottom:10px;flex:1;overflow:hidden;text-align:left;}
-#sig-e7 .e7m{font-size:11px;padding:1px 0;color:#5a9870;line-height:1.55}
-#sig-e7 .e7m.sys{color:var(--dim)}
 
 /* ── INTRO SCREEN ── */
 #intro,#setup{isolation:isolate}

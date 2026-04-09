@@ -309,7 +309,7 @@ const EQ_CARDS=[
 const EVENT_CARDS=[
   // Public — yields
   {text:'Emergency supplies found, partially intact. Roll 1 die for Food yield.',pub:true,rollFood:true},
-  {text:'Salvageable material nearby. Roll 1 die: 1–3 = nothing; 4–5 = 1 Food; 6 = Equipment card.',pub:true,rollWreckage:true},
+  {text:['Salvageable material nearby. Roll 1 die:','1–3: nothing','4–5: +1 Food','6: Equipment card'],pub:true,rollWreckage:true},
   {text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true},
   {text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true},
   {text:'In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive. If you take it back to the Signal Array, it might take a charge.',pub:true,rf:true},
@@ -340,32 +340,32 @@ const EVENT_CARDS=[
 ];
 
 const TILE_TIPS={
-  'Crash Site':        {desc:'Starting point for all crew. The heart of Base Camp.',         act:'No specific action — this is your anchor point.'},
-  'Medical Bay':       {desc:'Emergency medical equipment salvaged from the wreckage.',      act:'Passive: Restore 1 Health automatically when entering.'},
-  'Signal Array':      {desc:'The ship\'s emergency transmitter. Fits one player at a time.',act:'Action: Activate Radio Fragments. Roll Signal dice if fragments are activated. Contest occupancy if blocked.'},
-  'Equipment Locker':  {desc:'The crew\'s tool cache. Raided but not empty.',               act:'Action: Draw 1 Equipment card.'},
-  'Cargo Hold':        {desc:'Communal food and supply storage.',                            act:'Action: Deposit or withdraw Food freely.'},
-  'Airlock':           {desc:'The pressurized entry point from the field. O₂ reserves fully restored on re-entry.',act:'Passive: Refill all O₂ Tanks automatically when entering from terrain.'},
-  'Watch Tower':       {desc:'An elevated vantage point over the surrounding terrain.',      act:'Action: Reveal all face-down tiles adjacent to any crew member currently in the field.'},
-  'Dead Tower':        {desc:'A broadcast tower, hand-built and long-abandoned. Inside, a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them. You salvage some Radio Fragments from the equipment.',act:'Investigate: Use Lockpick to recover 1 Radio Fragment.'},
-  'Collapsed Tower':   {desc:'A relay tower, partially collapsed. The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter. A crew member with a plasma cutter can get inside and salvage the Radio Fragment.',act:'Investigate: Use Plasma Cutter to recover 1 Radio Fragment.'},
-  'Cave':              {desc:'Natural shelter. Atmospheric sensors can\'t reach inside.',    act:'Investigate: Skip O2 Tank flip this round. Draw an Event card.'},
-  'Abandoned Outpost': {desc:'The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.',act:'Use the Lockpick to enter. Roll 1 die for Food yield.'},
-  'Mysterious Outpost':{desc:'The structure doesn\'t match anything on your planetary scans. The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize. Someone built this here and didn\'t want visitors.',act:'Investigate: Use Data Spike to enter. Draw 1 Equipment card.'},
-  'Fuselage':          {desc:'Hull section from the Endymion 7. Still holds cargo.',        act:'Investigate: May yield Equipment cards or a Radio Fragment. Draw an Event card.'},
-  'Wreckage Field':    {desc:'Debris scattered across the terrain — hazardous, but potentially useful.',act:'Investigate: Roll for salvage. Draw an Event card.'},
-  'Recovered Terminal':{desc:'The terminal still draws power from a source you can\'t locate. The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE. No crew names are listed. You weren\'t briefed on any prior missions to this planet.',act:'Investigate: Draw a Private Event card. The data is yours alone.'},
-  'Cache':             {desc:'A sealed supply cache — military or civilian, hard to tell. Roll 1 die. 1–2: +1 Food, 3–4: +2 Food, 5–6: +3 Food.',              act:'Investigate: Roll 1 die. 1–2: +1 Food, 3–4: +2 Food, 5–6: +3 Food.'},
-  'Passage':           {desc:'A narrow route through the terrain. Something passed through here recently.',act:'Investigate: Draw an Event card.'},
-  'Bloody Passage':    {desc:'A narrow route marked with signs of violence. Whatever happened here was recent.',act:'Investigate: Draw an Event card.'},
-  'Stasis Pod':        {desc:'Alien preservation technology. Time moves differently inside.', act:'Enter: Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time.'},
-  'Temporal Rift':     {desc:'Spacetime distortion. Past and future Food flickers.',       act:'Automatic: Roll 1 die. 1–3: lose that many Food. 4–6: recover that many Food.'},
-  'Portal':            {desc:'Instantaneous transit point. Origin unknown.',                  act:'Option: Move pawn immediately to Crash Site. Turn ends.'},
-  'Gravitational Well':{desc:'Intense localized gravity field.',                             act:'Automatic: Roll 1 die. The player to your left moves your pawn that many points in any direction.'},
-  'Dead Zone':       {desc:'Something blocks all transmission here.',                       act:'Automatic: No Signal Roll occurs this round for any player.'},
-  'Echo Chamber':      {desc:'The terrain resonates with past events.',                      act:'Automatic: Resolve the most recent Public Event card again in full.'},
-  'Inversion Field':   {desc:'Gravity inversion. Resources change hands involuntarily.',     act:'Automatic: Choose any other player. Swap your Food with theirs.'},
-  'Ship Section':      {desc:'A section of the Endymion 7 that came down separately. Emergency systems are still online.',act:'Investigate: Roll 1 die — 1–2: Food, 3–4: Oxygen, 5–6: Health.'},
+  'Crash Site':        [[0,'','Starting point for all crew. The heart of Base Camp.'],[0,'act','No specific action — this is your anchor point.']],
+  'Medical Bay':       [[0,'','Emergency medical equipment salvaged from the wreckage.'],[0,'act','Passive: Restore 1 Health automatically when entering.']],
+  'Signal Array':      [[0,'','The ship\'s emergency transmitter. Fits one player at a time.'],[0,'act','Activate Radio Fragments. Roll Signal dice if fragments are activated. Contest occupancy if blocked.']],
+  'Equipment Locker':  [[0,'','The crew\'s tool cache. Raided but not empty.'],[0,'act','Draw 1 Equipment card.']],
+  'Cargo Hold':        [[0,'','Communal food and supply storage.'],[0,'act','Deposit or withdraw Food freely.']],
+  'Airlock':           [[0,'','The pressurized entry point from the field. O₂ reserves fully restored on re-entry.'],[0,'act','Passive: Refill all O₂ Tanks automatically when entering from terrain.']],
+  'Watch Tower':       [[0,'','An elevated vantage point over the surrounding terrain.'],[0,'act','Reveal all face-down tiles adjacent to any crew member currently in the field.']],
+  'Dead Tower':        [[0,'','A broadcast tower, hand-built and long-abandoned. Inside, a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them. You salvage some Radio Fragments from the equipment.'],[0,'act','Use Lockpick to recover 1 Radio Fragment.']],
+  'Collapsed Tower':   [[0,'','A relay tower, partially collapsed. The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter.'],[0,'act','A crew member with a plasma cutter can get inside and salvage the Radio Fragment.']],
+  'Cave':              [[0,'','Natural shelter. Atmospheric sensors can\'t reach inside.'],[0,'act','Skip O2 Tank flip this round. Draw an Event card.']],
+  'Abandoned Outpost': [[0,'','The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.'],[0,'act','Use the Lockpick to enter.'],[0,'act','Roll 1 die for Food yield.']],
+  'Mysterious Outpost':[[0,'','The structure doesn\'t match anything on your planetary scans. The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize. Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Draw 1 Equipment card.']],
+  'Fuselage':          [[0,'','Hull section from the Endymion 7. Still holds cargo.'],[0,'act','May yield Equipment cards or a Radio Fragment. Draw an Event card.']],
+  'Wreckage Field':    [[0,'','Debris scattered across the terrain — hazardous, but potentially useful.'],[0,'act','Roll for salvage. Draw an Event card.']],
+  'Recovered Terminal':[[0,'','The terminal still draws power from a source you can\'t locate. The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE. No crew names are listed. You weren\'t briefed on any prior missions to this planet.'],[0,'act','Draw a Private Event card. The data is yours alone.']],
+  'Cache':             [[0,'','A sealed supply cache — military or civilian, hard to tell.'],[0,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
+  'Passage':           [[0,'','A narrow route through the terrain. Something passed through here recently.'],[0,'act','Draw an Event card.']],
+  'Bloody Passage':    [[0,'','A narrow route marked with signs of violence. Whatever happened here was recent.'],[0,'act','Draw an Event card.']],
+  'Stasis Pod':        [[0,'','Alien preservation technology. Time moves differently inside.'],[0,'act','Enter: Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time.']],
+  'Temporal Rift':     [[0,'','You experience an unexplained spacetime distortion. Past and future flickers. You fight to keep down your breakfast.'],[0,'act','Roll 1 die.'],[0,'crit','1\u20133: lose that many Food.'],[0,'good','4\u20136: recover that many Food.']],
+  'Portal':            [[0,'','Instantaneous transit point. Origin unknown.'],[0,'act','Option: Move immediately to Crash Site. Turn ends.']],
+  'Gravitational Well':[[0,'','Intense localized gravity field.'],[0,'act','Roll 1 die.'],[0,'act','The player to your left moves your pawn that many steps in any direction.']],
+  'Dead Zone':         [[0,'','Something blocks all transmission here.'],[0,'act','No Signal Roll occurs this round for any player.']],
+  'Echo Chamber':      [[0,'','The terrain resonates with past events.'],[0,'act','Resolve the most recent Public Event card again in full.']],
+  'Inversion Field':   [[0,'','Gravity inversion. Resources change hands involuntarily.'],[0,'act','Choose any other player. Swap your Food with theirs.']],
+  'Ship Section':      [[0,'','A section of the Endymion 7 that came down separately. Emergency systems are still online.'],[0,'act','Roll 1 die.'],[0,'good','1\u20132: Food'],[0,'sys','3\u20134: Oxygen'],[0,'crit','5\u20136: Health']],
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -466,41 +466,41 @@ function tileImgHtml(t){
   return `<div style="width:200px;height:140px;background:url(${img}) center/cover no-repeat;border-radius:4px;margin:0 auto 10px;overflow:hidden;display:block"></div>`;
 }
 
+function trDesc(steps,charDelay=15){
+  const el=document.getElementById('tr-desc');
+  el.innerHTML='';
+  termSeq(el,Array.isArray(steps[0])?steps:[[0,'',steps]],charDelay);
+}
 function showTileRevealModal(t, onDismiss){
-  let title, desc;
+  let title;
+  let steps=[];
   if(t.type==='anomaly'){
     title=t.anomaly||'Anomaly';
-    const tip=TILE_TIPS[t.anomaly]||{};
-    desc=[tip.desc,tip.act].filter(Boolean).join('\n\n');
-    if(!desc)desc='An anomaly of unknown origin.';
+    steps=[...(TILE_TIPS[t.anomaly]||[[0,'','An anomaly of unknown origin.']])];
   } else if(t.type==='ship_section'){
     title='Ship Section — Endymion 7';
-    desc='A section of the Endymion 7 that came down separately. Emergency systems are still online. Roll to see what you can salvage — 1–2: Food, 3–4: Oxygen, 5–6: Health.';
+    steps=[...TILE_TIPS['Ship Section']];
   } else {
     title=t.pois.join(' \u00b7 ');
-    desc=t.pois.map(poi=>TILE_TIPS[poi]?.desc).filter(Boolean).join('\n\n');
+    t.pois.forEach(poi=>{if(TILE_TIPS[poi])steps.push(...TILE_TIPS[poi]);});
   }
   if(t.requiresTool&&!t.radioFragment){
     const p=cp();
     const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
     const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    desc=(desc?desc+'\n\n':'')+
-      (hasTool?`\u25c8 You have a ${toolName}. You can enter.`
-              :`\u25c8 Requires ${toolName} to enter.`);
+    steps.push([0,'act',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
   }
   if(t.radioFragment&&!t.requiresTool){
     const p=cp();p.radioFragments++;t.radioFragment=false;
     addLog(`${p.name} recovered a Radio Fragment.`,'frag');
-    desc=(desc?desc+'\n\n':'')+'\u25c8 Radio Fragment recovered.';
+    steps.push([0,'good','\u25c8 Radio Fragment recovered.']);
   } else if(t.radioFragment&&t.requiresTool){
     const p=cp();
     const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
     const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    desc=(desc?desc+'\n\n':'')+
-      (hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`
-              :`\u25c8 Requires ${toolName} to access the Radio Fragment.`);
+    steps.push([0,'act',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
@@ -508,7 +508,7 @@ function showTileRevealModal(t, onDismiss){
   const tileImg=getTileImg(t);
   trov.style.backgroundImage=tileImg?`url(${tileImg})`:'none';
   document.getElementById('tr-name').textContent=title.toUpperCase();
-  e7Type(document.getElementById('tr-desc'),desc||'Unknown terrain.');
+  trDesc(steps.length?steps:[[0,'','Unknown terrain.']]);
   const deck=document.getElementById('tr-deck');
   const actionsEl=document.getElementById('tr-actions');
   actionsEl.innerHTML='';
@@ -1102,8 +1102,9 @@ function doSignalRoll(){
   document.getElementById('bsig').disabled=true;
   const e7el=document.getElementById('sig-e7');e7el.innerHTML='';
   e7ScreenSeq('sig-e7',[
-    [0,  'sys', `> Radio Fragments: ${frags}.`],
-    [600,'',    `Roll 3 dice. You must roll a ${thr} or above to establish a rescue signal.`],
+    [0,  'sys',   `> Radio Fragments: ${frags}.`],
+    [600,'act',   `Roll 3 dice.`],
+    [600,'act',   `You must roll a ${thr} or above to establish a rescue signal.`],
   ],18);
 }
 
@@ -1139,9 +1140,7 @@ function doEquipLocker(){
   if(hasCards){
     // Exchange mode: select a card to discard, then draw a replacement
     deck.style.display='none';
-    e7Type(document.getElementById('tr-desc'),deckEmpty
-      ?'The equipment deck is empty — nothing to exchange.'
-      :'Select a card to discard. It will be replaced with a new one.');
+    trDesc(deckEmpty?'The equipment deck is empty — nothing to exchange.':'Select a card to discard. It will be replaced with a new one.');
     if(!deckEmpty){
       actionsEl.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px;';
       p.equipment.forEach(card=>{
@@ -1167,7 +1166,7 @@ function doEquipLocker(){
     }
   } else {
     // Draw mode: no existing cards, just draw one
-    e7Type(document.getElementById('tr-desc'),deckEmpty?'The equipment deck is empty.':'Draw 1 card from the equipment deck.');
+    trDesc(deckEmpty?'The equipment deck is empty.':'Draw 1 card from the equipment deck.');
     document.getElementById('tr-evtn').textContent=G.eqDeckCount;
     document.getElementById('tr-deck-lbl').textContent='Draw Equipment Card';
     deck.style.display=deckEmpty?'none':'';
@@ -1240,7 +1239,7 @@ function doWatchTower(){
   trov.style.backgroundImage='url(img/Tiles/watch-tower.png)';
   trov.classList.add('watch-tower');
   document.getElementById('tr-name').textContent='WATCH TOWER';
-  e7Type(document.getElementById('tr-desc'),msg);
+  trDesc(msg);
   const deck=document.getElementById('tr-deck');
   deck.style.display='none';
   const dismiss=()=>{
@@ -1353,6 +1352,9 @@ function triggerAnomaly(t){
       let rollCb=null;
       if(evt.rollFood){rollCb=r=>{const g=Math.min(10-p.food,r);p.food+=g;addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`,g?'good':'');return`Rolled ${r} — gained ${g} Food.`;};}
       else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(10-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
+      const ecOv=document.getElementById('evc-ov');
+      ecOv.style.backgroundImage='url(img/Tiles/echo-chamber.png)';
+      ecOv.style.backgroundSize='cover';ecOv.style.backgroundPosition='center';
       showEventCard(evt,'Echo Chamber',()=>{updateUI();render();},rollCb);
       break;
     }
@@ -1821,13 +1823,15 @@ function showHexTip(t){
   let key=t.name||t.anomaly||t.type;
   if(t.type==='ship_section')key='Ship Section';
   if(t.type==='face_down')key='face_down';
-  const info=TILE_TIPS[key]||{desc:'Unknown terrain.',act:''};
+  const steps=TILE_TIPS[key]||[[0,'','Unknown terrain.']];
   const title=t.name||(t.type==='anomaly'?t.anomaly:t.type==='ship_section'?'Ship Section':t.pois&&t.pois.length?t.pois.join(' · '):'Unknown');
   document.getElementById('tiptit').textContent=title.toUpperCase();
-  document.getElementById('tipdesc').textContent=t.type==='face_down'?'Face-down tile. Enter to reveal what lies ahead.':info.desc;
+  const descSteps=steps.filter(([,cls])=>cls==='');
+  const actSteps=steps.filter(([,cls])=>cls!=='');
+  document.getElementById('tipdesc').textContent=t.type==='face_down'?'Face-down tile. Enter to reveal what lies ahead.':descSteps.map(([,,msg])=>msg).join('\n');
   const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
   const toolNote=t.requiresTool&&(t.radioFragment||t.toolReward)?`\n*Requires ${TOOL_NAMES[t.requiresTool]||t.requiresTool}`:'';
-  document.getElementById('tipact').textContent=t.type==='face_down'?'':(info.act+(toolNote));
+  document.getElementById('tipact').textContent=t.type==='face_down'?'':(actSteps.map(([,,msg])=>msg).join('\n')+toolNote);
   // Hero image
   const heroEl=document.getElementById('tip-hero-img');
   const tImg=getTileImg(t);
@@ -2166,7 +2170,11 @@ function showEventCard(evt, _locName, onOk, rollCallback){
   const evtLbl=isPub?'PUBLIC EVENT':'PRIVATE EVENT';
   evtBadge.innerHTML=`<span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/${evtIcon}')"></span>`;
   document.getElementById('evc-loc').textContent=evtLbl;
-  document.getElementById('evc-body').textContent=evt.text;
+  const body=document.getElementById('evc-body');
+  if(Array.isArray(evt.text)){
+    body.innerHTML='';
+    evt.text.forEach(line=>{const d=document.createElement('div');d.textContent=line;body.appendChild(d);});
+  } else {body.textContent=evt.text;}
   const pills=document.getElementById('evc-pills');pills.innerHTML='';
   function addPill(txt,cls){const p=document.createElement('div');p.className='evc-pill '+cls;p.textContent=txt;pills.appendChild(p);}
   if(evt.rf)           addPill('+ Radio Fragment','good');
@@ -2222,36 +2230,54 @@ function showEventCard(evt, _locName, onOk, rollCallback){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ENDYMION 7 — SHIP COMPUTER
+// TERMINAL SYSTEM — unified rendering for all terminal elements
 // ═══════════════════════════════════════════════════════════════
-function e7Scroll(){
-  const p=document.getElementById('e7panel');
-  if(p?.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;}
-}
-// Type text character-by-character into an existing element
+
+// Type text character-by-character into el; auto-scrolls parent container
 function e7Type(el,msg,charDelay=15){
   el.textContent='';
-  for(let i=0;i<msg.length;i++)setTimeout(()=>{el.textContent=msg.slice(0,i+1);e7Scroll();},i*charDelay);
+  for(let i=0;i<msg.length;i++)
+    setTimeout(()=>{el.textContent=msg.slice(0,i+1);const p=el.parentElement;if(p)p.scrollTop=p.scrollHeight;},i*charDelay);
 }
-// Ship computer voice message
-function addE7(msg,type='',charDelay=15){
-  const l=document.getElementById('e7log');
+// Append a colored line to any terminal container
+// cls: 'sys'|'good'|'act'|'crit'|'imp'|'frag'|'tile'|''   base: 'e7m' (voice) or 'le' (log entry)
+function termAppend(container,msg,cls='',charDelay=15,base='e7m'){
   const d=document.createElement('div');
-  d.className='e7m'+(type?' '+type:'');l.appendChild(d);e7Scroll();
+  d.className=base+(cls?' '+cls:'');
+  container.appendChild(d);
+  container.scrollTop=container.scrollHeight;
   e7Type(d,msg,charDelay);
 }
-// Horizontal divider in the E7 log
-function addE7Div(){
-  const l=document.getElementById('e7log');
-  const d=document.createElement('div');d.className='e7div';l.appendChild(d);e7Scroll();
+// Append a divider to any terminal container
+function termDiv(container){
+  const d=document.createElement('div');d.className='e7div';
+  container.appendChild(d);container.scrollTop=container.scrollHeight;
 }
-// Standard game-event log entry (now lives inside the E7 panel)
-function addLog(msg,cls,charDelay=15){
-  const l=document.getElementById('e7log');
-  const d=document.createElement('div');
-  d.className='le'+(cls?' '+cls:'');l.appendChild(d);e7Scroll();
-  e7Type(d,msg,charDelay);
+// Run a timed sequence into any terminal container
+// steps: [[gapMs, cls, msg], ...]
+// cls: 'sys'|'good'|'act'|'crit'|'imp'|'' for e7m voice lines
+//      'log'|'log-act'|'log-good'|'log-imp' for compact le log lines
+//      'div' for a divider (msg ignored)
+function termSeq(container,steps,charDelay=15){
+  let t=0;
+  steps.forEach(([gap,cls,msg])=>{
+    t+=gap;
+    if(cls==='div'){
+      const at=t;setTimeout(()=>termDiv(container),at);
+    } else {
+      const isLog=cls==='log'||cls.startsWith('log-');
+      const base=isLog?'le':'e7m';
+      const c=isLog?cls.replace(/^log-?/,''):cls;
+      const at=t;
+      setTimeout(()=>termAppend(container,msg,c,charDelay,base),at);
+      t+=msg.length*charDelay;
+    }
+  });
 }
+// Convenience wrappers — all existing call sites unchanged
+function addE7(msg,cls='',charDelay=15){termAppend(document.getElementById('e7log'),msg,cls,charDelay);}
+function addLog(msg,cls='',charDelay=15){termAppend(document.getElementById('e7log'),msg,cls,charDelay,'le');}
+function addE7Div(){termDiv(document.getElementById('e7log'));}
 // Prompt bar — updated on every updateUI call
 function updateE7Prompt(){
   const el=document.getElementById('e7prompt');if(!el)return;
@@ -2298,60 +2324,10 @@ fetch('docs/FieldGuide.md')
 function toggleE7(){
   const p=document.getElementById('e7panel');
   p.classList.toggle('show');
-  if(p.classList.contains('show')){e7Scroll();updateE7Prompt();}
+  if(p.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;updateE7Prompt();}
 }
-// Write a timed narrative into the floating E7 panel (#e7log)
-// steps: [[gapMs, type, msg], ...] — gapMs is pause after previous entry finishes typing
-// type: 'sys'|''|'div'|'log'|'log-imp'   charDelay: ms per character
-function e7Seq(steps,charDelay=15){
-  let t=0;
-  steps.forEach(([gap,type,msg])=>{
-    t+=gap;
-    if(type==='div'){
-      const at=t;setTimeout(()=>addE7Div(),at);
-    } else {
-      const at=t;
-      setTimeout(()=>{
-        if(type==='sys')addE7(msg,'sys',charDelay);
-        else if(type==='log-imp')addLog(msg,'imp',charDelay);
-        else if(type==='log-act')addLog(msg,'act',charDelay);
-        else if(type==='log')addLog(msg,'',charDelay);
-        else addE7(msg,'',charDelay);
-      },at);
-      t+=msg.length*charDelay;
-    }
-  });
-}
-// Write a timed narrative into an inline setup-screen terminal (typewriter effect)
-// steps: [[gapMs, type, msg], ...] — gapMs is delay after previous element finishes
-// type: 'sys'|''|'div'   charDelay: ms between characters
-function e7ScreenSeq(containerId,steps,charDelay=20){
-  const container=document.getElementById(containerId);
-  if(!container)return;
-  let t=0;
-  steps.forEach(([gap,type,msg])=>{
-    t+=gap;
-    if(type==='div'){
-      const at=t;
-      setTimeout(()=>{
-        const d=document.createElement('div');d.className='e7div';container.appendChild(d);
-        container.scrollTop=container.scrollHeight;
-      },at);
-    } else {
-      const at=t;
-      setTimeout(()=>{
-        const d=document.createElement('div');
-        d.className='e7m'+(type?' '+type:'');
-        d.textContent='';
-        container.appendChild(d);
-        for(let i=0;i<msg.length;i++){
-          setTimeout(()=>{d.textContent=msg.slice(0,i+1);container.scrollTop=container.scrollHeight;},i*charDelay);
-        }
-      },at);
-      t+=msg.length*charDelay;
-    }
-  });
-}
+function e7Seq(steps,charDelay=15){termSeq(document.getElementById('e7log'),steps,charDelay);}
+function e7ScreenSeq(containerId,steps,charDelay=20){const c=document.getElementById(containerId);if(c)termSeq(c,steps,charDelay);}
 // E7 panel stays open until explicitly closed via the ✕ button or E7 toggle
 
 function openRulebook(){
@@ -2433,10 +2409,10 @@ function initBoard(){
 // ═══════════════════════════════════════════════════════════════
 const BUILDER_PALETTE=[
   {name:'Medical Bay',     short:'MED',  desc:'On entry: restore 1 Health token automatically.'},
-  {name:'Signal Array',    short:'SIG',  desc:'Action: Activate fragments & roll for rescue.'},
-  {name:'Equipment Locker',short:'EQUIP',desc:'Action: Draw 1 Equipment card.'},
-  {name:'Cargo Hold',      short:'CARGO',desc:'Action: Deposit or withdraw Food freely.'},
-  {name:'Watch Tower',     short:'WATCH',desc:'Action: Reveal tiles adjacent to any frontier player.'},
+  {name:'Signal Array',    short:'SIG',  desc:'Activate fragments & roll for rescue.'},
+  {name:'Equipment Locker',short:'EQUIP',desc:'Draw 1 Equipment card.'},
+  {name:'Cargo Hold',      short:'CARGO',desc:'Deposit or withdraw Food freely.'},
+  {name:'Watch Tower',     short:'WATCH',desc:'Reveal tiles adjacent to any frontier player.'},
   {name:'Airlock',         short:'AIR',  desc:'On entry from terrain: refill all O₂ Tanks.'},
 ];
 
@@ -2684,14 +2660,14 @@ function finalizeGame(){
     const crew=pendingNames;
     const ctrlLines=usesTrackpad
       ?[
-        [0,'','Left-click — Interact'],
-        [0,'','Two-finger scroll — Pan'],
-        [0,'','Pinch — Zoom'],
+        [0,'good','Click — Interact'],
+        [0,'good','Two-finger scroll — Pan'],
+        [0,'good','Pinch — Zoom'],
       ]
       :[
-        [0,'','Left-click — Interact'],
-        [0,'','Right-click or middle-click drag — Pan'],
-        [0,'','Scroll wheel — Zoom'],
+        [0,'good','Left-click — Interact'],
+        [0,'good','Right-click — Pan'],
+        [0,'good','Scroll wheel — Zoom'],
       ];
     e7Seq([
       [0,   'sys', '> MISSION CONTROLS'],
@@ -2784,10 +2760,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   e7ScreenSeq('e7-intro-msg',[
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-    [400, 'sys', '> Primary diagnostics: complete. Life support: NOMINAL.'],
+    [400, 'good', '> Primary diagnostics: COMPLETE. Life support: NOMINAL.'],
     [600, '',    'Welcome aboard. I am E7, your ship\'s emergency computer. You are the crew of the Endymion 7, a deep-range mining vessel. You have crash-landed on an uncharted planet. The cause of the accident is unknown.'],
     [500, '',    'Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array to call for rescue.'],
-    [400, '',    'You have a 1 in 10,358 chance of survival.'],
+    [400, 'crit',    'You have a 1 in 10,358 chance of survival.'],
     [300, '',    'Please acknowledge.'],
   ]);
 });
