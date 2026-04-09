@@ -2702,7 +2702,7 @@ function buildSetup(){
     const d=document.createElement('div');d.className='prow';
     d.innerHTML=`<div class="ppick">
       <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
-      <div style="${portBg(pname,40,50)}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+      <div style="${portBg(pname,80,90)}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
       <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
     </div><input class="pi" type="text" id="pn-${i}" value="${prev[i]!==undefined?prev[i]:pname}" maxlength="16" placeholder="Crew ${i+1}">`;
     nl.appendChild(d);
@@ -2763,9 +2763,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   e7ScreenSeq('e7-intro-msg',[
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
     [400, 'good', '> Primary diagnostics: COMPLETE. Life support: NOMINAL.'],
-    [600, '',    'Welcome aboard. I am E7, your ship\'s emergency computer. You are the crew of the Endymion 7, a deep-range mining vessel. You have crash-landed on an uncharted planet. The cause of the accident is unknown.'],
-    [500, '',    'Somewhere out there, scattered across the terrain, are pieces of your radio. Find them and bring them back to the Signal Array to call for rescue.'],
-    [400, 'crit',    'You have a 1 in 10,358 chance of survival.'],
+    [600, '',    'Hello, Commander. I am E7, your ship\'s emergency computer.'],
+    [600, '',    'The Endymion 7, a deep-range mining vessel, has crash-landed on an uncharted planet. The cause of the accident is unknown.'],
+    [500, '',    'Before impact, the ship\'s cargo was jettisoned. Your task is to explore the surrounding area, recover Radio Fragments, and return them to the Signal Array to call for rescue.'],
+    [400, 'crit','You have a 1 in 10,358 chance of survival.'],
     [300, '',    'Please acknowledge.'],
   ]);
 });
@@ -2774,7 +2775,9 @@ function showCrewSetup(){
   document.getElementById('setup').style.display='flex';
   buildSetup();
   e7ScreenSeq('e7-setup-msg',[
-    [0,   'sys', '> ENDYMION 7 — CREW INITIALIZATION...'],
-    [400, '',    'Please confirm the surviving crew members.'],
+    [0,   'sys', '> ENDYMION 7 — CREW MUSTER...'],
+    [400, '',    'Life support systems are operational.'],
+    [400, '',    'The unscheduled landing has resulted in numerous casualties among the crew. Biological scans are inconclusive.'],
+    [400, 'act',    'Please confirm the surviving crew members.'],
   ]);
 }

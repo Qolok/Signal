@@ -35,19 +35,33 @@
 
 <!-- ── SETUP: player names ── -->
 <div id="setup">
-  <div class="sbox">
-    <h1>SIGNAL</h1>
-    <p class="ssub">Endymion 7 · Crew Initialization</p>
-    <div class="ssec">
-      <div class="slbl">Crew Size</div>
-      <div class="crow" id="crow"></div>
+  <div id="suhdr">
+    <h1>SIGNAL · CREW INITIALIZATION</h1>
+  </div>
+  <div id="sumain">
+    <div id="su-left">
+      <div class="ssec">
+        <div class="slbl">Crew Size</div>
+        <div class="crow" id="crow"></div>
+      </div>
+      <div class="ssec">
+        <div class="slbl">Crew Manifest</div>
+        <div id="plist"></div>
+      </div>
     </div>
-    <div class="ssec">
-      <div class="slbl">Crew Manifest</div>
-      <div id="plist"></div>
+    <div id="su-right">
+      <div id="su-e7-hdr">
+        <div class="e7title">
+          <span class="e7logo">ENDYMION 7</span>
+          <span class="e7status">● ONLINE</span>
+        </div>
+        <div class="e7sub">SHIP COMPUTER</div>
+      </div>
+      <div id="e7-setup-msg"></div>
     </div>
-    <div id="e7-setup-msg" class="e7-screen-msg"></div>
-    <button class="sbtn" onclick="goToSiteBuilder()">Confirm</button>
+  </div>
+  <div id="sufooter">
+    <button id="su-confirm" class="mbtn pri" onclick="goToSiteBuilder()">Confirm Crew</button>
   </div>
 </div>
 
