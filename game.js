@@ -747,8 +747,9 @@ function drawTileEvent(t){
     };
   }
   const evImg=getTileImg(t);
-  const evOv=document.getElementById('evc-ov');
-  evOv.style.backgroundImage=evImg?`url(${evImg})`:'none';
+  const _evOv=document.getElementById('evc-ov');
+  _evOv.style.backgroundImage=evImg?`url(${evImg})`:'none';
+  _evOv.style.backgroundSize='cover';_evOv.style.backgroundPosition='center';
   showEventCard(evt,locName,()=>{updateUI();render();},rollCallback);
 }
 
@@ -1058,7 +1059,7 @@ function doSignalRoll(){
   const diceEl=document.getElementById('sig-dice');diceEl.innerHTML='';
   const outEl=document.getElementById('sig-out');outEl.textContent='';
   const btn=document.getElementById('sig-btn');
-  btn.textContent='Roll Dice';btn.disabled=false;delete btn.dataset.done;
+  btn.textContent='Attempt Rescue Signal';btn.disabled=false;delete btn.dataset.done;
   const wraps=[];
   for(let i=0;i<3;i++){const w=make3DDie('idle');diceEl.appendChild(w);wraps.push(w);}
   function closeOv(){
@@ -1091,7 +1092,7 @@ function doSignalRoll(){
           e7ScreenSeq('mov-e7log',[
             [300,'sys','> SIGNAL RECEIVED.'],
             [500,'','Rescue craft entering orbit.'],
-            [1200,'good','> All surviving crew have been rescued.'],
+            [1200,'','All surviving crew have been rescued.'],
           ],22);
         };
       }
@@ -2060,7 +2061,7 @@ function openCardModal(playerIdx,c,bgImage){
   // set category CSS vars on the overlay card
   const card=document.getElementById('evc');
   const ov=document.getElementById('evc-ov');
-  ov.style.backgroundImage=bgImage||'';
+  ov.style.backgroundImage=bgImage||'';ov.style.backgroundSize='cover';ov.style.backgroundPosition='center';
   ov.className=`cc-${c.cat}`;
   card.className='evc eq';
   const badge=document.getElementById('evc-badge');
@@ -2089,7 +2090,7 @@ function closeCardModal(){
   const ov=document.getElementById('evc-ov');
   ov.className='';
   ov.classList.remove('show');
-  ov.style.backgroundImage='';
+  document.getElementById('evc-ov').style.backgroundImage='';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2100,9 +2101,13 @@ function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okCl
   const isRescue=title==='RESCUE SIGNAL RECEIVED';
   const isAllDead=title==='ALL CREW LOST';
   const isNewGame=title==='SELF-DESTRUCT';
+  const isStasis=title==='STASIS POD';
+  const isInversion=title==='INVERSION FIELD';
   mov.classList.toggle('rescue',isRescue);
   mov.classList.toggle('all-dead',isAllDead);
   mov.classList.toggle('new-game',isNewGame);
+  mov.classList.toggle('stasis-pod',isStasis);
+  mov.classList.toggle('inversion-field',isInversion);
   document.getElementById('mtit').textContent=title;
   const mb=document.getElementById('mbod');mb.innerHTML='';
   if(!isPub){const n=document.createElement('div');n.className='pvnote';n.textContent='PRIVATE — read silently. Show only to crew on your tile.';mb.appendChild(n);}
@@ -2121,7 +2126,7 @@ function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okCl
 // ═══════════════════════════════════════════════════════════════
 function showDieRoll(prompt, onRoll, onDismiss, bgImage){
   const ov=document.getElementById('evc-ov');
-  ov.className='';ov.style.backgroundImage=bgImage||'';
+  ov.className='';ov.style.backgroundImage=bgImage||'';ov.style.backgroundSize='cover';ov.style.backgroundPosition='center';
   const card=document.getElementById('evc');card.className='evc pub';
   document.getElementById('evc-badge').textContent='ROLL';
   document.getElementById('evc-loc').textContent='';
@@ -2147,7 +2152,7 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage){
       btn.disabled=false;btn.style.opacity='';
     },1500);
   };
-  btn.onclick=()=>{ov.classList.remove('show');ov.style.backgroundImage='';if(onDismiss)onDismiss();else{updateUI();render();}};
+  btn.onclick=()=>{ov.classList.remove('show');document.getElementById('evc-ov').style.backgroundImage='';if(onDismiss)onDismiss();else{updateUI();render();}};
   cancelTooltip();
   ov.classList.add('show');
 }
@@ -2211,7 +2216,7 @@ function showEventCard(evt, _locName, onOk, rollCallback){
   }
   const ov=document.getElementById('evc-ov');
   ov.className='';
-  btn.onclick=()=>{ov.classList.remove('show');ov.style.backgroundImage='';onOk();};
+  btn.onclick=()=>{ov.classList.remove('show');document.getElementById('evc-ov').style.backgroundImage='';onOk();};
   cancelTooltip();
   ov.classList.add('show');
 }
