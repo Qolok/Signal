@@ -347,25 +347,25 @@ const TILE_TIPS={
   'Cargo Hold':        [[0,'','Communal food and supply storage.'],[0,'act','Deposit or withdraw Food freely.']],
   'Airlock':           [[0,'','The pressurized entry point from the field. O₂ reserves fully restored on re-entry.'],[0,'act','Passive: Refill all O₂ Tanks automatically when entering from terrain.']],
   'Watch Tower':       [[0,'','An elevated vantage point over the surrounding terrain.'],[0,'act','Reveal all face-down tiles adjacent to any crew member currently in the field.']],
-  'Dead Tower':        [[0,'','A broadcast tower, hand-built and long-abandoned. Inside, a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them. You salvage some Radio Fragments from the equipment.'],[0,'act','Use Lockpick to recover 1 Radio Fragment.']],
-  'Collapsed Tower':   [[0,'','A relay tower, partially collapsed. The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter.'],[0,'act','A crew member with a plasma cutter can get inside and salvage the Radio Fragment.']],
+  'Dead Tower':        [[0,'','A broadcast tower, hand-built and long-abandoned.'],[0,'','Inside, you find a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them.'],[0,'','You salvage some Radio Fragments from the equipment.'],[0,'act','Use Lockpick to recover 1 Radio Fragment.']],
+  'Collapsed Tower':   [[0,'','On the ridge, you spot a relay tower, partially collapsed.'],[0,'','The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter.'],[0,'act','A crew member with a plasma cutter can get inside and salvage the Radio Fragment.']],
   'Cave':              [[0,'','Natural shelter. Atmospheric sensors can\'t reach inside.'],[0,'good','Skip O2 Tank flip this round.'],[0,'act','Draw an Event card.']],
-  'Abandoned Outpost': [[0,'','The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.'],[0,'act','Use the Lockpick to enter.'],[0,'act','Roll 1 die for Food yield.']],
-  'Mysterious Outpost':[[0,'','The structure doesn\'t match anything on your planetary scans. The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize. Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Draw 1 Equipment card.']],
-  'Fuselage':          [[0,'','Hull section from the Endymion 7. Still holds cargo.'],[0,'act','May yield Equipment cards or a Radio Fragment. Draw an Event card.']],
-  'Wreckage Field':    [[0,'','Debris scattered across the terrain — hazardous, but potentially useful.'],[0,'act','Draw an Event card.']],
-  'Recovered Terminal':[[0,'','The terminal still draws power from a source you can\'t locate. The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE. No crew names are listed. You weren\'t briefed on any prior missions to this planet.'],[0,'act','Draw a Private Event card. The data is yours alone.']],
-  'Cache':             [[0,'','A sealed supply cache — military or civilian, hard to tell.'],[0,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
-  'Passage':           [[0,'','A narrow route through the terrain. Something passed through here recently.'],[0,'act','Draw an Event card.']],
-  'Bloody Passage':    [[0,'','A narrow route marked with signs of violence. Whatever happened here was recent.'],[0,'act','Draw an Event card.']],
-  'Stasis Pod':        [[0,'','Alien preservation technology. Time moves differently inside.'],[0,'act','Enter: Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time.']],
+  'Abandoned Outpost': [[0,'','In a valley, you spot an odd structure. This was likely a small settlement or research station.'],[0,'','The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.'],[0,'act','Use the Lockpick to enter.'],[0,'act','Roll 1 die for Food yield.']],
+  'Mysterious Outpost':[[0,'','An odd building emerges from the landscape. The structure doesn\'t match anything on your planetary scans.'],[0,'','The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize.'],[0,'','Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Draw 1 Equipment card.']],
+  'Fuselage':          [[0,'','In a crater, you find an intact hull section from the Endymion 7. It looks like there may be some cargo inside.'],[0,'','You move closer to investigate the wreckage. Maybe you\ll get lucky and find something useful.'],[0,'act','Draw an Event card.']],
+  'Wreckage Field':    [[0,'','The Endymion 7 broke into several pieces in the upper atmosphere.'],[0,'','You come across some debris scattered across the terrain. It\'s hazardous, but potentially useful.'],[0,'act','Draw an Event card.']],
+  'Recovered Terminal':[[0,'','In an abandoned building, you locate a terminal that still draws power from a source you can\'t locate.'],[0,'','The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE.'],[0,'','No crew names are listed. You weren\'t briefed on any prior missions to this planet.'],[0,'act','Draw an Event card.']],
+  'Cache':             [[0,'','You find a supply cache half-buried in the sand, but the seal appears to have been broken. You open it to see what\'s inside.'],[0,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
+  'Passage':           [[0,'','In a narrow canyon, you find a route through the terrain. Something passed through here recently.'],[0,'','On inspection, you find a high-tech door that doesn\'t belong. What could be on the other side?'],[0,'act','Draw an Event card.']],
+  'Bloody Passage':    [[0,'','You find a piece of the ship wedged in a canyon. Some of the crew might have come down here.'],[0,'','A narrow route inside is marked with signs of violence. Whatever happened here was gruesome... and recent.'],[0,'act','Draw an Event card.']],
+  'Stasis Pod':        [[0,'','Among the rubble, you find the ship\'s stasis pod. This could be your chance at survival, but the pod only holds one.'],[0,'act','Skip Resource Flip each round inside. Cannot move or interact. Exit any time.']],
   'Temporal Rift':     [[0,'','You experience an unexplained spacetime distortion. Past and future flickers. You fight to keep down your breakfast.'],[0,'act','Roll 1 die.'],[0,'crit','1\u20133: lose that many Food.'],[0,'good','4\u20136: recover that many Food.']],
-  'Portal':            [[0,'','Instantaneous transit point. Origin unknown.'],[0,'act','Option: Move immediately to Crash Site. Turn ends.']],
-  'Gravitational Well':[[0,'','Intense localized gravity field.'],[0,'act','Roll 1 die.'],[0,'act','The player to your left moves your pawn that many steps in any direction.']],
-  'Dead Zone':         [[0,'','Something blocks all transmission here.'],[0,'act','No Signal Roll occurs this round for any player.']],
+  'Portal':            [[0,'','You come across abandoned alien technology.'],[0,'','As you approach, a strange vortex opens up. This appears to be some kind of Instantaneous transit point. Origin unknown.'],[0,'act','Option: Move immediately to Crash Site. Turn ends.']],
+  'Gravitational Well':[[0,'','Suddenly, you are pulled into an intense localized gravity field. It picks you up like a rag doll and tosses you around.'],[0,'act','Roll 1 die.'],[0,'act','You will be moved that many steps in a random direction.']],
+  'Dead Zone':         [[0,'','There is a strange electricity in the air around this place.'],[0,'','Something here is blocking all radio transmissions. It\'s almost as if the air itself is charged. You can taste metal.'],[0,'','Don\'t stay too long.'],[0,'act','No Signal Roll occurs this round for any player.']],
   'Echo Chamber':      [[0,'','The terrain resonates with past events.'],[0,'act','Resolve the most recent Public Event card again in full.']],
   'Inversion Field':   [[0,'','Gravity inversion. Resources change hands involuntarily.'],[0,'act','Choose any other player. Swap your Food with theirs.']],
-  'Ship Section':      [[0,'','A section of the Endymion 7 that came down separately. Emergency systems are still online.'],[0,'act','Roll 1 die.'],[0,'good','1\u20132: Food'],[0,'sys','3\u20134: Oxygen'],[0,'crit','5\u20136: Health']],
+  'Ship Section':      [[0,'','Over a barren ridge, you come across a section of the Endymion 7 that came down separately.'],[0,'','Emergency systems appear to be still online.'],[0,'','Recover what you can from the wreckage.'],[0,'act','Roll 1 die.'],[0,'good','1\u20132: Food'],[0,'sys','3\u20134: Oxygen'],[0,'crit','5\u20136: Health']],
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -1090,8 +1090,10 @@ function doSignalRoll(){
             undefined,undefined,undefined,
             '<div id="mov-e7log" class="mov-e7log"></div>');
           e7ScreenSeq('mov-e7log',[
-            [300,'sys','> SIGNAL RECEIVED.'],
-            [500,'','Rescue craft entering orbit.'],
+            [300,'sys','> SIGNAL TRANSMITTING.'],
+            [500,'','Congratulations, Commander!'],
+            [800,'','We are receiving a transmission from the NSS Monroe. They have acknowledged our signal and are en route to the planet now.'],
+            [1000,'good','Rescue craft entering orbit.'],
             [1200,'good','All surviving crew have been rescued.'],
           ],22);
         };
@@ -1231,7 +1233,7 @@ function doWatchTower(){
     });
     const names=inField.map(x=>x.name).join(', ');
     addLog(`Watch Tower: ${revealed} tile${revealed!==1?'s':''} revealed around ${names}.`,'tile');
-    msg=`Scanning terrain around ${names}.\n\n${revealed} tile${revealed!==1?'s':''} revealed.`;
+    msg=`From this vantage point, you can see the terrain around ${names}. As you ping their locations, you are able to survey the surrounding area, revealing \n\n${revealed} tile${revealed!==1?'s':''}.`;
     render();updateUI();
   }
   cancelTooltip();
@@ -1562,6 +1564,31 @@ function closeTrade(){
 // BOARD RENDERING
 // ═══════════════════════════════════════════════════════════════
 let pan={x:0,y:0},zoom=2;
+let boardGroup=null,panRafId=null;
+let _hexGridPath=null;
+function _buildHexGridPath(){
+  if(_hexGridPath)return _hexGridPath;
+  const GR=22,pd=[];
+  for(let q=-GR;q<=GR;q++)for(let r=-GR;r<=GR;r++){
+    const[cx,cy]=h2p(q,r);
+    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
+      pd.push(`${i===0?'M':'L'}${(cx+SZ*Math.cos(a)).toFixed(1)},${(cy+SZ*Math.sin(a)).toFixed(1)}`);}
+    pd.push('Z');}
+  return (_hexGridPath=pd.join(' '));
+}
+function _updateBoardTransform(){
+  if(!boardGroup)return;
+  const svg=document.getElementById('bsvg');
+  const W=svg.clientWidth||800,H=svg.clientHeight||600;
+  boardGroup.setAttribute('transform',`translate(${W/2+pan.x} ${H/2+pan.y}) scale(${zoom})`);
+}
+function _schedulePan(){
+  if(panRafId)return;
+  panRafId=requestAnimationFrame(()=>{panRafId=null;_updateBoardTransform();});
+}
+function preloadTileImages(){
+  Object.values(TILE_IMAGE_MAP).forEach(f=>{const i=new Image();i.src=`img/Tiles/${f}`;});
+}
 let sbPan={x:0,y:0},sbZoom=1,sbEventsInit=false;
 let usesTrackpad=false;
 function svgEl(tag,attrs){const e=document.createElementNS(NS,tag);if(attrs)Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));return e;}
@@ -1580,6 +1607,7 @@ function render(){
   svg.appendChild(defs);
   svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
   const g=svgEl('g',{transform:`translate(${W/2+pan.x} ${H/2+pan.y}) scale(${zoom})`});
+  boardGroup=g;
   // Radial gradient mask: full opacity at origin (base camp), fades to nothing at edges
   const hgGrad=svgEl('radialGradient',{id:'hg-fade',gradientUnits:'userSpaceOnUse',cx:'0',cy:'0',r:'900'});
   hgGrad.appendChild(svgEl('stop',{offset:'0%','stop-color':'white','stop-opacity':'1'}));
@@ -1588,15 +1616,8 @@ function render(){
   const hgMask=svgEl('mask',{id:'hg-mask'});
   hgMask.appendChild(svgEl('rect',{x:'-5000',y:'-5000',width:'10000',height:'10000',fill:'url(#hg-fade)'}));
   defs.appendChild(hgGrad);defs.appendChild(hgMask);
-  // Hex grid texture: explicit path inside <g> so it pans/zooms with the board.
-  // Drawn as a single path to avoid any SVG pattern clipping artifacts.
-  {const GR=22,pd=[];
-  for(let q=-GR;q<=GR;q++)for(let r=-GR;r<=GR;r++){
-    const[cx,cy]=h2p(q,r);
-    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
-      pd.push(`${i===0?'M':'L'}${(cx+SZ*Math.cos(a)).toFixed(1)},${(cy+SZ*Math.sin(a)).toFixed(1)}`);}
-    pd.push('Z');}
-  g.appendChild(svgEl('path',{d:pd.join(' '),fill:'none',stroke:'rgba(255,255,255,0.06)','stroke-width':'0.7','pointer-events':'none',mask:'url(#hg-mask)'}));}
+  // Hex grid texture: cached path string — SZ is constant so this never changes.
+  g.appendChild(svgEl('path',{d:_buildHexGridPath(),fill:'none',stroke:'rgba(255,255,255,0.06)','stroke-width':'0.7','pointer-events':'none',mask:'url(#hg-mask)'}));
   svg.appendChild(g);
   for(const[,t]of G.tiles)drawTile(g,t);
   if((G.phase==='move'||G.phase==='action')&&G.movementLeft>0){
@@ -2386,17 +2407,17 @@ function initBoard(){
   let dragging=false,df=null;
   wrap.addEventListener('mousedown',e=>{if(e.button!==2&&e.button!==1)return;e.preventDefault();dragging=true;df={x:e.clientX,y:e.clientY};svg.classList.add('drag');});
   wrap.addEventListener('contextmenu',e=>{e.preventDefault();});
-  document.addEventListener('mousemove',e=>{if(!dragging||!df)return;pan.x+=e.clientX-df.x;pan.y+=e.clientY-df.y;df={x:e.clientX,y:e.clientY};render();});
+  document.addEventListener('mousemove',e=>{if(!dragging||!df)return;pan.x+=e.clientX-df.x;pan.y+=e.clientY-df.y;df={x:e.clientX,y:e.clientY};_schedulePan();});
   document.addEventListener('mouseup',e=>{if(e.button!==2&&e.button!==1)return;dragging=false;df=null;svg.classList.remove('drag');});
   wrap.addEventListener('wheel',e=>{
     e.preventDefault();
-    if(e.ctrlKey){zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.985:1.015)));render();return;}
-    if(usesTrackpad){pan.x-=e.deltaX;pan.y-=e.deltaY;render();return;}
-    zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.88:1.13)));render();
+    if(e.ctrlKey){zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.985:1.015)));_schedulePan();return;}
+    if(usesTrackpad){pan.x-=e.deltaX;pan.y-=e.deltaY;_schedulePan();return;}
+    zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.88:1.13)));_schedulePan();
   },{passive:false});
   let lt=null;
   wrap.addEventListener('touchstart',e=>{if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
-  wrap.addEventListener('touchmove',e=>{if(e.touches.length===1&&lt){pan.x+=e.touches[0].clientX-lt.x;pan.y+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};render();}},{passive:true});
+  wrap.addEventListener('touchmove',e=>{if(e.touches.length===1&&lt){pan.x+=e.touches[0].clientX-lt.x;pan.y+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};_schedulePan();}},{passive:true});
   wrap.addEventListener('touchend',()=>{lt=null;});
   svg.addEventListener('touchend',e=>{
     if(e.changedTouches.length!==1)return;const T=e.changedTouches[0],rect=svg.getBoundingClientRect();
@@ -2655,7 +2676,7 @@ function finalizeGame(){
   clearSave();
   newGame(pendingNames,pendingPortraits,placedMap);
   setTimeout(()=>{
-    initBoard();render();updateUI();
+    preloadTileImages();initBoard();render();updateUI();
     showTableDice('move');
     // Open E7 panel and seed with mission controls + game log
     document.getElementById('e7panel').classList.add('show');
@@ -2737,7 +2758,7 @@ function goToSiteBuilder(){
   e7ScreenSeq('sb-e7-log',[
     [0, 'crit', '> Signal Array: OFFLINE.'],
     [300, '',    'You must recover Radio Fragments to restore the Signal Array.'],
-    [500, '',    'Establish your base camp by placing life support structures near the crash site.'],
+    [500, 'act',    'Establish your base camp by placing life support structures near the crash site.'],
   ]);
 }
 
@@ -2753,7 +2774,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     // Resume saved game
     document.getElementById('intro').style.display='none';
     document.getElementById('game').className='running';
-    initBoard();render();updateUI();
+    preloadTileImages();initBoard();render();updateUI();
     showTableDice(G.phase==='roll'?'move':G.phase==='move'?'move':null);
     if(G.phase==='move'&&G.movementLeft>0)G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
     document.getElementById('e7panel').classList.add('show');
