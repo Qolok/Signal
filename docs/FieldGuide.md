@@ -17,8 +17,9 @@ Somewhere out there, scattered across the terrain, are pieces of your radio. Fin
 3. Shuffle the Event deck. Shuffle the Equipment deck separately.
 4. Each player places their pawn on the Crash Site hex.
 5. Each player draws 3 Equipment cards.
-6. Each player takes 10 FOOD tokens (all FULL), 3 OXYGEN tokens (all FULL), and 3 Health tokens (all HEALTHY).
-7. Roll to see who goes first.
+6. Each player takes 5 FOOD tokens (all FULL), 3 OXYGEN tokens (all FULL), and 3 Health tokens (all HEALTHY).
+7. Place 15 FOOD tokens in the Cargo Hold at Base Camp. This is the crew's shared communal supply — it does not replenish.
+8. Roll to see who goes first.
 
 # Base Camp
 
@@ -31,7 +32,7 @@ The layout of Base Camp is chosen by players during setup — the six surroundin
 | Crash Site | All players begin here. No specific action — this is your anchor point. |
 | Medical Bay | Action: Restore 1 Health token to HEALTHY. |
 | Equipment Locker | Action: Draw 1 Equipment card. One draw per turn maximum. |
-| Cargo Hold | Action: Deposit or withdraw FOOD from communal storage. |
+| Cargo Hold | Action: Deposit or withdraw FOOD from communal storage. Starts with 15 FOOD. |
 | Signal Array | Action: Activate Radio Fragments and roll for rescue. Capacity: 1 player only. |
 | Watch Tower | Action: Reveal all face-down tiles adjacent to any crew member currently in the field. |
 | Airlock | Passive: Refill 1 O₂ Tank automatically when returning from terrain. |
@@ -122,7 +123,9 @@ If the roll succeeds, rescue arrives. All surviving players whose win condition 
 
 # Resources
 
-**Food:** 10 per player. One flipped to EMPTY each turn regardless of location. Always visible — no player may conceal how many they have. Cache yield: roll 1 die, flip that many EMPTY to FULL. Surplus beyond 10 may be shared immediately or is lost.
+**Food:** 5 per player at the start of the game. Maximum a player may carry: 15. One flipped to EMPTY each turn regardless of location. Always visible — no player may conceal how many they have. Cache yield: roll 1 die, flip that many EMPTY to FULL. Surplus beyond 15 may be shared immediately or is lost.
+
+The **Cargo Hold** begins the game with 15 FOOD tokens — a shared, finite communal reserve. It does not replenish. Players may visit to deposit or withdraw freely, but the more players drawing from it, the faster it drains. At 6 or more players, the hold empties in roughly 2–3 rounds if everyone withdraws — making it a genuine point of tension and potential betrayal.
 
 **Oxygen Tanks:** 3 per player. One flipped to EMPTY each turn spent away from Base Camp. Returning to Base Camp refills all OXYGEN to FULL. **Finite — no new Oxygen Tanks enter the game. They can only be redistributed via trading.**
 

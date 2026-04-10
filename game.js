@@ -396,14 +396,14 @@ function newGame(names, portraits, placedMap){
   const players=names.map((name,i)=>{
     const equipment=eqDeck.splice(0,3).map(c=>({...c,uid:++cardUid}));
     const portrait=(portraits&&portraits[i])||CREW_PORTRAITS[i%CREW_PORTRAITS.length].name;
-    return{id:i,name,color:PCOLORS[i],portrait,q:0,r:0,food:10,o2:3,health:3,
+    return{id:i,name,color:PCOLORS[i],portrait,q:0,r:0,food:5,o2:3,health:3,
            radioFragments:0,equipment,incapacitated:0,alive:true,location:'Crash Site',skipO2:false,
            inStasis:false,signalArrayRounds:0,soloRescueActive:false,rfExtractionActive:false,
            scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false};
   });
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
      eqDeck,eqDeckCount:eqDeck.length,evtDeckCount:80,
-     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:players.length*5,lastPublicEvt:null,jammerActive:false};
+     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:15,lastPublicEvt:null,jammerActive:false};
   expandFrontier();
 }
 
@@ -541,7 +541,7 @@ function showTileRevealModal(t, onDismiss){
         actionsEl.appendChild(resDie);
         const p=cp();
         let outcome='';
-        if(val<=2){const gained=Math.min(10-p.food,3);p.food+=gained;outcome=`Rolled ${val} — Food: +${gained}.`;addLog(`${p.name} salvaged ${gained} Food from Ship Section.`,'good');}
+        if(val<=2){const gained=Math.min(15-p.food,3);p.food+=gained;outcome=`Rolled ${val} — Food: +${gained}.`;addLog(`${p.name} salvaged ${gained} Food from Ship Section.`,'good');}
         else if(val<=4){const gained=Math.min(3-p.o2,2);p.o2+=gained;outcome=`Rolled ${val} — Oxygen: +${gained}.`;addLog(`${p.name} refilled ${gained} O\u2082 from Ship Section.`,'good');}
         else{if(p.health<3){p.health++;outcome=`Rolled ${val} — Health restored.`;addLog(`${p.name} treated at Ship Section. Health: ${p.health}/3.`,'good');}else{outcome=`Rolled ${val} — Health already full.`;addLog(`${p.name} searched Ship Section — health already full.`);}}
         const outEl=document.createElement('div');
@@ -570,7 +570,7 @@ function showTileRevealModal(t, onDismiss){
         actionsEl.appendChild(resDie);
         const p=cp();
         const yield_=val<=2?1:val<=4?2:3;
-        const gained=Math.min(10-p.food,yield_);
+        const gained=Math.min(15-p.food,yield_);
         p.food+=gained;
         const outcome=`Rolled ${val} — Food: +${gained}.`;
         addLog(`${p.name} raided the cache — gained ${gained} Food.`,'good');
@@ -611,7 +611,7 @@ function showTileRevealModal(t, onDismiss){
         const p=cp();
         if(t.anomaly==='Temporal Rift'){
           if(val<=3){const lost=Math.min(p.food,val);p.food-=lost;outcome=`Rolled ${val} — lost ${lost} Food.`;addLog(`Temporal Rift: rolled ${val} — lost ${lost} Food.`,'crit');}
-          else{const gain=Math.min(10-p.food,val);p.food+=gain;outcome=`Rolled ${val} — gained ${gain} Food.`;addLog(`Temporal Rift: rolled ${val} — gained ${gain} Food.`,'good');}
+          else{const gain=Math.min(15-p.food,val);p.food+=gain;outcome=`Rolled ${val} — gained ${gain} Food.`;addLog(`Temporal Rift: rolled ${val} — gained ${gain} Food.`,'good');}
         } else if(t.anomaly==='Gravitational Well'){
           let q=p.q,r=p.r;
           for(let i=0;i<val;i++){const d=DIRS[0|Math.random()*6];const nq=q+d[0],nr=r+d[1];if(G.tiles.has(hk(nq,nr))){q=nq;r=nr;}}
@@ -661,7 +661,7 @@ function showTileRevealModal(t, onDismiss){
             const bg=getTileImg(t);
             dismiss();
             showDieRoll('Search the outpost. Roll for Food yield.',val=>{
-              const gained=Math.min(10-p.food,val);
+              const gained=Math.min(15-p.food,val);
               p.food+=gained;
               addLog(`${p.name} searched the outpost — gained ${gained} Food.`,'good');
               return`Rolled ${val} — gained ${gained} Food.`;
@@ -724,8 +724,8 @@ function drawTileEvent(t){
   if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');}
   if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}.`,'good');}
   if(evt.drawEqHidden){drawEqCard(p);}
-  if(evt.gainFood){p.food=Math.min(10,p.food+evt.gainFood);}
-  if(evt.takeAllCargo){const taken=Math.min(10-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
+  if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
+  if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
   if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food.`,'crit');}
   if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.');}
   if(evt.loseHealth){
@@ -738,11 +738,11 @@ function drawTileEvent(t){
   const locName=t.pois&&t.pois.length?t.pois.join(' \u00b7 '):(t.name||'');
   let rollCallback=null;
   if(evt.rollFood){
-    rollCallback=r=>{const gained=Math.min(10-p.food,r);p.food+=gained;addLog(`Loot roll: ${r} \u2014 +${gained} Food.`,gained?'good':'');return`Rolled ${r} \u2014 gained ${gained} Food.`;};
+    rollCallback=r=>{const gained=Math.min(15-p.food,r);p.food+=gained;addLog(`Loot roll: ${r} \u2014 +${gained} Food.`,gained?'good':'');return`Rolled ${r} \u2014 gained ${gained} Food.`;};
   } else if(evt.rollWreckage){
     rollCallback=r=>{
       if(r<=3){addLog(`Wreckage roll: ${r} \u2014 nothing found.`);return`Rolled ${r} \u2014 nothing found.`;}
-      if(r<=5){const gained=Math.min(10-p.food,1);p.food+=gained;addLog(`Wreckage roll: ${r} \u2014 +1 Food.`,'good');return`Rolled ${r} \u2014 gained 1 Food.`;}
+      if(r<=5){const gained=Math.min(15-p.food,1);p.food+=gained;addLog(`Wreckage roll: ${r} \u2014 +1 Food.`,'good');return`Rolled ${r} \u2014 gained 1 Food.`;}
       const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
     };
   }
@@ -957,7 +957,7 @@ function useCard(playerIdx,uid){
   const c=p.equipment[ci];
   if(!c.use)return;
   if(c.use==='medpack'){if(p.health<3){p.health++;p.equipment.splice(ci,1);addLog(`${p.name} used MedPack. Health: ${p.health}/3.`,'good');}else{addLog('Health already full.');return;}}
-  else if(c.use==='emer_food'){const gain=Math.min(3,10-p.food);p.food+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Food. +${gain} Food.`,'good');}
+  else if(c.use==='emer_food'){const gain=Math.min(3,15-p.food);p.food+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Food. +${gain} Food.`,'good');}
   else if(c.use==='compressed_o2'){const gain=Math.min(2,3-p.o2);p.o2+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Compressed O₂. +${gain} O₂.`,'good');}
   else if(c.use==='excavator'){p.equipment.splice(ci,1);closeCardModal();G.excavatorMode=true;addLog('Excavator: click an adjacent face-down tile to reveal it.','act');updateUI();render();return;}
   else if(c.use==='scanner'){
@@ -1195,7 +1195,7 @@ function doCargo(){
 function renderCargoModal(){
   const p=cp();
   const hold=G.cargoHold||0;
-  const cap=10-p.food;// room on player
+  const cap=15-p.food;// room on player
   const body=`Hold: ${hold} Food\nYours: ${p.food} Food\n\nChoose action:`;
   const mov=document.getElementById('mov');
   mov.classList.add('cargo');
@@ -1347,13 +1347,13 @@ function triggerAnomaly(t){
       const evt=G.lastPublicEvt;
       if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment! (Echo Chamber)`,'frag');}
       if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}. (Echo Chamber)`,'good');}
-      if(evt.gainFood){p.food=Math.min(10,p.food+evt.gainFood);}
-      if(evt.takeAllCargo){const taken=Math.min(10-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
+      if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
+      if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
       if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food. (Echo Chamber)`,'crit');}
       if(evt.skipO2){p.skipO2=true;}
       let rollCb=null;
-      if(evt.rollFood){rollCb=r=>{const g=Math.min(10-p.food,r);p.food+=g;addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`,g?'good':'');return`Rolled ${r} — gained ${g} Food.`;};}
-      else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(10-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
+      if(evt.rollFood){rollCb=r=>{const g=Math.min(15-p.food,r);p.food+=g;addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`,g?'good':'');return`Rolled ${r} — gained ${g} Food.`;};}
+      else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(15-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
       const ecOv=document.getElementById('evc-ov');
       ecOv.style.backgroundImage='url(img/Tiles/echo-chamber.png)';
       ecOv.style.backgroundSize='cover';ecOv.style.backgroundPosition='center';
@@ -1445,7 +1445,7 @@ function renderTradeModal(){
     nameSpan.className='trpname';nameSpan.style.color=p.color;nameSpan.textContent=p.name;
     function makeToks(full,total,fc,ec){const r=document.createElement('div');r.className='tokrow';for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;r.appendChild(s);}return r;}
     const foodGrid=document.createElement('div');foodGrid.className='tokgrid';
-    for(let i=0;i<10;i++){const s=document.createElement('span');s.className=`tok ${i<p.food?'rf':'re'}`;foodGrid.appendChild(s);}
+    for(let i=0,vis=Math.max(5,Math.ceil(p.food/5)*5);i<vis;i++){const s=document.createElement('span');s.className=`tok ${i<p.food?'rf':'re'}`;foodGrid.appendChild(s);}
     const o2Row=makeToks(p.o2,3,'of','oe');
     const hpRow=makeToks(p.health,3,'hf','he');
     nameBlock.appendChild(nameSpan);nameBlock.appendChild(foodGrid);nameBlock.appendChild(o2Row);nameBlock.appendChild(hpRow);
@@ -1546,8 +1546,8 @@ function confirmTrade(){
     if(ci>=0){pA.equipment.push(pB.equipment.splice(ci,1)[0]);}
   });
   // Resources
-  pA.food=Math.max(0,Math.min(10,pA.food-aFood+bFood));
-  pB.food=Math.max(0,Math.min(10,pB.food-bFood+aFood));
+  pA.food=Math.max(0,Math.min(15,pA.food-aFood+bFood));
+  pB.food=Math.max(0,Math.min(15,pB.food-bFood+aFood));
   pA.o2=Math.max(0,Math.min(3,pA.o2-aO2+bO2));
   pB.o2=Math.max(0,Math.min(3,pB.o2-bO2+aO2));
   addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`,'good');
@@ -1988,7 +1988,7 @@ function updateUI(){
   document.getElementById('hcname').textContent=v.name;
   document.getElementById('hcname').style.color=v.color;
   document.getElementById('hcloc').textContent=v.location;
-  buildTokGrid('htr',v.food,10,'rf','re',2,5);
+  buildTokGrid('htr',v.food,Math.max(5,Math.ceil(v.food/5)*5),'rf','re',3,5);
   buildTokRow('hto',v.o2,3,'of','oe');
   buildTokRow('hth',v.health,3,'hf','he');
   const fragRow=document.getElementById('hud-frags');
