@@ -331,12 +331,12 @@ const EVENT_CARDS=[
   {text:'You were at the equipment locker before your turn. Draw 1 Equipment card now and keep it face-down. Don\'t mention it.',pub:false,drawEqHidden:true},
   {text:'You reached this cache first. Refill your depleted Food from the Cargo Hold — take only what you\'re missing. No rule says you have to tell anyone.',pub:false,takeAllCargo:true},
   // Private — competing objectives
-  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll a 6 or higher to abandon the others and be rescued alone. The choice is yours.',pub:false,trackSignalArray:true},
-  {text:'Your mission briefing had a clause the others weren\'t cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.',pub:false,rfExtraction:true},
+  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll a 6 or higher to abandon the others and be rescued alone. The choice is yours.',pub:false,trackSignalArray:true,keep:true},
+  {text:'Your mission briefing had a clause the others weren\'t cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.',pub:false,rfExtraction:true,keep:true},
   // Private — psychological
-  {text:'You\'re playing a different game than the others. Help when it\'s convenient. Nod along. But you know what you\'d do if it came down to it.',pub:false},
-  {text:'Someone was at the Cargo Hold when they shouldn\'t have been. You didn\'t see who. Say nothing. Information is worth more than accusations.',pub:false},
-  {text:'You\'ve calculated the O\u2082 supply against the extraction window. It supports three people. Not four. You haven\'t corrected anyone\'s assumptions. You\'re still running the numbers.',pub:false},
+  {text:'You\'re playing a different game than the others. Help when it\'s convenient. Nod along. But you know what you\'d do if it came down to it.',pub:false,keep:true},
+  {text:'Someone was at the Cargo Hold when they shouldn\'t have been. You didn\'t see who. Say nothing. Information is worth more than accusations.',pub:false,keep:true},
+  {text:(n)=>{const others=n-1;return`You\'ve calculated the O\u2082 supply against the extraction window. It supports ${others} ${others===1?'person':'people'}. Not ${n}. You haven\'t corrected anyone\'s assumptions. You\'re still running the numbers.`;},pub:false,keep:true},
 ];
 
 const TILE_TIPS={
@@ -403,7 +403,7 @@ function newGame(names, portraits, placedMap){
   });
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
      eqDeck,eqDeckCount:eqDeck.length,evtDeckCount:80,
-     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:15,lastPublicEvt:null,jammerActive:false};
+     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:10,lastPublicEvt:null,jammerActive:false};
   expandFrontier();
 }
 
@@ -592,6 +592,41 @@ function showTileRevealModal(t, onDismiss){
     const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Decline';
     decBtn.onclick=()=>{dismiss();addLog(`${p.name} declined the Portal.`);updateUI();};
     actionsEl.appendChild(decBtn);actionsEl.appendChild(useBtn);
+  } else if(isAnomaly&&t.anomaly==='Inversion Field'){
+    deck.style.display='none';
+    const p=cp();
+    const others=G.players.filter(pl=>pl.alive&&pl.id!==p.id);
+    if(!others.length){
+      const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Acknowledge';
+      decBtn.onclick=()=>{dismiss();addLog('Inversion Field: no other players to swap with.','act');updateUI();};
+      actionsEl.appendChild(decBtn);
+    } else {
+      others.forEach(other=>{
+        const b=document.createElement('button');b.className='mbtn pri';
+        b.textContent=`Swap with ${other.name} (${other.food} Food)`;
+        b.onclick=()=>{dismiss();const tmp=p.food;p.food=other.food;other.food=tmp;addLog(`Inversion Field: ${p.name} swapped Food with ${other.name}.`,'crit');updateUI();render();};
+        actionsEl.appendChild(b);
+      });
+      const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Decline';
+      decBtn.onclick=()=>{dismiss();addLog(`${p.name} declined the Inversion Field.`);updateUI();};
+      actionsEl.appendChild(decBtn);
+    }
+  } else if(isAnomaly&&t.anomaly==='Stasis Pod'){
+    deck.style.display='none';
+    const p=cp();
+    if(p.inStasis){
+      const exitBtn=document.createElement('button');exitBtn.className='mbtn pri';exitBtn.textContent='Exit Stasis';
+      exitBtn.onclick=()=>{dismiss();p.inStasis=false;addLog(`${p.name} exited stasis.`,'act');updateUI();render();};
+      const stayBtn=document.createElement('button');stayBtn.className='mbtn';stayBtn.textContent='Stay in Stasis';
+      stayBtn.onclick=()=>{dismiss();updateUI();render();};
+      actionsEl.appendChild(stayBtn);actionsEl.appendChild(exitBtn);
+    } else {
+      const enterBtn=document.createElement('button');enterBtn.className='mbtn pri';enterBtn.textContent='Enter Stasis';
+      enterBtn.onclick=()=>{dismiss();p.inStasis=true;addLog(`${p.name} entered stasis.`,'act');updateUI();render();};
+      const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Decline';
+      decBtn.onclick=()=>{dismiss();updateUI();render();};
+      actionsEl.appendChild(decBtn);actionsEl.appendChild(enterBtn);
+    }
   } else if(isAnomaly&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravitational Well')){
     deck.style.display='none';
     trov.onclick=null;
@@ -634,8 +669,9 @@ function showTileRevealModal(t, onDismiss){
     };
   } else if(isAnomaly){
     deck.style.display='none';
-    trov.classList.add('anomaly-mode');
-    trov.onclick=e=>{if(e.target===trov)dismiss();};
+    const ackBtn=document.createElement('button');ackBtn.className='mbtn';ackBtn.textContent='Acknowledge';
+    ackBtn.onclick=dismiss;
+    actionsEl.appendChild(ackBtn);
   } else {
     trov.onclick=null;
     if(t.noEvent){
@@ -903,21 +939,42 @@ function hideTableDice(){
 function doMove(q,r){
   const p=cp();if(G.phase!=='move'&&G.phase!=='action')return;if(!G.movementLeft)return;
   const path=bfsPath(p.q,p.r,q,r);if(!path||!path.length)return;if(path.length>G.movementLeft)return;
-  const fromTile=G.tiles.get(hk(p.q,p.r));
-  const comingFromTerrain=fromTile?.type!=='crash_site';
   const wasRevealed=G.tiles.get(hk(q,r))?.revealed;
   path.forEach(([pq,pr])=>{if(!G.tiles.get(hk(pq,pr))?.revealed)revealAt(pq,pr);});
   // Signal Array: only 1 player allowed at a time
   const destT=G.tiles.get(hk(q,r));
   if(destT?.name==='Signal Array'){
     const occupant=G.players.find(x=>x.alive&&x.id!==p.id&&x.q===q&&x.r===r);
-    if(occupant){showModal('Signal Array Occupied',`${occupant.name} is already at the Signal Array. Only one crew member can use it at a time.`,true,()=>{updateUI();render();},'OK',null,null,null,null,'img/Tiles/signal-array.png');return;}
+    if(occupant){
+      if(G.tileActionUsed){addLog('Already contested the Signal Array this turn.','act');updateUI();render();return;}
+      G.tileActionUsed=true;
+      addLog(`${p.name} contests the Signal Array with ${occupant.name}.`,'act');
+      showContestModal(
+        p, occupant,
+        ()=>{
+          // Challenger wins — displace defender to challenger's former tile
+          const fromQ=p.q,fromR=p.r,fromLoc=p.location;
+          occupant.q=fromQ;occupant.r=fromR;occupant.location=fromLoc;
+          addLog(`${p.name} takes the Signal Array. ${occupant.name} displaced.`,'act');
+          applyLanding(p,q,r,path,wasRevealed);
+        },
+        ()=>{
+          // Defender holds — challenger stays put
+          addLog(`${occupant.name} holds the Signal Array.`,'act');
+          updateUI();render();
+        }
+      );
+      return;
+    }
   }
+  applyLanding(p,q,r,path,wasRevealed);
+}
+
+function applyLanding(p,q,r,path,wasRevealed){
   p.q=q;p.r=r;G.movementLeft-=path.length;renderTableDice();
   const t=G.tiles.get(hk(q,r));
   p.location=tileName(t);
   if(t?.type==='crash_site'){
-    // Airlock: refill 1 O2 when entering from outside base camp
     if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');}
     if(t.name==='Medical Bay'&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
   }
@@ -935,9 +992,9 @@ function doMove(q,r){
   G.phase='action';G.reach=bfsReach(p.q,p.r,G.movementLeft);
   addLog(`${p.name} → ${p.location}`);
   updateUI();render();
-  const rollingAnomaly=t?.type==='anomaly'&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravitational Well');
+  const selfContainedAnomaly=t?.type==='anomaly'&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravitational Well'||t.anomaly==='Portal'||t.anomaly==='Inversion Field'||t.anomaly==='Stasis Pod');
   if(needsDraw)showTileRevealModal(t);
-  else if(isNewAnomaly)showTileRevealModal(t,rollingAnomaly?()=>{updateUI();render();}:()=>triggerAnomaly(t));
+  else if(isNewAnomaly)showTileRevealModal(t,selfContainedAnomaly?()=>{updateUI();render();}:()=>triggerAnomaly(t));
 }
 
 
@@ -1044,7 +1101,8 @@ function doSignalRoll(){
   // RF Extraction: auto-success if this player holds a Radio Fragment
   if(p.rfExtractionActive&&p.radioFragments>0){
     addLog(`${p.name} — Radio Fragment detected. Extraction guaranteed.`,'good');
-    showModal('RESCUE SIGNAL RECEIVED','',true,()=>{},undefined,undefined,undefined,
+    G.phase='over';
+    showModal('RESCUE SIGNAL RECEIVED','',true,()=>{updateUI();},undefined,undefined,undefined,
       '<div id="mov-e7log" class="mov-e7log"></div>');
     e7ScreenSeq('mov-e7log',[
       [300,'sys',`> PRIORITY SIGNAL: ${p.name}.`],
@@ -1083,10 +1141,11 @@ function doSignalRoll(){
       outEl.style.color=success?'#50c840':'#d04040';
       btn.textContent='OK';btn.disabled=false;btn.dataset.done='1';
       if(success){
+        G.phase='over';
         btn.onclick=()=>{
           closeOv();
           showModal('RESCUE SIGNAL RECEIVED','',true,
-            ()=>{},
+            ()=>{updateUI();},
             undefined,undefined,undefined,
             '<div id="mov-e7log" class="mov-e7log"></div>');
           e7ScreenSeq('mov-e7log',[
@@ -1250,8 +1309,11 @@ function doWatchTower(){
     trov.style.display='none';
     trov.style.backgroundImage='';
   };
-  trov.classList.add('anomaly-mode');
-  trov.onclick=e=>{if(e.target===trov)dismiss();};
+  const wtActionsEl=document.getElementById('tr-actions');
+  wtActionsEl.innerHTML='';
+  const wtAckBtn=document.createElement('button');wtAckBtn.className='mbtn';wtAckBtn.textContent='Acknowledge';
+  wtAckBtn.onclick=dismiss;
+  wtActionsEl.appendChild(wtAckBtn);
   trov.style.display='flex';
   trov.classList.add('show');
 }
@@ -1330,6 +1392,7 @@ function advanceTurn(){
   addLog(`Turn ${G.turn}: ${G.players[next].name}.`,'act');
   showTableDice('move');
   updateUI();render();
+  panToPlayer(G.players[next]);
 }
 
 function triggerAnomaly(t){
@@ -1444,9 +1507,11 @@ function renderTradeModal(){
     const nameSpan=document.createElement('span');
     nameSpan.className='trpname';nameSpan.style.color=p.color;nameSpan.textContent=p.name;
     function makeToks(full,total,fc,ec){const r=document.createElement('div');r.className='tokrow';for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;r.appendChild(s);}return r;}
+    const netFood=isA?p.food-aFood+bFood:p.food-bFood+aFood;
+    const netO2  =isA?p.o2-aO2+bO2    :p.o2-bO2+aO2;
     const foodGrid=document.createElement('div');foodGrid.className='tokgrid';
-    for(let i=0,vis=Math.max(5,Math.ceil(p.food/5)*5);i<vis;i++){const s=document.createElement('span');s.className=`tok ${i<p.food?'rf':'re'}`;foodGrid.appendChild(s);}
-    const o2Row=makeToks(p.o2,3,'of','oe');
+    for(let i=0,vis=Math.max(5,Math.ceil(p.food/5)*5);i<vis;i++){const s=document.createElement('span');s.className=`tok ${i<netFood?'rf':'re'}`;foodGrid.appendChild(s);}
+    const o2Row=makeToks(netO2,3,'of','oe');
     const hpRow=makeToks(p.health,3,'hf','he');
     nameBlock.appendChild(nameSpan);nameBlock.appendChild(foodGrid);nameBlock.appendChild(o2Row);nameBlock.appendChild(hpRow);
     nameRow.appendChild(portEl);nameRow.appendChild(nameBlock);
@@ -1585,6 +1650,23 @@ function _updateBoardTransform(){
 function _schedulePan(){
   if(panRafId)return;
   panRafId=requestAnimationFrame(()=>{panRafId=null;_updateBoardTransform();});
+}
+let _panAnimId=null;
+function panToPlayer(p,duration=600){
+  if(_panAnimId){cancelAnimationFrame(_panAnimId);_panAnimId=null;}
+  const[hx,hy]=h2p(p.q,p.r);
+  const targetX=-hx*zoom, targetY=(-hy+15)*zoom;
+  const startX=pan.x,startY=pan.y,startT=performance.now();
+  function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+  function step(now){
+    const t=Math.min(1,(now-startT)/duration);
+    const e=ease(t);
+    pan.x=startX+(targetX-startX)*e;
+    pan.y=startY+(targetY-startY)*e;
+    _updateBoardTransform();
+    if(t<1)_panAnimId=requestAnimationFrame(step);else _panAnimId=null;
+  }
+  _panAnimId=requestAnimationFrame(step);
 }
 function preloadTileImages(){
   Object.values(TILE_IMAGE_MAP).forEach(f=>{const i=new Image();i.src=`img/Tiles/${f}`;});
@@ -1979,7 +2061,7 @@ function updateUI(){
   const v=G.players[viewedPlayer]||p;   // viewed player (card display)
   document.getElementById('hturn').textContent=`Turn ${G.turn} · ${p.name}`;
   const ph=document.getElementById('hphase');
-  const PHM={roll:['Roll','ph-roll'],move:['Move','ph-move'],action:['Action','ph-act']};
+  const PHM={roll:['Roll','ph-roll'],move:['Move','ph-move'],action:['Action','ph-act'],over:['Rescued','ph-act']};
   const[pt,pc]=PHM[G.phase]||['—',''];ph.textContent=pt;ph.className=`hphase ${pc}`;
   const frags=G.radioFragmentsActivated,THR=[null,18,16,14,12,10];
   document.getElementById('hsig').textContent=frags?`${frags}/5 fragments · threshold ${THR[frags]}+`:'0 fragments · signal offline';
@@ -2003,7 +2085,7 @@ function updateUI(){
   buildEqHand(v);
   buildCrewTabs();
   // Actions always tied to active player
-  document.getElementById('bend').disabled=G.phase==='roll';
+  document.getElementById('bend').disabled=G.phase==='roll'||G.phase==='over';
   const t=G.tiles.get(hk(p.q,p.r));
   const act=G.phase==='action';
   const actOrMove=act||G.phase==='move';
@@ -2062,11 +2144,19 @@ function buildEqHand(p){
     const c=all[eqGalleryOffset+i];
     const d=document.createElement('div');
     if(!c){d.className='eqcard empty';hand.appendChild(d);continue;}
-    d.className=`eqcard cc-${c.cat}`;
-    d.dataset.uid=c.uid;
-    if(c.uid===selectedCardUid)d.classList.add('selected');
-    d.innerHTML=cardFaceHTML(c.cat,c.name,c.txt);
-    d.onclick=()=>openCardModal(p.id,c);
+    if(c.eventCard){
+      d.className='eqcard eqcard-event-priv';
+      d.dataset.uid=c.uid;
+      if(c.uid===selectedCardUid)d.classList.add('selected');
+      d.innerHTML=`<div class="eqcard-inner eqcard-event-back"><span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/person-solid-full.svg')"></span><div class="eqcard-event-back-lbl">PRIVATE<br>EVENT</div></div>`;
+      d.onclick=()=>{selectedCardUid=c.uid;showEventCard(c.eventCard,null,()=>{selectedCardUid=null;updateUI();},null,true);};
+    } else {
+      d.className=`eqcard cc-${c.cat}`;
+      d.dataset.uid=c.uid;
+      if(c.uid===selectedCardUid)d.classList.add('selected');
+      d.innerHTML=cardFaceHTML(c.cat,c.name,c.txt);
+      d.onclick=()=>openCardModal(p.id,c);
+    }
     hand.appendChild(d);
   }
   const showNav=all.length>=4;
@@ -2116,6 +2206,74 @@ function closeCardModal(){
   ov.className='';
   ov.classList.remove('show');
   document.getElementById('evc-ov').style.backgroundImage='';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// SIGNAL ARRAY CONTEST
+// ═══════════════════════════════════════════════════════════════
+function showContestModal(challenger, defender, onChallengerWins, onDefenderWins){
+  const ov=document.getElementById('contest-ov');
+  ov.classList.add('show');
+
+  // Portraits
+  document.getElementById('contest-challenger-port').style.cssText=portBg(challenger.portrait,80,80,.15);
+  document.getElementById('contest-challenger-port').style.borderColor=challenger.color;
+  document.getElementById('contest-challenger-name').textContent=challenger.name;
+  document.getElementById('contest-defender-port').style.cssText=portBg(defender.portrait,80,80,.15);
+  document.getElementById('contest-defender-port').style.borderColor=defender.color;
+  document.getElementById('contest-defender-name').textContent=defender.name;
+  document.getElementById('contest-outcome').textContent='Each crew member rolls — highest wins.';
+
+  document.getElementById('contest-challenger').classList.remove('winner','loser');
+  document.getElementById('contest-defender').classList.remove('winner','loser');
+
+  // Build dice
+  let cVal=null, dVal=null;
+  function checkBoth(){
+    if(cVal===null||dVal===null)return;
+    const outcomeEl=document.getElementById('contest-outcome');
+    const cSide=document.getElementById('contest-challenger');
+    const dSide=document.getElementById('contest-defender');
+    setTimeout(()=>{
+      if(cVal>dVal){
+        outcomeEl.textContent=`${challenger.name} wins — takes the Signal Array.`;
+        cSide.classList.add('winner');dSide.classList.add('loser');
+        setTimeout(()=>{ov.classList.remove('show');onChallengerWins();},1800);
+      } else if(dVal>cVal){
+        outcomeEl.textContent=`${defender.name} holds the Signal Array.`;
+        dSide.classList.add('winner');cSide.classList.add('loser');
+        setTimeout(()=>{ov.classList.remove('show');onDefenderWins();},1800);
+      } else {
+        // Tie — defender holds
+        outcomeEl.textContent=`Tie — ${defender.name} holds position.`;
+        dSide.classList.add('winner');cSide.classList.add('loser');
+        setTimeout(()=>{ov.classList.remove('show');onDefenderWins();},1800);
+      }
+    },400);
+  }
+
+  function makeDie(containerId, onRolled){
+    const wrap=document.getElementById(containerId);
+    wrap.innerHTML='';
+    const die=make3DDie('idle');
+    die.onclick=()=>{
+      die.className='td-die-wrap rolling';
+      die.onclick=null;
+      const val=1+(0|Math.random()*6);
+      setTimeout(()=>{
+        wrap.innerHTML='';
+        const res=makeResultDie(val);
+        wrap.appendChild(res);
+        onRolled(val);
+        checkBoth();
+      },1000);
+    };
+    wrap.appendChild(die);
+  }
+
+  makeDie('contest-challenger-die', v=>{cVal=v;});
+  makeDie('contest-defender-die',   v=>{dVal=v;});
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2184,7 +2342,7 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage){
   ov.classList.add('show');
 }
 
-function showEventCard(evt, _locName, onOk, rollCallback){
+function showEventCard(evt, _locName, onOk, rollCallback, isReview){
   const isPub=evt.pub;
   const card=document.getElementById('evc');
   card.className='evc '+(isPub?'pub':'priv');
@@ -2194,10 +2352,12 @@ function showEventCard(evt, _locName, onOk, rollCallback){
   evtBadge.innerHTML=`<span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/${evtIcon}')"></span>`;
   document.getElementById('evc-loc').textContent=evtLbl;
   const body=document.getElementById('evc-body');
-  if(Array.isArray(evt.text)){
+  const aliveCount=G.players.filter(p=>p.alive).length;
+  const resolvedText=typeof evt.text==='function'?evt.text(aliveCount):evt.text;
+  if(Array.isArray(resolvedText)){
     body.innerHTML='';
-    evt.text.forEach(line=>{const d=document.createElement('div');d.textContent=line;body.appendChild(d);});
-  } else {body.textContent=evt.text;}
+    resolvedText.forEach(line=>{const d=document.createElement('div');d.textContent=line;body.appendChild(d);});
+  } else {body.textContent=resolvedText;}
   const pills=document.getElementById('evc-pills');pills.innerHTML='';
   function addPill(txt,cls){const p=document.createElement('div');p.className='evc-pill '+cls;p.textContent=txt;pills.appendChild(p);}
   if(evt.rf)           addPill('+ Radio Fragment','good');
@@ -2247,7 +2407,10 @@ function showEventCard(evt, _locName, onOk, rollCallback){
   }
   const ov=document.getElementById('evc-ov');
   ov.className='';
-  btn.onclick=()=>{ov.classList.remove('show');document.getElementById('evc-ov').style.backgroundImage='';onOk();};
+  btn.onclick=()=>{
+    if(evt.keep&&!isReview){const p=cp();p.equipment.push({eventCard:evt,uid:++cardUid});}
+    ov.classList.remove('show');document.getElementById('evc-ov').style.backgroundImage='';if(onOk)onOk();
+  };
   cancelTooltip();
   ov.classList.add('show');
 }
@@ -2411,9 +2574,13 @@ function initBoard(){
   document.addEventListener('mouseup',e=>{if(e.button!==2&&e.button!==1)return;dragging=false;df=null;svg.classList.remove('drag');});
   wrap.addEventListener('wheel',e=>{
     e.preventDefault();
-    if(e.ctrlKey){zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.985:1.015)));_schedulePan();return;}
-    if(usesTrackpad){pan.x-=e.deltaX;pan.y-=e.deltaY;_schedulePan();return;}
-    zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY>0?.88:1.13)));_schedulePan();
+    if(usesTrackpad&&!e.ctrlKey){pan.x-=e.deltaX;pan.y-=e.deltaY;_schedulePan();return;}
+    const factor=e.ctrlKey?(e.deltaY>0?.985:1.015):(e.deltaY>0?.88:1.13);
+    const newZoom=Math.max(.3,Math.min(3,zoom*factor));
+    const bx=-pan.x/zoom, by=-pan.y/zoom;
+    pan.x=-bx*newZoom; pan.y=-by*newZoom;
+    zoom=newZoom;
+    _schedulePan();
   },{passive:false});
   let lt=null;
   wrap.addEventListener('touchstart',e=>{if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
