@@ -2783,8 +2783,8 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   e7ScreenSeq('e7-intro-msg',[
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-    [400, 'good', '> Primary diagnostics: COMPLETE. Life support: NOMINAL.'],
-    [600, '',    'Hello, Commander. I am E7, your ship\'s emergency computer.'],
+    [1200, 'good', '> Primary diagnostics: COMPLETE. Life support: NOMINAL.'],
+    [800, '',    'Hello, Commander. I am E7, your ship\'s emergency computer.'],
     [600, '',    'The Endymion 7, a deep-range mining vessel, has crash-landed on an uncharted planet. The cause of the accident is unknown.'],
     [500, '',    'Before impact, the ship\'s cargo was jettisoned. Your task is to explore the surrounding area, recover Radio Fragments, and return them to the Signal Array to call for rescue.'],
     [400, 'crit','You have a 1 in 10,358 chance of survival.'],

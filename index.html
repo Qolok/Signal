@@ -26,8 +26,13 @@
 <!-- ── INTRO ── -->
 <div id="intro">
   <div class="sbox intro-box">
-    <h1>SIGNAL</h1>
-    <p class="ssub">1–6 Players · Ages 14+ · 30–60 Minutes</p>
+    <div class="intro-lockup">
+      <div class="signal-intro-glow"><div class="signal-intro-icon"></div></div>
+      <div class="intro-lockup-text">
+        <h1>SIGNAL</h1>
+        <p class="ssub">1–6 Players · Ages 14+ · 30–60 Minutes</p>
+      </div>
+    </div>
     <div id="e7-intro-msg" class="e7-screen-msg"></div>
     <button class="sbtn" onclick="showCrewSetup()">Start Game</button>
   </div>
@@ -36,6 +41,7 @@
 <!-- ── SETUP: player names ── -->
 <div id="setup">
   <div id="suhdr">
+    <div class="signal-hdr-icon"></div>
     <h1>SIGNAL · CREW INITIALIZATION</h1>
   </div>
   <div id="sumain">
@@ -68,6 +74,7 @@
 <!-- ── BASE CAMP BUILDER ── -->
 <div id="setup-site">
   <div id="sbhdr">
+    <div class="signal-hdr-icon"></div>
     <h1>SIGNAL · ESTABLISH BASE CAMP</h1>
     <span id="sbprogress">0 / 6 placed</span>
     <span class="sbreset" onclick="resetBuilder()">Reset</span>
@@ -106,6 +113,7 @@
 <div id="game">
   <!-- Header -->
   <div id="hdr">
+    <div class="signal-hdr-icon"></div>
     <h1 class="hlogo">SIGNAL</h1>
     <span class="hsep">|</span>
     <span id="hturn">Turn 1</span>
@@ -184,13 +192,13 @@
         </div>
         <div class="hud-tab-body">
           <div class="deckpile" id="evtdeck" title="Event Deck">
-            <span class="dk-symbol">◈</span>
+            <div class="signal-card-icon"></div>
             <div class="dklbl">Event</div>
             <div class="dkn" id="evtn">80</div>
             <div class="dksub">cards</div>
           </div>
           <div class="deckpile" id="equpdeck" title="Equipment Deck">
-            <span class="dk-symbol">◆</span>
+            <div class="signal-card-icon"></div>
             <div class="dklbl">Equip</div>
             <div class="dkn" id="equpn">30</div>
             <div class="dksub">cards</div>
@@ -224,7 +232,7 @@
     <div id="tr-actions"></div>
     <div id="tr-deck" title="Click to draw Event Card">
       <div id="tr-deck-pile">
-        <span class="dk-symbol">◈</span>
+        <div class="signal-card-icon"></div>
         <div class="dkn" id="tr-evtn">—</div>
         <div class="dksub">cards</div>
       </div>
@@ -240,7 +248,7 @@
   <div id="eqd-desc">Draw 1 card from the equipment deck.</div>
   <div id="eqd-deck" title="Click to draw Equipment Card">
     <div id="eqd-deck-pile">
-      <span class="dk-symbol">◆</span>
+      <div class="signal-card-icon"></div>
       <div class="dkn" id="eqd-equpn">—</div>
       <div class="dksub">cards</div>
     </div>

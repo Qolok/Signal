@@ -846,6 +846,29 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #intro::before{content:'';position:absolute;inset:0;background:url(img/Tiles/cockpit.png) center/cover no-repeat;filter:blur(2px);opacity:.3;z-index:-1;transform:scale(1.04)}
 #intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:200}
 .intro-box{text-align:center}
+.intro-lockup{display:flex;align-items:center;justify-content:center;gap:40px;margin-bottom:0;}
+.intro-lockup-text{display:flex;flex-direction:column;align-items:flex-start;}
+.intro-lockup-text h1{margin-bottom:2px;}
+.intro-lockup-text .ssub{margin-bottom:0;}
+.signal-intro-icon,.signal-hdr-icon,.signal-card-icon{
+  -webkit-mask-image:url(img/Icons/signal.svg);mask-image:url(img/Icons/signal.svg);
+  -webkit-mask-size:contain;mask-size:contain;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  flex-shrink:0;
+}
+.signal-hdr-icon,.signal-card-icon{transform:rotate(30deg);}
+.signal-intro-glow{flex-shrink:0;filter:drop-shadow(0 0 12px rgba(174,204,224,.45)) drop-shadow(0 0 28px rgba(174,204,224,.2));animation:signal-intro 1.6s cubic-bezier(.2,.8,.3,1) forwards;}
+@keyframes signal-intro{
+  0%  {opacity:0; transform:rotate(0deg)  scale(.7);}
+  70% {opacity:1; transform:rotate(32deg) scale(1.04);}
+  100%{opacity:1; transform:rotate(30deg) scale(1);}
+}
+.signal-intro-icon{width:50px;height:56px;background-color:var(--hi);opacity:.8;}
+.signal-hdr-icon{width:17px;height:19px;background-color:var(--hi);opacity:.7;}
+.signal-card-icon{width:30px;height:34px;display:block;}
+#evtdeck .signal-card-icon,#tr-deck-pile .signal-card-icon{background-color:#1e4a70;}
+#equpdeck .signal-card-icon,#eqd-deck-pile .signal-card-icon{background-color:#6a4a10;}
 .intro-story{text-align:left;margin:20px 0 28px;display:flex;flex-direction:column;gap:12px}
 .intro-story p{font-size:13px;color:var(--txt);line-height:1.65;margin:0}
 
