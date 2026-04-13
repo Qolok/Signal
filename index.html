@@ -14,7 +14,7 @@
   <div id="e7hdr">
     <div class="e7title">
       <span class="e7logo">ENDYMION 7</span>
-      <span class="e7status">● ONLINE</span>
+      <button class="e7guidance-toggle" id="e7guidance-toggle" onclick="toggleGuidance()">Guide: ON</button>
     </div>
     <div class="e7sub">SHIP COMPUTER</div>
     <button class="e7close" onclick="toggleE7()">✕</button>
@@ -116,13 +116,15 @@
     <div class="signal-hdr-icon"></div>
     <h1 class="hlogo">SIGNAL</h1>
     <span class="hsep">|</span>
-    <span id="hturn">Turn 1</span>
-    <span class="hsep">|</span>
-    <span id="hphase" class="ph-roll">Roll</span>
-    <span id="hsig">0 fragments · signal offline</span>
-    <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
-    <button class="hbtn" onclick="openRulebook()">Field Guide</button>
-    <button class="hbtn" onclick="confirmNewGame()">New Game</button>
+    <span id="hmission">Collect Radio Fragments · Signal Offline</span>
+    <div class="hdr-right">
+      <span id="hturn">Turn 1</span>
+      <span class="hsep">|</span>
+      <span id="hphase" class="ph-roll" data-tooltip="Roll the die to determine how many hexes you can move this turn.">Roll</span>
+      <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
+      <button class="hbtn" onclick="openRulebook()">Field Guide</button>
+      <button class="hbtn" onclick="confirmNewGame()">New Game</button>
+    </div>
   </div>
 
   <!-- Board -->
@@ -149,7 +151,7 @@
       </div>
       <!-- Resources -->
       <div class="hudres">
-        <div class="shd">Resources</div>
+        <div class="shd" data-tooltip="Food and Oxygen each deplete 1 per turn. If either hits zero, Health depletes instead.">Resources</div>
         <div>
           <div class="rlbl">Food</div>
           <div class="tokgrid" id="htr"></div>
@@ -170,7 +172,7 @@
       <!-- Equipment gallery -->
       <div class="hudeq" id="hudeq">
         <div class="hud-tab-body">
-          <div class="shd">Equipment</div>
+          <div class="shd" data-tooltip="Equipment cards give you tools, supplies, and weapons. Click a card to view details or use it.">Equipment</div>
           <div class="eq-gallery">
             <button type="button" class="eq-nav" id="eq-prev" onclick="eqNav(-1)" disabled>&#9664;</button>
             <div class="eq-viewport" id="eqhand"></div>
@@ -191,13 +193,13 @@
           <span class="hud-vtab-lbl">Decks</span>
         </div>
         <div class="hud-tab-body">
-          <div class="deckpile" id="evtdeck" title="Event Deck">
+          <div class="deckpile" id="evtdeck" data-tooltip="Event cards trigger encounters and discoveries when you explore new tiles.">
             <div class="signal-card-icon"></div>
             <div class="dklbl">Event</div>
             <div class="dkn" id="evtn">80</div>
             <div class="dksub">cards</div>
           </div>
-          <div class="deckpile" id="equpdeck" title="Equipment Deck">
+          <div class="deckpile" id="equpdeck" data-tooltip="Equipment cards are drawn from the locker at base camp and carried into the field.">
             <div class="signal-card-icon"></div>
             <div class="dklbl">Equip</div>
             <div class="dkn" id="equpn">30</div>
@@ -206,12 +208,12 @@
         </div>
       </div>
       <div id="tabletop-dice">
-        <div class="shd">Move</div>
+        <div class="shd" data-tooltip="Roll the die to get movement points, then click a hex to move there.">Move</div>
         <div class="td-row" id="td-row"></div>
         <div id="td-moves"></div>
       </div>
       <div class="hudact">
-        <div class="shd">Actions</div>
+        <div class="shd" data-tooltip="Perform tile actions based on your current location.">Actions</div>
         <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Open Locker</button>
         <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
         <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
@@ -230,7 +232,7 @@
     <div id="tr-name"></div>
     <div id="tr-desc"></div>
     <div id="tr-actions"></div>
-    <div id="tr-deck" title="Click to draw Event Card">
+    <div id="tr-deck">
       <div id="tr-deck-pile">
         <div class="signal-card-icon"></div>
         <div class="dkn" id="tr-evtn">—</div>
@@ -246,7 +248,7 @@
 <div id="eqdov" style="display:none">
   <div id="eqd-title">Equipment Locker</div>
   <div id="eqd-desc">Draw 1 card from the equipment deck.</div>
-  <div id="eqd-deck" title="Click to draw Equipment Card">
+  <div id="eqd-deck" data-tooltip="Click to draw an Equipment Card from the locker.">
     <div id="eqd-deck-pile">
       <div class="signal-card-icon"></div>
       <div class="dkn" id="eqd-equpn">—</div>
@@ -356,6 +358,9 @@
     <div class="tipact" id="tipact"></div>
   </div>
 </div>
+
+<!-- ── CUSTOM TOOLTIP ── -->
+<div id="tip-custom"></div>
 
 <script src="game.js"></script>
 </body>

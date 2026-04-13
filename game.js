@@ -369,6 +369,50 @@ const TILE_TIPS={
 };
 
 // ═══════════════════════════════════════════════════════════════
+// GUIDANCE MODE
+// ═══════════════════════════════════════════════════════════════
+let guidanceMode=true;
+let guidanceSeen=new Set(); // milestone keys shown this session — reset on new game
+
+function toggleGuidance(){
+  guidanceMode=!guidanceMode;
+  const btn=document.getElementById('e7guidance-toggle');
+  if(btn){btn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';btn.classList.toggle('on',guidanceMode);}
+}
+
+function guidance(key, fn){
+  if(!guidanceMode||guidanceSeen.has(key))return;
+  guidanceSeen.add(key);
+  fn();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOM TOOLTIP ENGINE
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const tip=document.getElementById('tip-custom');
+  let visible=false,delayTimer=null;
+  function pos(x,y){
+    const pad=14,tw=tip.offsetWidth,th=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
+    let lx=x+pad,ly=y+pad;
+    if(lx+tw>vw-pad)lx=x-tw-pad;
+    if(ly+th>vh-pad)ly=y-th-pad;
+    tip.style.left=lx+'px';tip.style.top=ly+'px';
+  }
+  function show(text,x,y){tip.textContent=text;tip.style.display='block';visible=true;pos(x,y);}
+  function hide(){clearTimeout(delayTimer);delayTimer=null;tip.style.display='none';visible=false;}
+  document.addEventListener('mouseover',e=>{
+    const el=e.target.closest('[data-tooltip]');
+    if(el){
+      clearTimeout(delayTimer);
+      delayTimer=setTimeout(()=>show(el.dataset.tooltip,e.clientX,e.clientY),1000);
+    } else hide();
+  });
+  document.addEventListener('mousemove',e=>{if(visible)pos(e.clientX,e.clientY);});
+  document.addEventListener('mouseleave',()=>hide());
+})();
+
+// ═══════════════════════════════════════════════════════════════
 // GAME STATE
 // ═══════════════════════════════════════════════════════════════
 let G=null, cardUid=0;
@@ -469,7 +513,7 @@ function tileImgHtml(t){
 function trDesc(steps,charDelay=15){
   const el=document.getElementById('tr-desc');
   el.innerHTML='';
-  termSeq(el,Array.isArray(steps[0])?steps:[[0,'',steps]],charDelay);
+  termSeq(el,Array.isArray(steps[0])?steps:[[0,'',steps]],charDelay,100);
 }
 function showTileRevealModal(t, onDismiss){
   let title;
@@ -489,18 +533,25 @@ function showTileRevealModal(t, onDismiss){
     const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
     const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    steps.push([0,'good',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
+    steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
   }
   if(t.radioFragment&&!t.requiresTool){
     const p=cp();p.radioFragments++;t.radioFragment=false;
     addLog(`${p.name} recovered a Radio Fragment.`,'frag');
     steps.push([0,'good','\u25c8 Radio Fragment recovered.']);
+    guidance('first_rf',()=>{
+      e7Seq([
+        [0, 'div', null],
+        [0, 'sys', '> Radio Fragment recovered.'],
+        [0, '',    'Bring it to the SIGNAL ARRAY to activate. Each activation lowers the threshold needed to establish a signal.'],
+      ]);
+    });
   } else if(t.radioFragment&&t.requiresTool){
     const p=cp();
     const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
     const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    steps.push([0,'good',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
+    steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
@@ -757,7 +808,17 @@ function drawTileEvent(t){
   G.evtDeckCount=Math.max(0,G.evtDeckCount-1);
   const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
   // Apply guaranteed (non-roll) effects immediately
-  if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');}
+  if(evt.rf){
+    p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');
+    guidance('first_rf',()=>{
+      e7Seq([
+        [0, 'div', null],
+        [0, 'sys', '> Radio Fragment recovered.'],
+        [0, '',    'Bring it to the Signal Array and use "Activate Fragment." Each activation lowers the rescue threshold — activate up to 5.'],
+        [0, 'act', 'Threshold with 1 fragment: 18+. Roll 3 dice to call for rescue.'],
+      ]);
+    });
+  }
   if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}.`,'good');}
   if(evt.drawEqHidden){drawEqCard(p);}
   if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
@@ -977,6 +1038,18 @@ function applyLanding(p,q,r,path,wasRevealed){
   if(t?.type==='crash_site'){
     if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');}
     if(t.name==='Medical Bay'&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
+    if(t.name==='Signal Array'){
+      guidance('first_signal_array',()=>{
+        const fragMsg=p.radioFragments>0
+          ?`${p.name} is carrying ${p.radioFragments} fragment${p.radioFragments!==1?'s':''}. Use "Activate Fragment" to charge the array, then "Roll Signal" to attempt rescue.`
+          :'No fragments in hand. Explore the terrain — Event cards and certain tiles contain Radio Fragments.';
+        e7Seq([
+          [0, 'div', null],
+          [0, 'sys', '> Signal Array reached.'],
+          [0, p.radioFragments>0?'act':'', fragMsg],
+        ]);
+      });
+    }
   }
   if(t?.shockTrap&&t.shockTrapOwner!==p.id){
     t.shockTrap=false;t.shockTrapOwner=null;
@@ -1085,6 +1158,16 @@ function doActivateFrag(){
   p.radioFragments--;G.radioFragmentsActivated++;
   const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
   addLog(`Fragment activated. Array: ${G.radioFragmentsActivated}/5. Threshold: ${thr}+`,'frag');
+  guidance('first_frag_activated',()=>{
+    const activated=G.radioFragmentsActivated;
+    const moreMsg=activated<5?[[0,'','Activating more fragments before rolling improves your odds.']] :[];
+    e7Seq([
+      [0,   'div', null],
+      [0,   'sys', `> Fragment ${activated}/5 activated. Rescue threshold: ${thr}+.`],
+      [0,   'act', `Roll 3 dice — total ${thr} or higher establishes contact. Each additional fragment lowers the threshold further.`],
+      ...moreMsg,
+    ]);
+  });
   updateUI();render();
 }
 
@@ -1204,7 +1287,7 @@ function doEquipLocker(){
     trDesc(deckEmpty?'The equipment deck is empty — nothing to exchange.':'Select a card to discard. It will be replaced with a new one.');
     if(!deckEmpty){
       actionsEl.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px;';
-      p.equipment.forEach(card=>{
+      p.equipment.filter(c=>!c.eventCard).forEach(card=>{
         const d=document.createElement('div');
         d.className=`eqcard exchange-target cc-${card.cat}`;
         d.innerHTML=cardFaceHTML(card.cat,card.name,card.txt);
@@ -1535,8 +1618,8 @@ function renderTradeModal(){
       srcStaged.add(uid);
       renderTradeModal();
     });
-    // Own cards (not staged away)
-    p.equipment.forEach(c=>{
+    // Own cards (not staged away, not private event cards)
+    p.equipment.filter(c=>!c.eventCard).forEach(c=>{
       const isStaged=staged.has(c.uid);
       const card=document.createElement('div');
       card.className='eqcard cc-'+c.cat+(isStaged?' staged':'');
@@ -1557,7 +1640,7 @@ function renderTradeModal(){
     // Show cards staged from other side incoming
     const incomingStaged=isA?stagedBtoA:stagedAtoB;
     const otherPlayer=isA?pB:pA;
-    otherPlayer.equipment.filter(c=>incomingStaged.has(c.uid)).forEach(c=>{
+    otherPlayer.equipment.filter(c=>!c.eventCard&&incomingStaged.has(c.uid)).forEach(c=>{
       const card=document.createElement('div');
       card.className='eqcard cc-'+c.cat+' incoming';
       card.innerHTML=cardFaceHTML(c.cat,c.name,c.txt);
@@ -1984,7 +2067,7 @@ function buildCrewTabs(){
       `border-color:${isCurrent?pl.color:isViewing?'rgba(255,255,255,.4)':'transparent'};`+
       `box-shadow:${isCurrent?`0 0 0 1px ${pl.color}`:'none'};`+
       `opacity:${pl.alive?1:.3};`;
-    t.title=pl.name+(isCurrent?' · Active':'')+(!pl.alive?' · Dead':pl.incapacitated?' · Incap':'');
+    t.dataset.tooltip=pl.name+(isCurrent?' · Active':'')+(!pl.alive?' · Dead':pl.incapacitated?' · Incap':'');
     if(pl.alive)t.onclick=()=>{viewedPlayer=pl.id;eqGalleryOffset=0;updateUI();};
     tabs.appendChild(t);
   });
@@ -2061,10 +2144,25 @@ function updateUI(){
   const v=G.players[viewedPlayer]||p;   // viewed player (card display)
   document.getElementById('hturn').textContent=`Turn ${G.turn} · ${p.name}`;
   const ph=document.getElementById('hphase');
-  const PHM={roll:['Roll','ph-roll'],move:['Move','ph-move'],action:['Action','ph-act'],over:['Rescued','ph-act']};
-  const[pt,pc]=PHM[G.phase]||['—',''];ph.textContent=pt;ph.className=`hphase ${pc}`;
+  const PHM={
+    roll: ['Roll','ph-roll','Roll the die to determine how many hexes you can move this turn.'],
+    move: ['Move','ph-move',`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — click a highlighted hex to move.`],
+    action: ['Action','ph-act',`You are at ${p.location}. Take an action or end your turn.`],
+    over: ['Rescued','ph-act','The crew has been rescued.'],
+  };
+  const[pt,pc,ptip]=PHM[G.phase]||['—','',''];
+  ph.textContent=pt;ph.className=`hphase ${pc}`;ph.dataset.tooltip=ptip;
   const frags=G.radioFragmentsActivated,THR=[null,18,16,14,12,10];
-  document.getElementById('hsig').textContent=frags?`${frags}/5 fragments · threshold ${THR[frags]}+`:'0 fragments · signal offline';
+  const anyFragsHeld=G.players.some(pl=>pl.radioFragments>0);
+  let missionHtml;
+  if(frags>0){
+    missionHtml=`Roll Rescue Signal <span class="hmission-sep">·</span> <span class="hmission-frags">${frags}/5 activated · Threshold: ${THR[frags]}+</span>`;
+  } else if(anyFragsHeld){
+    missionHtml=`Activate Fragments at Signal Array <span class="hmission-sep">·</span> <span class="hmission-offline">Signal Offline</span>`;
+  } else {
+    missionHtml=`Collect Radio Fragments <span class="hmission-sep">·</span> <span class="hmission-offline">Signal Offline</span>`;
+  }
+  document.getElementById('hmission').innerHTML=missionHtml;
   // Card shows viewed player
   document.getElementById('hcimg').style.cssText=`background-image:url(img/Crew/${v.portrait}.png);background-size:cover;background-position:center top;width:100%;height:100%;`;
   document.getElementById('hcname').textContent=v.name;
@@ -2073,6 +2171,25 @@ function updateUI(){
   buildTokGrid('htr',v.food,Math.max(5,Math.ceil(v.food/5)*5),'rf','re',3,5);
   buildTokRow('hto',v.o2,3,'of','oe');
   buildTokRow('hth',v.health,3,'hf','he');
+  // Pulse at-risk resources for the active player during their turn
+  if(v.id===G.currentPlayer&&G.phase!=='over'&&!v.inStasis){
+    const onBase=G.tiles.get(hk(v.q,v.r))?.type==='crash_site';
+    // Food always ticks (if food>0, last full token pulses; if food=0, first health token pulses)
+    if(v.food>0){
+      const ftoks=document.getElementById('htr').querySelectorAll('.tok.rf');
+      if(ftoks.length){const last=ftoks[ftoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — will deplete at end of turn';}
+    } else if(v.health>0){
+      const htoks=document.getElementById('hth').querySelectorAll('.tok.hf');
+      if(htoks.length){const last=htoks[htoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — no food remaining, Health will deplete';}
+    }
+    // O2 ticks if in field and not skipping this turn
+    const hasRebreather=v.equipment.some(c=>c.id==='rebreather');
+    const o2WillTick=!onBase&&!v.skipO2&&(!hasRebreather||!v.rebreatherCycle);
+    if(o2WillTick&&v.o2>0){
+      const otoks=document.getElementById('hto').querySelectorAll('.tok.of');
+      if(otoks.length){const last=otoks[otoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — will deplete at end of turn';}
+    }
+  }
   const fragRow=document.getElementById('hud-frags');
   const fragEl=document.getElementById('htfrag');
   if(v.radioFragments>0){
@@ -2102,13 +2219,15 @@ function updateUI(){
   document.getElementById('bfrag').disabled=!(act&&atArr&&p.radioFragments>0&&G.radioFragmentsActivated<5);
   document.getElementById('bsig').disabled=!((act||G.phase==='move')&&atArr&&G.radioFragmentsActivated>0&&!G.signalRolled);
   const hereOthers=G.players.filter(x=>x.alive&&x.id!==p.id&&x.q===p.q&&x.r===p.r);
-  document.getElementById('btrd').disabled=!(act&&hereOthers.length>0);
+  const trdEnabled=act&&hereOthers.length>0;
+  document.getElementById('btrd').disabled=!trdEnabled;
+  document.getElementById('btrd').dataset.tooltip=trdEnabled?'Trade resources and equipment with crew on your tile':'Another crew member must be on your tile to trade';
   updateE7Prompt();
 }
 
 function buildTokGrid(id,full,total,fc,ec,rows,cols){
   const c=document.getElementById(id);c.innerHTML='';
-  for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;s.title=i<full?'Full':'Empty';c.appendChild(s);}
+  for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;c.appendChild(s);}
 }
 function buildTokRow(id,full,total,fc,ec){
   const c=document.getElementById(id);c.innerHTML='';
@@ -2444,19 +2563,21 @@ function termDiv(container){
 // cls: 'sys'|'good'|'act'|'crit'|'imp'|'' for e7m voice lines
 //      'log'|'log-act'|'log-good'|'log-imp' for compact le log lines
 //      'div' for a divider (msg ignored)
-function termSeq(container,steps,charDelay=15){
+// lineGap: extra pause (ms) held after each line before the next starts — makes sequential nature visible
+function termSeq(container,steps,charDelay=15,lineGap=0){
   let t=0;
   steps.forEach(([gap,cls,msg])=>{
     t+=gap;
     if(cls==='div'){
       const at=t;setTimeout(()=>termDiv(container),at);
+      t+=lineGap;
     } else {
       const isLog=cls==='log'||cls.startsWith('log-');
       const base=isLog?'le':'e7m';
       const c=isLog?cls.replace(/^log-?/,''):cls;
       const at=t;
       setTimeout(()=>termAppend(container,msg,c,charDelay,base),at);
-      t+=msg.length*charDelay;
+      t+=msg.length*charDelay+lineGap;
     }
   });
 }
@@ -2512,8 +2633,8 @@ function toggleE7(){
   p.classList.toggle('show');
   if(p.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;updateE7Prompt();}
 }
-function e7Seq(steps,charDelay=15){termSeq(document.getElementById('e7log'),steps,charDelay);}
-function e7ScreenSeq(containerId,steps,charDelay=20){const c=document.getElementById(containerId);if(c)termSeq(c,steps,charDelay);}
+function e7Seq(steps,charDelay=15,lineGap=150){termSeq(document.getElementById('e7log'),steps,charDelay,lineGap);}
+function e7ScreenSeq(containerId,steps,charDelay=20,lineGap=120){const c=document.getElementById(containerId);if(c)termSeq(c,steps,charDelay,lineGap);}
 // E7 panel stays open until explicitly closed via the ✕ button or E7 toggle
 
 function openRulebook(){
@@ -2644,12 +2765,32 @@ function isValidBuilderPos(q,r){
   return false;
 }
 
+const BUILDER_TILE_DETAIL={
+  'Medical Bay':    'Entering this tile restores 1 HEALTH token every turn. Place it for fast access during emergencies.',
+  'Signal Array':   'Your rescue transmitter — the only way off this planet. Activate RADIO FRAGMENTS here, then roll to establish a signal.',
+  'Equipment Locker':'Draw EQUIPMENT cards here: tools, supplies, and weapons. Visit early to gear up before exploring the field.',
+  'Cargo Hold':     'Communal FOOD storage shared by all crew. Deposit surplus FOOD so teammates can withdraw it.',
+  'Watch Tower':    'Reveals all face-down tiles adjacent to any crew member currently in the field. This is powerful for scouting unknown terrain.',
+  'Airlock':        'OXYGEN depletes every turn outside the base camp. The airlock is your lifeline. Entering this tile refills a crew member\'s OXYGEN supply.',
+};
+
 function selectBuilderTile(idx){
   const item=builderState.palette[idx];
   if(item.placed)return;
   builderState.selectedIdx=(builderState.selectedIdx===idx?-1:idx);
   renderPalette();
   renderSiteBuilder();
+  // Update E7 log with detailed description of selected tile
+  const sbLog=document.getElementById('sb-e7-log');
+  if(builderState.selectedIdx>=0&&sbLog){
+    const sel=builderState.palette[builderState.selectedIdx];
+    const detail=BUILDER_TILE_DETAIL[sel.name]||sel.desc;
+    termDiv(sbLog);
+    termAppend(sbLog,`> ${sel.name.toUpperCase()}`,'sys',13,'e7m');
+    const detailDelay=sel.name.length*13+200;
+    setTimeout(()=>termAppend(sbLog,detail,'',13,'e7m'),detailDelay);
+    setTimeout(()=>termAppend(sbLog,'Click a highlighted hex on the map to place.','act',13,'e7m'),detailDelay+detail.length*13+300);
+  }
 }
 
 function placeBuilderTile(q,r){
@@ -2841,7 +2982,11 @@ function finalizeGame(){
   document.getElementById('setup-site').style.display='none';
   document.getElementById('game').className='running';
   clearSave();
+  guidanceSeen=new Set(); // reset guidance milestones for new game
   newGame(pendingNames,pendingPortraits,placedMap);
+  // Sync guidance toggle button state
+  const gtBtn=document.getElementById('e7guidance-toggle');
+  if(gtBtn){gtBtn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';gtBtn.classList.toggle('on',guidanceMode);}
   setTimeout(()=>{
     preloadTileImages();initBoard();render();updateUI();
     showTableDice('move');
@@ -2850,24 +2995,27 @@ function finalizeGame(){
     const crew=pendingNames;
     const ctrlLines=usesTrackpad
       ?[
-        [0,'good','Click — Interact'],
-        [0,'good','Two-finger scroll — Pan'],
-        [0,'good','Pinch — Zoom'],
+        [0,'','Click — Interact'],
+        [0,'','Two-finger scroll — Pan'],
+        [0,'','Pinch — Zoom'],
       ]
       :[
-        [0,'good','Left-click — Interact'],
-        [0,'good','Right-click — Pan'],
-        [0,'good','Scroll wheel — Zoom'],
+        [0,'','Left-click — Interact'],
+        [0,'','Right-click — Pan'],
+        [0,'','Scroll wheel — Zoom'],
       ];
     e7Seq([
-      [0,   'sys', '> MISSION CONTROLS'],
-      [0,   'div', null],
+      [0,   'sys',  '> MISSION CONTROLS'],
+      [0,   'div',  null],
       ...ctrlLines,
-      [0,   'div', null],
-      [0,   '',    'Explore the planet to recover radio fragments. Your food and oxygen dwindle each round. Find caches or return to the base to heal.'],
-      [0,   'div', null],
-      [0,   'log-act', `Mission initialized. ${crew.length} crew active.`],
-      [0,   'log-act', `Turn 1: ${crew[0]}. Roll for movement.`],
+      [0,   'div',  null],
+      [0,   'sys',  '> MISSION BRIEFING'],
+      [0,   '',     'Find RADIO FRAGMENTS and activate them at your SIGNAL ARRAY. Each fragment increases the chance your signal will be received.'],
+      [0,   '',     'FOOD and OXYGEN deplete every turn. Return to the base camp to refill your supply.'],
+      [0,   '',     'When FOOD or OXYGEN runs out, your HEALTH will deplete. Visit the MEDICAL BAY to heal.'],
+      [0,   'div',  null],
+      [0,   'sys', `Mission initialized. ${crew.length} crew active.`],
+      [0,   'sys', `Turn 1: ${crew[0]}. Roll for movement.`],
     ]);
     updateE7Prompt();
   },40);
@@ -2923,9 +3071,9 @@ function goToSiteBuilder(){
   initBuilder();
   updateBuilderProgress();
   e7ScreenSeq('sb-e7-log',[
-    [0, 'crit', '> Signal Array: OFFLINE.'],
-    [300, '',    'You must recover Radio Fragments to restore the Signal Array.'],
-    [500, 'act',    'Establish your base camp by placing life support structures near the crash site.'],
+    [0,   'sys', '> ESTABLISHING BASE CAMP...'],
+    [300, '',     'Before venturing into the field, you\'ll need to set up your base camp by placing key structures on the map.'],
+    [400, 'act',  'Choose a tile below.'],
   ]);
 }
 
@@ -2937,6 +3085,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   });
 
   document.getElementById('setup').style.display='none';
+  // Sync guidance toggle on load
+  const _gtBtn=document.getElementById('e7guidance-toggle');
+  if(_gtBtn){_gtBtn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';_gtBtn.classList.toggle('on',guidanceMode);}
   if(loadGame()){
     // Resume saved game
     document.getElementById('intro').style.display='none';
