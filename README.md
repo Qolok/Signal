@@ -165,7 +165,7 @@ When a player enters a tile and flips it to find an Anomaly, the printed rule on
 | Stasis Pod | You may enter. Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time on your turn. |
 | Temporal Rift | Roll 1 die. 1–3: flip that many Rations to SPENT. 4–6: flip that many EMPTY Rations to FULL. |
 | Portal | You may immediately move your pawn to the Crash Site. Your turn ends. You may decline. |
-| Gravitational Well | Roll 1 die. The player to your left moves your pawn that many points in any direction. |
+| Gravity Well | Roll 1 die. The player to your left moves your pawn that many hexes in any direction. |
 | Dead Signal | No Signal Roll occurs this round for any player. |
 | Echo Chamber | Resolve the most recent Public Event card again in full. |
 | Inversion Field | Choose any other player. Swap your Ration tokens with theirs. They cannot refuse. |

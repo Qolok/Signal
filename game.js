@@ -129,11 +129,12 @@ const PORTRAIT_SVG_UNUSED = [
 <path d="M24,38 Q30,41 36,38" stroke="#7a5030" stroke-width="1.5" fill="none"/>
 </svg>`,
 ];
-// Portrait helper — individual files in img/Crew/<name>.png
-// Uses CSS cover crop. fy: 0=top-aligned (default), 0.5=centered
-function portBg(portrait, dw, dh, fy=0){
+// Portrait helper — individual files in img/Crew/<name><health>.png
+// health: 1–3 (3=healthy, 1=critical/incap). fy: 0=top-aligned, 0.5=centered
+function portBg(portrait, dw, dh, fy=0, health=3){
   const ypos=fy===0?'top':'center';
-  return `background-image:url(img/Crew/${portrait}.png);background-size:cover;`+
+  const suf=Math.max(1,Math.min(3,health));
+  return `background-image:url(img/Crew/${portrait}${suf}.png);background-size:cover;`+
          `background-position:center ${ypos};width:${dw}px;height:${dh}px;flex-shrink:0;`;
 }
 
@@ -193,7 +194,7 @@ const CRASH_HEXES_DEFAULT=[
   {q:0,r:1,  name:'Cargo Hold',      short:'CARGO'},
 ];
 
-const ANOMALIES=['Stasis Pod','Temporal Rift','Portal','Gravitational Well','Dead Zone','Echo Chamber','Inversion Field'];
+const ANOMALIES=['Stasis Pod','Temporal Rift','Portal','Gravity Well','Dead Zone','Echo Chamber','Inversion Field'];
 
 // ═══════════════════════════════════════════════════════════════
 // FIXED 43-TILE TERRAIN DECK SPEC
@@ -262,7 +263,7 @@ const TILE_IMAGE_MAP={
   'Bloody Passage':     'passage-bloody.png',
   'Stasis Pod':         'stasis.png',
   'Temporal Rift':      'temporal-distortion.png',
-  'Gravitational Well': 'gravity-well.png',
+  'Gravity Well': 'gravity-well.png',
   'Echo Chamber':       'echo-chamber.png',
   'Dead Zone':          'dead-zone.png',
   'Portal':             'portal.png',
@@ -331,7 +332,7 @@ const EVENT_CARDS=[
   {text:'You were at the equipment locker before your turn. Draw 1 Equipment card now and keep it face-down. Don\'t mention it.',pub:false,drawEqHidden:true},
   {text:'You reached this cache first. Refill your depleted Food from the Cargo Hold — take only what you\'re missing. No rule says you have to tell anyone.',pub:false,takeAllCargo:true},
   // Private — competing objectives
-  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll a 6 or higher to abandon the others and be rescued alone. The choice is yours.',pub:false,trackSignalArray:true,keep:true},
+  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll 10 or higher on 3 dice to abandon the others and be rescued alone. The choice is yours.',pub:false,trackSignalArray:true,keep:true},
   {text:'Your mission briefing had a clause the others weren\'t cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.',pub:false,rfExtraction:true,keep:true},
   // Private — psychological
   {text:'You\'re playing a different game than the others. Help when it\'s convenient. Nod along. But you know what you\'d do if it came down to it.',pub:false,keep:true},
@@ -361,7 +362,7 @@ const TILE_TIPS={
   'Stasis Pod':        [[0,'','Among the rubble, you find the ship\'s stasis pod. This could be your chance at survival, but the pod only holds one.'],[0,'act','Skip Resource Flip each round inside. Cannot move or interact. Exit any time.']],
   'Temporal Rift':     [[0,'','You experience an unexplained spacetime distortion. Past and future flickers. You fight to keep down your breakfast.'],[0,'act','Roll 1 die.'],[0,'crit','1\u20133: lose that many Food.'],[0,'good','4\u20136: recover that many Food.']],
   'Portal':            [[0,'','You come across abandoned alien technology.'],[0,'','As you approach, a strange vortex opens up. This appears to be some kind of Instantaneous transit point. Origin unknown.'],[0,'act','Option: Move immediately to Crash Site. Turn ends.']],
-  'Gravitational Well':[[0,'','Suddenly, you are pulled into an intense localized gravity field. It picks you up like a rag doll and tosses you around.'],[0,'act','Roll 1 die.'],[0,'act','You will be moved that many steps in a random direction.']],
+  'Gravity Well':      [[0,'','Suddenly, you are pulled into an intense localized gravity field. It picks you up like a rag doll and tosses you around.'],[0,'act','Roll 1 die.'],[0,'act','You will be moved that many steps in a random direction.']],
   'Dead Zone':         [[0,'','There is a strange electricity in the air around this place.'],[0,'','Something here is blocking all radio transmissions. It\'s almost as if the air itself is charged. You can taste metal.'],[0,'','Don\'t stay too long.'],[0,'act','No Signal Roll occurs this round for any player.']],
   'Echo Chamber':      [[0,'','The terrain resonates with past events.'],[0,'act','Resolve the most recent Public Event card again in full.']],
   'Inversion Field':   [[0,'','Gravity inversion. Resources change hands involuntarily.'],[0,'act','Choose any other player. Swap your Food with theirs.']],
@@ -427,6 +428,7 @@ function dealEquipment(){
 }
 
 function newGame(names, portraits, placedMap){
+  _tilesDirty=true;_dynGroup=null;_lastRenderW=0;_lastRenderH=0;
   const tiles=new Map();
   // Use builder placed map or defaults
   if(placedMap && placedMap.size>0){
@@ -461,6 +463,7 @@ function countTerrainTiles(){
 }
 
 function expandFrontier(){
+  markTilesDirty();
   const MAX_TERRAIN=43;
   for(const[k,t]of G.tiles){
     if(!t.revealed)continue;
@@ -478,6 +481,7 @@ function expandFrontier(){
 
 function revealAt(q,r){
   const k=hk(q,r);const t=G.tiles.get(k);if(!t||t.revealed)return;
+  markTilesDirty();
   if(!G.terrainDeck.length){G.tiles.set(k,{...t,type:'terrain',revealed:true,pois:['Wreckage Field'],investigatedCount:0});expandFrontier();return;}
   const drawn=G.terrainDeck.pop();
   G.tiles.set(k,{...t,...drawn,q,r,revealed:true,investigatedCount:0});
@@ -510,10 +514,18 @@ function tileImgHtml(t){
   return `<div style="width:200px;height:140px;background:url(${img}) center/cover no-repeat;border-radius:4px;margin:0 auto 10px;overflow:hidden;display:block"></div>`;
 }
 
+let _trDescTimers=[];
 function trDesc(steps,charDelay=15){
+  _trDescTimers.forEach(id=>clearTimeout(id));
+  _trDescTimers=[];
   const el=document.getElementById('tr-desc');
   el.innerHTML='';
+  // Patch: collect timer IDs from this call
+  const origSet=window.setTimeout;
+  const ids=[];
+  window.setTimeout=(fn,ms)=>{const id=origSet(fn,ms);ids.push(id);_trDescTimers=ids;return id;};
   termSeq(el,Array.isArray(steps[0])?steps:[[0,'',steps]],charDelay,100);
+  window.setTimeout=origSet;
 }
 function showTileRevealModal(t, onDismiss){
   let title;
@@ -536,7 +548,7 @@ function showTileRevealModal(t, onDismiss){
     steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
   }
   if(t.radioFragment&&!t.requiresTool){
-    const p=cp();p.radioFragments++;t.radioFragment=false;
+    const p=cp();p.radioFragments++;t.radioFragment=false;markTilesDirty();
     addLog(`${p.name} recovered a Radio Fragment.`,'frag');
     steps.push([0,'good','\u25c8 Radio Fragment recovered.']);
     guidance('first_rf',()=>{
@@ -578,7 +590,6 @@ function showTileRevealModal(t, onDismiss){
   if(t.type==='ship_section'){
     deck.style.display='none';
     trov.onclick=null;
-    const descEl=document.getElementById('tr-desc');
     const dieWrap=make3DDie('idle');
     dieWrap.style.cssText='margin:0 auto;';
     actionsEl.appendChild(dieWrap);
@@ -597,7 +608,7 @@ function showTileRevealModal(t, onDismiss){
         else{if(p.health<3){p.health++;outcome=`Rolled ${val} — Health restored.`;addLog(`${p.name} treated at Ship Section. Health: ${p.health}/3.`,'good');}else{outcome=`Rolled ${val} — Health already full.`;addLog(`${p.name} searched Ship Section — health already full.`);}}
         const outEl=document.createElement('div');
         outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;descEl.appendChild(outEl);
+        outEl.textContent=outcome;actionsEl.appendChild(outEl);
         updateUI();
         const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
         cont.onclick=dismiss;
@@ -607,7 +618,6 @@ function showTileRevealModal(t, onDismiss){
   } else if(t.pois&&t.pois.includes('Cache')){
     deck.style.display='none';
     trov.onclick=null;
-    const descEl=document.getElementById('tr-desc');
     const dieWrap=make3DDie('idle');
     dieWrap.style.cssText='margin:0 auto;';
     actionsEl.appendChild(dieWrap);
@@ -627,8 +637,7 @@ function showTileRevealModal(t, onDismiss){
         addLog(`${p.name} raided the cache — gained ${gained} Food.`,'good');
         const outEl=document.createElement('div');
         outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;
-        descEl.appendChild(outEl);
+        outEl.textContent=outcome;actionsEl.appendChild(outEl);
         updateUI();
         const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
         cont.onclick=dismiss;
@@ -678,10 +687,9 @@ function showTileRevealModal(t, onDismiss){
       decBtn.onclick=()=>{dismiss();updateUI();render();};
       actionsEl.appendChild(decBtn);actionsEl.appendChild(enterBtn);
     }
-  } else if(isAnomaly&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravitational Well')){
+  } else if(isAnomaly&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravity Well')){
     deck.style.display='none';
     trov.onclick=null;
-    const descEl=document.getElementById('tr-desc');
     const dieWrap=make3DDie('idle');
     dieWrap.style.cssText='margin:0 auto;';
     actionsEl.appendChild(dieWrap);
@@ -698,22 +706,34 @@ function showTileRevealModal(t, onDismiss){
         if(t.anomaly==='Temporal Rift'){
           if(val<=3){const lost=Math.min(p.food,val);p.food-=lost;outcome=`Rolled ${val} — lost ${lost} Food.`;addLog(`Temporal Rift: rolled ${val} — lost ${lost} Food.`,'crit');}
           else{const gain=Math.min(15-p.food,val);p.food+=gain;outcome=`Rolled ${val} — gained ${gain} Food.`;addLog(`Temporal Rift: rolled ${val} — gained ${gain} Food.`,'good');}
-        } else if(t.anomaly==='Gravitational Well'){
+        } else if(t.anomaly==='Gravity Well'){
           let q=p.q,r=p.r;
           for(let i=0;i<val;i++){const d=DIRS[0|Math.random()*6];const nq=q+d[0],nr=r+d[1];if(G.tiles.has(hk(nq,nr))){q=nq;r=nr;}}
-          p.q=q;p.r=r;const dest=G.tiles.get(hk(q,r));p.location=tileName(dest);
+          p.q=q;p.r=r;
+          if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
+          const dest=G.tiles.get(hk(q,r));p.location=tileName(dest);
           outcome=`Rolled ${val} — thrown to ${p.location}.`;
-          addLog(`Gravitational Well: rolled ${val} — ${p.name} thrown to ${p.location}.`,'crit');render();
+          addLog(`Gravity Well: rolled ${val} — ${p.name} thrown to ${p.location}.`,'crit');render();
         }
         const outEl=document.createElement('div');
         outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;descEl.appendChild(outEl);
+        outEl.textContent=outcome;actionsEl.appendChild(outEl);
         updateUI();
         const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
         cont.onclick=()=>{
           trov.onclick=null;deck.onclick=null;actionsEl.innerHTML='';
           trov.classList.remove('show','anomaly-mode');trov.style.display='none';trov.style.backgroundImage='';
-          if(onDismiss)onDismiss();else{updateUI();render();}
+          if(t.anomaly==='Gravity Well'){
+            const newTile=G.tiles.get(hk(p.q,p.r));
+            const stillPending=newTile?.requiresTool&&(newTile.radioFragment||newTile.toolReward);
+            const wasInvestigated=(newTile?.investigatedCount||0)>0;
+            const needsDraw=newTile&&!wasInvestigated&&(newTile.type==='terrain'||newTile.type==='ship_section')&&newTile.pois?.length>0||stillPending;
+            if(needsDraw&&!stillPending){newTile.investigatedCount=newTile.pois.length;markTilesDirty();}
+            if(needsDraw)showTileRevealModal(newTile);
+            else if(onDismiss)onDismiss();else{updateUI();render();}
+          } else {
+            if(onDismiss)onDismiss();else{updateUI();render();}
+          }
         };
         actionsEl.appendChild(cont);
       },1500);
@@ -743,7 +763,7 @@ function showTileRevealModal(t, onDismiss){
         enterBtn.className='mbtn pri';
         enterBtn.textContent=`Use ${toolName} — Enter`;
         enterBtn.onclick=()=>{
-          const reward=t.toolReward;t.toolReward=null;t.investigatedCount=t.pois.length;
+          const reward=t.toolReward;t.toolReward=null;t.investigatedCount=t.pois.length;markTilesDirty();
           if(reward==='rollFood'){
             const bg=getTileImg(t);
             dismiss();
@@ -786,7 +806,7 @@ function showTileRevealModal(t, onDismiss){
         const fragBtn=document.createElement('button');
         fragBtn.className='mbtn pri';
         fragBtn.textContent=`Use ${toolName} — Recover Fragment`;
-        fragBtn.onclick=()=>{p.radioFragments++;t.radioFragment=false;t.investigatedCount=t.pois.length;addLog(`${p.name} used ${toolName} to recover a Radio Fragment.`,'frag');dismiss();};
+        fragBtn.onclick=()=>{p.radioFragments++;t.radioFragment=false;t.investigatedCount=t.pois.length;markTilesDirty();addLog(`${p.name} used ${toolName} to recover a Radio Fragment.`,'frag');dismiss();};
         actionsEl.appendChild(fragBtn);
       } else {
         const leaveBtn=document.createElement('button');
@@ -1061,11 +1081,11 @@ function applyLanding(p,q,r,path,wasRevealed){
   const wasInvestigated=(G.tiles.get(hk(q,r))?.investigatedCount||0)>0;
   const stillPending=t?.requiresTool&&(t.radioFragment||t.toolReward);
   const needsDraw=!wasInvestigated&&t&&(t.type==='terrain'||t.type==='ship_section')&&t.pois?.length>0||stillPending;
-  if(needsDraw&&!stillPending)t.investigatedCount=t.pois.length;
+  if(needsDraw&&!stillPending){t.investigatedCount=t.pois.length;markTilesDirty();}
   G.phase='action';G.reach=bfsReach(p.q,p.r,G.movementLeft);
   addLog(`${p.name} → ${p.location}`);
   updateUI();render();
-  const selfContainedAnomaly=t?.type==='anomaly'&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravitational Well'||t.anomaly==='Portal'||t.anomaly==='Inversion Field'||t.anomaly==='Stasis Pod');
+  const selfContainedAnomaly=t?.type==='anomaly'&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravity Well'||t.anomaly==='Portal'||t.anomaly==='Inversion Field'||t.anomaly==='Stasis Pod');
   if(needsDraw)showTileRevealModal(t);
   else if(isNewAnomaly)showTileRevealModal(t,selfContainedAnomaly?()=>{updateUI();render();}:()=>triggerAnomaly(t));
 }
@@ -1427,9 +1447,9 @@ function doEndTurn(){
   if(curTile?.name==='Signal Array'){
     p.signalArrayRounds++;
     if(p.soloRescueActive&&p.signalArrayRounds>=3){
-      showDieRoll(`${p.name} — Solo Extraction attempt. Roll 6 or higher to be rescued alone.`,val=>{
-        addLog(`${p.name} solo rescue: rolled ${val}.`,val>=6?'good':'crit');
-        if(val>=6){
+      showDieRoll(`${p.name} — Solo Extraction attempt. Roll 10 or higher to be rescued alone.`,val=>{
+        addLog(`${p.name} solo rescue: rolled ${val}.`,val>=10?'good':'crit');
+        if(val>=10){
           p.alive=false;
           showModal('SOLO EXTRACTION','',true,()=>{advanceTurn();},undefined,undefined,undefined,
             '<div id="mov-e7log" class="mov-e7log"></div>');
@@ -1441,7 +1461,7 @@ function doEndTurn(){
           return`Rolled ${val} — EXTRACTED.`;
         }
         return`Rolled ${val} — signal not strong enough. Remain on the array.`;
-      },()=>advanceTurn());
+      },()=>advanceTurn(),undefined,3);
       return;
     }
   } else {
@@ -1486,7 +1506,7 @@ function triggerAnomaly(t){
       showTileRevealModal(t,()=>{updateUI();render();});break;
     case'Portal':showTileRevealModal(t,()=>{updateUI();render();});break;
     case'Dead Zone':addLog('Dead Zone: transmission blocked. No Signal Roll can be made while this tile is occupied.');updateUI();break;
-    case'Gravitational Well':
+    case'Gravity Well':
       showTileRevealModal(t,()=>{updateUI();render();});break;
     case'Echo Chamber':{
       if(!G.lastPublicEvt){addLog('Echo Chamber: no prior public event to repeat.','act');break;}
@@ -1584,7 +1604,7 @@ function renderTradeModal(){
     const nameRow=document.createElement('div');
     nameRow.style.cssText='display:flex;align-items:flex-end;gap:10px;margin-bottom:10px';
     const portEl=document.createElement('div');
-    portEl.style.cssText=portBg(p.portrait,104,104)+'border:1px solid '+p.color+';border-radius:3px;flex-shrink:0';
+    portEl.style.cssText=portBg(p.portrait,104,104,0,p.health)+'border:1px solid '+p.color+';border-radius:3px;flex-shrink:0';
     const nameBlock=document.createElement('div');
     nameBlock.style.cssText='display:flex;flex-direction:column;gap:6px;padding-bottom:2px';
     const nameSpan=document.createElement('span');
@@ -1700,6 +1720,7 @@ function confirmTrade(){
   pB.o2=Math.max(0,Math.min(3,pB.o2-bO2+aO2));
   addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`,'good');
   closeTrade();
+  viewedPlayer=G.currentPlayer;
   updateUI();render();
 }
 
@@ -1714,6 +1735,15 @@ function closeTrade(){
 let pan={x:0,y:0},zoom=2;
 let boardGroup=null,panRafId=null;
 let _hexGridPath=null;
+let _tilesDirty=true,_dynGroup=null,_lastRenderW=0,_lastRenderH=0;
+function markTilesDirty(){_tilesDirty=true;}
+function _hexCssClip(){
+  if(_hexCssClip._c)return _hexCssClip._c;
+  const hw=SZ*SQRT3,hh=SZ*2,r=SZ-1,pts=[];
+  for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
+    pts.push(`${((r*Math.cos(a)+hw/2)/hw*100).toFixed(2)}% ${((r*Math.sin(a)+hh/2)/hh*100).toFixed(2)}%`);}
+  return(_hexCssClip._c=`polygon(${pts.join(',')})`);
+}
 function _buildHexGridPath(){
   if(_hexGridPath)return _hexGridPath;
   const GR=22,pd=[];
@@ -1728,7 +1758,7 @@ function _updateBoardTransform(){
   if(!boardGroup)return;
   const svg=document.getElementById('bsvg');
   const W=svg.clientWidth||800,H=svg.clientHeight||600;
-  boardGroup.setAttribute('transform',`translate(${W/2+pan.x} ${H/2+pan.y}) scale(${zoom})`);
+  boardGroup.style.transform=`translate(${W/2+pan.x}px,${H/2+pan.y}px) scale(${zoom})`;
 }
 function _schedulePan(){
   if(panRafId)return;
@@ -1761,34 +1791,40 @@ function svgEl(tag,attrs){const e=document.createElementNS(NS,tag);if(attrs)Obje
 function render(){
   const svg=document.getElementById('bsvg');
   const W=svg.clientWidth||800,H=svg.clientHeight||600;
-  svg.innerHTML='';
-  const defs=svgEl('defs');
-  ['terrain','anomaly','ship','crash','fd'].forEach(id=>{
-    const gr=svgEl('radialGradient',{id:'gr-'+id,cx:'40%',cy:'35%',r:'65%'});
-    const stops=GRAD_STOPS[id]||GRAD_STOPS.fd;
-    stops.forEach(([off,col])=>{const s=svgEl('stop',{'offset':off,'stop-color':col});gr.appendChild(s);});
-    defs.appendChild(gr);
-  });
-  svg.appendChild(defs);
-  svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
-  const g=svgEl('g',{transform:`translate(${W/2+pan.x} ${H/2+pan.y}) scale(${zoom})`});
-  boardGroup=g;
-  // Radial gradient mask: full opacity at origin (base camp), fades to nothing at edges
-  const hgGrad=svgEl('radialGradient',{id:'hg-fade',gradientUnits:'userSpaceOnUse',cx:'0',cy:'0',r:'900'});
-  hgGrad.appendChild(svgEl('stop',{offset:'0%','stop-color':'white','stop-opacity':'1'}));
-  hgGrad.appendChild(svgEl('stop',{offset:'55%','stop-color':'white','stop-opacity':'0.5'}));
-  hgGrad.appendChild(svgEl('stop',{offset:'100%','stop-color':'white','stop-opacity':'0'}));
-  const hgMask=svgEl('mask',{id:'hg-mask'});
-  hgMask.appendChild(svgEl('rect',{x:'-5000',y:'-5000',width:'10000',height:'10000',fill:'url(#hg-fade)'}));
-  defs.appendChild(hgGrad);defs.appendChild(hgMask);
-  // Hex grid texture: cached path string — SZ is constant so this never changes.
-  g.appendChild(svgEl('path',{d:_buildHexGridPath(),fill:'none',stroke:'rgba(255,255,255,0.06)','stroke-width':'0.7','pointer-events':'none',mask:'url(#hg-mask)'}));
-  svg.appendChild(g);
-  for(const[,t]of G.tiles)drawTile(g,t);
+  const sizeChanged=W!==_lastRenderW||H!==_lastRenderH;
+
+  if(_tilesDirty||sizeChanged||!_dynGroup){
+    _tilesDirty=false;_lastRenderW=W;_lastRenderH=H;
+    svg.innerHTML='';
+    const defs=svgEl('defs');
+    ['terrain','anomaly','ship','crash','fd'].forEach(id=>{
+      const gr=svgEl('radialGradient',{id:'gr-'+id,cx:'40%',cy:'35%',r:'65%'});
+      const stops=GRAD_STOPS[id]||GRAD_STOPS.fd;
+      stops.forEach(([off,col])=>{const s=svgEl('stop',{'offset':off,'stop-color':col});gr.appendChild(s);});
+      defs.appendChild(gr);
+    });
+    svg.appendChild(defs);
+    svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
+    const g=svgEl('g');
+    g.style.transformOrigin='0 0';
+    g.style.willChange='transform';
+    g.style.transform=`translate(${W/2+pan.x}px,${H/2+pan.y}px) scale(${zoom})`;
+    boardGroup=g;
+    g.appendChild(svgEl('path',{d:_buildHexGridPath(),fill:'none',stroke:'rgba(255,255,255,0.06)','stroke-width':'0.7','pointer-events':'none'}));
+    for(const[,t]of G.tiles)drawTile(g,t);
+    _dynGroup=svgEl('g');
+    g.appendChild(_dynGroup);
+    svg.appendChild(g);
+  } else {
+    boardGroup.style.transform=`translate(${W/2+pan.x}px,${H/2+pan.y}px) scale(${zoom})`;
+  }
+
+  // Dynamic layer: reach highlights + pawns — always rebuilt (cheap)
+  _dynGroup.innerHTML='';
   if((G.phase==='move'||G.phase==='action')&&G.movementLeft>0){
     for(const[k]of G.reach){const[q,r]=hparse(k);const[cx,cy]=h2p(q,r);
-      g.appendChild(svgEl('polygon',{points:hexPts(cx,cy,SZ-4),fill:'rgba(20,70,120,.2)',stroke:'#205888','stroke-width':'1','pointer-events':'none'}));}}
-  G.players.forEach(p=>{if(p.alive)drawPawn(g,p);});
+      _dynGroup.appendChild(svgEl('polygon',{points:hexPts(cx,cy,SZ-4),fill:'rgba(20,70,120,.2)',stroke:'#205888','stroke-width':'1','pointer-events':'none'}));}}
+  G.players.forEach(p=>{if(p.alive)drawPawn(_dynGroup,p);});
 }
 
 const GRAD_STOPS={
@@ -1821,23 +1857,10 @@ function drawTile(g,t){
   const sw='1.5';
   const tileImg=getTileImg(t);
   if(tileImg){
-    // Clip path for this hex — added to SVG defs (in root coord space of g group)
-    const clipId=`tc_${t.q}_${t.r}`;
-    const svgDefs=document.getElementById('bsvg').querySelector('defs');
-    if(!svgDefs.querySelector(`#${clipId}`)){
-      const cp=svgEl('clipPath',{id:clipId});
-      cp.appendChild(svgEl('polygon',{points:hexPoly}));
-      svgDefs.appendChild(cp);
-    }
     const hw=SZ*SQRT3,hh=SZ*2;
-    g.appendChild(svgEl('image',{
-      href:tileImg,
-      x:cx-hw/2,y:cy-hh/2,
-      width:hw,height:hh,
-      'clip-path':`url(#${clipId})`,
-      'pointer-events':'none',
-      preserveAspectRatio:'xMidYMid slice',
-    }));
+    const img=svgEl('image',{href:tileImg,x:cx-hw/2,y:cy-hh/2,width:hw,height:hh,'pointer-events':'none',preserveAspectRatio:'xMidYMid slice'});
+    img.style.clipPath=_hexCssClip();
+    g.appendChild(img);
     // Subtle dark vignette so labels and icons stay legible
     g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(0,0,0,.32)','pointer-events':'none'}));
   } else {
@@ -1878,8 +1901,9 @@ function drawTileArtwork(g,cx,cy,t){
   if(t.type==='terrain'&&t.radioFragment){
     const poi=t.pois?.[0];
     if(poi==='Dead Tower'||poi==='Collapsed Tower'){
-      g.appendChild(svgEl('circle',{cx:cx+18,cy:cy-20,r:5,fill:'#1a4010',stroke:'#60c040','stroke-width':'1.2','pointer-events':'none'}));
-      lbl(g,cx+18,cy-17,'RF','5.5','#60c040');
+      const fragTok=svgEl('text',{x:cx+18,y:cy-13,'text-anchor':'middle','font-family':'monospace','font-size':'13',fill:'#8a28c8',style:'filter:drop-shadow(0 0 4px rgba(138,40,200,0.7))','pointer-events':'none'});
+      fragTok.textContent='◈';
+      g.appendChild(fragTok);
     }
   }
   if(t.type==='crash_site'){
@@ -1940,7 +1964,7 @@ function drawPawn(g,p){
   cp2.appendChild(svgEl('circle',{cx:px,cy:py,r:11}));
   defs.appendChild(cp2);
   const imgEl=svgEl('image',{
-    href:`img/Crew/${p.portrait}.png`,
+    href:`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}.png`,
     x:px-11, y:py-11,
     width:22, height:22,
     'clip-path':`url(#${cid})`,
@@ -2063,7 +2087,7 @@ function buildCrewTabs(){
     const isCurrent=pl.id===G.currentPlayer;
     const isViewing=pl.id===viewedPlayer;
     t.className='hctab'+(pl.alive?'':' dead');
-    t.style.cssText=`background-image:url(img/Crew/${pl.portrait}.png);background-size:cover;background-position:center top;`+
+    t.style.cssText=`background-image:url(img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}.png);background-size:cover;background-position:center top;`+
       `border-color:${isCurrent?pl.color:isViewing?'rgba(255,255,255,.4)':'transparent'};`+
       `box-shadow:${isCurrent?`0 0 0 1px ${pl.color}`:'none'};`+
       `opacity:${pl.alive?1:.3};`;
@@ -2164,7 +2188,7 @@ function updateUI(){
   }
   document.getElementById('hmission').innerHTML=missionHtml;
   // Card shows viewed player
-  document.getElementById('hcimg').style.cssText=`background-image:url(img/Crew/${v.portrait}.png);background-size:cover;background-position:center top;width:100%;height:100%;`;
+  document.getElementById('hcimg').style.cssText=`background-image:url(img/Crew/${v.portrait}${Math.max(1,Math.min(3,v.health))}.png);background-size:cover;background-position:center top;width:100%;height:100%;`;
   document.getElementById('hcname').textContent=v.name;
   document.getElementById('hcname').style.color=v.color;
   document.getElementById('hcloc').textContent=v.location;
@@ -2336,10 +2360,10 @@ function showContestModal(challenger, defender, onChallengerWins, onDefenderWins
   ov.classList.add('show');
 
   // Portraits
-  document.getElementById('contest-challenger-port').style.cssText=portBg(challenger.portrait,80,80,.15);
+  document.getElementById('contest-challenger-port').style.cssText=portBg(challenger.portrait,80,80,.15,challenger.health);
   document.getElementById('contest-challenger-port').style.borderColor=challenger.color;
   document.getElementById('contest-challenger-name').textContent=challenger.name;
-  document.getElementById('contest-defender-port').style.cssText=portBg(defender.portrait,80,80,.15);
+  document.getElementById('contest-defender-port').style.cssText=portBg(defender.portrait,80,80,.15,defender.health);
   document.getElementById('contest-defender-port').style.borderColor=defender.color;
   document.getElementById('contest-defender-name').textContent=defender.name;
   document.getElementById('contest-outcome').textContent='Each crew member rolls — highest wins.';
@@ -2428,7 +2452,7 @@ function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okCl
 // ═══════════════════════════════════════════════════════════════
 // EVENT CARD
 // ═══════════════════════════════════════════════════════════════
-function showDieRoll(prompt, onRoll, onDismiss, bgImage){
+function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount=1){
   const ov=document.getElementById('evc-ov');
   ov.className='';ov.style.backgroundImage=bgImage||'';ov.style.backgroundSize='cover';ov.style.backgroundPosition='center';
   const card=document.getElementById('evc');card.className='evc pub';
@@ -2441,16 +2465,20 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage){
   const btn=document.getElementById('evc-btn');
   btn.className='';btn.textContent='OK';btn.disabled=true;btn.style.opacity='.35';
   dieEl.innerHTML='';dieEl.style.display='flex';
-  const wrap=make3DDie('idle');
-  dieEl.appendChild(wrap);
-  wrap.onclick=()=>{
-    wrap.className='td-die-wrap rolling';wrap.onclick=null;
-    const val=1+(0|Math.random()*6);
+  const wraps=[];
+  for(let i=0;i<diceCount;i++){const w=make3DDie('idle');dieEl.appendChild(w);wraps.push(w);}
+  dieEl.onclick=()=>{
+    if(wraps.some(w=>w.className.includes('rolling')))return;
+    wraps.forEach(w=>{w.className='td-die-wrap rolling';});
+    dieEl.onclick=null;
+    const vals=wraps.map(()=>1+(0|Math.random()*6));
     setTimeout(()=>{
       dieEl.innerHTML='';
       const res=document.createElement('div');res.className='evc-die-result';
-      res.appendChild(makeResultDie(val));dieEl.appendChild(res);
-      const outcome=onRoll(val);
+      vals.forEach(v=>res.appendChild(makeResultDie(v)));
+      if(diceCount>1){const tot=document.createElement('div');tot.style.cssText='font-size:13px;letter-spacing:.1em;color:var(--dim);align-self:center;padding-left:6px;';tot.textContent=`= ${vals.reduce((a,b)=>a+b,0)}`;res.appendChild(tot);}
+      dieEl.appendChild(res);
+      const outcome=onRoll(vals.reduce((a,b)=>a+b,0));
       if(outcome){outEl.textContent=outcome;outEl.style.display='';}
       updateUI();
       btn.disabled=false;btn.style.opacity='';
@@ -3025,7 +3053,7 @@ function finalizeGame(){
 // SETUP SCREEN
 // ═══════════════════════════════════════════════════════════════
 let setupN=2;
-let setupPortraits=CREW_PORTRAITS.map((_,i)=>i); // one index per slot
+let setupPortraits=(()=>{const a=CREW_PORTRAITS.map((_,i)=>i);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;})(); // shuffled so all 10 crew rotate in
 
 function buildSetup(){
   const row=document.getElementById('crow');row.innerHTML='';
