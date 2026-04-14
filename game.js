@@ -1960,6 +1960,8 @@ function drawPawn(g,p){
   }
   const cid=`pc-${p.id}`;
   const defs=document.getElementById('bsvg').querySelector('defs');
+  const existing=defs.querySelector(`#${cid}`);
+  if(existing)existing.remove();
   const cp2=svgEl('clipPath',{id:cid});
   cp2.appendChild(svgEl('circle',{cx:px,cy:py,r:11}));
   defs.appendChild(cp2);
