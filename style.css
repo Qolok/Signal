@@ -472,6 +472,29 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 
 .sec{padding:9px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0}
 .shd{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:7px;font-weight:normal;cursor:default}
+.eq-shd-row{display:flex;align-items:start;justify-content:space-between;margin-bottom:5px;}
+.eq-filters{display:flex;gap:3px;align-items:center;}
+.eq-filt{
+  width:20px;height:20px;padding:0;background:transparent;border:1px solid transparent;
+  border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  opacity:.35;transition:opacity .15s,border-color .15s,background .15s;
+}
+.eq-filt:hover{opacity:.7;border-color:var(--bdr);}
+.eq-filt.active{opacity:1;border-color:var(--hi);background:rgba(42,112,176,.12);}
+.eq-filt-icon{
+  display:block;width:11px;height:11px;
+  background-color:var(--dim);
+  -webkit-mask-image:var(--eq-icon-url);mask-image:var(--eq-icon-url);
+  -webkit-mask-size:contain;mask-size:contain;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  pointer-events:none;transition:background-color .15s;
+}
+#eq-filt-Tool.active   .eq-filt-icon{background-color:#aecce0;}
+#eq-filt-Supply.active .eq-filt-icon{background-color:#90d8a0;}
+#eq-filt-Tech.active   .eq-filt-icon{background-color:#c0a0e0;}
+#eq-filt-Weapon.active .eq-filt-icon{background-color:#e09090;}
+#eq-filt-Event.active  .eq-filt-icon{background-color:#d0a060;}
 
 /* ── E7 SHIP COMPUTER PANEL (top-right HUD, below E7 button) ── */
 #e7panel{
@@ -630,14 +653,14 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .cc-Fragment{--cc-bg:#0e0804;--cc-bdr:#4a2808;--cc-ibdr:#321808;--cc-badge:#8a5010;--cc-loc:#d0a060;--cc-body:#c09050;--cc-rule:#4a2808;--cc-dim:#321808;}
 
 .eqcard{
-  width:116px;height:185px;flex-shrink:0;
+  width:115px;height:175px;flex-shrink:0;
   background:var(--cc-bg,var(--bg));border:1px solid var(--cc-bdr,var(--bdr));
   border-radius:4px;cursor:pointer;
   display:flex;flex-direction:column;overflow:hidden;
   transition:transform .12s,box-shadow .12s;position:relative;
   box-shadow:0 2px 8px rgba(0,0,0,.6);
 }
-.eqcard.empty{cursor:default;border-style:dashed;opacity:.15;background:var(--bg);}
+.eqcard.empty{cursor:default;border-style:dashed;opacity:.5;background:var(--bg);}
 .eqcard-event-priv{background:#120a04;border-color:#4a2808;}
 .eqcard-event-back{align-items:center;justify-content:center;gap:10px;border-color:#321808;background:repeating-linear-gradient(45deg,#1a0c04,#1a0c04 4px,#120804 4px,#120804 8px);}
 .eqcard-event-back-lbl{font-size:9px;letter-spacing:.12em;color:#7a4a28;text-align:center;line-height:1.6;}

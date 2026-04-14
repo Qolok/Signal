@@ -173,7 +173,16 @@
       <!-- Equipment gallery -->
       <div class="hudeq" id="hudeq">
         <div class="hud-tab-body">
-          <div class="shd" data-tooltip="Equipment cards give you tools, supplies, and weapons. Click a card to view details or use it.">Equipment</div>
+          <div class="shd eq-shd-row">
+            <span data-tooltip="Your backpack holds tools, supplies, weapons, and certain event cards. Click a card to view more details.">Backpack</span>
+            <span class="eq-filters" id="eq-filters">
+              <button type="button" class="eq-filt" id="eq-filt-Tool"   onclick="toggleEqFilter('Tool')"   data-tooltip="Filter: Tools"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/wrench-solid-full.svg')"></span></button>
+              <button type="button" class="eq-filt" id="eq-filt-Supply" onclick="toggleEqFilter('Supply')" data-tooltip="Filter: Supplies"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/cubes-solid-full.svg')"></span></button>
+              <button type="button" class="eq-filt" id="eq-filt-Tech"   onclick="toggleEqFilter('Tech')"   data-tooltip="Filter: Tech"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/microchip-solid-full.svg')"></span></button>
+              <button type="button" class="eq-filt" id="eq-filt-Weapon" onclick="toggleEqFilter('Weapon')" data-tooltip="Filter: Weapons"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/gun-solid-full.svg')"></span></button>
+              <button type="button" class="eq-filt" id="eq-filt-Event"  onclick="toggleEqFilter('Event')"  data-tooltip="Filter: Private Events"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/person-solid-full.svg')"></span></button>
+            </span>
+          </div>
           <div class="eq-gallery">
             <button type="button" class="eq-nav" id="eq-prev" onclick="eqNav(-1)" disabled>&#9664;</button>
             <div class="eq-viewport" id="eqhand"></div>
@@ -182,7 +191,7 @@
         </div>
         <div class="hud-vtab">
           <span class="hud-vtab-caret">&#9660;</span>
-          <span class="hud-vtab-lbl">Equipment</span>
+          <span class="hud-vtab-lbl">Backpack</span>
         </div>
       </div>
     </div>

@@ -585,7 +585,10 @@ function showTileRevealModal(t, onDismiss){
     trov.style.backgroundImage='';
     if(onDismiss)onDismiss();
     else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'||t.pois?.includes('Cache')){updateUI();render();}
-    else drawTileEvent(t);
+    else{
+      if(t.pois?.includes('Cave')){cp().skipO2=true;addLog('Cave shelter: O\u2082 flip skipped this turn.','good');}
+      drawTileEvent(t);
+    }
   };
   if(t.type==='ship_section'){
     deck.style.display='none';
@@ -1159,9 +1162,14 @@ function useCard(playerIdx,uid){
     if(!adjacent.length){addLog('No crew on adjacent tiles.','act');closeCardModal();return;}
     const openWith=partner=>{closeCardModal();initTradeModal(p,partner);};
     if(adjacent.length===1){openWith(adjacent[0]);return;}
-    showModal('WALKIE','Select a crew member to trade with.',true,()=>{},'Cancel',undefined,undefined,'');
     const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-    adjacent.forEach(pl=>{const b=document.createElement('button');b.className='mbtn';b.textContent=pl.name;b.onclick=()=>{document.getElementById('mov').classList.remove('show');openWith(pl);};btns.appendChild(b);});
+    adjacent.forEach(pl=>{
+      const b=document.createElement('button');b.className='mbtn';
+      b.innerHTML=`<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
+      b.onclick=()=>{document.getElementById('mov').classList.remove('show');openWith(pl);};
+      btns.appendChild(b);
+    });
+    showModal('WALKIE','Choose a crew member to trade with.',true,()=>{},'Cancel',undefined,undefined,'');
     document.getElementById('mact').prepend(btns);return;
   }
   else if(c.use==='jammer'){
@@ -1570,18 +1578,19 @@ function triggerAnomaly(t){
 let tradeState=null;
 
 function openTrade(){
-  const p=cp();if(G.phase!=='action')return;
+  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   const here=G.players.filter(x=>x.alive&&x.id!==p.id&&x.q===p.q&&x.r===p.r);
   if(!here.length){addLog('No crew on this tile to trade with.');return;}
-  let partner=here[0];
-  if(here.length>1){
-    // Show picker first — simple modal for now
-    const names=here.map((x,i)=>`${i+1}. ${x.name}`).join('\n');
-    showModal('Choose Trade Partner','Multiple crew on this tile:\n\n'+names+'\n\nTrading with: '+here[0].name+'\n(For multiple partners, cancel and retry.)',true,
-      ()=>{initTradeModal(p,here[0]);});
-    return;
-  }
-  initTradeModal(p,partner);
+  if(here.length===1){initTradeModal(p,here[0]);return;}
+  const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+  here.forEach(pl=>{
+    const b=document.createElement('button');b.className='mbtn';
+    b.innerHTML=`<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
+    b.onclick=()=>{document.getElementById('mov').classList.remove('show');initTradeModal(p,pl);};
+    btns.appendChild(b);
+  });
+  showModal('TRADE','Choose a crew member to trade with.',true,()=>{},'Cancel',undefined,undefined,'');
+  document.getElementById('mact').prepend(btns);
 }
 
 function initTradeModal(pA,pB){
@@ -1613,7 +1622,7 @@ function renderTradeModal(){
     const netFood=isA?p.food-aFood+bFood:p.food-bFood+aFood;
     const netO2  =isA?p.o2-aO2+bO2    :p.o2-bO2+aO2;
     const foodGrid=document.createElement('div');foodGrid.className='tokgrid';
-    for(let i=0,vis=Math.max(5,Math.ceil(p.food/5)*5);i<vis;i++){const s=document.createElement('span');s.className=`tok ${i<netFood?'rf':'re'}`;foodGrid.appendChild(s);}
+    for(let i=0,vis=Math.max(5,Math.ceil(Math.max(p.food,netFood)/5)*5);i<vis;i++){const s=document.createElement('span');s.className=`tok ${i<netFood?'rf':'re'}`;foodGrid.appendChild(s);}
     const o2Row=makeToks(netO2,3,'of','oe');
     const hpRow=makeToks(p.health,3,'hf','he');
     nameBlock.appendChild(nameSpan);nameBlock.appendChild(foodGrid);nameBlock.appendChild(o2Row);nameBlock.appendChild(hpRow);
@@ -2245,7 +2254,7 @@ function updateUI(){
   document.getElementById('bfrag').disabled=!(act&&atArr&&p.radioFragments>0&&G.radioFragmentsActivated<5);
   document.getElementById('bsig').disabled=!((act||G.phase==='move')&&atArr&&G.radioFragmentsActivated>0&&!G.signalRolled);
   const hereOthers=G.players.filter(x=>x.alive&&x.id!==p.id&&x.q===p.q&&x.r===p.r);
-  const trdEnabled=act&&hereOthers.length>0;
+  const trdEnabled=(act||G.phase==='move')&&hereOthers.length>0;
   document.getElementById('btrd').disabled=!trdEnabled;
   document.getElementById('btrd').dataset.tooltip=trdEnabled?'Trade resources and equipment with crew on your tile':'Another crew member must be on your tile to trade';
   updateE7Prompt();
@@ -2260,9 +2269,25 @@ function buildTokRow(id,full,total,fc,ec){
   for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;c.appendChild(s);}
 }
 let eqGalleryOffset=0;
+let eqFilter=null;
+function toggleEqFilter(cat){
+  eqFilter=eqFilter===cat?null:cat;
+  eqGalleryOffset=0;
+  const cats=['Tool','Supply','Tech','Weapon','Event'];
+  cats.forEach(c=>{
+    const btn=document.getElementById('eq-filt-'+c);
+    if(btn)btn.classList.toggle('active',eqFilter===c);
+  });
+  buildEqHand(G.players[viewedPlayer]||cp());
+}
+function filteredEq(equipment){
+  if(!eqFilter)return equipment;
+  if(eqFilter==='Event')return equipment.filter(e=>!!e.eventCard);
+  return equipment.filter(e=>e.cat===eqFilter);
+}
 function eqNav(dir){
   const v=G.players[viewedPlayer]||cp();
-  const total=v.equipment.length;
+  const total=filteredEq(v.equipment).length;
   eqGalleryOffset=Math.max(0,Math.min(Math.max(0,total-3),eqGalleryOffset+dir));
   buildEqHand(v);
 }
@@ -2282,7 +2307,7 @@ function cardFaceHTML(cat,name,txt,brand='◆  ENDYMION 7  ◆'){
 }
 function buildEqHand(p){
   const hand=document.getElementById('eqhand');hand.innerHTML='';
-  const all=p.equipment;
+  const all=filteredEq(p.equipment);
   const max=Math.max(0,all.length-3);
   if(eqGalleryOffset>max)eqGalleryOffset=max;
   for(let i=0;i<3;i++){
