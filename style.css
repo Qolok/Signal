@@ -119,7 +119,8 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .hmission-sep{color:var(--bdr)}
 .hmission-offline{color:#7a2828;letter-spacing:.06em}
 .hmission-frags{color:#3a7a5a;letter-spacing:.06em}
-.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
+.hdr-center{flex:1;display:flex;justify-content:center;align-items:center;}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 #hturn{font-size:12px;color:var(--txt);cursor:default}
 #hphase{font-size:11px;padding:2px 7px;border:1px solid currentColor;letter-spacing:.1em;text-transform:uppercase;cursor:default}
 .ph-roll{color:#4a80a8}.ph-move{color:#4aa860}.ph-act{color:#a89040}
@@ -973,3 +974,23 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #rbcontent td p,#rbcontent td ul,#rbcontent td ol,#rbcontent td blockquote{margin:0;padding:0}
 #rbcontent td{line-height:1.5}
 #rbcontent table{background:var(--bg2)}
+
+/* ── ONLINE LOBBY ────────────────────────────────────────────────── */
+#online-lobby{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:10;}
+.lobby-box{display:flex;flex-direction:column;align-items:center;gap:16px;padding:32px 40px;min-width:360px;}
+.lobby-hint{font-size:12px;color:var(--dim);text-align:center;letter-spacing:.04em;margin-bottom:4px;}
+.lobby-mode-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.lobby-code-label{font-size:10px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:4px;}
+.lobby-code{font-size:36px;font-weight:700;letter-spacing:.25em;color:var(--hi);font-family:var(--ff);padding:12px 24px;border:1px solid var(--acc);border-radius:4px;background:var(--bg2);}
+.lobby-code-hint{font-size:11px;color:var(--dim);text-align:center;line-height:1.6;max-width:280px;}
+.lobby-input{background:var(--bg2);border:1px solid var(--bdr);color:var(--hi);font-family:var(--ff);font-size:22px;letter-spacing:.2em;padding:10px 16px;border-radius:4px;text-align:center;width:160px;text-transform:uppercase;}
+.lobby-input:focus{outline:none;border-color:var(--acc);}
+.lobby-status{font-size:11px;color:var(--dim);min-height:1.4em;text-align:center;letter-spacing:.04em;margin-top:4px;}
+.intro-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.intro-btns .sbtn{margin-top:0;}
+.sbtn.online{background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px),#2a6030;border-color:#3a8040;}
+.sbtn.online:hover{background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px),#1e4a24;}
+
+/* ── MULTIPLAYER BADGE (game header) ────────────────────────────── */
+.mp-badge{display:none;font-size:9px;letter-spacing:.16em;color:#4a9040;border:1px solid #2a5020;border-radius:3px;padding:2px 7px;cursor:default;white-space:nowrap;}
+.mp-badge.active{display:inline-block;}

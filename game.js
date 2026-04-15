@@ -2551,6 +2551,7 @@ function saveGame(){
     };
     s.G.players=G.players.map(p=>({...p,equipment:[...p.equipment]}));
     localStorage.setItem('signal_save',JSON.stringify(s));
+    if(window.Sync?.isActive()) window.Sync.pushState(s);
   }catch(e){}
 }
 function loadGame(){
@@ -2570,6 +2571,54 @@ function loadGame(){
   }catch(e){return false;}
 }
 function clearSave(){localStorage.removeItem('signal_save');}
+
+// Applies a game state received from Firebase (remote player's turn ended)
+function receiveRemoteState(data){
+  try{
+    window.Sync?.beginReceive();
+    const sg=data.G;
+    sg.tiles=new Map(sg.tiles);
+    sg.reach=new Map();
+    G=sg;
+    cardUid=data.cardUid||0;
+    // viewedPlayer is intentionally local — each browser keeps their own view
+    const gameEl=document.getElementById('game');
+    const alreadyRunning=gameEl.className==='running';
+    if(alreadyRunning){
+      if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
+      render(); updateUI();
+    } else {
+      // First state received: joiner launches the game view
+      document.getElementById('online-lobby').style.display='none';
+      gameEl.className='running';
+      const idx=window.Sync?.myPlayerIndex()||0;
+      viewedPlayer=Math.min(idx,G.players.length-1);
+      preloadTileImages(); initBoard();
+      if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
+      render(); updateUI();
+      showTableDice(G.phase==='roll'?'move':G.phase==='move'?'move':null);
+      document.getElementById('e7panel').classList.add('show');
+      const myName=G.players[idx]?.name||'crew';
+      addE7(`> Online session connected. You are ${myName}.`,'sys');
+      addE7(`> Turn ${G.turn}: ${cp().name}. ${G.phase==='roll'?'Roll for movement.':''}`,'');
+    }
+    _updateMpBadge();
+  }catch(e){console.error('receiveRemoteState',e);}
+  finally{window.Sync?.endReceive();}
+}
+
+function _updateMpBadge(){
+  const badge=document.getElementById('mp-badge');
+  if(!badge) return;
+  if(window.Sync?.isActive()){
+    badge.textContent=`ONLINE · ${window.Sync.joinCode()}`;
+    badge.dataset.tooltip=`Online game · Join code: ${window.Sync.joinCode()}`;
+    badge.classList.add('active');
+  } else {
+    badge.classList.remove('active');
+  }
+}
+
 function confirmNewGame(){
   let countdownInterval=null;
   const doNewGame=()=>{clearInterval(countdownInterval);clearSave();location.reload();};
@@ -3486,6 +3535,7 @@ function finalizeGame(){
   document.getElementById('setup-site').style.display='none';
   document.getElementById('game').className='running';
   clearSave();
+  _updateMpBadge();
   guidanceSeen=new Set(); // reset guidance milestones for new game
   newGame(pendingNames,pendingPortraits,placedMap);
   // Sync guidance toggle button state
@@ -3597,8 +3647,30 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Sync guidance toggle on load
   const _gtBtn=document.getElementById('e7guidance-toggle');
   if(_gtBtn){_gtBtn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';_gtBtn.classList.toggle('on',guidanceMode);}
+
+  // Initialize the Firebase sync module (no-op if config not filled in yet)
+  window.Sync?.init();
+
+  // Check for an existing multiplayer session (page reload mid-game)
+  const mpSession=window.Sync?.restoreSession();
+  if(mpSession){
+    window.Sync.onStateUpdate(receiveRemoteState);
+    window.Sync.reconnect(mpSession.joinCode,mpSession.playerIndex).then(()=>{
+      document.getElementById('intro').style.display='none';
+      const lobby=document.getElementById('online-lobby');
+      lobby.style.display='flex';
+      document.getElementById('lobby-mode-sel').style.display='none';
+      document.getElementById('lobby-joining').style.display='block';
+      document.getElementById('lobby-join-status').textContent='Reconnecting to game...';
+    }).catch(()=>{
+      // Session stale — fall through to normal intro
+      window.Sync?.clearSession();
+    });
+    return;
+  }
+
   if(loadGame()){
-    // Resume saved game
+    // Resume saved local game
     document.getElementById('intro').style.display='none';
     document.getElementById('game').className='running';
     preloadTileImages();initBoard();render();updateUI();
@@ -3617,6 +3689,71 @@ window.addEventListener('DOMContentLoaded',()=>{
     [500, 'sys',    'Venture into the planet, gather lost RADIO FRAGMENTS, and restore the SIGNAL ARRAY. Only then can we call for rescue.'],
   ]);
 });
+// ═══════════════════════════════════════════════════════════════
+// ONLINE LOBBY
+// ═══════════════════════════════════════════════════════════════
+
+function showOnlineLobby(){
+  if(!window.Sync?.init()){
+    alert('Firebase SDK failed to load. Check your internet connection and try again.');
+    return;
+  }
+  document.getElementById('intro').style.display='none';
+  document.getElementById('online-lobby').style.display='flex';
+  // Reset lobby to mode-selection view
+  document.getElementById('lobby-mode-sel').style.display='block';
+  document.getElementById('lobby-hosting').style.display='none';
+  document.getElementById('lobby-joining').style.display='none';
+}
+
+function lobbyBack(){
+  document.getElementById('online-lobby').style.display='none';
+  document.getElementById('intro').style.display='flex';
+  window.Sync?.clearSession();
+}
+
+function lobbyHost(){
+  const code=window.Sync.generateJoinCode();
+  document.getElementById('lobby-code-display').textContent=code;
+  document.getElementById('lobby-mode-sel').style.display='none';
+  document.getElementById('lobby-hosting').style.display='block';
+  window.Sync.hostGame(code).catch(err=>{
+    alert('Could not create game: '+err.message);
+    document.getElementById('lobby-mode-sel').style.display='block';
+    document.getElementById('lobby-hosting').style.display='none';
+  });
+}
+
+function lobbyHostContinue(){
+  window.Sync.onStateUpdate(receiveRemoteState);
+  document.getElementById('online-lobby').style.display='none';
+  showCrewSetup();
+}
+
+function lobbyJoinMode(){
+  document.getElementById('lobby-mode-sel').style.display='none';
+  document.getElementById('lobby-joining').style.display='block';
+  document.getElementById('lobby-code-input').focus();
+}
+
+function lobbyJoinConnect(){
+  const code=(document.getElementById('lobby-code-input').value||'').trim().toUpperCase();
+  if(code.length!==6){
+    document.getElementById('lobby-join-status').textContent='Enter a 6-character code.';
+    return;
+  }
+  const btn=document.getElementById('lobby-join-btn');
+  btn.disabled=true;
+  document.getElementById('lobby-join-status').textContent='Connecting...';
+  window.Sync.joinGame(code).then(()=>{
+    window.Sync.onStateUpdate(receiveRemoteState);
+    document.getElementById('lobby-join-status').textContent='Connected! Waiting for host to start the game...';
+  }).catch(err=>{
+    btn.disabled=false;
+    document.getElementById('lobby-join-status').textContent=err.message;
+  });
+}
+
 function showCrewSetup(){
   document.getElementById('intro').style.display='none';
   document.getElementById('setup').style.display='flex';

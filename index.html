@@ -35,7 +35,53 @@
       </div>
     </div>
     <div id="e7-intro-msg" class="e7-screen-msg"></div>
-    <button class="sbtn" onclick="showCrewSetup()">Start Game</button>
+    <div class="intro-btns">
+      <button class="sbtn" onclick="showCrewSetup()">Local Game</button>
+      <button class="sbtn online" onclick="showOnlineLobby()">Play Online</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ONLINE LOBBY ── -->
+<div id="online-lobby" style="display:none">
+  <div class="sbox lobby-box">
+    <div class="intro-lockup">
+      <div class="signal-intro-glow"><div class="signal-intro-icon"></div></div>
+      <div class="intro-lockup-text">
+        <h1>SIGNAL</h1>
+        <p class="ssub">ONLINE MULTIPLAYER</p>
+      </div>
+    </div>
+
+    <!-- Mode selection -->
+    <div id="lobby-mode-sel">
+      <div class="lobby-hint">One player hosts — others join with a code.</div>
+      <div class="lobby-mode-btns">
+        <button class="sbtn" onclick="lobbyHost()">Host a Game</button>
+        <button class="sbtn" onclick="lobbyJoinMode()">Join a Game</button>
+      </div>
+      <button class="sbtn secondary" style="margin-top:8px" onclick="lobbyBack()">← Back</button>
+    </div>
+
+    <!-- Host: show join code and continue to setup -->
+    <div id="lobby-hosting" style="display:none">
+      <div class="lobby-code-label">Your join code</div>
+      <div class="lobby-code" id="lobby-code-display">------</div>
+      <div class="lobby-code-hint">Share this with up to 5 other players.<br>They can join any time — even after the game starts.</div>
+      <button class="sbtn" style="margin-top:16px" onclick="lobbyHostContinue()">Continue to Crew Setup →</button>
+      <button class="sbtn secondary" style="margin-top:8px" onclick="lobbyBack()">← Back</button>
+    </div>
+
+    <!-- Joiner: enter code -->
+    <div id="lobby-joining" style="display:none">
+      <div class="lobby-code-label">Enter join code</div>
+      <input id="lobby-code-input" class="lobby-input" maxlength="6" placeholder="ABC123"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')lobbyJoinConnect()">
+      <button class="sbtn" id="lobby-join-btn" style="margin-top:12px" onclick="lobbyJoinConnect()">Connect</button>
+      <div id="lobby-join-status" class="lobby-status"></div>
+      <button class="sbtn secondary" style="margin-top:8px" onclick="lobbyBack()">← Back</button>
+    </div>
   </div>
 </div>
 
@@ -134,6 +180,7 @@
     <h1 class="hlogo">SIGNAL</h1>
     <span class="hsep">|</span>
     <span id="hmission">Collect Radio Fragments · Signal Offline</span>
+    <div class="hdr-center"><span id="mp-badge" class="mp-badge"></span></div>
     <div class="hdr-right">
       <span id="hturn">Turn 1</span>
       <span class="hsep">|</span>
@@ -388,6 +435,10 @@
 <!-- ── CUSTOM TOOLTIP ── -->
 <div id="tip-custom"></div>
 
+<!-- Firebase Realtime Database (compat SDK — no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="sync.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
