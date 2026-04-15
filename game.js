@@ -3648,25 +3648,39 @@ window.addEventListener('DOMContentLoaded',()=>{
   const _gtBtn=document.getElementById('e7guidance-toggle');
   if(_gtBtn){_gtBtn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';_gtBtn.classList.toggle('on',guidanceMode);}
 
-  // Initialize the Firebase sync module (no-op if config not filled in yet)
-  window.Sync?.init();
-
   // Check for an existing multiplayer session (page reload mid-game)
   const mpSession=window.Sync?.restoreSession();
-  if(mpSession){
-    window.Sync.onStateUpdate(receiveRemoteState);
-    window.Sync.reconnect(mpSession.joinCode,mpSession.playerIndex).then(()=>{
-      document.getElementById('intro').style.display='none';
-      const lobby=document.getElementById('online-lobby');
-      lobby.style.display='flex';
-      document.getElementById('lobby-mode-sel').style.display='none';
-      document.getElementById('lobby-joining').style.display='block';
-      document.getElementById('lobby-join-status').textContent='Reconnecting to game...';
-    }).catch(()=>{
-      // Session stale — fall through to normal intro
-      window.Sync?.clearSession();
-    });
-    return;
+  if(mpSession && window.Sync?.init()){
+    if(mpSession.playerIndex===0){
+      // HOST: restore from localStorage (always current), then reattach Firebase sync
+      if(loadGame()){
+        window.Sync.onStateUpdate(receiveRemoteState);
+        window.Sync.reconnect(mpSession.joinCode,0).catch(()=>window.Sync?.clearSession());
+        document.getElementById('intro').style.display='none';
+        document.getElementById('game').className='running';
+        preloadTileImages();initBoard();render();updateUI();
+        showTableDice(G.phase==='roll'?'move':G.phase==='move'?'move':null);
+        if(G.phase==='move'&&G.movementLeft>0)G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
+        document.getElementById('e7panel').classList.add('show');
+        _updateMpBadge();
+        addE7('> Session restored.','sys');
+        return;
+      }
+    } else {
+      // JOINER: no local save — wait for Firebase to deliver current state
+      window.Sync.onStateUpdate(receiveRemoteState);
+      window.Sync.reconnect(mpSession.joinCode,mpSession.playerIndex).then(()=>{
+        document.getElementById('intro').style.display='none';
+        const lobby=document.getElementById('online-lobby');
+        lobby.style.display='flex';
+        document.getElementById('lobby-mode-sel').style.display='none';
+        document.getElementById('lobby-joining').style.display='block';
+        document.getElementById('lobby-join-status').textContent='Reconnecting to game...';
+      }).catch(()=>window.Sync?.clearSession());
+      return;
+    }
+    // Session found but restore failed — clear and fall through to intro
+    window.Sync?.clearSession();
   }
 
   if(loadGame()){
@@ -3702,32 +3716,36 @@ function showOnlineLobby(){
   document.getElementById('online-lobby').style.display='flex';
   // Reset lobby to mode-selection view
   document.getElementById('lobby-mode-sel').style.display='block';
-  document.getElementById('lobby-hosting').style.display='none';
   document.getElementById('lobby-joining').style.display='none';
+  document.getElementById('lobby-crew').style.display='none';
+  _lobbyMyPortrait=-1;
 }
 
+const _escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let _lobbyMyPortrait=-1;
+
 function lobbyBack(){
+  const inCrew=document.getElementById('lobby-crew').style.display!=='none';
   document.getElementById('online-lobby').style.display='none';
   document.getElementById('intro').style.display='flex';
-  window.Sync?.clearSession();
+  // Reset lobby panels for next open
+  document.getElementById('lobby-mode-sel').style.display='block';
+  document.getElementById('lobby-joining').style.display='none';
+  document.getElementById('lobby-crew').style.display='none';
+  _lobbyMyPortrait=-1;
+  if(inCrew) window.Sync?.leaveLobby();
+  else window.Sync?.clearSession();
 }
 
 function lobbyHost(){
   const code=window.Sync.generateJoinCode();
-  document.getElementById('lobby-code-display').textContent=code;
   document.getElementById('lobby-mode-sel').style.display='none';
-  document.getElementById('lobby-hosting').style.display='block';
-  window.Sync.hostGame(code).catch(err=>{
-    alert('Could not create game: '+err.message);
-    document.getElementById('lobby-mode-sel').style.display='block';
-    document.getElementById('lobby-hosting').style.display='none';
-  });
-}
-
-function lobbyHostContinue(){
-  window.Sync.onStateUpdate(receiveRemoteState);
-  document.getElementById('online-lobby').style.display='none';
-  showCrewSetup();
+  window.Sync.hostGame(code)
+    .then(()=>showLobbyCrew(code,true))
+    .catch(err=>{
+      document.getElementById('lobby-mode-sel').style.display='block';
+      alert('Could not create game: '+err.message);
+    });
 }
 
 function lobbyJoinMode(){
@@ -3738,20 +3756,92 @@ function lobbyJoinMode(){
 
 function lobbyJoinConnect(){
   const code=(document.getElementById('lobby-code-input').value||'').trim().toUpperCase();
-  if(code.length!==6){
-    document.getElementById('lobby-join-status').textContent='Enter a 6-character code.';
-    return;
-  }
+  if(code.length!==6){document.getElementById('lobby-join-status').textContent='Enter a 6-character code.';return;}
   const btn=document.getElementById('lobby-join-btn');
   btn.disabled=true;
   document.getElementById('lobby-join-status').textContent='Connecting...';
-  window.Sync.joinGame(code).then(()=>{
-    window.Sync.onStateUpdate(receiveRemoteState);
-    document.getElementById('lobby-join-status').textContent='Connected! Waiting for host to start the game...';
-  }).catch(err=>{
-    btn.disabled=false;
-    document.getElementById('lobby-join-status').textContent=err.message;
+  window.Sync.joinGame(code)
+    .then(()=>{
+      window.Sync.onStateUpdate(receiveRemoteState);
+      document.getElementById('lobby-joining').style.display='none';
+      showLobbyCrew(code,false);
+    })
+    .catch(err=>{
+      btn.disabled=false;
+      document.getElementById('lobby-join-status').textContent=err.message;
+    });
+}
+
+function showLobbyCrew(code,isHost){
+  _lobbyMyPortrait=-1;
+  document.getElementById('lobby-crew-code').textContent=code;
+  document.getElementById('lobby-launch-btn').style.display=isHost?'block':'none';
+  document.getElementById('lobby-crew-status').textContent=isHost?'':'Waiting for host to launch...';
+  document.getElementById('lobby-iris-row').style.display=isHost?'flex':'none';
+  document.getElementById('lobby-name-input').value='';
+  document.getElementById('lobby-crew').style.display='block';
+  window.Sync.onLobbyUpdate(renderLobbyGrid);
+  renderLobbyGrid({});
+}
+
+function renderLobbyGrid(lobbyData){
+  const mySlot=window.Sync.myPlayerIndex();
+  // Build map: portraitIndex → entry
+  const claimed={};
+  Object.values(lobbyData).forEach(entry=>{
+    if(entry&&entry.portraitIndex>=0) claimed[entry.portraitIndex]=entry;
   });
+  const grid=document.getElementById('lobby-portrait-grid');
+  grid.innerHTML='';
+  CREW_PORTRAITS.forEach((crew,idx)=>{
+    const claimant=claimed[idx];
+    const isMine=claimant&&claimant.connectionSlot===mySlot;
+    const taken=claimant&&!isMine;
+    const card=document.createElement('div');
+    card.className='lobby-port-card'+(isMine?' mine':'')+(taken?' taken':'');
+    card.innerHTML=
+      `<div class="lobby-port-img" style="${portBg(crew.name,72,80)}"></div>`+
+      `<div class="lobby-port-name">${claimant?_escHtml(claimant.name||crew.name):crew.name}</div>`;
+    if(!taken) card.onclick=()=>lobbyPickPortrait(idx);
+    grid.appendChild(card);
+  });
+}
+
+function lobbyPickPortrait(idx){
+  _lobbyMyPortrait=idx;
+  const input=document.getElementById('lobby-name-input');
+  if(!input.value.trim()) input.value=CREW_PORTRAITS[idx].name;
+  _lobbyPushSlot();
+}
+
+function lobbyNameChanged(){
+  if(_lobbyMyPortrait<0) return;
+  _lobbyPushSlot();
+}
+
+function _lobbyPushSlot(){
+  const name=document.getElementById('lobby-name-input').value.trim()||CREW_PORTRAITS[_lobbyMyPortrait].name;
+  window.Sync.updateLobbySlot({name,portraitIndex:_lobbyMyPortrait,connectionSlot:window.Sync.myPlayerIndex()});
+}
+
+async function lobbyLaunch(){
+  const lobby=await window.Sync.getLobbyOnce();
+  const players=Object.values(lobby)
+    .filter(p=>p&&p.portraitIndex>=0)
+    .sort((a,b)=>a.connectionSlot-b.connectionSlot);
+  if(players.length===0){alert('At least one crew member must be selected.');return;}
+  pendingNames=players.map(p=>p.name||CREW_PORTRAITS[p.portraitIndex].name);
+  pendingPortraits=players.map(p=>CREW_PORTRAITS[p.portraitIndex].name);
+  window.Sync.onStateUpdate(receiveRemoteState);
+  document.getElementById('online-lobby').style.display='none';
+  const sb=document.getElementById('setup-site');
+  sb.style.display='flex';sb.classList.add('show');
+  initBuilder();updateBuilderProgress();
+  e7ScreenSeq('sb-e7-log',[
+    [0,   'sys', '> ESTABLISHING BASE CAMP...'],
+    [300, '',    'Before venturing into the field, set up your base camp.'],
+    [400, 'act', 'Choose a tile below.'],
+  ]);
 }
 
 function showCrewSetup(){

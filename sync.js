@@ -126,7 +126,7 @@ window.Sync = {
   // Returns the stored multiplayer session, or null if none
   restoreSession() {
     try {
-      const raw = sessionStorage.getItem(SESSION_KEY);
+      const raw = localStorage.getItem(SESSION_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch { return null; }
   },
@@ -145,8 +145,42 @@ window.Sync = {
   beginReceive() { _receivingState = true;  },
   endReceive()   { _receivingState = false; },
 
+  // Write this client's lobby selection (portrait + name)
+  updateLobbySlot(data) {
+    if (!_active || !_gameRef) return;
+    _gameRef.child('lobby').child(_clientId).set(data);
+  },
+
+  // Listen for any lobby change (fires immediately with current data)
+  onLobbyUpdate(callback) {
+    if (!_gameRef) return;
+    _gameRef.child('lobby').on('value', snap => callback(snap.val() || {}));
+  },
+
+  // One-time read of the full lobby (used by host at launch)
+  async getLobbyOnce() {
+    const snap = await _gameRef.child('lobby').once('value');
+    return snap.val() || {};
+  },
+
+  // Graceful leave: remove lobby + connection entries, then clear session
+  async leaveLobby() {
+    if (_gameRef) {
+      try {
+        await Promise.all([
+          _gameRef.child('lobby').child(_clientId).remove(),
+          _gameRef.child('connections').child(_clientId).remove(),
+        ]);
+      } catch(_) {}
+      _gameRef.off();
+      _gameRef = null;
+    }
+    localStorage.removeItem(SESSION_KEY);
+    _active = false;
+  },
+
   clearSession() {
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
     _active = false;
     if (_gameRef) { _gameRef.off(); _gameRef = null; }
   },
@@ -155,7 +189,7 @@ window.Sync = {
 // ── Private helpers ─────────────────────────────────────────────────
 
 function _saveSession() {
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+  localStorage.setItem(SESSION_KEY, JSON.stringify({
     joinCode:    _joinCode,
     playerIndex: _myPlayerIndex,
   }));
