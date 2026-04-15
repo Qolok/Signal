@@ -133,7 +133,7 @@ const PORTRAIT_SVG_UNUSED = [
 // health: 1–3 (3=healthy, 1=critical/incap). fy: 0=top-aligned, 0.5=centered
 function portBg(portrait, dw, dh, fy=0, health=3){
   const ypos=fy===0?'top':'center';
-  const url=portrait==='synth'?'img/Crew/synth.png':`img/Crew/${portrait}${Math.max(1,Math.min(3,health))}.png`;
+  const url=portrait==='iris'?'img/Crew/IRIS.png':`img/Crew/${portrait}${Math.max(1,Math.min(3,health))}.png`;
   return `background-image:url(${url});background-size:cover;`+
          `background-position:center ${ypos};width:${dw}px;height:${dh}px;flex-shrink:0;`;
 }
@@ -453,7 +453,7 @@ function newGame(names, portraits, placedMap){
            scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false};
   });
   if(addSynth){
-    players.push({id:players.length,name:'SYNTH',color:SYNTH_COLOR,portrait:'synth',
+    players.push({id:players.length,name:'IRIS',color:SYNTH_COLOR,portrait:'iris',
       q:0,r:0,battery:10,food:0,o2:0,health:0,
       radioFragments:0,equipment:[],incapacitated:0,alive:true,location:'Crash Site',
       skipO2:true,inStasis:false,signalArrayRounds:0,soloRescueActive:false,
@@ -867,7 +867,7 @@ function drawTileEvent(t){
     else{
       if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');
       const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
-      if(synth){synth.corrupted=true;synth.corruptionTarget=p.id;addLog('> SYNTH: PRIORITY DIRECTIVE UPDATED — CONTAINMENT PROTOCOL ACTIVE','crit');}
+      if(synth){synth.corrupted=true;synth.corruptionTarget=p.id;addLog('> IRIS: PRIORITY DIRECTIVE UPDATED — CONTAINMENT PROTOCOL ACTIVE','crit');}
     }
   }
   if(evt.pub)G.lastPublicEvt=evt;
@@ -1460,8 +1460,8 @@ function doEndTurn(){
   const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
   // Synth: battery logic only
   if(p.isSynth){
-    if(curTile?.name==='Airlock'){p.battery=10;addLog('SYNTH recharged battery at Airlock.','good');}
-    else{if(p.battery>0)p.battery--;if(p.battery===0){p.alive=false;addLog('SYNTH: Power depleted. Systems offline.','crit');}}
+    if(curTile?.name==='Airlock'){p.battery=10;addLog('IRIS recharged battery at Airlock.','good');}
+    else{if(p.battery>0)p.battery--;if(p.battery===0){p.alive=false;addLog('IRIS: Power depleted. Systems offline.','crit');}}
     advanceTurn();return;
   }
   // Stasis: skip all depletion
@@ -1547,7 +1547,7 @@ function advanceTurn(){
   if(G.players[next].isSynth){setTimeout(doSynthTurn,1800);}
 }
 // ═══════════════════════════════════════════════════════════════
-// SYNTH AI
+// IRIS AI
 // ═══════════════════════════════════════════════════════════════
 function synthFindTile(name){
   for(const[k,t]of G.tiles){if(t.name===name){const[q,r]=hparse(k);return{q,r,tile:t};}}
@@ -1661,7 +1661,7 @@ function synthRevealCorruption(synth){
   synth.corruptionRevealed=true;
   const target=G.players.find(pl=>pl.id===synth.corruptionTarget);
   const tname=target?target.name:'crew member';
-  addLog('> SYNTH LOG: Biological contamination detected in crew member '+tname+'. Quarantine priority supersedes extraction directive.','crit');
+  addLog('> IRIS LOG: Biological contamination detected in crew member '+tname+'. Quarantine priority supersedes extraction directive.','crit');
 }
 
 function synthApplyStep(p,q,r){
@@ -1673,19 +1673,19 @@ function synthApplyStep(p,q,r){
   if(t?.shockTrap&&t.shockTrapOwner!==p.id){
     t.shockTrap=false;t.shockTrapOwner=null;
     if(p.battery>0)p.battery--;
-    addLog('SYNTH triggered a Shock Trap! Battery: '+p.battery+'/10.','crit');
+    addLog('IRIS triggered a Shock Trap! Battery: '+p.battery+'/10.','crit');
     markTilesDirty();
   }
   if(t?.type==='anomaly'&&t.anomaly==='Portal'){
     p.q=0;p.r=0;const ct=G.tiles.get(hk(0,0));p.location=tileName(ct);G.movementLeft=0;
-    addLog('SYNTH transited Portal → Crash Site.');markTilesDirty();
+    addLog('IRIS transited Portal → Crash Site.');markTilesDirty();
   }
   if(t?.radioFragment&&!t.requiresTool){
     p.radioFragments++;t.radioFragment=false;markTilesDirty();
-    addLog('SYNTH recovered a Radio Fragment.','frag');
+    addLog('IRIS recovered a Radio Fragment.','frag');
   }
   G.reach=bfsReach(p.q,p.r,G.movementLeft);
-  addLog('SYNTH → '+p.location);
+  addLog('IRIS → '+p.location);
   updateUI();render();panToPlayer(p);
 }
 
@@ -1705,7 +1705,7 @@ function synthTakeAction(p,target,onDone){
         while(p.radioFragments>0&&G.radioFragmentsActivated<5){
           p.radioFragments--;G.radioFragmentsActivated++;
           const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
-          addLog('SYNTH activated fragment. Array: '+G.radioFragmentsActivated+'/5. Threshold: '+thr+'+','frag');
+          addLog('IRIS activated fragment. Array: '+G.radioFragmentsActivated+'/5. Threshold: '+thr+'+','frag');
         }
         updateUI();render();
       }
@@ -1720,10 +1720,10 @@ function synthTakeAction(p,target,onDone){
           p.equipment.push({...spec,uid:++cardUid});
           G.eqDeckCount=Math.max(0,G.eqDeckCount-1);
           const el=document.getElementById('equpn');if(el)el.textContent=G.eqDeckCount;
-          addLog('SYNTH acquired '+spec.name+'.','good');
+          addLog('IRIS acquired '+spec.name+'.','good');
         } else if(G.eqDeckCount>0){
           const card=drawEqCard(p);
-          if(card)addLog('SYNTH acquired '+card.name+'.','good');
+          if(card)addLog('IRIS acquired '+card.name+'.','good');
         }
         G.tileActionUsed=true;updateUI();
       }
@@ -1738,7 +1738,7 @@ function synthTakeAction(p,target,onDone){
           const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
           if(ci>=0)p.equipment.splice(ci,1);
           markTilesDirty();
-          addLog('SYNTH used '+tool.name+' to recover a Radio Fragment.','frag');
+          addLog('IRIS used '+tool.name+' to recover a Radio Fragment.','frag');
           updateUI();render();
         }
       }
@@ -1752,9 +1752,9 @@ function synthTakeAction(p,target,onDone){
         const occupant=G.players.find(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r);
         if(occupant){
           synthRevealCorruption(p);
-          addLog('SYNTH contests the Signal Array with '+occupant.name+'.','act');
+          addLog('IRIS contests the Signal Array with '+occupant.name+'.','act');
           showContestModal(p,occupant,
-            ()=>{addLog('SYNTH holds the Signal Array. '+occupant.name+' displaced.','crit');
+            ()=>{addLog('IRIS holds the Signal Array. '+occupant.name+' displaced.','crit');
               occupant.q=0;occupant.r=0;const ct=G.tiles.get(hk(0,0));occupant.location=tileName(ct);
               updateUI();render();onDone();},
             ()=>{addLog(occupant.name+' holds the Signal Array.','act');updateUI();render();onDone();}
@@ -1773,10 +1773,10 @@ function synthTakeAction(p,target,onDone){
           const ci=p.equipment.findIndex(c=>c.uid===weapon.uid);
           if(weapon.id==='stun_baton'){
             cr.stunned=true;if(ci>=0)p.equipment.splice(ci,1);
-            addLog('SYNTH used Stun Baton on '+cr.name+'. They will skip their next turn.','crit');
+            addLog('IRIS used Stun Baton on '+cr.name+'. They will skip their next turn.','crit');
           }else if(weapon.id==='shock_trap'){
             t.shockTrap=true;t.shockTrapOwner=p.id;if(ci>=0)p.equipment.splice(ci,1);
-            addLog('SYNTH placed a Shock Trap at '+p.location+'.','crit');
+            addLog('IRIS placed a Shock Trap at '+p.location+'.','crit');
           }else if(weapon.id==='flare_gun'){
             const others=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id);
             if(others.length){
@@ -1785,11 +1785,11 @@ function synthTakeAction(p,target,onDone){
                 return(ap&&bp&&ap.length>bp.length)?a:b;
               });
               pulled.q=p.q;pulled.r=p.r;pulled.location=p.location;if(ci>=0)p.equipment.splice(ci,1);
-              addLog('SYNTH fired Flare Gun — '+pulled.name+' pulled to '+p.location+'.','crit');
+              addLog('IRIS fired Flare Gun — '+pulled.name+' pulled to '+p.location+'.','crit');
             }
           }else if(weapon.id==='jammer'){
             G.jammerActive=true;if(ci>=0)p.equipment.splice(ci,1);
-            addLog('SYNTH activated Signal Jammer. No Signal Roll this round.','crit');
+            addLog('IRIS activated Signal Jammer. No Signal Roll this round.','crit');
           }
           updateUI();render();
         }
@@ -1803,7 +1803,7 @@ function synthTakeAction(p,target,onDone){
         if(med){
           cr.health=1;cr.incapacitated=0;
           const ci=p.equipment.findIndex(c=>c.uid===med.uid);if(ci>=0)p.equipment.splice(ci,1);
-          addLog('SYNTH administered MedPack to '+cr.name+'. '+cr.name+' is back on their feet.','good');
+          addLog('IRIS administered MedPack to '+cr.name+'. '+cr.name+' is back on their feet.','good');
           updateUI();render();
         }
       }
@@ -2327,7 +2327,7 @@ function drawPawn(g,p){
     defs.appendChild(filt);
   }
   const imgEl=svgEl('image',{
-    href:p.isSynth?'img/Crew/synth.png':`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}.png`,
+    href:p.isSynth?'img/Crew/IRIS.png':`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}.png`,
     x:px-11, y:py-11,
     width:22, height:22,
     'clip-path':`url(#${cid})`,
@@ -2456,7 +2456,7 @@ function buildCrewTabs(){
     const isCurrent=pl.id===G.currentPlayer;
     const isViewing=pl.id===viewedPlayer;
     t.className='hctab'+(pl.alive?'':' dead');
-    t.style.cssText=`background-image:url(${pl.isSynth?'img/Crew/synth.png':`img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}.png`});background-size:cover;background-position:center top;`+
+    t.style.cssText=`background-image:url(${pl.isSynth?'img/Crew/IRIS.png':`img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}.png`});background-size:cover;background-position:center top;`+
       `border-color:${isCurrent?pl.color:isViewing?'rgba(255,255,255,.4)':'transparent'};`+
       `box-shadow:${isCurrent?`0 0 0 1px ${pl.color}`:'none'};`+
       `opacity:${pl.alive?1:.3};`;
@@ -2557,7 +2557,7 @@ function updateUI(){
   }
   document.getElementById('hmission').innerHTML=missionHtml;
   // Card shows viewed player
-  document.getElementById('hcimg').style.cssText=`background-image:url(${v.isSynth?'img/Crew/synth.png':`img/Crew/${v.portrait}${Math.max(1,Math.min(3,v.health))}.png`});background-size:cover;background-position:center top;width:100%;height:100%;`;
+  document.getElementById('hcimg').style.cssText=`background-image:url(${v.isSynth?'img/Crew/IRIS.png':`img/Crew/${v.portrait}${Math.max(1,Math.min(3,v.health))}.png`});background-size:cover;background-position:center top;width:100%;height:100%;`;
   document.getElementById('hcname').textContent=v.name;
   document.getElementById('hcname').style.color=v.color;
   document.getElementById('hcloc').textContent=v.location;
@@ -3457,7 +3457,7 @@ function buildSetup(){
   const row=document.getElementById('crow');row.innerHTML='';
   for(let i=1;i<=6;i++){const b=document.createElement('button');b.className='cbtn'+(i===setupN?' sel':'');b.textContent=i;b.onclick=()=>{setupN=i;buildSetup();};row.appendChild(b);}
   const synthPrev=document.getElementById('synth-preview');
-  if(synthPrev)synthPrev.style.cssText=portBg('synth',80,90)+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
+  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90)+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
   const cbx=document.getElementById('addSynthCbx');if(cbx)cbx.checked=addSynth;
   const nl=document.getElementById('plist');const prev=[...nl.querySelectorAll('input')].map(x=>x.value);nl.innerHTML='';
   for(let i=0;i<setupN;i++){
@@ -3531,13 +3531,12 @@ window.addEventListener('DOMContentLoaded',()=>{
     return;
   }
   e7ScreenSeq('e7-intro-msg',[
-    [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-    [1200, 'crit', '> Primary diagnostics: COMPLETE. Life support: DAMAGED.'],
-    [800, '',    'Commander, I am E7, your ship’s emergency AI.'],
-    [600, '',    'The Endymion 7 has crash landed on an uncharted planet--cause unknown.'],
-    [500, '',    'Before impact, the ship\'s cargo was scattered across the wilds.'],
-    [500, 'sys',    'Venture into the planet, gather lost RADIO FRAGMENTS, and restore the SIGNAL ARRAY.'],
-    [400, '',    'Only then can we call for rescue.'],
+    [300, 'sys',    '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
+    [1500, 'sys',   '> PRIMARY DIAGNOSTICS: COMPLETE'],
+    [500, 'crit',   '> SIGNAL ARRAY: DAMAGED'],
+    [800, '',       'Attention crew of the Endymion 7. I am E7, your ship’s emergency AI. The ship has crash landed on an uncharted planet--cause unknown.'],
+    [500, '',       'Before impact, the ship\'s cargo was scattered across the wilds.'],
+    [500, 'sys',    'Venture into the planet, gather lost RADIO FRAGMENTS, and restore the SIGNAL ARRAY. Only then can we call for rescue.'],
   ]);
 });
 function showCrewSetup(){
