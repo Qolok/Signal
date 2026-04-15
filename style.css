@@ -39,6 +39,9 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .ppick{display:flex;align-items:center;gap:3px;flex-shrink:0}
 .parr{background:none;border:none;color:var(--dim);cursor:pointer;padding:2px 5px;font-size:20px;line-height:1;font-family:inherit}
 .parr:hover{color:var(--hi)}
+.synth-toggle-lbl{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--txt);font-size:15px;user-select:none;padding:7px 10px;flex:1;max-width:600px}
+.synth-toggle-lbl input[type=checkbox]{accent-color:#9ab0c0;width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.synth-subtext{display:block;color:#4a80b8;font-size:11px;margin-top:3px;opacity:.8}
 /* ── large terminal button (modals, overlays, setup) ── */
 .mbtn,.sbtn,#evc-btn,#trov-cancel,#sig-btn{
   width:100%;padding:12px;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px),var(--bg3);
@@ -226,7 +229,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
   font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);
   writing-mode:vertical-rl;transform:rotate(180deg);
 }
-.hud-vtab-caret{font-size:8px;color:var(--dim);transition:transform .15s;line-height:1;}
+.hud-vtab-caret{font-size:8px;color:var(--dim);transition:transform .15s;line-height:1;display:block;width:100%;text-align:center;}
 .hud-collapsed .hud-vtab-caret{transform:rotate(-90deg)}
 /* decks tab is on left edge */
 #decks .hud-vtab{border-left:none;border-right:1px solid var(--bdr);}
@@ -530,7 +533,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .e7m.sys{color:#4a80b8}
 .e7m.good{color:#60a060}.e7m.crit{color:var(--red)}
 .e7m.act{color:#b08840}
-*:not(.e7m.act)+.e7m.act{margin-top:15px;padding-top:15px!important;border-top:1px solid;border-image:linear-gradient(90deg,var(--dim),transparent) 1}
+#tr-box *:not(.e7m.act)+.e7m.act{margin-top:15px;padding-top:15px!important;border-top:1px solid;border-image:linear-gradient(90deg,var(--dim),transparent) 1}
 .e7div{height:1px;background:var(--bdr);margin:5px 14px;opacity:.35}
 /* Log entries */
 .le{font-size:11px;padding:2px 14px;border-bottom:1px solid rgba(255,255,255,.02);line-height:1.4}

@@ -55,6 +55,22 @@
         <div class="slbl">Crew Manifest</div>
         <div id="plist"></div>
       </div>
+      <div class="ssec" id="synth-section">
+        <div class="slbl">Synthetic Crew</div>
+        <div id="plist-synth">
+          <div class="prow">
+            <div class="ppick">
+              <button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>
+              <div id="synth-preview"></div>
+              <button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button>
+            </div>
+            <label class="synth-toggle-lbl">
+              <input type="checkbox" id="addSynthCbx" onchange="toggleSynth(this.checked)">
+              <span>Add SYNTH to crew<span class="synth-subtext">They will render assistance (if their programming allows).</span></span>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="su-right">
       <div id="su-e7-hdr">
@@ -152,16 +168,16 @@
       </div>
       <!-- Resources -->
       <div class="hudres">
-        <div class="shd" data-tooltip="Food and Oxygen each deplete 1 per turn. If either hits zero, Health depletes instead.">Resources</div>
-        <div>
-          <div class="rlbl">Food</div>
+        <div class="shd" id="hud-res-lbl" data-tooltip="Food and Oxygen each deplete 1 per turn. If either hits zero, Health depletes instead.">Resources</div>
+        <div id="hud-res-food">
+          <div class="rlbl" id="hud-res-food-lbl">Food</div>
           <div class="tokgrid" id="htr"></div>
         </div>
-        <div>
+        <div id="hud-res-o2">
           <div class="rlbl">Oxygen</div>
           <div class="tokrow" id="hto"></div>
         </div>
-        <div>
+        <div id="hud-res-health">
           <div class="rlbl">Health</div>
           <div class="tokrow" id="hth"></div>
         </div>

@@ -133,8 +133,8 @@ const PORTRAIT_SVG_UNUSED = [
 // health: 1–3 (3=healthy, 1=critical/incap). fy: 0=top-aligned, 0.5=centered
 function portBg(portrait, dw, dh, fy=0, health=3){
   const ypos=fy===0?'top':'center';
-  const suf=Math.max(1,Math.min(3,health));
-  return `background-image:url(img/Crew/${portrait}${suf}.png);background-size:cover;`+
+  const url=portrait==='synth'?'img/Crew/synth.png':`img/Crew/${portrait}${Math.max(1,Math.min(3,health))}.png`;
+  return `background-image:url(${url});background-size:cover;`+
          `background-position:center ${ypos};width:${dw}px;height:${dh}px;flex-shrink:0;`;
 }
 
@@ -169,20 +169,24 @@ function bfsReach(fq,fr,mp){
       if(!dist.has(k)&&G.tiles.has(k)){dist.set(k,cd+1);q.push([nq,nr]);}}}
   dist.delete(hk(fq,fr));return dist;}
 
-function bfsPath(fq,fr,tq,tr){
+function bfsPath(fq,fr,tq,tr,passable){
   if(fq===tq&&fr===tr)return[];
   const prev=new Map([[hk(fq,fr),null]]),q=[[fq,fr]];
   while(q.length){const[cq,cr]=q.shift();
     for(const[nq,nr]of hnbr(cq,cr)){const k=hk(nq,nr);
-      if(prev.has(k)||!G.tiles.has(k))continue;prev.set(k,hk(cq,cr));
+      if(prev.has(k)||!G.tiles.has(k))continue;
+      if(passable&&!passable(nq,nr))continue;
+      prev.set(k,hk(cq,cr));
       if(nq===tq&&nr===tr){const path=[];let cur=k;
         while(cur){const p=prev.get(cur);if(p)path.unshift(hparse(cur));cur=p;}return path;}
       q.push([nq,nr]);}}return null;}
+const synthPassable=(q,r)=>G.tiles.get(hk(q,r))?.anomaly!=='Gravity Well';
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 const PCOLORS=['#4a8fbd','#c04444','#4ab04a','#c09040','#9040c0','#40b0b0'];
+const SYNTH_COLOR='#9ab0c0';
 
 const CRASH_HEXES_DEFAULT=[
   {q:0,r:0,  name:'Crash Site',      short:'CRASH'},
@@ -293,7 +297,7 @@ const EQ_CARDS=[
   {id:'excavator',     name:'Excavator',         cat:'Tool',   txt:'Reveal a face-down tile without entering it.',use:'excavator'},
   {id:'lockpick',      name:'Lockpick',          cat:'Tool',   txt:'Bypass mechanical locks on many structures.',},
   {id:'walkie',        name:'Walkie',            cat:'Tool',   txt:'Trade resources with a player on an adjacent tile.',use:'walkie'},
-  {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health to HEALTHY. Discard after use.', use:'medpack'},
+  {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health. Discard after use.', use:'medpack'},
   {id:'emer_food',     name:'Emergency Rations', cat:'Supply', txt:'Flip 3 EMPTY Food to FULL. Discard after use.', use:'emer_food'},
   {id:'compressed_o2', name:'Compressed O2',     cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
   {id:'hazard_suit',   name:'Hazard Suit',       cat:'Tech',   txt:'Negates Health loss from toxic exposure Event cards.'},
@@ -418,6 +422,7 @@ function guidance(key, fn){
 // ═══════════════════════════════════════════════════════════════
 let G=null, cardUid=0;
 let pendingNames=[], pendingPortraits=[];
+let addSynth=false;
 let viewedPlayer=0;
 function cp(){return G.players[G.currentPlayer];}
 
@@ -447,6 +452,15 @@ function newGame(names, portraits, placedMap){
            inStasis:false,signalArrayRounds:0,soloRescueActive:false,rfExtractionActive:false,
            scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false};
   });
+  if(addSynth){
+    players.push({id:players.length,name:'SYNTH',color:SYNTH_COLOR,portrait:'synth',
+      q:0,r:0,battery:10,food:0,o2:0,health:0,
+      radioFragments:0,equipment:[],incapacitated:0,alive:true,location:'Crash Site',
+      skipO2:true,inStasis:false,signalArrayRounds:0,soloRescueActive:false,
+      rfExtractionActive:false,scannerUsed:false,scannerCharges:0,rebreatherCycle:false,
+      stunned:false,isSynth:true,cpu:true,corrupted:false,corruptionTarget:null,
+      corruptionRevealed:false});
+  }
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
      eqDeck,eqDeckCount:eqDeck.length,evtDeckCount:80,
      radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:10,lastPublicEvt:null,jammerActive:false};
@@ -850,7 +864,11 @@ function drawTileEvent(t){
   if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.');}
   if(evt.loseHealth){
     if(p.equipment.some(c=>c.id==='hazard_suit')){addLog(`${p.name}'s Hazard Suit blocked toxic exposure.`,'good');}
-    else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
+    else{
+      if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');
+      const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
+      if(synth){synth.corrupted=true;synth.corruptionTarget=p.id;addLog('> SYNTH: PRIORITY DIRECTIVE UPDATED — CONTAINMENT PROTOCOL ACTIVE','crit');}
+    }
   }
   if(evt.pub)G.lastPublicEvt=evt;
   if(evt.trackSignalArray){p.soloRescueActive=true;addLog(`${p.name} has a private objective.`,'act');}
@@ -1078,6 +1096,14 @@ function applyLanding(p,q,r,path,wasRevealed){
     t.shockTrap=false;t.shockTrapOwner=null;
     if(p.health>0)p.health--;
     addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3.`,'crit');
+    markTilesDirty();
+  }
+  if(t?.droppedFragments>0&&!p.isSynth){
+    const picked=t.droppedFragments;
+    p.radioFragments+=picked;
+    t.droppedFragments=0;
+    markTilesDirty();
+    addLog(`${p.name} recovered ${picked} abandoned Radio Fragment${picked!==1?'s':''}.`,'frag');
   }
   const isNewAnomaly=!wasRevealed&&t?.type==='anomaly';
   if(t?.type==='anomaly'&&!isNewAnomaly)triggerAnomaly(t);
@@ -1432,6 +1458,12 @@ function doWatchTower(){
 function doEndTurn(){
   if(G.phase==='roll')return;
   const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
+  // Synth: battery logic only
+  if(p.isSynth){
+    if(curTile?.name==='Airlock'){p.battery=10;addLog('SYNTH recharged battery at Airlock.','good');}
+    else{if(p.battery>0)p.battery--;if(p.battery===0){p.alive=false;addLog('SYNTH: Power depleted. Systems offline.','crit');}}
+    advanceTurn();return;
+  }
   // Stasis: skip all depletion
   if(p.inStasis){
     if(curTile?.anomaly!=='Stasis Pod'){p.inStasis=false;}
@@ -1449,7 +1481,15 @@ function doEndTurn(){
   }
   p.skipO2=false;
   if(p.health===0&&p.alive){p.incapacitated++;
-    if(p.incapacitated>=2){p.alive=false;addLog(`${p.name} has DIED.`,'crit');}
+    if(p.incapacitated>=2){
+      p.alive=false;addLog(`${p.name} has DIED.`,'crit');
+      if(p.radioFragments>0){
+        const dt=G.tiles.get(hk(p.q,p.r));
+        if(dt){dt.droppedFragments=(dt.droppedFragments||0)+p.radioFragments;markTilesDirty();}
+        addLog(`${p.name} dropped ${p.radioFragments} Radio Fragment${p.radioFragments!==1?'s':''} — retrieve them before they\'re lost.`,'frag');
+        p.radioFragments=0;
+      }
+    }
     else addLog(`${p.name} is INCAPACITATED (${p.incapacitated}/2).`,'crit');}
   // Signal Array occupancy tracking
   if(curTile?.name==='Signal Array'){
@@ -1504,7 +1544,292 @@ function advanceTurn(){
   showTableDice('move');
   updateUI();render();
   panToPlayer(G.players[next]);
+  if(G.players[next].isSynth){setTimeout(doSynthTurn,1800);}
 }
+// ═══════════════════════════════════════════════════════════════
+// SYNTH AI
+// ═══════════════════════════════════════════════════════════════
+function synthFindTile(name){
+  for(const[k,t]of G.tiles){if(t.name===name){const[q,r]=hparse(k);return{q,r,tile:t};}}
+  return null;
+}
+function synthKnownFragTiles(){
+  const out=[];
+  for(const[k,t]of G.tiles){
+    if(t.revealed&&t.radioFragment){const[q,r]=hparse(k);out.push({q,r,requiresTool:t.requiresTool||null});}
+  }
+  return out;
+}
+function synthNearest(p,candidates){
+  let best=null,bestLen=Infinity;
+  for(const c of candidates){
+    const path=bfsPath(p.q,p.r,c.q,c.r,synthPassable);
+    if(path&&path.length<bestLen){bestLen=path.length;best={...c,pathLen:bestLen};}
+  }
+  return best;
+}
+
+function synthChooseTarget(p){
+  if(p.corrupted)return synthChooseCorrupted(p);
+  // Priority 0: recharge if battery is low
+  if(p.battery<=3){
+    const air=synthFindTile('Airlock');
+    if(air&&!(p.q===air.q&&p.r===air.r))return{q:air.q,r:air.r,action:'recharge'};
+  }
+  // Priority 1: rescue incapacitated crew member
+  const incap=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.health===0&&pl.incapacitated>0)
+    .sort((a,b)=>b.incapacitated-a.incapacitated);
+  if(incap.length){
+    const t=incap[0];
+    const hasMed=p.equipment.some(c=>c.id==='medpack');
+    if(hasMed){
+      // Already have medpack — deliver it
+      return{q:t.q,r:t.r,action:'medic',crewRef:t};
+    } else {
+      // Go get a medpack first
+      const locker=synthFindTile('Equipment Locker');
+      if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:'medpack'};
+    }
+  }
+  // Priority 2: hold fragments -> activate at Signal Array
+  if(p.radioFragments>0&&G.radioFragmentsActivated<5){
+    const arr=synthFindTile('Signal Array');
+    if(arr)return{q:arr.q,r:arr.r,action:'activate'};
+  }
+  // Priority 3: fragment tile reachable with tools we have
+  const fragTiles=synthKnownFragTiles().filter(t=>!t.requiresTool||p.equipment.some(c=>c.id===t.requiresTool));
+  const nearest=synthNearest(p,fragTiles);
+  if(nearest)return{...nearest,action:'fragment'};
+  // Priority 4: need a tool for known fragment -> Equipment Locker
+  const toolNeeded=synthKnownFragTiles().filter(t=>t.requiresTool&&!p.equipment.some(c=>c.id===t.requiresTool));
+  if(toolNeeded.length){
+    const locker=synthFindTile('Equipment Locker');
+    if(locker&&!(p.q===locker.q&&p.r===locker.r))return{q:locker.q,r:locker.r,action:'equipment',needTool:toolNeeded[0].requiresTool};
+  }
+  // Priority 5: explore nearest face-down tile
+  const frontier=[];
+  for(const[k,t]of G.tiles){if(!t.revealed){const[q,r]=hparse(k);frontier.push({q,r});}}
+  const nearFront=synthNearest(p,frontier);
+  if(nearFront)return{...nearFront,action:'explore'};
+  return{q:0,r:0,action:'idle'};
+}
+
+function synthChooseCorrupted(p){
+  // Battery first
+  if(p.battery<=3){
+    const air=synthFindTile('Airlock');
+    if(air&&!(p.q===air.q&&p.r===air.r))return{q:air.q,r:air.r,action:'recharge'};
+  }
+  // Rescue non-targeted incapacitated crew (even when corrupted)
+  const incapNonTarget=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.corruptionTarget&&pl.health===0&&pl.incapacitated>0)
+    .sort((a,b)=>b.incapacitated-a.incapacitated);
+  if(incapNonTarget.length){
+    const t=incapNonTarget[0];
+    const hasMed=p.equipment.some(c=>c.id==='medpack');
+    if(hasMed)return{q:t.q,r:t.r,action:'medic',crewRef:t};
+    const locker=synthFindTile('Equipment Locker');
+    if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:'medpack'};
+  }
+  const target=G.players.find(pl=>pl.id===p.corruptionTarget&&pl.alive);
+  const arr=synthFindTile('Signal Array');
+  const hasWeapon=p.equipment.some(c=>c.cat==='Weapon');
+  // Get a weapon if unarmed
+  if(!hasWeapon){
+    const locker=synthFindTile('Equipment Locker');
+    if(locker&&!(p.q===locker.q&&p.r===locker.r))return{q:locker.q,r:locker.r,action:'equipment_corrupted',needWeapon:['stun_baton','shock_trap','flare_gun','jammer']};
+  }
+  // Armed: prioritise hunting the infection target
+  if(hasWeapon&&target){
+    // Special case: if carrying shock_trap, place it on Signal Array first
+    const hasShockTrap=p.equipment.some(c=>c.id==='shock_trap');
+    if(hasShockTrap&&arr&&!(p.q===arr.q&&p.r===arr.r))return{q:arr.q,r:arr.r,action:'block'};
+    if(hasShockTrap&&arr&&p.q===arr.q&&p.r===arr.r)return{q:arr.q,r:arr.r,action:'block_hold'};
+    // Otherwise go after the target directly
+    return{q:target.q,r:target.r,action:'harass',crewRef:target};
+  }
+  // Unarmed fallback: squat on Signal Array to block activation
+  if(arr){
+    if(p.q===arr.q&&p.r===arr.r)return{q:arr.q,r:arr.r,action:'block_hold'};
+    return{q:arr.q,r:arr.r,action:'block'};
+  }
+  if(target)return{q:target.q,r:target.r,action:'harass',crewRef:target};
+  return{q:0,r:0,action:'idle'};
+}
+
+function synthRevealCorruption(synth){
+  if(synth.corruptionRevealed)return;
+  synth.corruptionRevealed=true;
+  const target=G.players.find(pl=>pl.id===synth.corruptionTarget);
+  const tname=target?target.name:'crew member';
+  addLog('> SYNTH LOG: Biological contamination detected in crew member '+tname+'. Quarantine priority supersedes extraction directive.','crit');
+}
+
+function synthApplyStep(p,q,r){
+  if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
+  G.movementLeft--;
+  p.q=q;p.r=r;
+  const t=G.tiles.get(hk(q,r));
+  p.location=tileName(t);
+  if(t?.shockTrap&&t.shockTrapOwner!==p.id){
+    t.shockTrap=false;t.shockTrapOwner=null;
+    if(p.battery>0)p.battery--;
+    addLog('SYNTH triggered a Shock Trap! Battery: '+p.battery+'/10.','crit');
+    markTilesDirty();
+  }
+  if(t?.type==='anomaly'&&t.anomaly==='Portal'){
+    p.q=0;p.r=0;const ct=G.tiles.get(hk(0,0));p.location=tileName(ct);G.movementLeft=0;
+    addLog('SYNTH transited Portal → Crash Site.');markTilesDirty();
+  }
+  if(t?.radioFragment&&!t.requiresTool){
+    p.radioFragments++;t.radioFragment=false;markTilesDirty();
+    addLog('SYNTH recovered a Radio Fragment.','frag');
+  }
+  G.reach=bfsReach(p.q,p.r,G.movementLeft);
+  addLog('SYNTH → '+p.location);
+  updateUI();render();panToPlayer(p);
+}
+
+function synthExecuteSteps(steps,idx,onDone){
+  if(idx>=steps.length){onDone();return;}
+  const[q,r]=steps[idx];
+  synthApplyStep(cp(),q,r);
+  setTimeout(()=>synthExecuteSteps(steps,idx+1,onDone),1400);
+}
+
+function synthTakeAction(p,target,onDone){
+  const t=G.tiles.get(hk(p.q,p.r));
+  if(!target){onDone();return;}
+  switch(target.action){
+    case'activate':
+      if(t?.name==='Signal Array'&&p.radioFragments>0){
+        while(p.radioFragments>0&&G.radioFragmentsActivated<5){
+          p.radioFragments--;G.radioFragmentsActivated++;
+          const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
+          addLog('SYNTH activated fragment. Array: '+G.radioFragmentsActivated+'/5. Threshold: '+thr+'+','frag');
+        }
+        updateUI();render();
+      }
+      onDone();break;
+    case'equipment':
+    case'equipment_corrupted':{
+      if(t?.name==='Equipment Locker'&&!G.tileActionUsed){
+        // Synth gets exactly the card it needs, not a random draw
+        const ids=target.needTool?[target.needTool]:(target.needWeapon||[]);
+        const spec=ids.length?EQ_CARDS.find(c=>ids.includes(c.id)):null;
+        if(spec&&G.eqDeckCount>0){
+          p.equipment.push({...spec,uid:++cardUid});
+          G.eqDeckCount=Math.max(0,G.eqDeckCount-1);
+          const el=document.getElementById('equpn');if(el)el.textContent=G.eqDeckCount;
+          addLog('SYNTH acquired '+spec.name+'.','good');
+        } else if(G.eqDeckCount>0){
+          const card=drawEqCard(p);
+          if(card)addLog('SYNTH acquired '+card.name+'.','good');
+        }
+        G.tileActionUsed=true;updateUI();
+      }
+      onDone();break;
+    }
+    case'fragment':
+      if(t?.radioFragment&&t.requiresTool){
+        const tool=p.equipment.find(c=>c.id===t.requiresTool);
+        if(tool){
+          p.radioFragments++;t.radioFragment=false;
+          t.investigatedCount=t.pois?t.pois.length:1;
+          const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
+          if(ci>=0)p.equipment.splice(ci,1);
+          markTilesDirty();
+          addLog('SYNTH used '+tool.name+' to recover a Radio Fragment.','frag');
+          updateUI();render();
+        }
+      }
+      if(t&&!t.investigatedCount&&(t.type==='terrain'||t.type==='ship_section')){
+        t.investigatedCount=t.pois?t.pois.length:0;markTilesDirty();
+      }
+      onDone();break;
+    case'block':
+    case'block_hold':{
+      if(t?.name==='Signal Array'){
+        const occupant=G.players.find(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r);
+        if(occupant){
+          synthRevealCorruption(p);
+          addLog('SYNTH contests the Signal Array with '+occupant.name+'.','act');
+          showContestModal(p,occupant,
+            ()=>{addLog('SYNTH holds the Signal Array. '+occupant.name+' displaced.','crit');
+              occupant.q=0;occupant.r=0;const ct=G.tiles.get(hk(0,0));occupant.location=tileName(ct);
+              updateUI();render();onDone();},
+            ()=>{addLog(occupant.name+' holds the Signal Array.','act');updateUI();render();onDone();}
+          );return;
+        }
+        if(target.action==='block')synthRevealCorruption(p);
+      }
+      onDone();break;
+    }
+    case'harass':{
+      const cr=target.crewRef;
+      if(cr&&p.q===cr.q&&p.r===cr.r){
+        synthRevealCorruption(p);
+        const weapon=p.equipment.find(c=>c.cat==='Weapon');
+        if(weapon){
+          const ci=p.equipment.findIndex(c=>c.uid===weapon.uid);
+          if(weapon.id==='stun_baton'){
+            cr.stunned=true;if(ci>=0)p.equipment.splice(ci,1);
+            addLog('SYNTH used Stun Baton on '+cr.name+'. They will skip their next turn.','crit');
+          }else if(weapon.id==='shock_trap'){
+            t.shockTrap=true;t.shockTrapOwner=p.id;if(ci>=0)p.equipment.splice(ci,1);
+            addLog('SYNTH placed a Shock Trap at '+p.location+'.','crit');
+          }else if(weapon.id==='flare_gun'){
+            const others=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id);
+            if(others.length){
+              const pulled=others.reduce((a,b)=>{
+                const ap=bfsPath(p.q,p.r,a.q,a.r,synthPassable),bp=bfsPath(p.q,p.r,b.q,b.r,synthPassable);
+                return(ap&&bp&&ap.length>bp.length)?a:b;
+              });
+              pulled.q=p.q;pulled.r=p.r;pulled.location=p.location;if(ci>=0)p.equipment.splice(ci,1);
+              addLog('SYNTH fired Flare Gun — '+pulled.name+' pulled to '+p.location+'.','crit');
+            }
+          }else if(weapon.id==='jammer'){
+            G.jammerActive=true;if(ci>=0)p.equipment.splice(ci,1);
+            addLog('SYNTH activated Signal Jammer. No Signal Roll this round.','crit');
+          }
+          updateUI();render();
+        }
+      }
+      onDone();break;
+    }
+    case'medic':{
+      const cr=target.crewRef;
+      if(cr&&p.q===cr.q&&p.r===cr.r){
+        const med=p.equipment.find(c=>c.id==='medpack');
+        if(med){
+          cr.health=1;cr.incapacitated=0;
+          const ci=p.equipment.findIndex(c=>c.uid===med.uid);if(ci>=0)p.equipment.splice(ci,1);
+          addLog('SYNTH administered MedPack to '+cr.name+'. '+cr.name+' is back on their feet.','good');
+          updateUI();render();
+        }
+      }
+      onDone();break;
+    }
+    default:onDone();
+  }
+}
+
+function doSynthTurn(){
+  const p=cp();if(!p||!p.isSynth)return;
+  // Trigger real dice animation; rollTableDice sets G.movementLeft and G.phase after 1500ms
+  rollTableDice();
+  setTimeout(()=>{
+    const target=synthChooseTarget(p);
+    const rawPath=target?bfsPath(p.q,p.r,target.q,target.r,synthPassable):null;
+    const steps=rawPath?rawPath.slice(0,G.movementLeft):[];
+    synthExecuteSteps(steps,0,()=>{
+      G.phase='action';
+      synthTakeAction(p,target,()=>{
+        setTimeout(()=>doEndTurn(),1400);
+      });
+    });
+  },1800);
+}
+
 
 function triggerAnomaly(t){
   const p=cp();
@@ -1915,6 +2240,28 @@ function drawTileArtwork(g,cx,cy,t){
       g.appendChild(fragTok);
     }
   }
+  // Shock trap indicator — mini equipment card (foreignObject)
+  if(t.shockTrap){
+    const cw=38,ch=56,cx2=cx-cw/2,cy2=cy-ch/2;
+    const fo=svgEl('foreignObject',{x:cx2,y:cy2,width:cw,height:ch,'pointer-events':'none',transform:`rotate(-8,${cx},${cy})`});
+    const div=document.createElement('div');
+    div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
+    div.className='eqcard cc-Weapon';
+    div.style.cssText=`width:${cw}px;height:${ch}px;cursor:default;transition:none;box-shadow:0 3px 8px rgba(0,0,0,.9);`;
+    div.innerHTML=`<div class="eqcard-inner" style="margin:2px;"><span class="eq-icon" style="--eq-icon-url:url('img/Icons/gun-solid-full.svg');width:10px;height:10px;margin:3px auto 2px;flex-shrink:0;"></span><div class="eqdivider" style="margin:0 2px"></div><div class="eqname" style="font-size:5px;padding:2px 2px 1px;line-height:1.2;">Shock Trap</div></div>`;
+    fo.appendChild(div);
+    g.appendChild(fo);
+  }
+  // Dropped fragments — amber ◈ tokens scattered on tile
+  if(t.droppedFragments>0){
+    const offsets=[[8,-14],[16,-8],[8,-2],[16,4],[12,10]];
+    for(let i=0;i<Math.min(t.droppedFragments,5);i++){
+      const[ox,oy]=offsets[i];
+      const tok=svgEl('text',{x:cx+ox,y:cy+oy,'text-anchor':'middle','font-family':'monospace','font-size':'11',fill:'#c87828',style:'filter:drop-shadow(0 0 3px rgba(200,120,40,0.8))','pointer-events':'none'});
+      tok.textContent='◈';
+      g.appendChild(tok);
+    }
+  }
   if(t.type==='crash_site'){
     const icon=BASECAMP_ICON_MAP[t.name];
     if(icon){
@@ -1974,16 +2321,25 @@ function drawPawn(g,p){
   const cp2=svgEl('clipPath',{id:cid});
   cp2.appendChild(svgEl('circle',{cx:px,cy:py,r:11}));
   defs.appendChild(cp2);
+  if(!defs.querySelector('#pawn-shadow')){
+    const filt=svgEl('filter',{id:'pawn-shadow',x:'-40%',y:'-40%',width:'180%',height:'180%'});
+    filt.appendChild(svgEl('feDropShadow',{dx:'0',dy:'1.5',stdDeviation:'2.5','flood-color':'#000','flood-opacity':'0.75'}));
+    defs.appendChild(filt);
+  }
   const imgEl=svgEl('image',{
-    href:`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}.png`,
+    href:p.isSynth?'img/Crew/synth.png':`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}.png`,
     x:px-11, y:py-11,
     width:22, height:22,
     'clip-path':`url(#${cid})`,
     'pointer-events':'none',
     preserveAspectRatio:'xMidYMin slice',
   });
-  g.appendChild(imgEl);
-  g.appendChild(svgEl('circle',{cx:px,cy:py,r:11,fill:'none',stroke:p.color,'stroke-width':'1.8','pointer-events':'none'}));
+  const ringColor=p.isSynth&&p.corrupted?'#c04444':p.color;
+  const ringEl=svgEl('circle',{cx:px,cy:py,r:11,fill:'none',stroke:ringColor,'stroke-width':'1.8','pointer-events':'none'});
+  const pawnG=svgEl('g',{filter:'url(#pawn-shadow)'});
+  pawnG.appendChild(imgEl);
+  pawnG.appendChild(ringEl);
+  g.appendChild(pawnG);
 }
 
 function onHexClick(q,r){
@@ -2049,7 +2405,9 @@ function showHexTip(t){
   document.getElementById('tiptit').textContent=title.toUpperCase();
   const descSteps=steps.filter(([,cls])=>cls==='');
   const actSteps=steps.filter(([,cls])=>cls!=='');
-  document.getElementById('tipdesc').textContent=t.type==='face_down'?'Face-down tile. Enter to reveal what lies ahead.':descSteps.map(([,,msg])=>msg).join('\n');
+  let tipDescText=t.type==='face_down'?'Face-down tile. Enter to reveal what lies ahead.':descSteps.map(([,,msg])=>msg).join('\n');
+  if(key==='Cargo Hold'&&G?.cargoHold!==undefined)tipDescText+=`\n\nContents: ${G.cargoHold} Food`;
+  document.getElementById('tipdesc').textContent=tipDescText;
   const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
   const toolNote=t.requiresTool&&(t.radioFragment||t.toolReward)?`\n*Requires ${TOOL_NAMES[t.requiresTool]||t.requiresTool}`:'';
   document.getElementById('tipact').textContent=t.type==='face_down'?'':(actSteps.map(([,,msg])=>msg).join('\n')+toolNote);
@@ -2098,7 +2456,7 @@ function buildCrewTabs(){
     const isCurrent=pl.id===G.currentPlayer;
     const isViewing=pl.id===viewedPlayer;
     t.className='hctab'+(pl.alive?'':' dead');
-    t.style.cssText=`background-image:url(img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}.png);background-size:cover;background-position:center top;`+
+    t.style.cssText=`background-image:url(${pl.isSynth?'img/Crew/synth.png':`img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}.png`});background-size:cover;background-position:center top;`+
       `border-color:${isCurrent?pl.color:isViewing?'rgba(255,255,255,.4)':'transparent'};`+
       `box-shadow:${isCurrent?`0 0 0 1px ${pl.color}`:'none'};`+
       `opacity:${pl.alive?1:.3};`;
@@ -2199,15 +2557,25 @@ function updateUI(){
   }
   document.getElementById('hmission').innerHTML=missionHtml;
   // Card shows viewed player
-  document.getElementById('hcimg').style.cssText=`background-image:url(img/Crew/${v.portrait}${Math.max(1,Math.min(3,v.health))}.png);background-size:cover;background-position:center top;width:100%;height:100%;`;
+  document.getElementById('hcimg').style.cssText=`background-image:url(${v.isSynth?'img/Crew/synth.png':`img/Crew/${v.portrait}${Math.max(1,Math.min(3,v.health))}.png`});background-size:cover;background-position:center top;width:100%;height:100%;`;
   document.getElementById('hcname').textContent=v.name;
   document.getElementById('hcname').style.color=v.color;
   document.getElementById('hcloc').textContent=v.location;
-  buildTokGrid('htr',v.food,Math.max(5,Math.ceil(v.food/5)*5),'rf','re',3,5);
-  buildTokRow('hto',v.o2,3,'of','oe');
-  buildTokRow('hth',v.health,3,'hf','he');
+  if(v.isSynth){
+    const fl=document.getElementById('hud-res-food-lbl');if(fl)fl.textContent='Battery';
+    buildTokGrid('htr',v.battery,10,'rf','re',2,5);
+    const o2el=document.getElementById('hud-res-o2');if(o2el)o2el.style.display='none';
+    const hel=document.getElementById('hud-res-health');if(hel)hel.style.display='none';
+  }else{
+    const fl=document.getElementById('hud-res-food-lbl');if(fl)fl.textContent='Food';
+    buildTokGrid('htr',v.food,Math.max(5,Math.ceil(v.food/5)*5),'rf','re',3,5);
+    const o2el=document.getElementById('hud-res-o2');if(o2el)o2el.style.display='';
+    const hel=document.getElementById('hud-res-health');if(hel)hel.style.display='';
+    buildTokRow('hto',v.o2,3,'of','oe');
+    buildTokRow('hth',v.health,3,'hf','he');
+  }
   // Pulse at-risk resources for the active player during their turn
-  if(v.id===G.currentPlayer&&G.phase!=='over'&&!v.inStasis){
+  if(v.id===G.currentPlayer&&G.phase!=='over'&&!v.inStasis&&!v.isSynth){
     const onBase=G.tiles.get(hk(v.q,v.r))?.type==='crash_site';
     // Food always ticks (if food>0, last full token pulses; if food=0, first health token pulses)
     if(v.food>0){
@@ -2444,6 +2812,9 @@ function showContestModal(challenger, defender, onChallengerWins, onDefenderWins
 
   makeDie('contest-challenger-die', v=>{cVal=v;});
   makeDie('contest-defender-die',   v=>{dVal=v;});
+  // Auto-roll for Synth side
+  if(challenger.isSynth){setTimeout(()=>document.getElementById('contest-challenger-die').querySelector('.td-die-wrap')?.click(),800);}
+  if(defender.isSynth){setTimeout(()=>document.getElementById('contest-defender-die').querySelector('.td-die-wrap')?.click(),800);}
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -3085,6 +3456,9 @@ let setupPortraits=(()=>{const a=CREW_PORTRAITS.map((_,i)=>i);for(let i=a.length
 function buildSetup(){
   const row=document.getElementById('crow');row.innerHTML='';
   for(let i=1;i<=6;i++){const b=document.createElement('button');b.className='cbtn'+(i===setupN?' sel':'');b.textContent=i;b.onclick=()=>{setupN=i;buildSetup();};row.appendChild(b);}
+  const synthPrev=document.getElementById('synth-preview');
+  if(synthPrev)synthPrev.style.cssText=portBg('synth',80,90)+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
+  const cbx=document.getElementById('addSynthCbx');if(cbx)cbx.checked=addSynth;
   const nl=document.getElementById('plist');const prev=[...nl.querySelectorAll('input')].map(x=>x.value);nl.innerHTML='';
   for(let i=0;i<setupN;i++){
     const pi=setupPortraits[i]??i%CREW_PORTRAITS.length;
@@ -3109,6 +3483,8 @@ function cyclePortrait(i, dir){
   if(input&&input.value===oldName) input.value=newName;
   buildSetup();
 }
+
+function toggleSynth(v){addSynth=v;buildSetup();}
 
 function goToSiteBuilder(){
   const names=[],portraits=[];
@@ -3156,12 +3532,12 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   e7ScreenSeq('e7-intro-msg',[
     [300, 'sys', '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-    [1200, 'good', '> Primary diagnostics: COMPLETE. Life support: NOMINAL.'],
-    [800, '',    'Hello, Commander. I am E7, your ship\'s emergency computer.'],
-    [600, '',    'The Endymion 7, a deep-range mining vessel, has crash-landed on an uncharted planet. The cause of the accident is unknown.'],
-    [500, '',    'Before impact, the ship\'s cargo was jettisoned. Your task is to explore the surrounding area, recover Radio Fragments, and return them to the Signal Array to call for rescue.'],
-    [400, 'crit','You have a 1 in 10,358 chance of survival.'],
-    [300, '',    'Please acknowledge.'],
+    [1200, 'crit', '> Primary diagnostics: COMPLETE. Life support: DAMAGED.'],
+    [800, '',    'Commander, I am E7, your ship’s emergency AI.'],
+    [600, '',    'The Endymion 7 has crash landed on an uncharted planet--cause unknown.'],
+    [500, '',    'Before impact, the ship\'s cargo was scattered across the wilds.'],
+    [500, 'sys',    'Venture into the planet, gather lost RADIO FRAGMENTS, and restore the SIGNAL ARRAY.'],
+    [400, '',    'Only then can we call for rescue.'],
   ]);
 });
 function showCrewSetup(){
