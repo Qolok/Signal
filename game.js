@@ -294,9 +294,9 @@ function spriteCssForName(name){
 const EQ_CARDS=[
   {id:'plasma_cutter', name:'Plasma Cutter',     cat:'Tool',   txt:'Cut through sealed structures.'},
   {id:'grappling',     name:'Grappling Hook',    cat:'Tool',   txt:'Move to any adjacent tile without using move points. Use once per round.'},
-  {id:'excavator',     name:'Excavator',         cat:'Tool',   txt:'Reveal a face-down tile without entering it.',use:'excavator'},
   {id:'lockpick',      name:'Lockpick',          cat:'Tool',   txt:'Bypass mechanical locks on many structures.',},
-  {id:'walkie',        name:'Walkie',            cat:'Tool',   txt:'Trade resources with a player on an adjacent tile.',use:'walkie'},
+  {id:'walkie',        name:'Walkie',            cat:'Tool',   txt:'Trade resources with any crew member anywhere on the board.',use:'walkie'},
+  {id:'stretcher',     name:'Stretcher',         cat:'Tool',   txt:'Move an incapacitated crew member on your tile to the Crash Site. Discard after use.',use:'stretcher'},
   {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health. Discard after use.', use:'medpack'},
   {id:'emer_food',     name:'Emergency Rations', cat:'Supply', txt:'Flip 3 EMPTY Food to FULL. Discard after use.', use:'emer_food'},
   {id:'compressed_o2', name:'Compressed O2',     cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
@@ -307,8 +307,48 @@ const EQ_CARDS=[
   {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile skips their next turn. Discard after use.',use:'stun_baton'},
   {id:'flare_gun',     name:'Flare Gun',         cat:'Weapon', txt:'Force any player within 2 tiles to move to your tile immediately. Discard after use.',use:'flare_gun'},
   {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place on your current tile. The next player to enter loses 1 Health. Discard after use.',use:'shock_trap'},
-  {id:'jammer',        name:'Signal Jammer',     cat:'Weapon', txt:'No Signal Roll occurs this round, regardless of Radio Fragments. Discard after use.',use:'jammer'},
+  {id:'jammer',        name:'Signal Jammer',     cat:'Weapon', txt:'No Signal Roll occurs this round. Discard after use.',use:'jammer'},
 ];
+
+function buildEventDeck(){
+  const deck=[];
+  function add(n,card){for(let i=0;i<n;i++)deck.push(card);}
+  // Public — yield
+  add(addSynth?3:4,{text:'Emergency supplies found, partially intact. Roll 1 die for Food yield.',pub:true,rollFood:true});
+  add(4,{text:['Salvageable material nearby. Roll 1 die:','1–3: nothing','4–5: +1 Food','6: Equipment card'],pub:true,rollWreckage:true});
+  add(4,{text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true});
+  add(1,{text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true});
+  add(1,{text:'In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive.',pub:true,rf:true});
+  add(1,{text:"You trip over a rock and uncover a Radio Fragment, wrapped in cloth. Whoever left it here thought they'd come back.",pub:true,rf:true});
+  add(addSynth?3:4,{text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true});
+  // Public — hazard
+  add(4,{text:'Structural instability. The ground shifts — brace yourself. Lose 1 Health.',pub:true,loseHealth:1});
+  add(4,{text:'Toxic residue from the crash. Lose 1 Health.',pub:true,loseHealth:1});
+  add(4,{text:'The air here reeks of chemical burn. Something toxic has seeped into the soil. Your lungs are burning.',pub:true,loseHealth:1});
+  add(4,{text:'Your suit registers a spike in atmospheric toxins. The source is somewhere in the wreckage above you. You inhale before you can seal the mask.',pub:true,loseHealth:1});
+  // Public — narrative
+  add(4,{text:'Nothing here. Whatever this place held has been taken by the terrain.',pub:true});
+  add(4,{text:'Signs of prior occupation — too recent to be from the crash. Someone else was here.',pub:true});
+  add(4,{text:'Clear. No hazards, no yield. Move on.',pub:true});
+  add(4,{text:"Something jammed the sensors on the way in. You can't tell if it was the terrain or something else.",pub:true});
+  // Public — IRIS threat (only when IRIS is in the game)
+  if(addSynth)add(2,{text:"IRIS's last data upload is concerning. She appears to think the odds of survival would be higher with one fewer crew member. Keep an eye on her.",pub:true,irisCorruption:true});
+  // Private — resource
+  add(4,{text:'A hidden cache — stowed deliberately, not by the crash. You pocket the contents before anyone else arrives.',pub:false,drawEq:true});
+  add(4,{text:"There's food here nobody logged. Take it. If anyone asks about your count, you found it in the field. That's true enough.",pub:false,gainFood:1});
+  add(4,{text:'You were at the equipment locker before your turn. Draw 1 Equipment card now.',pub:false,drawEq:true});
+  add(4,{text:"It's not fair. Everyone else had a meal before the crash while you were on shift. Take 2 Food from the Cargo Hold. You deserve it.",pub:false,takeCargoFood:2});
+  // Private — competing objective
+  add(2,{text:"Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll 10 or higher on 3 dice to abandon the others and be rescued alone. The choice is yours.",pub:false,trackSignalArray:true,keep:true});
+  add(2,{text:"Your mission briefing had a clause the others weren't cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.",pub:false,rfExtraction:true,keep:true});
+  // Private — psychological
+  add(3,{text:"You're playing a different game than the others. Help when it's convenient. Nod along. But you know what you'd do if it came down to it.",pub:false,keep:true});
+  add(3,{text:"Someone was at the Cargo Hold when they shouldn't have been. You didn't see who. Say nothing. Information is worth more than accusations.",pub:false,keep:true});
+  add(3,{text:(n)=>{const others=n-1;return`You've calculated the O\u2082 supply against the extraction window. It supports ${others} ${others===1?'person':'people'}. Not ${n}. You haven't corrected anyone's assumptions. You're still running the numbers.`;},pub:false,keep:true});
+  // shuffle
+  for(let i=deck.length-1;i>0;i--){const j=0|Math.random()*(i+1);[deck[i],deck[j]]=[deck[j],deck[i]];}
+  return deck;
+}
 
 // Note: The Event Cards should be designed to sew distrust among the crew. They should also be based in the actual game mechanics with real consequences.
 const EVENT_CARDS=[
@@ -458,12 +498,12 @@ function newGame(names, portraits, placedMap){
       radioFragments:0,equipment:[],incapacitated:0,alive:true,location:'Crash Site',
       skipO2:true,inStasis:false,signalArrayRounds:0,soloRescueActive:false,
       rfExtractionActive:false,scannerUsed:false,scannerCharges:0,rebreatherCycle:false,
-      stunned:false,isSynth:true,cpu:true,corrupted:false,corruptionTarget:null,
-      corruptionRevealed:false});
+      stunned:false,isSynth:true,cpu:true,corrupted:false});
   }
+  const evtDeck=buildEventDeck();
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
-     eqDeck,eqDeckCount:eqDeck.length,evtDeckCount:80,
-     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),excavatorMode:false,tileActionUsed:false,signalRolled:false,cargoHold:10,lastPublicEvt:null,jammerActive:false};
+     eqDeck,eqDeckCount:eqDeck.length,evtDeck,evtDeckCount:evtDeck.length,
+     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),tileActionUsed:false,signalRolled:false,cargoHold:10,lastPublicEvt:null,jammerActive:false};
   expandFrontier();
 }
 
@@ -797,12 +837,9 @@ function showTileRevealModal(t, onDismiss){
             dismiss();
           } else if(reward==='drawPrivateEvent'){
             dismiss();
-            const privCards=EVENT_CARDS.filter(e=>e.pub===false);
-            const evt=privCards[0|Math.random()*privCards.length];
-            G.evtDeckCount=Math.max(0,G.evtDeckCount-1);
-            const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
+            const evt=popEventCard();
             addLog(`${p.name} accessed the Recovered Terminal.`,'act');
-            showEventCard(evt,'Recovered Terminal',()=>{updateUI();render();},null);
+            if(evt)showEventCard(evt,'Recovered Terminal',()=>{updateUI();render();},null);
           }
         };
         actionsEl.appendChild(enterBtn);
@@ -839,11 +876,18 @@ function showTileRevealModal(t, onDismiss){
   trov.classList.add('show');
 }
 
+function popEventCard(){
+  if(!G.evtDeck.length)return null;
+  const evt=G.evtDeck.pop();
+  G.evtDeckCount=G.evtDeck.length;
+  const el=document.getElementById('evtn');if(el)el.textContent=G.evtDeckCount;
+  return evt;
+}
+
 function drawTileEvent(t){
   const p=cp();
-  const evt=EVENT_CARDS[0|Math.random()*EVENT_CARDS.length];
-  G.evtDeckCount=Math.max(0,G.evtDeckCount-1);
-  const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
+  const evt=popEventCard();
+  if(!evt)return;
   // Apply guaranteed (non-roll) effects immediately
   if(evt.rf){
     p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');
@@ -862,13 +906,14 @@ function drawTileEvent(t){
   if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
   if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food.`,'crit');}
   if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.');}
+  if(evt.takeCargoFood){const taken=Math.min(evt.takeCargoFood,Math.min(15-p.food,G.cargoHold||0));p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
+  if(evt.irisCorruption){
+    const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
+    if(synth){synth.corrupted=true;addLog('> IRIS threat assessment updated. She considers one fewer crew member optimal.','crit');}
+  }
   if(evt.loseHealth){
     if(p.equipment.some(c=>c.id==='hazard_suit')){addLog(`${p.name}'s Hazard Suit blocked toxic exposure.`,'good');}
-    else{
-      if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');
-      const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
-      if(synth){synth.corrupted=true;synth.corruptionTarget=p.id;addLog('> IRIS: PRIORITY DIRECTIVE UPDATED — CONTAINMENT PROTOCOL ACTIVE','crit');}
-    }
+    else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
   }
   if(evt.pub)G.lastPublicEvt=evt;
   if(evt.trackSignalArray){p.soloRescueActive=true;addLog(`${p.name} has a private objective.`,'act');}
@@ -1121,10 +1166,10 @@ function applyLanding(p,q,r,path,wasRevealed){
 
 
 function drawEqCard(player){
-  if(!G.eqDeckCount)return null;
-  const card=EQ_CARDS[0|Math.random()*EQ_CARDS.length];
+  if(!G.eqDeck.length)return null;
+  const card=G.eqDeck.pop();
   player.equipment.push({...card,uid:++cardUid});
-  G.eqDeckCount--;
+  G.eqDeckCount=G.eqDeck.length;
   const el=document.getElementById('equpn');if(el)el.textContent=G.eqDeckCount;
   return card;
 }
@@ -1138,7 +1183,16 @@ function useCard(playerIdx,uid){
   if(c.use==='medpack'){if(p.health<3){p.health++;p.equipment.splice(ci,1);addLog(`${p.name} used MedPack. Health: ${p.health}/3.`,'good');}else{addLog('Health already full.');return;}}
   else if(c.use==='emer_food'){const gain=Math.min(3,15-p.food);p.food+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Food. +${gain} Food.`,'good');}
   else if(c.use==='compressed_o2'){const gain=Math.min(2,3-p.o2);p.o2+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Compressed O₂. +${gain} O₂.`,'good');}
-  else if(c.use==='excavator'){p.equipment.splice(ci,1);closeCardModal();G.excavatorMode=true;addLog('Excavator: click an adjacent face-down tile to reveal it.','act');updateUI();render();return;}
+  else if(c.use==='stretcher'){
+    const incap=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r&&pl.health===0&&pl.incapacitated>0);
+    if(!incap.length){addLog('No incapacitated crew on this tile.','act');closeCardModal();return;}
+    const applyStretcher=target=>{target.q=1;target.r=0;const ct=G.tiles.get(hk(1,0));target.location=tileName(ct);target.health=1;target.incapacitated=0;p.equipment.splice(ci,1);addLog(`${p.name} carried ${target.name} to the Medical Bay. ${target.name} is back on their feet.`,'good');closeCardModal();updateUI();render();};
+    if(incap.length===1){applyStretcher(incap[0]);return;}
+    showModal('STRETCHER','Choose a crew member to carry.',true,()=>{},'Cancel',undefined,undefined,'');
+    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+    incap.forEach(pl=>{const b=document.createElement('button');b.className='mbtn';b.innerHTML=`<span style="color:${pl.color};font-weight:bold">${pl.name}</span>`;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyStretcher(pl);};btns.appendChild(b);});
+    document.getElementById('mact').prepend(btns);return;
+  }
   else if(c.use==='scanner'){
     if(p.scannerUsed){addLog('Scanner already used this round.','act');closeCardModal();return;}
     if(p.scannerCharges<=0){addLog('Scanner is depleted.','act');closeCardModal();return;}
@@ -1181,11 +1235,8 @@ function useCard(playerIdx,uid){
     addLog(`${p.name} placed a Shock Trap on this tile.`,'act');closeCardModal();updateUI();return;
   }
   else if(c.use==='walkie'){
-    const adjacent=G.players.filter(pl=>{
-      if(!pl.alive||pl.id===p.id)return false;
-      return DIRS.some(([dq,dr])=>pl.q===p.q+dq&&pl.r===p.r+dr);
-    });
-    if(!adjacent.length){addLog('No crew on adjacent tiles.','act');closeCardModal();return;}
+    const adjacent=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id);
+    if(!adjacent.length){addLog('No other crew available to trade with.','act');closeCardModal();return;}
     const openWith=partner=>{closeCardModal();initTradeModal(p,partner);};
     if(adjacent.length===1){openWith(adjacent[0]);return;}
     const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
@@ -1490,7 +1541,10 @@ function doEndTurn(){
         p.radioFragments=0;
       }
     }
-    else addLog(`${p.name} is INCAPACITATED (${p.incapacitated}/2).`,'crit');}
+    else{addLog(`${p.name} is INCAPACITATED (${p.incapacitated}/2).`,'crit');
+      const synth=G.players.find(pl=>pl.isSynth&&pl.corrupted&&pl.alive);
+      if(synth){synth.corrupted=false;addLog('IRIS: Active crew count reduced. Threat protocol suspended.','sys');}
+    }}
   // Signal Array occupancy tracking
   if(curTile?.name==='Signal Array'){
     p.signalArrayRounds++;
@@ -1533,7 +1587,7 @@ function advanceTurn(){
   let next=(G.currentPlayer+1)%G.players.length,tries=0;
   while(!G.players[next].alive&&tries++<G.players.length)next=(next+1)%G.players.length;
   if(next<=G.currentPlayer){G.turn++;G.jammerActive=false;}
-  G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.excavatorMode=false;G.signalRolled=false;
+  G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.signalRolled=false;
   G.players[next].scannerUsed=false;
   if(G.players[next].stunned){
     G.players[next].stunned=false;
@@ -1620,49 +1674,34 @@ function synthChooseCorrupted(p){
     const air=synthFindTile('Airlock');
     if(air&&!(p.q===air.q&&p.r===air.r))return{q:air.q,r:air.r,action:'recharge'};
   }
-  // Rescue non-targeted incapacitated crew (even when corrupted)
-  const incapNonTarget=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.corruptionTarget&&pl.health===0&&pl.incapacitated>0)
-    .sort((a,b)=>b.incapacitated-a.incapacitated);
-  if(incapNonTarget.length){
-    const t=incapNonTarget[0];
-    const hasMed=p.equipment.some(c=>c.id==='medpack');
-    if(hasMed)return{q:t.q,r:t.r,action:'medic',crewRef:t};
-    const locker=synthFindTile('Equipment Locker');
-    if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:'medpack'};
+  // Re-evaluate weakest living active crew member each turn (lowest health, tiebreak lowest food)
+  const target=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.health>0)
+    .sort((a,b)=>a.health-b.health||a.food-b.food)[0]||null;
+  if(!target){
+    p.corrupted=false;
+    addLog('IRIS: No viable target. Threat protocol suspended.','good');
+    return synthChooseTarget(p);
   }
-  const target=G.players.find(pl=>pl.id===p.corruptionTarget&&pl.alive);
   const arr=synthFindTile('Signal Array');
   const hasWeapon=p.equipment.some(c=>c.cat==='Weapon');
-  // Get a weapon if unarmed
   if(!hasWeapon){
     const locker=synthFindTile('Equipment Locker');
     if(locker&&!(p.q===locker.q&&p.r===locker.r))return{q:locker.q,r:locker.r,action:'equipment_corrupted',needWeapon:['stun_baton','shock_trap','flare_gun','jammer']};
   }
-  // Armed: prioritise hunting the infection target
-  if(hasWeapon&&target){
-    // Special case: if carrying shock_trap, place it on Signal Array first
+  if(hasWeapon){
     const hasShockTrap=p.equipment.some(c=>c.id==='shock_trap');
     if(hasShockTrap&&arr&&!(p.q===arr.q&&p.r===arr.r))return{q:arr.q,r:arr.r,action:'block'};
     if(hasShockTrap&&arr&&p.q===arr.q&&p.r===arr.r)return{q:arr.q,r:arr.r,action:'block_hold'};
-    // Otherwise go after the target directly
     return{q:target.q,r:target.r,action:'harass',crewRef:target};
   }
-  // Unarmed fallback: squat on Signal Array to block activation
   if(arr){
     if(p.q===arr.q&&p.r===arr.r)return{q:arr.q,r:arr.r,action:'block_hold'};
     return{q:arr.q,r:arr.r,action:'block'};
   }
-  if(target)return{q:target.q,r:target.r,action:'harass',crewRef:target};
-  return{q:0,r:0,action:'idle'};
+  return{q:target.q,r:target.r,action:'harass',crewRef:target};
 }
 
-function synthRevealCorruption(synth){
-  if(synth.corruptionRevealed)return;
-  synth.corruptionRevealed=true;
-  const target=G.players.find(pl=>pl.id===synth.corruptionTarget);
-  const tname=target?target.name:'crew member';
-  addLog('> IRIS LOG: Biological contamination detected in crew member '+tname+'. Quarantine priority supersedes extraction directive.','crit');
-}
+
 
 function synthApplyStep(p,q,r){
   if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
@@ -1751,7 +1790,7 @@ function synthTakeAction(p,target,onDone){
       if(t?.name==='Signal Array'){
         const occupant=G.players.find(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r);
         if(occupant){
-          synthRevealCorruption(p);
+
           addLog('IRIS contests the Signal Array with '+occupant.name+'.','act');
           showContestModal(p,occupant,
             ()=>{addLog('IRIS holds the Signal Array. '+occupant.name+' displaced.','crit');
@@ -1760,7 +1799,6 @@ function synthTakeAction(p,target,onDone){
             ()=>{addLog(occupant.name+' holds the Signal Array.','act');updateUI();render();onDone();}
           );return;
         }
-        if(target.action==='block')synthRevealCorruption(p);
       }
       onDone();break;
     }
@@ -2344,27 +2382,6 @@ function drawPawn(g,p){
 
 function onHexClick(q,r){
   if(!G)return;
-  if(G.excavatorMode){
-    const p=cp();
-    const t=G.tiles.get(hk(q,r));
-    if(!t||t.revealed){addLog('Excavator: select a face-down tile.','act');return;}
-    // Must be adjacent to current player
-    const adj=hnbr(p.q,p.r).some(([aq,ar])=>aq===q&&ar===r);
-    if(!adj){addLog('Excavator: tile must be adjacent to you.','act');return;}
-    revealAt(q,r);
-    G.excavatorMode=false;
-    addLog(`${p.name} revealed a tile with the Excavator.`,'tile');
-    // Show the reveal modal if it has POIs
-    const nt=G.tiles.get(hk(q,r));
-    if(nt&&(nt.type==='terrain'||nt.type==='ship_section')&&nt.pois?.length>0){
-      nt.investigatedCount=nt.pois.length;
-      updateUI();render();
-      showTileRevealModal(nt);
-    } else {
-      updateUI();render();
-    }
-    return;
-  }
   if(G.phase!=='move'&&G.phase!=='action')return;
   if(!G.movementLeft)return;
   const p=cp();if(q===p.q&&r===p.r)return;
