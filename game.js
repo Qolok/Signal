@@ -832,9 +832,8 @@ function showTileRevealModal(t, onDismiss){
             },null,bg?`url(${bg})`:undefined);
           } else if(reward==='drawEq'){
             const c=drawEqCard(p);
-            if(c)addLog(`${p.name} found ${c.name} inside.`,'good');
-            else addLog(`${p.name} searched the outpost — equipment cache empty.`);
-            dismiss();
+            if(c){addLog(`${p.name} found ${c.name} inside.`,'good');dismiss();openCardModal(p.id,c,bg?`url(${bg})`:undefined);}
+            else{addLog(`${p.name} searched the outpost — equipment cache empty.`);dismiss();}
           } else if(reward==='drawPrivateEvent'){
             dismiss();
             const evt=popEventCard();
@@ -900,8 +899,8 @@ function drawTileEvent(t){
       ]);
     });
   }
-  if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}.`,'good');}
-  if(evt.drawEqHidden){drawEqCard(p);}
+  let drawnEqCard=null;
+  if(evt.drawEq){drawnEqCard=drawEqCard(p);if(drawnEqCard)addLog(`${p.name} drew ${drawnEqCard.name}.`,'good');}
   if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
   if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
   if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food.`,'crit');}
@@ -926,14 +925,14 @@ function drawTileEvent(t){
     rollCallback=r=>{
       if(r<=3){addLog(`Wreckage roll: ${r} \u2014 nothing found.`);return`Rolled ${r} \u2014 nothing found.`;}
       if(r<=5){const gained=Math.min(15-p.food,1);p.food+=gained;addLog(`Wreckage roll: ${r} \u2014 +1 Food.`,'good');return`Rolled ${r} \u2014 gained 1 Food.`;}
-      const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
+      drawnEqCard=drawEqCard(p);const msg=drawnEqCard?`drew ${drawnEqCard.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
     };
   }
   const evImg=getTileImg(t);
   const _evOv=document.getElementById('evc-ov');
   _evOv.style.backgroundImage=evImg?`url(${evImg})`:'none';
   _evOv.style.backgroundSize='cover';_evOv.style.backgroundPosition='center';
-  showEventCard(evt,locName,()=>{updateUI();render();},rollCallback);
+  showEventCard(evt,locName,()=>{updateUI();render();if(drawnEqCard)openCardModal(p.id,drawnEqCard,evImg?`url(${evImg})`:'');},rollCallback);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1805,7 +1804,6 @@ function synthTakeAction(p,target,onDone){
     case'harass':{
       const cr=target.crewRef;
       if(cr&&p.q===cr.q&&p.r===cr.r){
-        synthRevealCorruption(p);
         const weapon=p.equipment.find(c=>c.cat==='Weapon');
         if(weapon){
           const ci=p.equipment.findIndex(c=>c.uid===weapon.uid);
@@ -1851,19 +1849,28 @@ function synthTakeAction(p,target,onDone){
   }
 }
 
+function synthMove(p,onDone){
+  if(G.movementLeft<=0){onDone();return;}
+  const target=synthChooseTarget(p);
+  if(!target||target.action==='idle'||(target.q===p.q&&target.r===p.r)){onDone();return;}
+  const rawPath=bfsPath(p.q,p.r,target.q,target.r,synthPassable);
+  const steps=rawPath?rawPath.slice(0,G.movementLeft):[];
+  if(!steps.length){onDone();return;}
+  synthExecuteSteps(steps,0,()=>{
+    if(G.movementLeft>0)setTimeout(()=>synthMove(p,onDone),400);
+    else onDone();
+  });
+}
+
 function doSynthTurn(){
   const p=cp();if(!p||!p.isSynth)return;
-  // Trigger real dice animation; rollTableDice sets G.movementLeft and G.phase after 1500ms
   rollTableDice();
   setTimeout(()=>{
-    const target=synthChooseTarget(p);
-    const rawPath=target?bfsPath(p.q,p.r,target.q,target.r,synthPassable):null;
-    const steps=rawPath?rawPath.slice(0,G.movementLeft):[];
-    synthExecuteSteps(steps,0,()=>{
-      G.phase='action';
-      synthTakeAction(p,target,()=>{
-        setTimeout(()=>doEndTurn(),1400);
-      });
+    G.phase='move';
+    synthMove(cp(),()=>{
+      const p2=cp();G.phase='action';
+      const target=synthChooseTarget(p2);
+      synthTakeAction(p2,target,()=>{setTimeout(()=>doEndTurn(),1400);});
     });
   },1800);
 }
@@ -1883,18 +1890,19 @@ function triggerAnomaly(t){
       if(!G.lastPublicEvt){addLog('Echo Chamber: no prior public event to repeat.','act');break;}
       const evt=G.lastPublicEvt;
       if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment! (Echo Chamber)`,'frag');}
-      if(evt.drawEq){const c=drawEqCard(p);if(c)addLog(`${p.name} drew ${c.name}. (Echo Chamber)`,'good');}
+      let ecDrawnCard=null;
+      if(evt.drawEq){ecDrawnCard=drawEqCard(p);if(ecDrawnCard)addLog(`${p.name} drew ${ecDrawnCard.name}. (Echo Chamber)`,'good');}
       if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
       if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
       if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food. (Echo Chamber)`,'crit');}
       if(evt.skipO2){p.skipO2=true;}
       let rollCb=null;
       if(evt.rollFood){rollCb=r=>{const g=Math.min(15-p.food,r);p.food+=g;addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`,g?'good':'');return`Rolled ${r} — gained ${g} Food.`;};}
-      else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(15-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}const c=drawEqCard(p);const msg=c?`drew ${c.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
+      else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(15-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}ecDrawnCard=drawEqCard(p);const msg=ecDrawnCard?`drew ${ecDrawnCard.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
       const ecOv=document.getElementById('evc-ov');
       ecOv.style.backgroundImage='url(img/Tiles/echo-chamber.png)';
       ecOv.style.backgroundSize='cover';ecOv.style.backgroundPosition='center';
-      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();},rollCb);
+      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();if(ecDrawnCard)openCardModal(p.id,ecDrawnCard,'url(img/Tiles/echo-chamber.png)');},rollCb);
       break;
     }
     case'Inversion Field':{
@@ -3033,10 +3041,17 @@ function updateE7Prompt(){
   const el=document.getElementById('e7prompt');if(!el)return;
   if(!G){el.textContent='';el.className='';return;}
   const p=cp();let text='',warn=false;
-  if(p.o2<=1){text=`⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;warn=true;}
-  else if(G.phase==='roll')text=`${p.name}: roll the die to move.`;
-  else if(G.phase==='move')text=`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — choose a hex.`;
-  else if(G.phase==='action'){text=`At ${p.location}. Take an action or end your turn.`;}
+  if(p.isSynth){
+    if(p.battery<=3){text=`⚠ IRIS battery critical — return to the Airlock to recharge.`;warn=true;}
+    else if(G.phase==='roll')text=`IRIS: processing next action.`;
+    else if(G.phase==='move')text=`IRIS moving — ${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining.`;
+    else if(G.phase==='action')text=`IRIS at ${p.location}.`;
+  } else {
+    if(p.o2<=1){text=`⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;warn=true;}
+    else if(G.phase==='roll')text=`${p.name}: roll the die to move.`;
+    else if(G.phase==='move')text=`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — choose a hex.`;
+    else if(G.phase==='action'){text=`At ${p.location}. Take an action or end your turn.`;}
+  }
   el.textContent=text;el.className=warn?'warn':'';
 }
 
