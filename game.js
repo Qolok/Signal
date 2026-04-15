@@ -220,7 +220,7 @@ function buildTerrainDeck(){
     {pois:['Mysterious Outpost'],  radioFragment:false, requiresTool:'data_spike',  toolReward:'drawEq',      noEvent:true, count:1},
     {pois:['Wreckage Field'],      radioFragment:false, count:9},
     {pois:['Cache'],               radioFragment:false, count:3},
-    {pois:['Recovered Terminal'],  radioFragment:false, requiresTool:'data_spike', toolReward:'drawPrivateEvent', noEvent:true, count:1},
+    {pois:['Recovered Terminal'],  radioFragment:false, requiresTool:'data_spike', toolReward:'drawEq', noEvent:true, count:1},
     {pois:['Passage'],             radioFragment:false, count:1},
     {pois:['Bloody Passage'],      radioFragment:false, count:1},
   ];
@@ -399,7 +399,7 @@ const TILE_TIPS={
   'Mysterious Outpost':[[0,'','An odd building emerges from the landscape. The structure doesn\'t match anything on your planetary scans.'],[0,'','The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize.'],[0,'','Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Draw 1 Equipment card.']],
   'Fuselage':          [[0,'','In a crater, you find an intact hull section from the Endymion 7. It looks like there may be some cargo inside.'],[0,'','You move closer to investigate the wreckage. Maybe you\ll get lucky and find something useful.'],[0,'act','Draw an Event card.']],
   'Wreckage Field':    [[0,'','The Endymion 7 broke into several pieces in the upper atmosphere.'],[0,'','You come across some debris scattered across the terrain. It\'s hazardous, but potentially useful.'],[0,'act','Draw an Event card.']],
-  'Recovered Terminal':[[0,'','In an abandoned building, you locate a terminal that still draws power from a source you can\'t locate.'],[0,'','The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE.'],[0,'','No crew names are listed. You weren\'t briefed on any prior missions to this planet.'],[0,'act','Draw an Event card.']],
+  'Recovered Terminal':[[0,'','In an abandoned building, you locate a terminal that still draws power from a source you can\'t locate.'],[0,'','The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE.'],[0,'','No crew names are listed. You weren\'t briefed on any prior missions to this planet.'],[0,'act','Draw an Equipment card.']],
   'Cache':             [[0,'','You find a supply cache half-buried in the sand, but the seal appears to have been broken. You open it to see what\'s inside.'],[0,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
   'Passage':           [[0,'','In a narrow canyon, you find a route through the terrain. Something passed through here recently.'],[0,'','On inspection, you find a high-tech door that doesn\'t belong. What could be on the other side?'],[0,'act','Draw an Event card.']],
   'Bloody Passage':    [[0,'','You find a piece of the ship wedged in a canyon. Some of the crew might have come down here.'],[0,'','A narrow route inside is marked with signs of violence. Whatever happened here was gruesome... and recent.'],[0,'act','Draw an Event card.']],
@@ -834,11 +834,6 @@ function showTileRevealModal(t, onDismiss){
             const c=drawEqCard(p);
             if(c){addLog(`${p.name} found ${c.name} inside.`,'good');dismiss();openCardModal(p.id,c,bg?`url(${bg})`:undefined);}
             else{addLog(`${p.name} searched the outpost — equipment cache empty.`);dismiss();}
-          } else if(reward==='drawPrivateEvent'){
-            dismiss();
-            const evt=popEventCard();
-            addLog(`${p.name} accessed the Recovered Terminal.`,'act');
-            if(evt)showEventCard(evt,'Recovered Terminal',()=>{updateUI();render();},null);
           }
         };
         actionsEl.appendChild(enterBtn);
@@ -1657,7 +1652,24 @@ function synthChooseTarget(p){
   const toolNeeded=synthKnownFragTiles().filter(t=>t.requiresTool&&!p.equipment.some(c=>c.id===t.requiresTool));
   if(toolNeeded.length){
     const locker=synthFindTile('Equipment Locker');
-    if(locker&&!(p.q===locker.q&&p.r===locker.r))return{q:locker.q,r:locker.r,action:'equipment',needTool:toolNeeded[0].requiresTool};
+    if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:toolNeeded[0].requiresTool};
+  }
+  // Priority 4b: revealed tool-reward tiles with equipment reward (e.g. Mysterious Outpost)
+  const toolRewardTiles=[];
+  for(const[k,t]of G.tiles){
+    if(t.revealed&&!t.radioFragment&&t.requiresTool&&t.toolReward==='drawEq'&&(t.investigatedCount||0)<(t.pois?t.pois.length:1)){
+      const[q,r]=hparse(k);toolRewardTiles.push({q,r,requiresTool:t.requiresTool});
+    }
+  }
+  if(toolRewardTiles.length){
+    const reachable=toolRewardTiles.filter(t=>p.equipment.some(c=>c.id===t.requiresTool));
+    const nearReward=synthNearest(p,reachable);
+    if(nearReward)return{...nearReward,action:'tool_reward'};
+    const needForReward=toolRewardTiles.filter(t=>!p.equipment.some(c=>c.id===t.requiresTool));
+    if(needForReward.length){
+      const locker=synthFindTile('Equipment Locker');
+      if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:needForReward[0].requiresTool};
+    }
   }
   // Priority 5: explore nearest face-down tile
   const frontier=[];
@@ -1685,7 +1697,7 @@ function synthChooseCorrupted(p){
   const hasWeapon=p.equipment.some(c=>c.cat==='Weapon');
   if(!hasWeapon){
     const locker=synthFindTile('Equipment Locker');
-    if(locker&&!(p.q===locker.q&&p.r===locker.r))return{q:locker.q,r:locker.r,action:'equipment_corrupted',needWeapon:['stun_baton','shock_trap','flare_gun','jammer']};
+    if(locker)return{q:locker.q,r:locker.r,action:'equipment_corrupted',needWeapon:['stun_baton','shock_trap','flare_gun','jammer']};
   }
   if(hasWeapon){
     const hasShockTrap=p.equipment.some(c=>c.id==='shock_trap');
@@ -1721,6 +1733,23 @@ function synthApplyStep(p,q,r){
   if(t?.radioFragment&&!t.requiresTool){
     p.radioFragments++;t.radioFragment=false;markTilesDirty();
     addLog('IRIS recovered a Radio Fragment.','frag');
+  }
+  if(t?.name==='Watch Tower'&&!G.tileActionUsed){
+    const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
+    if(inField.length){
+      let revealed=0;
+      inField.forEach(fp=>{
+        hnbr(fp.q,fp.r).forEach(([nq,nr])=>{
+          const nt=G.tiles.get(hk(nq,nr));
+          if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
+        });
+      });
+      if(revealed>0){
+        const names=inField.map(x=>x.name).join(', ');
+        addLog('IRIS activated Watch Tower: '+revealed+' tile'+(revealed!==1?'s':'')+' revealed around '+names+'.','tile');
+      }
+    }
+    G.tileActionUsed=true;
   }
   G.reach=bfsReach(p.q,p.r,G.movementLeft);
   addLog('IRIS → '+p.location);
@@ -1840,6 +1869,23 @@ function synthTakeAction(p,target,onDone){
           cr.health=1;cr.incapacitated=0;
           const ci=p.equipment.findIndex(c=>c.uid===med.uid);if(ci>=0)p.equipment.splice(ci,1);
           addLog('IRIS administered MedPack to '+cr.name+'. '+cr.name+' is back on their feet.','good');
+          updateUI();render();
+        }
+      }
+      onDone();break;
+    }
+    case'tool_reward':{
+      if(t?.requiresTool&&t.toolReward&&!t.radioFragment){
+        const tool=p.equipment.find(c=>c.id===t.requiresTool);
+        if(tool){
+          const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
+          if(t.toolReward==='drawEq'){
+            const card=drawEqCard(p);
+            if(card)addLog('IRIS used '+tool.name+' at '+p.location+'. Acquired '+card.name+'.','good');
+            else addLog('IRIS used '+tool.name+' at '+p.location+'.','act');
+          }
+          if(ci>=0)p.equipment.splice(ci,1);
+          t.investigatedCount=(t.pois?t.pois.length:1);markTilesDirty();
           updateUI();render();
         }
       }
