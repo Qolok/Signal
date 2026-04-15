@@ -161,7 +161,7 @@ Each activated Fragment lowers the threshold required to trigger rescue. If a pl
 
 # IRIS
 
-IRIS is an optional AI crew member. When included, she operates automatically on her own turn — no player controls her.
+The Integrated Robotic Intelligence System (IRIS) is an optional AI crew member. When included, she operates automatically on her own turn — no player controls her.
 
 **Resources:** IRIS runs on Battery (10 charges) instead of Food and Oxygen. Her battery does not deplete each round but can be damaged by hazards (Shock Traps cost 1 Battery). When her battery reaches 3 or below, she returns to the Airlock to recharge before doing anything else.
 
