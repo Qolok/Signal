@@ -110,11 +110,10 @@ window.Sync = {
   },
 
   // Called by saveGame() to broadcast the new state to all other players.
-  // Only fires when it's this client's player turn, and never during reception.
+  // Suppressed during reception to prevent echo loops; game.js guards prevent
+  // non-active players from mutating state via isMyTurn() checks on all actions.
   pushState(serializedState) {
     if (!_active || !_gameRef || _receivingState) return;
-    // Prevent non-current-player browsers from writing (basic turn lock)
-    if (typeof G !== 'undefined' && G && G.currentPlayer !== _myPlayerIndex) return;
     _gameRef.child('state').set({ ...serializedState, _source: _clientId });
   },
 

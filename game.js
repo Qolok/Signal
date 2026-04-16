@@ -2592,6 +2592,7 @@ function receiveRemoteState(data){
       const turnChanged=prevPlayer!==G.currentPlayer;
       if(turnChanged){viewedPlayer=G.currentPlayer;eqGalleryOffset=0;}
       if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
+      markTilesDirty();
       render(); updateUI();
       if(turnChanged){showTableDice('move');panToPlayer(cp());}
       else if(G.phase==='action'){hideTableDice();}
@@ -2608,12 +2609,24 @@ function receiveRemoteState(data){
       viewedPlayer=Math.min(idx,G.players.length-1);
       preloadTileImages(); initBoard();
       if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
-      render(); updateUI();
-      showTableDice(G.phase==='roll'?'move':G.phase==='move'?'move':null);
+      markTilesDirty(); render(); updateUI();
+      showTableDice('move');
       document.getElementById('e7panel').classList.add('show');
       const myName=G.players[idx]?.name||'crew';
-      addE7(`> Online session connected. You are ${myName}.`,'sys');
-      addE7(`> Turn ${G.turn}: ${cp().name}. ${G.phase==='roll'?'Roll for movement.':''}`,'');
+      e7Seq([
+        [0,   'sys',  '> MISSION CONTROLS'],
+        [0,   'div',  null],
+        [0,   '',     'Left-click — Interact'],
+        [0,   '',     'Right-click — Pan'],
+        [0,   '',     'Scroll wheel — Zoom'],
+        [0,   'div',  null],
+        [0,   'sys',  '> MISSION BRIEFING'],
+        [0,   '',     'Find RADIO FRAGMENTS to activate the SIGNAL ARRAY.'],
+        [0,   '',     'RESOURCES deplete every turn. Return to base camp to refuel.'],
+        [0,   'div',  null],
+        [0,   'sys',  `> ONLINE SESSION CONNECTED. You are ${myName}.`],
+        [0,   'sys',  `Turn ${G.turn}: ${cp().name}. ${cp().name===myName?'Roll for movement.':'Waiting for '+cp().name+' to move.'}`],
+      ]);
     }
     _updateMpBadge();
   }catch(e){console.error('receiveRemoteState',e);}
@@ -3164,9 +3177,15 @@ function updateE7Prompt(){
     else if(G.phase==='action')text=`IRIS at ${p.location}.`;
   } else {
     if(p.o2<=1){text=`⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;warn=true;}
-    else if(G.phase==='roll')text=`${p.name}: roll the die to move.`;
-    else if(G.phase==='move')text=`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — choose a hex.`;
-    else if(G.phase==='action'){text=`At ${p.location}. Take an action or end your turn.`;}
+    else if(isMyTurn()){
+      if(G.phase==='roll')text=`${p.name}: roll the die to move.`;
+      else if(G.phase==='move')text=`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — choose a hex.`;
+      else if(G.phase==='action')text=`At ${p.location}. Take an action or end your turn.`;
+    } else {
+      if(G.phase==='roll')text=`Waiting for ${p.name} to roll…`;
+      else if(G.phase==='move')text=`${p.name} moving — ${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining.`;
+      else if(G.phase==='action')text=`${p.name} at ${p.location}.`;
+    }
   }
   el.textContent=text;el.className=warn?'warn':'';
 }
