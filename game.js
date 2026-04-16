@@ -3111,18 +3111,20 @@ function termDiv(container){
 //      'div' for a divider (msg ignored)
 // lineGap: extra pause (ms) held after each line before the next starts — makes sequential nature visible
 function termSeq(container,steps,charDelay=15,lineGap=0){
+  const seq=Date.now()+Math.random();
+  container._termSeq=seq;
   let t=0;
   steps.forEach(([gap,cls,msg])=>{
     t+=gap;
     if(cls==='div'){
-      const at=t;setTimeout(()=>termDiv(container),at);
+      const at=t;setTimeout(()=>{if(container._termSeq===seq)termDiv(container);},at);
       t+=lineGap;
     } else {
       const isLog=cls==='log'||cls.startsWith('log-');
       const base=isLog?'le':'e7m';
       const c=isLog?cls.replace(/^log-?/,''):cls;
       const at=t;
-      setTimeout(()=>termAppend(container,msg,c,charDelay,base),at);
+      setTimeout(()=>{if(container._termSeq===seq)termAppend(container,msg,c,charDelay,base);},at);
       t+=msg.length*charDelay+lineGap;
     }
   });
@@ -3579,9 +3581,13 @@ function finalizeGame(){
 // SETUP SCREEN
 // ═══════════════════════════════════════════════════════════════
 let setupN=2;
+let _sbMsgPlayed=false;
+let _lobbyMsgPlayed=false;
+let _crewMsgPlayed=false;
 let setupPortraits=(()=>{const a=CREW_PORTRAITS.map((_,i)=>i);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;})(); // shuffled so all 10 crew rotate in
 
 function buildSetup(){
+  if(_isOnlineMode){buildOnlineSetup();return;}
   const row=document.getElementById('crow');row.innerHTML='';
   for(let i=1;i<=6;i++){const b=document.createElement('button');b.className='cbtn'+(i===setupN?' sel':'');b.textContent=i;b.onclick=()=>{setupN=i;buildSetup();};row.appendChild(b);}
   const synthPrev=document.getElementById('synth-preview');
@@ -3609,12 +3615,29 @@ function cyclePortrait(i, dir){
   const newName=CREW_PORTRAITS[setupPortraits[i]].name;
   const input=document.getElementById(`pn-${i}`);
   if(input&&input.value===oldName) input.value=newName;
+  if(_isOnlineMode&&i===(window.Sync?.myPlayerIndex()??0)){_onlinePushMySlot();buildSetup();return;}
   buildSetup();
 }
 
 function toggleSynth(v){addSynth=v;buildSetup();}
 
 function goToSiteBuilder(){
+  if(_isOnlineMode){
+    const players=Object.values(_onlineLobbyData).sort((a,b)=>a.connectionSlot-b.connectionSlot);
+    pendingNames=players.map(p=>p.name||CREW_PORTRAITS[p.portraitIndex??0].name);
+    pendingPortraits=players.map(p=>CREW_PORTRAITS[p.portraitIndex??0].name);
+    document.getElementById('su-leave').style.display='none';
+    document.getElementById('setup').style.display='none';
+    const sb=document.getElementById('setup-site');
+    sb.style.display='flex';sb.classList.add('show');
+    initBuilder();updateBuilderProgress();
+    if(!_sbMsgPlayed){_sbMsgPlayed=true;e7ScreenSeq('sb-e7-log',[
+      [0,  'sys','> ESTABLISHING BASE CAMP...'],
+      [300,'',   'Before venturing into the field, set up your base camp.'],
+      [400,'act','Choose a tile below.'],
+    ]);}
+    return;
+  }
   const names=[],portraits=[];
   for(let i=0;i<setupN;i++){
     const v=(document.getElementById(`pn-${i}`)?.value||'').trim();
@@ -3625,15 +3648,16 @@ function goToSiteBuilder(){
   pendingNames=names;
   pendingPortraits=portraits;
   document.getElementById('setup').style.display='none';
+  document.getElementById('su-back').style.display='none';
   const sb=document.getElementById('setup-site');
   sb.style.display='flex';sb.classList.add('show');
   initBuilder();
   updateBuilderProgress();
-  e7ScreenSeq('sb-e7-log',[
+  if(!_sbMsgPlayed){_sbMsgPlayed=true;e7ScreenSeq('sb-e7-log',[
     [0,   'sys', '> ESTABLISHING BASE CAMP...'],
     [300, '',     'Before venturing into the field, you\'ll need to set up your base camp by placing key structures on the map.'],
     [400, 'act',  'Choose a tile below.'],
-  ]);
+  ]);}
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
@@ -3667,16 +3691,10 @@ window.addEventListener('DOMContentLoaded',()=>{
         return;
       }
     } else {
-      // JOINER: no local save — wait for Firebase to deliver current state
-      window.Sync.onStateUpdate(receiveRemoteState);
-      window.Sync.reconnect(mpSession.joinCode,mpSession.playerIndex).then(()=>{
-        document.getElementById('intro').style.display='none';
-        const lobby=document.getElementById('online-lobby');
-        lobby.style.display='flex';
-        document.getElementById('lobby-mode-sel').style.display='none';
-        document.getElementById('lobby-joining').style.display='block';
-        document.getElementById('lobby-join-status').textContent='Reconnecting to game...';
-      }).catch(()=>window.Sync?.clearSession());
+      // JOINER: no local save — reattach Firebase and restore crew setup or game state
+      window.Sync.reconnect(mpSession.joinCode,mpSession.playerIndex)
+        .then(()=>enterOnlineCrewSetup())
+        .catch(()=>window.Sync?.clearSession());
       return;
     }
     // Session found but restore failed — clear and fall through to intro
@@ -3695,17 +3713,31 @@ window.addEventListener('DOMContentLoaded',()=>{
     return;
   }
   e7ScreenSeq('e7-intro-msg',[
-    [300, 'sys',    '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-    [1500, 'sys',   '> PRIMARY DIAGNOSTICS: COMPLETE'],
+    [300, '',       '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
+    [1500, '',      '> PRIMARY DIAGNOSTICS: COMPLETE'],
     [500, 'crit',   '> SIGNAL ARRAY: DAMAGED'],
-    [800, '',       'Attention crew of the Endymion 7. I am E7, your ship’s emergency AI. The ship has crash landed on an uncharted planet--cause unknown.'],
-    [500, '',       'Before impact, the ship\'s cargo was scattered across the wilds.'],
-    [500, 'sys',    'Venture into the planet, gather lost RADIO FRAGMENTS, and restore the SIGNAL ARRAY. Only then can we call for rescue.'],
+    [500, 'sys',    'Attention crew of the Endymion 7. The ship has crash landed on an uncharted planet. Cargo has been scattered across the wilds.'],
+    [500, 'sys',    'You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.'],
+    [500, 'sys',    'You have a 0.173% chance of survival.'],
+    [500, 'sys',    'Please acknowledge.'],
   ]);
 });
 // ═══════════════════════════════════════════════════════════════
 // ONLINE LOBBY
 // ═══════════════════════════════════════════════════════════════
+
+const _escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let _isOnlineMode=false;
+let _onlineLobbyData={};  // keyed by connectionSlot (0–5)
+
+function _lobbyShowPanel(id){
+  const footers={'lobby-mode-sel':'lobby-footer-sel','lobby-hosting':'lobby-footer-host','lobby-joining':'lobby-footer-join'};
+  ['lobby-mode-sel','lobby-hosting','lobby-joining'].forEach(p=>{
+    document.getElementById(p).style.display=p===id?'block':'none';
+    const f=footers[p];
+    if(f) document.getElementById(f).style.display=p===id?'flex':'none';
+  });
+}
 
 function showOnlineLobby(){
   if(!window.Sync?.init()){
@@ -3714,43 +3746,38 @@ function showOnlineLobby(){
   }
   document.getElementById('intro').style.display='none';
   document.getElementById('online-lobby').style.display='flex';
-  // Reset lobby to mode-selection view
-  document.getElementById('lobby-mode-sel').style.display='block';
-  document.getElementById('lobby-joining').style.display='none';
-  document.getElementById('lobby-crew').style.display='none';
-  _lobbyMyPortrait=-1;
+  _lobbyShowPanel('lobby-mode-sel');
+  if(!_lobbyMsgPlayed){_lobbyMsgPlayed=true;e7ScreenSeq('lobby-e7-msg',[
+    [0,   'sys', '> ENDYMION 7 — COMM LINK ESTABLISHED'],
+    [500, '',    'One player hosts. Share the join code with up to 5 others.'],
+    [400, 'act', 'Select a mode below.'],
+  ]);}
 }
 
-const _escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-let _lobbyMyPortrait=-1;
-
 function lobbyBack(){
-  const inCrew=document.getElementById('lobby-crew').style.display!=='none';
+  _lobbyMsgPlayed=false;
   document.getElementById('online-lobby').style.display='none';
   document.getElementById('intro').style.display='flex';
-  // Reset lobby panels for next open
-  document.getElementById('lobby-mode-sel').style.display='block';
-  document.getElementById('lobby-joining').style.display='none';
-  document.getElementById('lobby-crew').style.display='none';
-  _lobbyMyPortrait=-1;
-  if(inCrew) window.Sync?.leaveLobby();
-  else window.Sync?.clearSession();
+  _lobbyShowPanel('lobby-mode-sel');
+  window.Sync?.clearSession();
 }
 
 function lobbyHost(){
   const code=window.Sync.generateJoinCode();
-  document.getElementById('lobby-mode-sel').style.display='none';
+  _lobbyShowPanel(null);
   window.Sync.hostGame(code)
-    .then(()=>showLobbyCrew(code,true))
+    .then(()=>{
+      document.getElementById('lobby-code-display').textContent=code;
+      _lobbyShowPanel('lobby-hosting');
+    })
     .catch(err=>{
-      document.getElementById('lobby-mode-sel').style.display='block';
+      _lobbyShowPanel('lobby-mode-sel');
       alert('Could not create game: '+err.message);
     });
 }
 
 function lobbyJoinMode(){
-  document.getElementById('lobby-mode-sel').style.display='none';
-  document.getElementById('lobby-joining').style.display='block';
+  _lobbyShowPanel('lobby-joining');
   document.getElementById('lobby-code-input').focus();
 }
 
@@ -3761,97 +3788,156 @@ function lobbyJoinConnect(){
   btn.disabled=true;
   document.getElementById('lobby-join-status').textContent='Connecting...';
   window.Sync.joinGame(code)
-    .then(()=>{
-      window.Sync.onStateUpdate(receiveRemoteState);
-      document.getElementById('lobby-joining').style.display='none';
-      showLobbyCrew(code,false);
-    })
+    .then(()=>enterOnlineCrewSetup())
     .catch(err=>{
       btn.disabled=false;
       document.getElementById('lobby-join-status').textContent=err.message;
     });
 }
 
-function showLobbyCrew(code,isHost){
-  _lobbyMyPortrait=-1;
-  document.getElementById('lobby-crew-code').textContent=code;
-  document.getElementById('lobby-launch-btn').style.display=isHost?'block':'none';
-  document.getElementById('lobby-crew-status').textContent=isHost?'':'Waiting for host to launch...';
-  document.getElementById('lobby-iris-row').style.display=isHost?'flex':'none';
-  document.getElementById('lobby-name-input').value='';
-  document.getElementById('lobby-crew').style.display='block';
-  window.Sync.onLobbyUpdate(renderLobbyGrid);
-  renderLobbyGrid({});
-}
-
-function renderLobbyGrid(lobbyData){
-  const mySlot=window.Sync.myPlayerIndex();
-  // Build map: portraitIndex → entry
-  const claimed={};
-  Object.values(lobbyData).forEach(entry=>{
-    if(entry&&entry.portraitIndex>=0) claimed[entry.portraitIndex]=entry;
-  });
-  const grid=document.getElementById('lobby-portrait-grid');
-  grid.innerHTML='';
-  CREW_PORTRAITS.forEach((crew,idx)=>{
-    const claimant=claimed[idx];
-    const isMine=claimant&&claimant.connectionSlot===mySlot;
-    const taken=claimant&&!isMine;
-    const card=document.createElement('div');
-    card.className='lobby-port-card'+(isMine?' mine':'')+(taken?' taken':'');
-    card.innerHTML=
-      `<div class="lobby-port-img" style="${portBg(crew.name,72,80)}"></div>`+
-      `<div class="lobby-port-name">${claimant?_escHtml(claimant.name||crew.name):crew.name}</div>`;
-    if(!taken) card.onclick=()=>lobbyPickPortrait(idx);
-    grid.appendChild(card);
-  });
-}
-
-function lobbyPickPortrait(idx){
-  _lobbyMyPortrait=idx;
-  const input=document.getElementById('lobby-name-input');
-  if(!input.value.trim()) input.value=CREW_PORTRAITS[idx].name;
-  _lobbyPushSlot();
-}
-
-function lobbyNameChanged(){
-  if(_lobbyMyPortrait<0) return;
-  _lobbyPushSlot();
-}
-
-function _lobbyPushSlot(){
-  const name=document.getElementById('lobby-name-input').value.trim()||CREW_PORTRAITS[_lobbyMyPortrait].name;
-  window.Sync.updateLobbySlot({name,portraitIndex:_lobbyMyPortrait,connectionSlot:window.Sync.myPlayerIndex()});
-}
-
-async function lobbyLaunch(){
-  const lobby=await window.Sync.getLobbyOnce();
-  const players=Object.values(lobby)
-    .filter(p=>p&&p.portraitIndex>=0)
-    .sort((a,b)=>a.connectionSlot-b.connectionSlot);
-  if(players.length===0){alert('At least one crew member must be selected.');return;}
-  pendingNames=players.map(p=>p.name||CREW_PORTRAITS[p.portraitIndex].name);
-  pendingPortraits=players.map(p=>CREW_PORTRAITS[p.portraitIndex].name);
-  window.Sync.onStateUpdate(receiveRemoteState);
+// Called by host "Continue →" button and by joiners after connecting
+function enterOnlineCrewSetup(){
+  _isOnlineMode=true;
+  _onlineLobbyData={};
   document.getElementById('online-lobby').style.display='none';
-  const sb=document.getElementById('setup-site');
-  sb.style.display='flex';sb.classList.add('show');
-  initBuilder();updateBuilderProgress();
-  e7ScreenSeq('sb-e7-log',[
-    [0,   'sys', '> ESTABLISHING BASE CAMP...'],
-    [300, '',    'Before venturing into the field, set up your base camp.'],
-    [400, 'act', 'Choose a tile below.'],
-  ]);
+  const badge=document.getElementById('su-mp-badge');
+  if(badge){badge.textContent='Join code: '+window.Sync.joinCode();badge.style.display='inline-flex';}
+  document.getElementById('su-leave').style.display='block';
+  document.getElementById('su-confirm').disabled=true;
+  window.Sync.onStateUpdate(receiveRemoteState);
+  window.Sync.onLobbyUpdate(rawData=>{
+    _onlineLobbyData={};
+    Object.values(rawData).forEach(entry=>{
+      if(entry&&typeof entry.connectionSlot==='number'){
+        _onlineLobbyData[entry.connectionSlot]=entry;
+        const mySlot=window.Sync?.myPlayerIndex()??0;
+        if(entry.connectionSlot!==mySlot&&entry.portraitIndex>=0)
+          setupPortraits[entry.connectionSlot]=entry.portraitIndex;
+      }
+    });
+    if(_isOnlineMode)buildSetup();
+  });
+  showCrewSetup();
+  _onlinePushMySlot();
+}
+
+function leaveOnlineSetup(){
+  _crewMsgPlayed=false;_sbMsgPlayed=false;
+  _isOnlineMode=false;
+  _onlineLobbyData={};
+  const badge=document.getElementById('su-mp-badge');
+  if(badge){badge.textContent='';badge.style.display='none';}
+  document.getElementById('su-leave').style.display='none';
+  document.getElementById('setup').style.display='none';
+  document.getElementById('intro').style.display='flex';
+  window.Sync?.leaveLobby();
+}
+
+function buildOnlineSetup(){
+  const mySlot=window.Sync?.myPlayerIndex()??0;
+  const connected=Object.keys(_onlineLobbyData).length;
+  document.getElementById('crow').innerHTML=
+    `<span class="online-crew-count">${connected} player${connected!==1?'s':''} connected</span>`;
+  const synthSec=document.getElementById('synth-section');
+  if(synthSec)synthSec.style.display=mySlot===0?'block':'none';
+  const synthPrev=document.getElementById('synth-preview');
+  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90)+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
+  const cbx=document.getElementById('addSynthCbx');if(cbx)cbx.checked=addSynth;
+  const nl=document.getElementById('plist');nl.innerHTML='';
+  const lastFilled=Math.max(...Object.keys(_onlineLobbyData).map(Number),mySlot,-1);
+  const showUp=Math.min(lastFilled+1,5);
+  for(let i=0;i<=showUp;i++){
+    const entry=_onlineLobbyData[i];
+    const isMe=(i===mySlot);
+    const d=document.createElement('div');
+    if(!entry&&!isMe){
+      d.className='prow prow-empty';
+      d.innerHTML=`<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button><div class="port-empty-ph"></div><button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button></div><span class="pi-waiting">Waiting...</span>`;
+      nl.appendChild(d);
+      continue;
+    }
+    const pi=isMe?(setupPortraits[i]??i%CREW_PORTRAITS.length):(entry?.portraitIndex??0);
+    if(isMe)setupPortraits[i]=pi;
+    const pname=CREW_PORTRAITS[pi].name;
+    const ready=entry?.ready??false;
+    d.className='prow'+(isMe?' prow-mine':'')+(ready?' prow-ready':'');
+    if(isMe){
+      const prevName=document.getElementById(`pn-${i}`)?.value||(entry?.name||pname);
+      d.innerHTML=`<div class="ppick">
+        <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
+        <div style="${portBg(pname,80,90)}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+        <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
+      </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prevName)}" maxlength="16" oninput="_onlineNameChange()">
+      <button class="online-ready-btn${ready?' active':''}" onclick="onlineToggleReady()">${ready?'Ready ✓':'Ready?'}</button>`;
+    } else {
+      const dname=_escHtml(entry?.name||pname);
+      d.innerHTML=`<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>
+        <div style="${portBg(pname,80,90)}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+        <button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button>
+      </div><span class="pi">${dname}</span>
+      <span class="online-ready-ind${ready?' active':''}"> ${ready?'✓ Ready':'Not ready'}</span>`;
+    }
+    nl.appendChild(d);
+  }
+  const confirmBtn=document.getElementById('su-confirm');
+  if(mySlot===0){
+    confirmBtn.style.display='block';
+    confirmBtn.disabled=!_allOnlineReady();
+  } else {
+    confirmBtn.style.display='none';
+  }
+}
+
+function onlineToggleReady(){
+  const mySlot=window.Sync?.myPlayerIndex()??0;
+  const wasReady=_onlineLobbyData[mySlot]?.ready??false;
+  _onlinePushMySlot(!wasReady);
+}
+
+function _onlineNameChange(){
+  _onlinePushMySlot();
+}
+
+function _onlinePushMySlot(readyOverride){
+  const mySlot=window.Sync?.myPlayerIndex()??0;
+  const pi=setupPortraits[mySlot]??mySlot%CREW_PORTRAITS.length;
+  const nameEl=document.getElementById(`pn-${mySlot}`);
+  const name=(nameEl?.value||'').trim()||CREW_PORTRAITS[pi].name;
+  const ready=readyOverride!==undefined?readyOverride:(_onlineLobbyData[mySlot]?.ready??false);
+  window.Sync.updateLobbySlot({name,portraitIndex:pi,ready,connectionSlot:mySlot});
+}
+
+function _allOnlineReady(){
+  const vals=Object.values(_onlineLobbyData);
+  if(vals.length===0)return false;
+  return vals.every(e=>e?.ready===true);
 }
 
 function showCrewSetup(){
   document.getElementById('intro').style.display='none';
   document.getElementById('setup').style.display='flex';
+  if(!_isOnlineMode) document.getElementById('su-back').style.display='block';
   buildSetup();
-  e7ScreenSeq('e7-setup-msg',[
+  if(!_crewMsgPlayed){_crewMsgPlayed=true;e7ScreenSeq('e7-setup-msg',[
     [0,   'sys', '> ENDYMION 7 — CREW MUSTER...'],
     [400, '',    'Life support systems are operational.'],
     [400, '',    'The unscheduled landing has resulted in numerous casualties among the crew. Biological scans are inconclusive.'],
     [400, 'act',    'Please confirm the surviving crew members.'],
-  ]);
+  ]);}
+}
+
+function backToIntro(){
+  _crewMsgPlayed=false;_sbMsgPlayed=false;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('su-back').style.display='none';
+  document.getElementById('intro').style.display='flex';
+}
+
+function backToCrewSetup(){
+  const ss=document.getElementById('setup-site');
+  ss.style.display='none';ss.classList.remove('show');
+  document.getElementById('setup').style.display='flex';
+  if(!_isOnlineMode) document.getElementById('su-back').style.display='block';
+  else document.getElementById('su-leave').style.display='block';
+  buildSetup();
 }

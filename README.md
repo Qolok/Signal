@@ -1,3 +1,5 @@
+![Signal Game](img/screens/game.jpeg)
+
 # SIGNAL
 
 *A game of survival, exploration, and eroding trust — where rescue is uncertain, and the greatest threat may be sitting across the table.*

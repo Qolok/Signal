@@ -35,9 +35,9 @@
       </div>
     </div>
     <div id="e7-intro-msg" class="e7-screen-msg"></div>
-    <div class="intro-btns">
-      <button class="sbtn" onclick="showCrewSetup()">Local Game</button>
-      <button class="sbtn online" onclick="showOnlineLobby()">Play Online</button>
+    <div class="sbox-footer">
+      <button class="sbtn secondary" onclick="showCrewSetup()">Local Game</button>
+      <button class="sbtn" onclick="showOnlineLobby()">Online Game</button>
     </div>
   </div>
 </div>
@@ -53,14 +53,16 @@
       </div>
     </div>
 
+    <div id="lobby-e7-msg" class="e7-screen-msg"></div>
+
     <!-- Mode selection -->
-    <div id="lobby-mode-sel">
-      <div class="lobby-hint">One player hosts — others join with a code.</div>
-      <div class="lobby-mode-btns">
-        <button class="sbtn" onclick="lobbyHost()">Host a Game</button>
-        <button class="sbtn" onclick="lobbyJoinMode()">Join a Game</button>
-      </div>
-      <button class="sbtn secondary" style="margin-top:8px" onclick="lobbyBack()">← Back</button>
+    <div id="lobby-mode-sel" style="display:none"></div>
+
+    <!-- Host: show join code -->
+    <div id="lobby-hosting" style="display:none">
+      <div class="lobby-code-label">Your join code</div>
+      <div class="lobby-code" id="lobby-code-display">------</div>
+      <div class="lobby-code-hint">Share this with up to 5 other players.</div>
     </div>
 
     <!-- Joiner: enter code -->
@@ -69,30 +71,21 @@
       <input id="lobby-code-input" class="lobby-input" maxlength="6" placeholder="ABC123"
              oninput="this.value=this.value.toUpperCase()"
              onkeydown="if(event.key==='Enter')lobbyJoinConnect()">
-      <button class="sbtn" id="lobby-join-btn" style="margin-top:12px" onclick="lobbyJoinConnect()">Connect</button>
       <div id="lobby-join-status" class="lobby-status"></div>
-      <button class="sbtn secondary" style="margin-top:8px" onclick="lobbyBack()">← Back</button>
     </div>
 
-    <!-- Crew selection: shown to both host and joiners after connecting -->
-    <div id="lobby-crew" style="display:none">
-      <div class="lobby-crew-top">
-        <span class="lobby-code-label">Join code</span>
-        <span class="lobby-code-inline" id="lobby-crew-code">------</span>
-        <span class="lobby-crew-sep">·</span>
-        <span class="lobby-crew-subtitle">Select your crew member</span>
-      </div>
-      <div class="lobby-portrait-grid" id="lobby-portrait-grid"></div>
-      <div class="lobby-crew-controls">
-        <input id="lobby-name-input" class="lobby-input lobby-name-input" placeholder="Your name"
-               maxlength="16" oninput="lobbyNameChanged()">
-        <label id="lobby-iris-row" class="lobby-iris-lbl" style="display:none">
-          <input type="checkbox" id="lobby-iris-cbx" onchange="toggleSynth(this.checked)"> Add IRIS
-        </label>
-      </div>
-      <button id="lobby-launch-btn" class="sbtn" style="display:none" onclick="lobbyLaunch()">Launch Mission →</button>
-      <div id="lobby-crew-status" class="lobby-status"></div>
-      <button class="sbtn secondary" onclick="lobbyBack()">← Leave Game</button>
+    <!-- Footers: one per panel, pinned to bottom of card -->
+    <div id="lobby-footer-sel" class="sbox-footer" style="display:none">
+      <button class="sbtn" onclick="lobbyHost()">Host a Game</button>
+      <button class="sbtn" onclick="lobbyJoinMode()">Join a Game</button>
+    </div>
+    <div id="lobby-footer-host" class="sbox-footer" style="display:none">
+      <button class="sbtn secondary" onclick="lobbyBack()">← Back</button>
+      <button class="sbtn" onclick="enterOnlineCrewSetup()">Continue →</button>
+    </div>
+    <div id="lobby-footer-join" class="sbox-footer" style="display:none">
+      <button class="sbtn secondary" onclick="lobbyBack()">← Back</button>
+      <button class="sbtn" id="lobby-join-btn" onclick="lobbyJoinConnect()">Connect</button>
     </div>
   </div>
 </div>
@@ -102,6 +95,7 @@
   <div id="suhdr">
     <div class="signal-hdr-icon"></div>
     <h1>SIGNAL · CREW INITIALIZATION</h1>
+    <span id="su-mp-badge" class="su-mp-badge" style="display:none"></span>
   </div>
   <div id="sumain">
     <div id="su-left">
@@ -142,6 +136,8 @@
     </div>
   </div>
   <div id="sufooter">
+    <button id="su-back" class="mbtn" onclick="backToIntro()">← Back</button>
+    <button id="su-leave" class="mbtn" onclick="leaveOnlineSetup()">← Leave Game</button>
     <button id="su-confirm" class="mbtn pri" onclick="goToSiteBuilder()">Confirm Crew</button>
   </div>
 </div>
@@ -180,6 +176,7 @@
     </div>
   </div>
   <div id="sbfooter">
+    <button class="mbtn" style="max-width:180px;flex-shrink:0;" onclick="backToCrewSetup()">← Back</button>
     <button id="sblaunbtn" class="mbtn dng" disabled onclick="finalizeGame()" style="flex:1;">Launch Mission</button>
   </div>
 </div>
