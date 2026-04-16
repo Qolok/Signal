@@ -184,6 +184,20 @@ window.Sync = {
     _active = false;
     if (_gameRef) { _gameRef.off(); _gameRef = null; }
   },
+
+  // HOST: push site builder placed-tile snapshot for clients to watch
+  pushBuilderState(placedObj) {
+    if (!_active || !_gameRef) return;
+    _gameRef.child('builder').set(placedObj);
+  },
+
+  // CLIENT: watch for builder state changes while host is building
+  onBuilderUpdate(callback) {
+    if (!_gameRef) return;
+    _gameRef.child('builder').on('value', snap => {
+      if (snap.exists()) callback(snap.val());
+    });
+  },
 };
 
 // ── Private helpers ─────────────────────────────────────────────────
@@ -198,11 +212,9 @@ function _saveSession() {
 function _startListening() {
   if (!_gameRef) return;
   _gameRef.child('state').on('value', snap => {
-    console.log('[Sync] state update, exists:',snap.exists(),'hasCallback:',!!_onStateUpdate);
     if (!snap.exists()) return;
     const data = snap.val();
-    if (data._source === _clientId) {console.log('[Sync] suppressed own echo');return;}
+    if (data._source === _clientId) return;
     if (_onStateUpdate) _onStateUpdate(data);
-    else console.warn('[Sync] no onStateUpdate callback registered');
   });
 }

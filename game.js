@@ -1009,8 +1009,9 @@ function renderTableDice(){
   diceState.values.forEach((v,i)=>{
     let el;
     if(!diceState.rolled&&!diceState.spinning){
-      el=make3DDie('idle');
-      el.onclick=rollTableDice;
+      el=make3DDie(isMyTurn()?'idle':'idle');
+      if(isMyTurn()) el.onclick=rollTableDice;
+      else el.style.opacity='0.4';
     } else if(diceState.spinning){
       el=make3DDie('rolling');
     } else {
@@ -1078,6 +1079,7 @@ function hideTableDice(){
 
 
 function doMove(q,r){
+  if(!isMyTurn())return;
   const p=cp();if(G.phase!=='move'&&G.phase!=='action')return;if(!G.movementLeft)return;
   const path=bfsPath(p.q,p.r,q,r);if(!path||!path.length)return;if(path.length>G.movementLeft)return;
   const wasRevealed=G.tiles.get(hk(q,r))?.revealed;
@@ -1592,7 +1594,7 @@ function advanceTurn(){
   showTableDice('move');
   updateUI();render();
   panToPlayer(G.players[next]);
-  if(G.players[next].isSynth){setTimeout(doSynthTurn,1800);}
+  if(G.players[next].isSynth&&(!_isOnlineMode||!window.Sync?.isActive()||window.Sync.myPlayerIndex()===0)){setTimeout(doSynthTurn,1800);}
 }
 // ═══════════════════════════════════════════════════════════════
 // IRIS AI
@@ -2553,7 +2555,7 @@ function saveGame(){
     };
     s.G.players=G.players.map(p=>({...p,equipment:[...p.equipment]}));
     localStorage.setItem('signal_save',JSON.stringify(s));
-    if(window.Sync?.isActive()){console.log('[saveGame] pushing state, tiles keys:',Object.keys(s.G.tiles).length);window.Sync.pushState(s);}
+    if(window.Sync?.isActive()) window.Sync.pushState(s);
   }catch(e){console.error('[saveGame]',e);}
 }
 function loadGame(){
@@ -2576,23 +2578,27 @@ function clearSave(){localStorage.removeItem('signal_save');}
 
 // Applies a game state received from Firebase (remote player's turn ended)
 function receiveRemoteState(data){
-  console.log('[receiveRemoteState] called, alreadyRunning:',document.getElementById('game').className==='running');
   try{
     window.Sync?.beginReceive();
     const sg=data.G;
     sg.tiles=new Map(Object.entries(sg.tiles||{}));
     sg.reach=new Map();
+    const prevPlayer=G?.currentPlayer;
     G=sg;
     cardUid=data.cardUid||0;
-    // viewedPlayer is intentionally local — each browser keeps their own view
     const gameEl=document.getElementById('game');
     const alreadyRunning=gameEl.className==='running';
     if(alreadyRunning){
+      const turnChanged=prevPlayer!==G.currentPlayer;
+      if(turnChanged){viewedPlayer=G.currentPlayer;eqGalleryOffset=0;}
       if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
       render(); updateUI();
+      if(turnChanged){showTableDice('move');panToPlayer(cp());}
+      else if(G.phase==='action'){hideTableDice();}
     } else {
       // First state received: joiner launches the game view
-      // Hide all pre-game screens (crew setup, site builder, lobby)
+      _builderReadOnly=false;
+      document.getElementById('sbpanel').style.display='';
       document.getElementById('online-lobby').style.display='none';
       document.getElementById('setup').style.display='none';
       document.getElementById('setup-site').style.display='none';
@@ -2753,6 +2759,12 @@ function updateUI(){
   document.getElementById('btrd').disabled=!trdEnabled;
   document.getElementById('btrd').dataset.tooltip=trdEnabled?'Trade resources and equipment with crew on your tile':'Another crew member must be on your tile to trade';
   updateE7Prompt();
+  // In online mode, lock all actions when it's not this player's turn
+  if(!isMyTurn()){
+    ['bend','bequip','bcargo','bwatch','bfrag','bsig','btrd'].forEach(id=>{
+      const b=document.getElementById(id);if(b)b.disabled=true;
+    });
+  }
 }
 
 function buildTokGrid(id,full,total,fc,ec,rows,cols){
@@ -3337,6 +3349,7 @@ const BUILDER_TILE_DETAIL={
 };
 
 function selectBuilderTile(idx){
+  if(_builderReadOnly)return;
   const item=builderState.palette[idx];
   if(item.placed)return;
   builderState.selectedIdx=(builderState.selectedIdx===idx?-1:idx);
@@ -3356,7 +3369,7 @@ function selectBuilderTile(idx){
 }
 
 function placeBuilderTile(q,r){
-  if(builderState.selectedIdx<0)return;
+  if(_builderReadOnly||builderState.selectedIdx<0)return;
   if(!isValidBuilderPos(q,r))return;
   const item=builderState.palette[builderState.selectedIdx];
   if(item.placed)return;
@@ -3366,6 +3379,7 @@ function placeBuilderTile(q,r){
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
+  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
 function updateBuilderProgress(){
@@ -3376,8 +3390,10 @@ function updateBuilderProgress(){
 }
 
 function resetBuilder(){
+  if(_builderReadOnly)return;
   initBuilder();
   updateBuilderProgress();
+  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
 function randomBuilder(){
@@ -3398,6 +3414,7 @@ function randomBuilder(){
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
+  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
 function renderPalette(){
@@ -3638,7 +3655,9 @@ function goToSiteBuilder(){
     document.getElementById('setup').style.display='none';
     const sb=document.getElementById('setup-site');
     sb.style.display='flex';sb.classList.add('show');
+    _builderReadOnly=false;
     initBuilder();updateBuilderProgress();
+    window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
     if(!_sbMsgPlayed){_sbMsgPlayed=true;e7ScreenSeq('sb-e7-log',[
       [0,  'sys','> ESTABLISHING BASE CAMP...'],
       [300,'',   'Before venturing into the field, set up your base camp.'],
@@ -3737,6 +3756,8 @@ window.addEventListener('DOMContentLoaded',()=>{
 const _escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 let _isOnlineMode=false;
 let _onlineLobbyData={};  // keyed by connectionSlot (0–5)
+let _builderReadOnly=false;
+function isMyTurn(){return !_isOnlineMode||!window.Sync?.isActive()||window.Sync.myPlayerIndex()===G?.currentPlayer;}
 
 function _lobbyShowPanel(id){
   const footers={'lobby-mode-sel':'lobby-footer-sel','lobby-hosting':'lobby-footer-host','lobby-joining':'lobby-footer-join'};
@@ -3825,6 +3846,23 @@ function enterOnlineCrewSetup(){
     });
     if(_isOnlineMode)buildSetup();
   });
+  // Clients (non-host) watch for the host's site builder state
+  if(window.Sync.myPlayerIndex()!==0){
+    window.Sync.onBuilderUpdate(placedData=>{
+      if(document.getElementById('game').className==='running')return;
+      document.getElementById('setup').style.display='none';
+      const sb=document.getElementById('setup-site');
+      sb.style.display='flex';sb.classList.add('show');
+      _builderReadOnly=true;
+      if(!builderState)builderState={placed:new Map(),palette:[],selectedIdx:-1,sbPan:{x:0,y:0}};
+      builderState.placed=new Map(Object.entries(placedData));
+      builderState.selectedIdx=-1;
+      document.getElementById('sbprogress').textContent='Host is building base camp…';
+      document.getElementById('sblaunbtn').disabled=true;
+      document.getElementById('sbpanel').style.display='none';
+      renderSiteBuilder();
+    });
+  }
   showCrewSetup();
   _onlinePushMySlot();
 }
