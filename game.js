@@ -1568,7 +1568,7 @@ function doEndTurn(){
 
 function advanceTurn(){
   const alive=G.players.filter(p=>p.alive);if(!alive.length){
-    showModal('ALL CREW LOST','',true,()=>{clearSave();location.reload();},'End Mission',undefined,undefined,'<div id="mov-e7log" class="mov-e7log"></div>');
+    showModal('ALL CREW LOST','',true,()=>{clearSave();window.Sync?.clearSession();location.reload();},'End Mission',undefined,undefined,'<div id="mov-e7log" class="mov-e7log"></div>');
     e7ScreenSeq('mov-e7log',[
       [200,'crit','> LIFE SIGN MONITOR: no signals detected.'],
       [600,'sys','> INITIATING FAILSAFE PROTOCOL.'],
@@ -2625,7 +2625,7 @@ function _updateMpBadge(){
 
 function confirmNewGame(){
   let countdownInterval=null;
-  const doNewGame=()=>{clearInterval(countdownInterval);clearSave();location.reload();};
+  const doNewGame=()=>{clearInterval(countdownInterval);clearSave();window.Sync?.clearSession();location.reload()};
   const doAbort=()=>{clearInterval(countdownInterval);};
   showModal('SELF-DESTRUCT','',true,doNewGame,'Self-destruct',doAbort,'Abort','<div id="ng-e7log" class="mov-e7log"></div>','dng');
   e7ScreenSeq('ng-e7log',[
