@@ -59,7 +59,7 @@ Each terrain tile contains one or more Points of Interest. Most tiles trigger an
 
 | POI | Tool Required | What Happens |
 |---|---|---|
-| Dead Tower | Lockpick | Recover 1 Radio Fragment. |
+| Derelict Tower | Lockpick | Recover 1 Radio Fragment. |
 | Collapsed Tower | Plasma Cutter | Recover 1 Radio Fragment. |
 | Abandoned Outpost | Lockpick | Roll 1 die for Food yield. |
 | Mysterious Outpost | Data Spike | Draw 1 Equipment card. |
@@ -155,7 +155,7 @@ The **Cargo Hold** begins the game with 15 FOOD tokens — a shared, finite comm
 
 There are 5 Radio Fragment tokens in the game. They represent pieces of the ship's emergency transmitter, scattered across the terrain by the crash.
 
-Fragments are found at Signal Tower tiles (Dead Tower and Collapsed Tower) and through Event cards. Tower tiles require specific tools to access — a Lockpick for the Dead Tower, a Plasma Cutter for the Collapsed Tower. When a fragment is recovered, the finding player carries the token. To contribute to rescue, a Fragment must be brought to the Signal Array at Base Camp and activated there.
+Fragments are found at Signal Tower tiles (Derelict Tower and Collapsed Tower) and through Event cards. Tower tiles require specific tools to access — a Lockpick for the Derelict Tower, a Plasma Cutter for the Collapsed Tower. When a fragment is recovered, the finding player carries the token. To contribute to rescue, a Fragment must be brought to the Signal Array at Base Camp and activated there.
 
 Each activated Fragment lowers the threshold required to trigger rescue. If a player carrying a Fragment dies, the token is left at their location for others to retrieve.
 
@@ -170,7 +170,7 @@ The Integrated Robotic Intelligence System (IRIS) is an optional AI crew member.
 1. Recharge at the Airlock if battery is critically low.
 2. Rescue incapacitated crew — she will go to the Equipment Locker to pick up a MedPack if needed.
 3. Carry Radio Fragments to the Signal Array and activate them.
-4. Collect tools to unlock and investigate known fragment tiles (Dead Tower, Collapsed Tower).
+4. Collect tools to unlock and investigate known fragment tiles (Derelict Tower, Collapsed Tower).
 5. Collect tools to investigate equipment-reward tiles (Mysterious Outpost, Recovered Terminal).
 6. Explore unrevealed tiles to expand the map.
 
@@ -210,7 +210,7 @@ Each card explains its own effect. There are 15 distinct cards, 3 copies each, f
 |---|---|
 | Plasma Cutter | Cut through sealed structures. Required to access the Collapsed Tower. |
 | Grappling Hook | Move to any adjacent tile without spending movement points. Once per round. |
-| Lockpick | Bypass mechanical locks. Required to access the Dead Tower and Abandoned Outpost. |
+| Lockpick | Bypass mechanical locks. Required to access the Derelict Tower and Abandoned Outpost. |
 | Walkie | Trade resources with any crew member anywhere on the board. |
 | Stretcher | Carry an incapacitated crew member on your tile to the Medical Bay. They regain 1 Health. Discard after use. |
 

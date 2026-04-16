@@ -883,7 +883,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .evc.pub .evc-bot-corners{color:#1a4060}
 .evc.priv .evc-bot-corners{color:#4a2808}
 #evc-die{display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
-.evc-die-result{display:flex;align-items:center;justify-content:center;}
+.evc-die-result{display:flex;align-items:center;justify-content:center;gap:10px;}
 #evc-btn{opacity:.8}
 /* Equipment card variants on overlay — inherit cc-* vars */
 .evc.eq{background:var(--cc-bg);border:1px solid var(--cc-bdr);

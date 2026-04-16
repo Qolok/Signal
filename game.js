@@ -212,7 +212,7 @@ function buildTerrainDeck(){
   ANOMALIES.forEach(a=>deck.push({type:'anomaly',anomaly:a,pois:[],investigatedCount:0}));
   // 33 Terrain tiles — single POI per tile
   const terrainSpec=[
-    {pois:['Dead Tower'],          radioFragment:true,  requiresTool:'lockpick',      noEvent:true, count:1},
+    {pois:['Derelict Tower'],       radioFragment:true,  requiresTool:'lockpick',      noEvent:true, count:1},
     {pois:['Collapsed Tower'],     radioFragment:true,  requiresTool:'plasma_cutter', noEvent:true, count:1},
     {pois:['Fuselage'],            radioFragment:false, count:2},
     {pois:['Cave'],                radioFragment:false, count:9},
@@ -239,7 +239,7 @@ function buildTerrainDeck(){
 
 const POI_COLOR={
   'Fuselage':'#3a7080','Cave':'#2a5030','Abandoned Outpost':'#7a6030','Mysterious Outpost':'#305060',
-  'Dead Tower':'#2870a0','Collapsed Tower':'#1a5080','Wreckage Field':'#705030',
+  'Derelict Tower':'#2870a0','Collapsed Tower':'#1a5080','Wreckage Field':'#705030',
   'Recovered Terminal':'#2060a8','Cache':'#507040',
   'Passage':'#4a4a60','Bloody Passage':'#702020',
 };
@@ -255,7 +255,7 @@ const TILE_IMAGE_MAP={
   'Medical Bay':        'medbay.png',
   'Cargo Hold':         'cargo.png',
   'Airlock':            'airlock.png',
-  'Dead Tower':         'signal-tower.png',
+  'Derelict Tower':     'signal-tower.png',
   'Collapsed Tower':    'signal-tower.png',
   'Abandoned Outpost':  'outpost1.png',
   'Mysterious Outpost': 'outpost2.png',
@@ -392,7 +392,7 @@ const TILE_TIPS={
   'Cargo Hold':        [[0,'','Communal food and supply storage.'],[0,'act','Deposit or withdraw Food freely.']],
   'Airlock':           [[0,'','The pressurized entry point from the field. O₂ reserves fully restored on re-entry.'],[0,'act','Passive: Refill all O₂ Tanks automatically when entering from terrain.']],
   'Watch Tower':       [[0,'','An elevated vantage point over the surrounding terrain.'],[0,'act','Reveal all face-down tiles adjacent to any crew member currently in the field.']],
-  'Dead Tower':        [[0,'','A broadcast tower, hand-built and long-abandoned.'],[0,'','Inside, you find a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them.'],[0,'','You salvage some Radio Fragments from the equipment.'],[0,'act','Use Lockpick to recover 1 Radio Fragment.']],
+  'Derelict Tower':    [[0,'','A broadcast tower, hand-built and long-abandoned.'],[0,'','Inside, you find a logbook in a language you recognize. The last entry is dated eighteen years ago. The final page is a list of names with lines drawn through them.'],[0,'','You salvage some Radio Fragments from the equipment.'],[0,'act','Use Lockpick to recover 1 Radio Fragment.']],
   'Collapsed Tower':   [[0,'','On the ridge, you spot a relay tower, partially collapsed.'],[0,'','The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter.'],[0,'act','A crew member with a plasma cutter can get inside and salvage the Radio Fragment.']],
   'Cave':              [[0,'','Natural shelter. Atmospheric sensors can\'t reach inside.'],[0,'good','Skip O2 Tank flip this round.'],[300,'act','Draw an Event card.']],
   'Abandoned Outpost': [[0,'','In a valley, you spot an odd structure. This was likely a small settlement or research station.'],[300,'','The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.'],[0,'act','Use the Lockpick to enter.'],[0,'act','Roll 1 die for Food yield.']],
@@ -1549,6 +1549,8 @@ function doEndTurn(){
         addLog(`${p.name} solo rescue: rolled ${val}.`,val>=10?'good':'crit');
         if(val>=10){
           p.alive=false;
+          const synth=G.players.find(pl=>pl.isSynth&&pl.corrupted&&pl.alive);
+          if(synth){synth.corrupted=false;addLog('IRIS: Active crew count reduced. Threat protocol suspended.','sys');}
           showModal('SOLO EXTRACTION','',true,()=>{advanceTurn();},undefined,undefined,undefined,
             '<div id="mov-e7log" class="mov-e7log"></div>');
           e7ScreenSeq('mov-e7log',[
@@ -1716,7 +1718,8 @@ function synthChooseCorrupted(p){
 
 
 
-function synthApplyStep(p,q,r){
+// Returns true if movement was interrupted (async contest triggered), false if sync step completed.
+function synthApplyStep(p,q,r,onInterrupted){
   if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
   G.movementLeft--;
   p.q=q;p.r=r;
@@ -1753,16 +1756,35 @@ function synthApplyStep(p,q,r){
     }
     G.tileActionUsed=true;
   }
+  // If IRIS steps onto an occupied Signal Array, trigger a contest and stop movement
+  if(t?.name==='Signal Array'&&onInterrupted){
+    const occupant=G.players.find(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r);
+    if(occupant){
+      G.reach=bfsReach(p.q,p.r,G.movementLeft);
+      addLog('IRIS contests the Signal Array with '+occupant.name+'.','act');
+      updateUI();render();panToPlayer(p);
+      showContestModal(p,occupant,
+        ()=>{addLog('IRIS holds the Signal Array. '+occupant.name+' displaced.','crit');
+          occupant.q=0;occupant.r=0;const ct=G.tiles.get(hk(0,0));occupant.location=tileName(ct);
+          updateUI();render();onInterrupted();},
+        ()=>{addLog(occupant.name+' holds the Signal Array.','act');
+          p.q=occupant.q;p.r=occupant.r;p.location=occupant.location;
+          G.movementLeft=0;updateUI();render();onInterrupted();}
+      );
+      return true;
+    }
+  }
   G.reach=bfsReach(p.q,p.r,G.movementLeft);
   addLog('IRIS → '+p.location);
   updateUI();render();panToPlayer(p);
+  return false;
 }
 
 function synthExecuteSteps(steps,idx,onDone){
   if(idx>=steps.length){onDone();return;}
   const[q,r]=steps[idx];
-  synthApplyStep(cp(),q,r);
-  setTimeout(()=>synthExecuteSteps(steps,idx+1,onDone),1400);
+  const interrupted=synthApplyStep(cp(),q,r,onDone);
+  if(!interrupted)setTimeout(()=>synthExecuteSteps(steps,idx+1,onDone),1400);
 }
 
 function synthTakeAction(p,target,onDone){
@@ -2328,7 +2350,7 @@ const BASECAMP_ICON_MAP={
 function drawTileArtwork(g,cx,cy,t){
   if(t.type==='terrain'&&t.radioFragment){
     const poi=t.pois?.[0];
-    if(poi==='Dead Tower'||poi==='Collapsed Tower'){
+    if(poi==='Derelict Tower'||poi==='Collapsed Tower'){
       const fragTok=svgEl('text',{x:cx+18,y:cy-13,'text-anchor':'middle','font-family':'monospace','font-size':'13',fill:'#8a28c8',style:'filter:drop-shadow(0 0 4px rgba(138,40,200,0.7))','pointer-events':'none'});
       fragTok.textContent='◈';
       g.appendChild(fragTok);
@@ -3906,7 +3928,7 @@ function enterOnlineCrewSetup(){
       if(!builderState)builderState={placed:new Map(),palette:[],selectedIdx:-1,sbPan:{x:0,y:0}};
       builderState.placed=new Map(Object.entries(placedData));
       builderState.selectedIdx=-1;
-      document.getElementById('sbprogress').textContent='Host is building base camp…';
+      document.getElementById('sbprogress').textContent='';
       document.getElementById('sblaunbtn').disabled=true;
       document.getElementById('sbpanel').style.display='none';
       renderSiteBuilder();
@@ -3915,7 +3937,7 @@ function enterOnlineCrewSetup(){
         e7ScreenSeq('sb-e7-log',[
           [0,  'sys','> ESTABLISHING BASE CAMP...'],
           [300,'',   'Before venturing into the field, set up your base camp.'],
-          [400,'',   'Host is building base camp…'],
+          [400,'act',   'Host is building base camp…'],
         ]);
       }
     });

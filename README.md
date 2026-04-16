@@ -1,4 +1,4 @@
-![Signal Game](img/screens/game.jpeg)
+![Signal Game](img/screens/game.jpg)
 
 # SIGNAL
 
