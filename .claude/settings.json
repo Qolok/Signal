@@ -1,7 +1,9 @@
 {
   "attribution": {
-    "commit": ""
+    "commit": "",
+    "pr": ""
   },
+  "includeCoAuthoredBy": false,
   "hooks": {
     "PreToolUse": [
       {
