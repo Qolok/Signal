@@ -2577,7 +2577,9 @@ function receiveRemoteState(data){
   try{
     window.Sync?.beginReceive();
     const sg=data.G;
-    sg.tiles=new Map(sg.tiles);
+    // Firebase sometimes converts arrays to objects with integer keys; normalize either form
+    const tilesRaw=sg.tiles;
+    sg.tiles=new Map(Array.isArray(tilesRaw)?tilesRaw:Object.values(tilesRaw||{}));
     sg.reach=new Map();
     G=sg;
     cardUid=data.cardUid||0;
@@ -3544,6 +3546,8 @@ function finalizeGame(){
   _updateMpBadge();
   guidanceSeen=new Set(); // reset guidance milestones for new game
   newGame(pendingNames,pendingPortraits,placedMap);
+  // For online games, push state immediately so the client doesn't wait for the setTimeout
+  if(_isOnlineMode && window.Sync?.isActive()) saveGame();
   // Sync guidance toggle button state
   const gtBtn=document.getElementById('e7guidance-toggle');
   if(gtBtn){gtBtn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';gtBtn.classList.toggle('on',guidanceMode);}
@@ -3570,8 +3574,8 @@ function finalizeGame(){
       ...ctrlLines,
       [0,   'div',  null],
       [0,   'sys',  '> MISSION BRIEFING'],
-      [0,   '',     'Find RADIO FRAGMENTS to activate your SIGNAL ARRAY. Each fragment increases the range of your signal.'],
-      [0,   '',     'FOOD and OXYGEN deplete every turn. Return to the base camp to refill and heal.'],
+      [0,   '',     'Find RADIO FRAGMENTS to activate the SIGNAL ARRAY. Each fragment increases the range of your signal.'],
+      [0,   '',     'RESOURCES deplete every turn. Return to the base camp to refuel.'],
       [0,   'div',  null],
       [0,   'sys', `Mission initialized. ${crew.length} crew active.`],
       [0,   'sys', `Turn 1: ${crew[0]}. Roll for movement.`],
