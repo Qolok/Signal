@@ -2589,7 +2589,11 @@ function receiveRemoteState(data){
       render(); updateUI();
     } else {
       // First state received: joiner launches the game view
+      // Hide all pre-game screens (crew setup, site builder, lobby)
       document.getElementById('online-lobby').style.display='none';
+      document.getElementById('setup').style.display='none';
+      document.getElementById('setup-site').style.display='none';
+      document.getElementById('intro').style.display='none';
       gameEl.className='running';
       const idx=window.Sync?.myPlayerIndex()||0;
       viewedPlayer=Math.min(idx,G.players.length-1);
@@ -3566,9 +3570,8 @@ function finalizeGame(){
       ...ctrlLines,
       [0,   'div',  null],
       [0,   'sys',  '> MISSION BRIEFING'],
-      [0,   '',     'Find RADIO FRAGMENTS and activate them at your SIGNAL ARRAY. Each fragment increases the chance your signal will be received.'],
-      [0,   '',     'FOOD and OXYGEN deplete every turn. Return to the base camp to refill your supply.'],
-      [0,   '',     'When FOOD or OXYGEN runs out, your HEALTH will deplete. Visit the MEDICAL BAY to heal.'],
+      [0,   '',     'Find RADIO FRAGMENTS to activate your SIGNAL ARRAY. Each fragment increases the range of your signal.'],
+      [0,   '',     'FOOD and OXYGEN deplete every turn. Return to the base camp to refill and heal.'],
       [0,   'div',  null],
       [0,   'sys', `Mission initialized. ${crew.length} crew active.`],
       [0,   'sys', `Turn 1: ${crew[0]}. Roll for movement.`],
