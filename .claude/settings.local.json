@@ -1,4 +1,20 @@
 {
+  "attribution": {
+    "commit": ""
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // \"\"'); if echo \"$cmd\" | grep -q 'git commit'; then node -e \"var fs=require('fs'),p='c:/Users/russp/Documents/Signal/index.html',h=fs.readFileSync(p,'utf8').replace(/v([0-9]+)[.]([0-9]+)[.]([0-9]+)/,function(m,a,b,c){return 'v'+a+'.'+b+'.'+(+c+1)});fs.writeFileSync(p,h);\" && git -C 'c:/Users/russp/Documents/Signal' add index.html; fi"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(git add:*)",
@@ -6,7 +22,26 @@
       "Bash(git push:*)",
       "Bash(git pull:*)",
       "Bash(ls c:/Users/russp/Documents/Signal/*.js)",
-      "Bash(node --check game.js)"
+      "Bash(node --check game.js)",
+      "Bash(grep -E \"\\\\.\\(js|html|css|json\\)$\")",
+      "Bash(node -e ':*)",
+      "Bash(\\\\${p.name}\\\\'s Hazard Suit blocked toxic exposure.)",
+      "Bash(\\\\${p.name} suffered:*)",
+      "Bash(node)",
+      "Bash(node patch_synth.js)",
+      "Bash(node brace_check.js)",
+      "Bash(node patch_find.js)",
+      "Bash(node fix_brace.js)",
+      "Bash(node patch2.js)",
+      "Bash(rm patch2.js)",
+      "Bash(node patch3.js)",
+      "Bash(rm patch3.js)",
+      "Bash(node patch4.js)",
+      "Bash(rm patch4.js)",
+      "WebSearch",
+      "Bash(node --check c:/Users/russp/Documents/Signal/game.js)",
+      "Bash(node --check c:/Users/russp/Documents/Signal/sync.js)",
+      "Bash(python3 -)"
     ]
   }
 }
