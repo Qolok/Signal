@@ -198,9 +198,11 @@ function _saveSession() {
 function _startListening() {
   if (!_gameRef) return;
   _gameRef.child('state').on('value', snap => {
+    console.log('[Sync] state update, exists:',snap.exists(),'hasCallback:',!!_onStateUpdate);
     if (!snap.exists()) return;
     const data = snap.val();
-    if (data._source === _clientId) return; // suppress our own echo
+    if (data._source === _clientId) {console.log('[Sync] suppressed own echo');return;}
     if (_onStateUpdate) _onStateUpdate(data);
+    else console.warn('[Sync] no onStateUpdate callback registered');
   });
 }

@@ -2551,8 +2551,8 @@ function saveGame(){
     };
     s.G.players=G.players.map(p=>({...p,equipment:[...p.equipment]}));
     localStorage.setItem('signal_save',JSON.stringify(s));
-    if(window.Sync?.isActive()) window.Sync.pushState(s);
-  }catch(e){}
+    if(window.Sync?.isActive()){console.log('[saveGame] pushing state, tiles keys:',Object.keys(s.G.tiles).length);window.Sync.pushState(s);}
+  }catch(e){console.error('[saveGame]',e);}
 }
 function loadGame(){
   try{
@@ -2574,6 +2574,7 @@ function clearSave(){localStorage.removeItem('signal_save');}
 
 // Applies a game state received from Firebase (remote player's turn ended)
 function receiveRemoteState(data){
+  console.log('[receiveRemoteState] called, alreadyRunning:',document.getElementById('game').className==='running');
   try{
     window.Sync?.beginReceive();
     const sg=data.G;
