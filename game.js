@@ -2583,11 +2583,17 @@ function clearSave(){localStorage.removeItem('signal_save');}
 function receiveRemoteState(data){
   try{
     window.Sync?.beginReceive();
+    // Firebase converts every array to a numeric-keyed object; normalize them all back
+    const _fa=v=>{if(!v)return[];if(Array.isArray(v))return v;return Object.keys(v).sort((a,b)=>+a-+b).map(k=>v[k]);};
     const sg=data.G;
     sg.tiles=new Map(Object.entries(sg.tiles||{}));
     sg.reach=new Map();
+    sg.terrainDeck=_fa(sg.terrainDeck);
+    sg.eqDeck=_fa(sg.eqDeck);
+    sg.evtDeck=_fa(sg.evtDeck);
+    sg.players=_fa(sg.players).map(p=>({...p,equipment:_fa(p.equipment)}));
     const prevPlayer=G?.currentPlayer;
-    const incomingLogs=sg._pendingLogs||[];
+    const incomingLogs=_fa(sg._pendingLogs);
     delete sg._pendingLogs;
     G=sg;
     cardUid=data.cardUid||0;
