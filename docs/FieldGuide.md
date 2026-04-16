@@ -149,7 +149,7 @@ The **Cargo Hold** begins the game with 15 FOOD tokens — a shared, finite comm
 
 **Incapacitation:** Cannot move or act. A crew member on the same tile may use a MedPack to restore them to 1 Health, or a Stretcher to carry them directly to the Medical Bay (also restores 1 Health). If neither happens before their second consecutive incapacitated round, they die.
 
-**Death:** Everything they were carrying — FOOD, OXYGEN, Equipment cards, Radio Fragments — is left at their current location. A dead player is out of the game. Their secrets die with them.
+**Death:** A dead player is out of the game. Any Radio Fragments they were carrying are left at their final location. Their secrets die with them.
 
 # Radio Fragments
 

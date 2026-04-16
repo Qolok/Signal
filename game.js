@@ -418,17 +418,20 @@ const TILE_TIPS={
 // ═══════════════════════════════════════════════════════════════
 let guidanceMode=true;
 let guidanceSeen=new Set(); // milestone keys shown this session — reset on new game
+let _inGuidance=false;
 
 function toggleGuidance(){
-  guidanceMode=!guidanceMode;
-  const btn=document.getElementById('e7guidance-toggle');
-  if(btn){btn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';btn.classList.toggle('on',guidanceMode);}
+  const cb=document.getElementById('e7guidance-toggle');
+  guidanceMode=cb?cb.checked:!guidanceMode;
+  document.querySelectorAll('#e7log .e7-guide').forEach(el=>el.classList.toggle('hidden',!guidanceMode));
 }
 
 function guidance(key, fn){
   if(!guidanceMode||guidanceSeen.has(key))return;
   guidanceSeen.add(key);
+  _inGuidance=true;
   fn();
+  _inGuidance=false;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -618,6 +621,7 @@ function showTileRevealModal(t, onDismiss){
     const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
     steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
+    if(!hasTool){guidance('first_tool_tile',()=>{e7Seq([[0,'div',null],[0,'sys',`> Access denied — ${toolName} required.`],[0,'','Some tiles are locked behind specific tools. Tools are found as equipment card draws. If you find a Lockpick, Plasma Cutter, or Data Spike, hold onto it — certain tiles contain Radio Fragments that can only be reached with the right tool.']]);});}
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
@@ -1065,6 +1069,13 @@ function rollTableDice(){
       addLog(`${cp().name} rolled ${r}.`);
       renderTableDice();
       updateUI();render();
+      guidance('first_roll',()=>{
+        e7Seq([
+          [0,'div',null],
+          [0,'sys',`> Movement budget: ${r}.`],
+          [0,'',`You rolled ${r} — that is how many hexes you can move this turn. Click any highlighted hex to move there. You can split your movement and explore multiple tiles before ending your turn.`],
+        ]);
+      });
     } else if(diceState.mode==='signal'){
       renderTableDice();
       finishSignalRoll(finalValues);
@@ -1118,8 +1129,10 @@ function applyLanding(p,q,r,path,wasRevealed){
   const t=G.tiles.get(hk(q,r));
   p.location=tileName(t);
   if(t?.type==='crash_site'){
-    if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');}
-    if(t.name==='Medical Bay'&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
+    if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');
+      guidance('first_airlock',()=>{e7Seq([[0,'div',null],[0,'sys','> Airlock pressurised.'],[0,'good','Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.']]);});}
+    if(t.name==='Medical Bay'&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');
+      guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'good','Health has been restored. The Medical Bay heals one point each time you visit. Return here when you are injured — it could save your life.']]);});}
     if(t.name==='Signal Array'){
       guidance('first_signal_array',()=>{
         const fragMsg=p.radioFragments>0
@@ -1135,7 +1148,7 @@ function applyLanding(p,q,r,path,wasRevealed){
   }
   if(t?.shockTrap&&t.shockTrapOwner!==p.id){
     t.shockTrap=false;t.shockTrapOwner=null;
-    if(p.health>0)p.health--;
+    if(p.health>0){p.health--;guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}
     addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3.`,'crit');
     markTilesDirty();
   }
@@ -1167,6 +1180,7 @@ function drawEqCard(player){
   player.equipment.push({...card,uid:++cardUid});
   G.eqDeckCount=G.eqDeck.length;
   const el=document.getElementById('equpn');if(el)el.textContent=G.eqDeckCount;
+  if(!card.eventCard){guidance('first_equipment',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment acquired.'],[0,'','Equipment cards are tools and consumables that can turn the tide. Most are single-use. Tools like the Lockpick, Plasma Cutter, and Data Spike can unlock tiles that contain Radio Fragments or additional equipment.']]);});}
   return card;
 }
 
@@ -1359,6 +1373,7 @@ function doEquipLocker(){
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Equipment Locker')return;
   G.phase='action';
   if(G.tileActionUsed){showModal('Already Used','You have already used a tile action this turn.',true,()=>{});return;}
+  guidance('first_equipment_locker',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment Locker accessed.'],[0,'','Draw one equipment card per visit. If you already have cards, you can exchange one for a fresh draw. Equipment can give you a significant advantage in the field — use the Locker whenever you have the chance.']]);});
   cancelTooltip();
   const trov=document.getElementById('trov');
   trov.style.backgroundImage='url(img/Tiles/locker.png)';
@@ -1433,6 +1448,7 @@ function doCargo(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Cargo Hold')return;
   G.phase='action';
+  guidance('first_cargo_hold',()=>{e7Seq([[0,'div',null],[0,'sys','> Cargo Hold accessed.'],[0,'','The Cargo Hold is a shared food reserve for the entire crew. Deposit surplus food here when you are well-stocked, and withdraw it when you are running low. Coordinating as a crew can prevent starvation.']]);});
   renderCargoModal();
 }
 function renderCargoModal(){
@@ -1462,6 +1478,7 @@ function doWatchTower(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Watch Tower')return;
   G.phase='action';
+  guidance('first_watch_tower',()=>{e7Seq([[0,'div',null],[0,'sys','> Watch Tower online.'],[0,'','The Watch Tower reveals all tiles adjacent to crew currently in the field — without them needing to move. Use it to scout the terrain and plan your routes before committing.']]);});
   const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
   let msg;
   if(!inField.length){
@@ -1516,14 +1533,14 @@ function doEndTurn(){
     if(curTile?.anomaly!=='Stasis Pod'){p.inStasis=false;}
     else{advanceTurn();return;}
   }
-  if(p.food>0)p.food--;
-  else{if(p.health>0)p.health--;addLog(`${p.name} is starving. Health: ${p.health}/3.`,'crit');}
+  if(p.food>0){p.food--;guidance('first_food_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Resource consumption logged.'],[0,'','Food depletes by 1 each turn. If it reaches zero, you will lose Health instead. Deposit surplus food in the Cargo Hold to build a shared reserve for the crew.']]);});}
+  else{if(p.health>0){p.health--;guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} is starving. Health: ${p.health}/3.`,'crit');}
   if(!onBase&&!p.skipO2){
     const hasRebreather=p.equipment.some(c=>c.id==='rebreather');
     if(hasRebreather){p.rebreatherCycle=!p.rebreatherCycle;}
     if(!hasRebreather||p.rebreatherCycle){
-      if(p.o2>0)p.o2--;
-      else{if(p.health>0)p.health--;addLog(`${p.name} has no O₂. Health: ${p.health}/3.`,'crit');}
+      if(p.o2>0){p.o2--;guidance('first_o2_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Oxygen consumption logged.'],[0,'','O\u2082 depletes by 1 each turn you spend outside the crash site. If it reaches zero, you will lose Health instead. Pass through the Airlock to fully restore your O\u2082.']]);});}
+      else{if(p.health>0){p.health--;guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} has no O₂. Health: ${p.health}/3.`,'crit');}
     }
   }
   p.skipO2=false;
@@ -2182,7 +2199,7 @@ function closeTrade(){
 // ═══════════════════════════════════════════════════════════════
 // BOARD RENDERING
 // ═══════════════════════════════════════════════════════════════
-let pan={x:0,y:0},zoom=2;
+let pan={x:0,y:0},zoom=Math.min(4,window.innerHeight/(SZ*9));
 let boardGroup=null,panRafId=null;
 let _hexGridPath=null;
 let _tilesDirty=true,_dynGroup=null,_lastRenderW=0,_lastRenderH=0;
@@ -3164,7 +3181,7 @@ function showEventCard(evt, _locName, onOk, rollCallback, isReview){
 function e7Type(el,msg,charDelay=15){
   el.textContent='';
   for(let i=0;i<msg.length;i++)
-    setTimeout(()=>{el.textContent=msg.slice(0,i+1);const p=el.parentElement;if(p)p.scrollTop=p.scrollHeight;},i*charDelay);
+    setTimeout(()=>{el.textContent=msg.slice(0,i+1);const p=el.parentElement;if(p){const sc=p._scrollTarget||p;sc.scrollTop=sc.scrollHeight;}},i*charDelay);
 }
 // Append a colored line to any terminal container
 // cls: 'sys'|'good'|'act'|'crit'|'imp'|'frag'|'tile'|''   base: 'e7m' (voice) or 'le' (log entry)
@@ -3172,13 +3189,13 @@ function termAppend(container,msg,cls='',charDelay=15,base='e7m'){
   const d=document.createElement('div');
   d.className=base+(cls?' '+cls:'');
   container.appendChild(d);
-  container.scrollTop=container.scrollHeight;
+  const sc=container._scrollTarget||container;sc.scrollTop=sc.scrollHeight;
   e7Type(d,msg,charDelay);
 }
 // Append a divider to any terminal container
 function termDiv(container){
   const d=document.createElement('div');d.className='e7div';
-  container.appendChild(d);container.scrollTop=container.scrollHeight;
+  container.appendChild(d);const sc=container._scrollTarget||container;sc.scrollTop=sc.scrollHeight;
 }
 // Run a timed sequence into any terminal container
 // steps: [[gapMs, cls, msg], ...]
@@ -3277,7 +3294,17 @@ function toggleE7(){
   p.classList.toggle('show');
   if(p.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;updateE7Prompt();}
 }
-function e7Seq(steps,charDelay=15,lineGap=150){termSeq(document.getElementById('e7log'),steps,charDelay,lineGap);}
+function e7Seq(steps,charDelay=15,lineGap=150){
+  const log=document.getElementById('e7log');
+  if(_inGuidance){
+    const wrap=document.createElement('div');wrap.className='e7-guide';
+    wrap._scrollTarget=log;
+    log.appendChild(wrap);log.scrollTop=log.scrollHeight;
+    termSeq(wrap,steps,charDelay,lineGap);
+  } else {
+    termSeq(log,steps,charDelay,lineGap);
+  }
+}
 function e7ScreenSeq(containerId,steps,charDelay=20,lineGap=120){const c=document.getElementById(containerId);if(c)termSeq(c,steps,charDelay,lineGap);}
 // E7 panel stays open until explicitly closed via the ✕ button or E7 toggle
 
@@ -3379,7 +3406,7 @@ function initBuilder(){
     palette:[...BUILDER_PALETTE.map((p,i)=>({...p,idx:i,placed:false}))],
     selectedIdx:-1
   };
-  sbPan={x:0,y:0};sbZoom=Math.min(4,window.innerHeight/(SZB*8));
+  sbPan={x:0,y:0};sbZoom=Math.min(4,window.innerHeight/(SZB*9));
   if(!sbEventsInit){
     sbEventsInit=true;
     const wrap=document.getElementById('sbsvg-wrap');
@@ -3637,8 +3664,7 @@ function finalizeGame(){
   // For online games, push state immediately so the client doesn't wait for the setTimeout
   if(_isOnlineMode && window.Sync?.isActive()) saveGame();
   // Sync guidance toggle button state
-  const gtBtn=document.getElementById('e7guidance-toggle');
-  if(gtBtn){gtBtn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';gtBtn.classList.toggle('on',guidanceMode);}
+  const gtBtn=document.getElementById('e7guidance-toggle');if(gtBtn){gtBtn.checked=guidanceMode;}
   setTimeout(()=>{
     preloadTileImages();initBoard();render();updateUI();
     showTableDice('move');
@@ -3766,8 +3792,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   document.getElementById('setup').style.display='none';
   // Sync guidance toggle on load
-  const _gtBtn=document.getElementById('e7guidance-toggle');
-  if(_gtBtn){_gtBtn.textContent=guidanceMode?'Guide: ON':'Guide: OFF';_gtBtn.classList.toggle('on',guidanceMode);}
+  const _gtBtn=document.getElementById('e7guidance-toggle');if(_gtBtn){_gtBtn.checked=guidanceMode;}
 
   // Check for an existing multiplayer session (page reload mid-game)
   const mpSession=window.Sync?.restoreSession();

@@ -15,7 +15,11 @@
   <div id="e7hdr">
     <div class="e7title">
       <span class="e7logo">ENDYMION 7</span>
-      <button class="e7guidance-toggle" id="e7guidance-toggle" onclick="toggleGuidance()">Guide: ON</button>
+      <label class="e7guidance-toggle" for="e7guidance-toggle" data-tooltip="Guide Mode: E7 can explain rules and mechanics from the Field Guide as you play.">
+        <input type="checkbox" id="e7guidance-toggle" onchange="toggleGuidance()">
+        <span class="e7toggle-track"><span class="e7toggle-thumb"></span></span>
+        <span class="e7toggle-lbl">GUIDE</span>
+      </label>
     </div>
     <div class="e7sub">SHIP COMPUTER</div>
     <button class="e7close" onclick="toggleE7()">✕</button>
@@ -40,7 +44,7 @@
       <button class="sbtn" onclick="showOnlineLobby()">Online Game</button>
     </div>
   </div>
-  <div class="version-label">v1.0.15</div>
+  <div class="version-label">v1.0.17</div>
 </div>
 
 <!-- ── ONLINE LOBBY ── -->
