@@ -2542,7 +2542,7 @@ function saveGame(){
   try{
     const s={
       G:{...G,
-        tiles:[...G.tiles.entries()],
+        tiles:Object.fromEntries(G.tiles),
         reach:[],                          // transient — recalculated
         terrainDeck:[...G.terrainDeck],
         eqDeck:[...G.eqDeck],
@@ -2560,7 +2560,7 @@ function loadGame(){
     if(!raw)return false;
     const s=JSON.parse(raw);
     const sg=s.G;
-    sg.tiles=new Map(sg.tiles);
+    sg.tiles=new Map(Object.entries(sg.tiles||{}));
     sg.reach=new Map();
     G=sg;
     cardUid=s.cardUid||0;
@@ -2577,9 +2577,7 @@ function receiveRemoteState(data){
   try{
     window.Sync?.beginReceive();
     const sg=data.G;
-    // Firebase sometimes converts arrays to objects with integer keys; normalize either form
-    const tilesRaw=sg.tiles;
-    sg.tiles=new Map(Array.isArray(tilesRaw)?tilesRaw:Object.values(tilesRaw||{}));
+    sg.tiles=new Map(Object.entries(sg.tiles||{}));
     sg.reach=new Map();
     G=sg;
     cardUid=data.cardUid||0;
