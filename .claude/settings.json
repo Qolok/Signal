@@ -11,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // \"\"'); if echo \"$cmd\" | grep -q 'git commit'; then node -e \"var fs=require('fs'),p='c:/Users/russp/Documents/Signal/index.html',h=fs.readFileSync(p,'utf8').replace(/v([0-9]+)[.]([0-9]+)[.]([0-9]+)/,function(m,a,b,c){return 'v'+a+'.'+b+'.'+(+c+1)});fs.writeFileSync(p,h);\" && git -C 'c:/Users/russp/Documents/Signal' add index.html; fi"
+            "command": "node -e \"var fs=require('fs'),inp='';process.stdin.on('data',function(d){inp+=d});process.stdin.on('end',function(){var cmd=(JSON.parse(inp).tool_input||{}).command||'';if(!/git commit/.test(cmd))return;var p='c:/Users/russp/Documents/Signal/index.html',h=fs.readFileSync(p,'utf8').replace(/v([0-9]+)\\.([0-9]+)\\.([0-9]+)/,function(m,a,b,c){return 'v'+a+'.'+b+'.'+(+c+1)});fs.writeFileSync(p,h);require('child_process').execSync('git -C c:/Users/russp/Documents/Signal add index.html')});\""
           }
         ]
       }
