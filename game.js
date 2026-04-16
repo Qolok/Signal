@@ -2543,6 +2543,7 @@ function saveGame(){
   if(!G)return;
   try{
     const n=G.players.length;
+    const pendingLogs=G._pendingLogs||[];
     const s={
       G:{...G,
         tiles:Object.fromEntries(G.tiles),
@@ -2550,10 +2551,12 @@ function saveGame(){
         terrainDeck:[...G.terrainDeck],
         eqDeck:[...G.eqDeck],
         evtDeck:G.evtDeck.map(c=>typeof c.text==='function'?{...c,text:c.text(n)}:c),
+        _pendingLogs:pendingLogs,
       },
       cardUid,viewedPlayer,pendingNames,pendingPortraits
     };
     s.G.players=G.players.map(p=>({...p,equipment:[...p.equipment]}));
+    G._pendingLogs=[];  // reset after capture
     localStorage.setItem('signal_save',JSON.stringify(s));
     if(window.Sync?.isActive()) window.Sync.pushState(s);
   }catch(e){console.error('[saveGame]',e);}
@@ -2584,17 +2587,30 @@ function receiveRemoteState(data){
     sg.tiles=new Map(Object.entries(sg.tiles||{}));
     sg.reach=new Map();
     const prevPlayer=G?.currentPlayer;
+    const incomingLogs=sg._pendingLogs||[];
+    delete sg._pendingLogs;
     G=sg;
     cardUid=data.cardUid||0;
     const gameEl=document.getElementById('game');
     const alreadyRunning=gameEl.className==='running';
     if(alreadyRunning){
       const turnChanged=prevPlayer!==G.currentPlayer;
-      if(turnChanged){viewedPlayer=G.currentPlayer;eqGalleryOffset=0;}
+      if(turnChanged){
+        // Follow the active player only if we were already watching the previous active player
+        if(viewedPlayer===prevPlayer)viewedPlayer=G.currentPlayer;
+        eqGalleryOffset=0;
+      }
       if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
       markTilesDirty();
       render(); updateUI();
-      if(turnChanged){showTableDice('move');panToPlayer(cp());}
+      incomingLogs.forEach(({msg,cls})=>addLog(msg,cls));
+      if(turnChanged){
+        showTableDice('move');panToPlayer(cp());
+        // If it's now IRIS's turn, only the host runs the AI
+        if(G.players[G.currentPlayer]?.isSynth&&window.Sync?.myPlayerIndex()===0){
+          setTimeout(doSynthTurn,1800);
+        }
+      }
       else if(G.phase==='action'){hideTableDice();}
     } else {
       // First state received: joiner launches the game view
@@ -3163,7 +3179,14 @@ function termSeq(container,steps,charDelay=15,lineGap=0){
 }
 // Convenience wrappers — all existing call sites unchanged
 function addE7(msg,cls='',charDelay=15){termAppend(document.getElementById('e7log'),msg,cls,charDelay);}
-function addLog(msg,cls='',charDelay=15){termAppend(document.getElementById('e7log'),msg,cls,charDelay,'le');}
+function addLog(msg,cls='',charDelay=15){
+  termAppend(document.getElementById('e7log'),msg,cls,charDelay,'le');
+  // Queue for sync to other players (skip during receive to avoid echo)
+  if(G&&_isOnlineMode&&!window.Sync?.isReceiving()){
+    if(!G._pendingLogs)G._pendingLogs=[];
+    G._pendingLogs.push({msg,cls});
+  }
+}
 function addE7Div(){termDiv(document.getElementById('e7log'));}
 // Prompt bar — updated on every updateUI call
 function updateE7Prompt(){
@@ -3867,6 +3890,7 @@ function enterOnlineCrewSetup(){
   });
   // Clients (non-host) watch for the host's site builder state
   if(window.Sync.myPlayerIndex()!==0){
+    let _builderMsgShown=false;
     window.Sync.onBuilderUpdate(placedData=>{
       if(document.getElementById('game').className==='running')return;
       document.getElementById('setup').style.display='none';
@@ -3880,6 +3904,14 @@ function enterOnlineCrewSetup(){
       document.getElementById('sblaunbtn').disabled=true;
       document.getElementById('sbpanel').style.display='none';
       renderSiteBuilder();
+      if(!_builderMsgShown){
+        _builderMsgShown=true;
+        e7ScreenSeq('sb-e7-log',[
+          [0,  'sys','> ESTABLISHING BASE CAMP...'],
+          [300,'',   'Before venturing into the field, set up your base camp.'],
+          [400,'',   'Host is building base camp…'],
+        ]);
+      }
     });
   }
   showCrewSetup();
