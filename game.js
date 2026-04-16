@@ -2540,12 +2540,14 @@ function buildCrewTabs(){
 function saveGame(){
   if(!G)return;
   try{
+    const n=G.players.length;
     const s={
       G:{...G,
         tiles:Object.fromEntries(G.tiles),
         reach:[],                          // transient — recalculated
         terrainDeck:[...G.terrainDeck],
         eqDeck:[...G.eqDeck],
+        evtDeck:G.evtDeck.map(c=>typeof c.text==='function'?{...c,text:c.text(n)}:c),
       },
       cardUid,viewedPlayer,pendingNames,pendingPortraits
     };
