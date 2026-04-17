@@ -217,7 +217,7 @@ function buildTerrainDeck(){
     {pois:['Fuselage'],            radioFragment:false, count:2},
     {pois:['Cave'],                radioFragment:false, count:9},
     {pois:['Abandoned Outpost'],   radioFragment:false, requiresTool:'lockpick',   toolReward:'rollFood', noEvent:true, count:1},
-    {pois:['Mysterious Outpost'],  radioFragment:false, requiresTool:'data_spike',  toolReward:'drawEq',      noEvent:true, count:1},
+    {pois:['Mysterious Outpost'],  radioFragment:true,  requiresTool:'data_spike',  toolReward:null,          noEvent:true, count:1},
     {pois:['Wreckage Field'],      radioFragment:false, count:9},
     {pois:['Cache'],               radioFragment:false, count:3},
     {pois:['Recovered Terminal'],  radioFragment:false, requiresTool:'data_spike', toolReward:'drawEq', noEvent:true, count:1},
@@ -304,9 +304,9 @@ const EQ_CARDS=[
   {id:'scanner',       name:'Scanner',           cat:'Tech',   txt:'Reveals all adjacent undiscovered tiles. Once per round, 3 charges total.',use:'scanner'},
   {id:'rebreather',    name:'Rebreather',        cat:'Tech',   txt:'Your O\u2082 depletes every 2 turns in the field instead of every turn.'},
   {id:'data_spike',    name:'Data Spike',        cat:'Tech',   txt:'Bypass electronic locks on high-tech structures.'},
-  {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile skips their next turn. Discard after use.',use:'stun_baton'},
+  {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile loses 1 Health (or Battery) and skips their next turn. Discard after use.',use:'stun_baton'},
   {id:'flare_gun',     name:'Flare Gun',         cat:'Weapon', txt:'Force any player within 2 tiles to move to your tile immediately. Discard after use.',use:'flare_gun'},
-  {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place on your current tile. The next player to enter loses 1 Health. Discard after use.',use:'shock_trap'},
+  {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place on your current tile. The next player or IRIS to enter loses 1 Health (or Battery) and their turn ends immediately. Discard after use.',use:'shock_trap'},
   {id:'jammer',        name:'Signal Jammer',     cat:'Weapon', txt:'No Signal Roll occurs this round. Discard after use.',use:'jammer'},
 ];
 
@@ -319,7 +319,7 @@ function buildEventDeck(){
   add(4,{text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true});
   add(1,{text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true});
   add(1,{text:'In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive.',pub:true,rf:true});
-  add(1,{text:"You trip over a rock and uncover a Radio Fragment, wrapped in cloth. Whoever left it here thought they'd come back.",pub:true,rf:true});
+  add(1,{text:'The atmosphere here is thick with chemical residue from the crash. You breathe it in before you realize the risk. Lose 1 Health.',pub:true,loseHealth:1});
   add(addSynth?3:4,{text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true});
   // Public — hazard
   add(4,{text:'Structural instability. The ground shifts — brace yourself. Lose 1 Health.',pub:true,loseHealth:1});
@@ -358,7 +358,7 @@ const EVENT_CARDS=[
   {text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true},
   {text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true},
   {text:'In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive. If you take it back to the Signal Array, it might take a charge.',pub:true,rf:true},
-  {text:'You trip over a rock and uncover a Radio Fragment, wrapped in cloth. Whoever left it here thought they\'d come back.',pub:true,rf:true},
+  {text:'The atmosphere here is thick with chemical residue from the crash. You breathe it in before you realize the risk. Lose 1 Health.',pub:true,loseHealth:1},
   {text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true},
   // Public — hazards
   {text:'Structural instability. The ground shifts — brace yourself. Lose 1 Food.',pub:true,loseFood:1},
@@ -396,7 +396,7 @@ const TILE_TIPS={
   'Collapsed Tower':   [[0,'','On the ridge, you spot a relay tower, partially collapsed.'],[0,'','The door is jammed, but you can see a radio inside with a dead body slumped over the transmitter.'],[0,'act','A crew member with a plasma cutter can get inside and salvage the Radio Fragment.']],
   'Cave':              [[0,'','Natural shelter. Atmospheric sensors can\'t reach inside.'],[0,'good','Skip O2 Tank flip this round.'],[300,'act','Draw an Event card.']],
   'Abandoned Outpost': [[0,'','In a valley, you spot an odd structure. This was likely a small settlement or research station.'],[300,'','The door hasn\'t moved in years — maybe decades. Through the window, you see overturned furniture. A layer of dust. Someone lived here for a long time.'],[0,'act','Use the Lockpick to enter.'],[0,'act','Roll 1 die for Food yield.']],
-  'Mysterious Outpost':[[0,'','An odd building emerges from the landscape. The structure doesn\'t match anything on your planetary scans.'],[300,'','The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize.'],[0,'','Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Draw 1 Equipment card.']],
+  'Mysterious Outpost':[[0,'','An odd building emerges from the landscape. The structure doesn\'t match anything on your planetary scans.'],[300,'','The materials are unfamiliar. The door has a digital lock — no keypad, no biometrics, nothing you recognize.'],[0,'','Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Recover 1 Radio Fragment.']],
   'Fuselage':          [[0,'','In a crater, you find an intact hull section from the Endymion 7. It looks like there may be some cargo inside.'],[300,'','You move closer to investigate the wreckage. Maybe you\ll get lucky and find something useful.'],[0,'act','Draw an Event card.']],
   'Wreckage Field':    [[0,'','The Endymion 7 broke into several pieces in the upper atmosphere.'],[0,'','You come across some debris scattered across the terrain. It\'s hazardous, but potentially useful.'],[0,'act','Draw an Event card.']],
   'Recovered Terminal':[[0,'','In an abandoned building, you locate a terminal that still draws power from a source you can\'t locate.'],[300,'','The login screen shows a corporate logo. The last active session was filed seven years ago. The project was marked INCOMPLETE.'],[0,'','No crew names are listed. You weren\'t briefed on any prior missions to this planet.'],[0,'act','Draw an Equipment card.']],
@@ -493,7 +493,7 @@ function newGame(names, portraits, placedMap){
     return{id:i,name,color:PCOLORS[i],portrait,q:0,r:0,food:5,o2:3,health:3,
            radioFragments:0,equipment,incapacitated:0,alive:true,location:'Crash Site',skipO2:false,
            inStasis:false,signalArrayRounds:0,soloRescueActive:false,rfExtractionActive:false,
-           scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false};
+           scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false,lockerUsedThisVisit:false};
   });
   if(addSynth){
     players.push({id:players.length,name:'IRIS',color:SYNTH_COLOR,portrait:'iris',
@@ -506,7 +506,7 @@ function newGame(names, portraits, placedMap){
   const evtDeck=buildEventDeck();
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
      eqDeck,eqDeckCount:eqDeck.length,evtDeck,evtDeckCount:evtDeck.length,
-     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),tileActionUsed:false,signalRolled:false,cargoHold:10,lastPublicEvt:null,jammerActive:false};
+     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),tileActionUsed:false,signalRolled:false,cargoHold:Math.min(players.filter(p=>!p.isSynth).length,3)*5,lastPublicEvt:null,jammerActive:false};
   expandFrontier();
 }
 
@@ -1125,13 +1125,14 @@ function doMove(q,r){
 }
 
 function applyLanding(p,q,r,path,wasRevealed){
-  p.q=q;p.r=r;G.movementLeft-=path.length;renderTableDice();
+  p.q=q;p.r=r;G.movementLeft-=path.length;p.lockerUsedThisVisit=false;renderTableDice();
   const t=G.tiles.get(hk(q,r));
   p.location=tileName(t);
   if(t?.type==='crash_site'){
     if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');
       guidance('first_airlock',()=>{e7Seq([[0,'div',null],[0,'sys','> Airlock pressurised.'],[0,'good','Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.']]);});}
-    if(t.name==='Medical Bay'&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');
+    if(t.name==='Medical Bay'&&p.isSynth&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
+    if(t.name==='Medical Bay'&&!p.isSynth&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');
       guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'good','Health has been restored. The Medical Bay heals one point each time you visit. Return here when you are injured — it could save your life.']]);});}
     if(t.name==='Signal Array'){
       guidance('first_signal_array',()=>{
@@ -1149,8 +1150,8 @@ function applyLanding(p,q,r,path,wasRevealed){
   if(t?.shockTrap&&t.shockTrapOwner!==p.id){
     t.shockTrap=false;t.shockTrapOwner=null;
     if(p.health>0){p.health--;guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}
-    addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3.`,'crit');
-    markTilesDirty();
+    addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3. Turn ended.`,'crit');
+    markTilesDirty();G.movementLeft=0;G.phase='action';render();doEndTurn();return;
   }
   if(t?.droppedFragments>0&&!p.isSynth){
     const picked=t.droppedFragments;
@@ -1160,6 +1161,7 @@ function applyLanding(p,q,r,path,wasRevealed){
     addLog(`${p.name} recovered ${picked} abandoned Radio Fragment${picked!==1?'s':''}.`,'frag');
   }
   const isNewAnomaly=!wasRevealed&&t?.type==='anomaly';
+  if(t?.type==='anomaly'&&isNewAnomaly){t.investigatedCount=1;markTilesDirty();}
   if(t?.type==='anomaly'&&!isNewAnomaly)triggerAnomaly(t);
   const wasInvestigated=(G.tiles.get(hk(q,r))?.investigatedCount||0)>0;
   const stillPending=t?.requiresTool&&(t.radioFragment||t.toolReward);
@@ -1222,7 +1224,13 @@ function useCard(playerIdx,uid){
   else if(c.use==='stun_baton'){
     const targets=G.players.filter(pl=>pl.alive&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r);
     if(!targets.length){addLog('No crew on this tile to stun.','act');closeCardModal();return;}
-    const applyStun=target=>{target.stunned=true;p.equipment.splice(ci,1);addLog(`${p.name} stunned ${target.name}. They skip their next turn.`,'crit');closeCardModal();updateUI();render();};
+    const applyStun=target=>{
+      target.stunned=true;
+      if(target.isSynth){if(target.battery>0)target.battery--;}else{if(target.health>0)target.health--;}
+      p.equipment.splice(ci,1);
+      addLog(`${p.name} stunned ${target.name}. They lose 1 ${target.isSynth?'Battery':'Health'} and skip their next turn.`,'crit');
+      closeCardModal();updateUI();render();
+    };
     if(targets.length===1){applyStun(targets[0]);return;}
     showModal('STUN BATON','Select a crew member to stun.',true,()=>{},'Cancel',undefined,undefined,'');
     const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
@@ -1242,7 +1250,7 @@ function useCard(playerIdx,uid){
   else if(c.use==='shock_trap'){
     const t=G.tiles.get(hk(p.q,p.r));if(!t){closeCardModal();return;}
     t.shockTrap=true;t.shockTrapOwner=p.id;p.equipment.splice(ci,1);
-    addLog(`${p.name} placed a Shock Trap on this tile.`,'act');closeCardModal();updateUI();return;
+    addLog(`${p.name} placed a Shock Trap on this tile.`,'act');closeCardModal();markTilesDirty();updateUI();render();return;
   }
   else if(c.use==='walkie'){
     const adjacent=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id);
@@ -1372,8 +1380,8 @@ function doEquipLocker(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Equipment Locker')return;
   G.phase='action';
-  if(G.tileActionUsed){showModal('Already Used','You have already used a tile action this turn.',true,()=>{});return;}
-  guidance('first_equipment_locker',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment Locker accessed.'],[0,'','Draw one equipment card per visit. If you already have cards, you can exchange one for a fresh draw. Equipment can give you a significant advantage in the field — use the Locker whenever you have the chance.']]);});
+  if(p.lockerUsedThisVisit){showModal('Already Used','You have already used the Equipment Locker this visit. Move away and return to draw again.',true,()=>{});return;}
+  guidance('first_equipment_locker',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment Locker accessed.'],[0,'','Draw one equipment card per visit. Move away and return to draw again. If you already have cards, you can exchange one for a fresh draw.']]);});
   cancelTooltip();
   const trov=document.getElementById('trov');
   trov.style.backgroundImage='url(img/Tiles/locker.png)';
@@ -1412,7 +1420,7 @@ function doEquipLocker(){
           if(ci>=0){p.equipment.splice(ci,1);G.eqDeckCount++;}// return card to deck
           dismiss();
           const newCard=drawEqCard(p);
-          G.tileActionUsed=true;
+          p.lockerUsedThisVisit=true;
           if(newCard){
             addLog(`${p.name} exchanged ${card.name} → ${newCard.name}.`,'good');
             openCardModal(p.id,newCard,'url(img/Tiles/locker.png)');
@@ -1433,7 +1441,7 @@ function doEquipLocker(){
     deck.onclick=()=>{
       dismiss();
       const c=drawEqCard(p);
-      G.tileActionUsed=true;
+      p.lockerUsedThisVisit=true;
       if(c){
         addLog(`${p.name} drew ${c.name} from Equipment Locker.`,'good');
         openCardModal(p.id,c,'url(img/Tiles/locker.png)');
@@ -1524,8 +1532,8 @@ function doEndTurn(){
   const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
   // Synth: battery logic only
   if(p.isSynth){
-    if(curTile?.name==='Airlock'){p.battery=10;addLog('IRIS recharged battery at Airlock.','good');}
-    else{if(p.battery>0)p.battery--;if(p.battery===0){p.alive=false;addLog('IRIS: Power depleted. Systems offline.','crit');}}
+    if(p.battery>0)p.battery--;
+    if(p.battery===0){p.alive=false;addLog('IRIS: Power depleted. Systems offline.','crit');}
     advanceTurn();return;
   }
   // Stasis: skip all depletion
@@ -1642,8 +1650,8 @@ function synthChooseTarget(p){
   if(p.corrupted)return synthChooseCorrupted(p);
   // Priority 0: recharge if battery is low
   if(p.battery<=3){
-    const air=synthFindTile('Airlock');
-    if(air&&!(p.q===air.q&&p.r===air.r))return{q:air.q,r:air.r,action:'recharge'};
+    const med=synthFindTile('Medical Bay');
+    if(med&&!(p.q===med.q&&p.r===med.r))return{q:med.q,r:med.r,action:'recharge'};
   }
   // Priority 1: rescue incapacitated crew member
   const incap=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.health===0&&pl.incapacitated>0)
@@ -1703,8 +1711,8 @@ function synthChooseTarget(p){
 function synthChooseCorrupted(p){
   // Battery first
   if(p.battery<=3){
-    const air=synthFindTile('Airlock');
-    if(air&&!(p.q===air.q&&p.r===air.r))return{q:air.q,r:air.r,action:'recharge'};
+    const med=synthFindTile('Medical Bay');
+    if(med&&!(p.q===med.q&&p.r===med.r))return{q:med.q,r:med.r,action:'recharge'};
   }
   // Re-evaluate weakest living active crew member each turn (lowest health, tiebreak lowest food)
   const target=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.health>0)
@@ -1745,13 +1753,14 @@ function synthApplyStep(p,q,r,onInterrupted){
   if(t?.shockTrap&&t.shockTrapOwner!==p.id){
     t.shockTrap=false;t.shockTrapOwner=null;
     if(p.battery>0)p.battery--;
-    addLog('IRIS triggered a Shock Trap! Battery: '+p.battery+'/10.','crit');
-    markTilesDirty();
+    addLog('IRIS triggered a Shock Trap! Battery: '+p.battery+'/10. Turn ended.','crit');
+    markTilesDirty();updateUI();render();setTimeout(()=>doEndTurn(),1000);return true;
   }
   if(t?.type==='anomaly'&&t.anomaly==='Portal'){
     p.q=0;p.r=0;const ct=G.tiles.get(hk(0,0));p.location=tileName(ct);G.movementLeft=0;
     addLog('IRIS transited Portal → Crash Site.');markTilesDirty();
   }
+  if(t?.name==='Medical Bay'&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
   if(t?.radioFragment&&!t.requiresTool){
     p.radioFragments++;t.radioFragment=false;markTilesDirty();
     addLog('IRIS recovered a Radio Fragment.','frag');
@@ -1878,8 +1887,10 @@ function synthTakeAction(p,target,onDone){
         if(weapon){
           const ci=p.equipment.findIndex(c=>c.uid===weapon.uid);
           if(weapon.id==='stun_baton'){
-            cr.stunned=true;if(ci>=0)p.equipment.splice(ci,1);
-            addLog('IRIS used Stun Baton on '+cr.name+'. They will skip their next turn.','crit');
+            cr.stunned=true;
+            if(cr.isSynth){if(cr.battery>0)cr.battery--;}else{if(cr.health>0)cr.health--;}
+            if(ci>=0)p.equipment.splice(ci,1);
+            addLog('IRIS used Stun Baton on '+cr.name+'. They lose 1 '+(cr.isSynth?'Battery':'Health')+' and skip their next turn.','crit');
           }else if(weapon.id==='shock_trap'){
             t.shockTrap=true;t.shockTrapOwner=p.id;if(ci>=0)p.equipment.splice(ci,1);
             addLog('IRIS placed a Shock Trap at '+p.location+'.','crit');
@@ -1939,7 +1950,8 @@ function synthTakeAction(p,target,onDone){
 function synthMove(p,onDone){
   if(G.movementLeft<=0){onDone();return;}
   const target=synthChooseTarget(p);
-  if(!target||target.action==='idle'||(target.q===p.q&&target.r===p.r)){onDone();return;}
+  if(!target||target.action==='idle'){onDone();return;}
+  if(target.q===p.q&&target.r===p.r){onDone();return;}
   const rawPath=bfsPath(p.q,p.r,target.q,target.r,synthPassable);
   const steps=rawPath?rawPath.slice(0,G.movementLeft):[];
   if(!steps.length){onDone();return;}
@@ -1949,23 +1961,51 @@ function synthMove(p,onDone){
   });
 }
 
+function synthObjectiveLabel(target){
+  if(!target)return'Idle.';
+  switch(target.action){
+    case'recharge':      return'Battery critical — returning to Medical Bay.';
+    case'medic':         return`Retrieving MedPack for ${target.crewRef?.name||'crew'}.`;
+    case'activate':      return'Carrying Radio Fragment to Signal Array.';
+    case'fragment':      return`Recovering Radio Fragment at ${tileName(G.tiles.get(hk(target.q,target.r)))}.`;
+    case'equipment':     return`Acquiring ${target.needTool||target.needWeapon?.[0]||'equipment'} from Equipment Locker.`;
+    case'equipment_corrupted': return'Acquiring weapon from Equipment Locker.';
+    case'tool_reward':   return`Investigating ${tileName(G.tiles.get(hk(target.q,target.r)))}.`;
+    case'explore':       return'Exploring unknown terrain.';
+    case'block':
+    case'block_hold':    return'Securing the Signal Array.';
+    case'harass':        return`Targeting ${target.crewRef?.name||'crew'}.`;
+    case'idle':          return'Holding position.';
+    default:             return'Processing.';
+  }
+}
+
 function doSynthTurn(){
   const p=cp();if(!p||!p.isSynth)return;
   rollTableDice();
   setTimeout(()=>{
     G.phase='move';
-    synthMove(cp(),()=>{
+    const initialTarget=synthChooseTarget(cp());
+    addLog('IRIS: '+synthObjectiveLabel(initialTarget),'sys');
+    function synthContinue(){
       const p2=cp();G.phase='action';
       const target=synthChooseTarget(p2);
-      synthTakeAction(p2,target,()=>{setTimeout(()=>doEndTurn(),1400);});
-    });
+      synthTakeAction(p2,target,()=>{
+        if(G.movementLeft>0){
+          G.phase='move';
+          setTimeout(()=>synthMove(cp(),synthContinue),600);
+        }
+        else setTimeout(()=>doEndTurn(),1400);
+      });
+    }
+    synthMove(cp(),synthContinue);
   },1800);
 }
 
 
 function triggerAnomaly(t){
   const p=cp();
-  t.investigatedCount=1;
+  t.investigatedCount=1;markTilesDirty();
   switch(t.anomaly){
     case'Temporal Rift':
       showTileRevealModal(t,()=>{updateUI();render();});break;
@@ -2770,7 +2810,7 @@ function updateUI(){
   document.getElementById('hcloc').textContent=v.location;
   if(v.isSynth){
     const fl=document.getElementById('hud-res-food-lbl');if(fl)fl.textContent='Battery';
-    buildTokGrid('htr',v.battery,10,'rf','re',2,5);
+    buildTokGrid('htr',v.battery,10,'hf','he',2,5);
     const o2el=document.getElementById('hud-res-o2');if(o2el)o2el.style.display='none';
     const hel=document.getElementById('hud-res-health');if(hel)hel.style.display='none';
   }else{
@@ -2782,6 +2822,10 @@ function updateUI(){
     buildTokRow('hth',v.health,3,'hf','he');
   }
   // Pulse at-risk resources for the active player during their turn
+  if(v.id===G.currentPlayer&&G.phase!=='over'&&v.isSynth&&v.battery>0){
+    const btoks=document.getElementById('htr').querySelectorAll('.tok.hf');
+    if(btoks.length){const last=btoks[btoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — will deplete at end of turn';}
+  }
   if(v.id===G.currentPlayer&&G.phase!=='over'&&!v.inStasis&&!v.isSynth){
     const onBase=G.tiles.get(hk(v.q,v.r))?.type==='crash_site';
     // Food always ticks (if food>0, last full token pulses; if food=0, first health token pulses)
@@ -2875,7 +2919,7 @@ function eqNav(dir){
 const CAT_ICONS={Tool:'wrench-solid-full.svg',Supply:'cubes-solid-full.svg',Tech:'microchip-solid-full.svg',Weapon:'gun-solid-full.svg'};
 function catIconStyle(cat){const f=CAT_ICONS[cat];return f?`style="--eq-icon-url:url('img/Icons/${f}')"`:'';
 }
-function cardFaceHTML(cat,name,txt,brand='◆  ENDYMION 7  ◆'){
+function cardFaceHTML(cat,name,txt,brand='◆  SIGNAL  ◆'){
   const iconHtml=CAT_ICONS[cat]?`<span class="eq-icon" ${catIconStyle(cat)}></span>`:'';
   return `<div class="eqcard-inner">
     ${iconHtml}
@@ -3239,7 +3283,7 @@ function updateE7Prompt(){
   if(!G){el.textContent='';el.className='';return;}
   const p=cp();let text='',warn=false;
   if(p.isSynth){
-    if(p.battery<=3){text=`⚠ IRIS battery critical — return to the Airlock to recharge.`;warn=true;}
+    if(p.battery<=3){text=`⚠ IRIS battery critical — return to the Medical Bay to recharge.`;warn=true;}
     else if(G.phase==='roll')text=`IRIS: processing next action.`;
     else if(G.phase==='move')text=`IRIS moving — ${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining.`;
     else if(G.phase==='action')text=`IRIS at ${p.location}.`;
@@ -3684,7 +3728,6 @@ function finalizeGame(){
       ];
     e7Seq([
       [0,   'sys',  '> MISSION CONTROLS'],
-      [0,   'div',  null],
       ...ctrlLines,
       [0,   'div',  null],
       [0,   'sys',  '> MISSION BRIEFING'],

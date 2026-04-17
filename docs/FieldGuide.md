@@ -18,7 +18,7 @@ Somewhere out there, scattered across the terrain, are pieces of your radio. Fin
 4. Each player places their pawn on the Crash Site hex.
 5. Each player draws 3 Equipment cards.
 6. Each player takes 5 FOOD tokens (all FULL), 3 OXYGEN tokens (all FULL), and 3 Health tokens (all HEALTHY).
-7. Place 15 FOOD tokens in the Cargo Hold at Base Camp. This is the crew's shared communal supply — it does not replenish.
+7. Place FOOD tokens in the Cargo Hold at Base Camp equal to 5 per human player (1 player = 5, 2 players = 10, 3+ players = 15). This is the crew's shared communal supply — it does not replenish.
 8. Roll to see who goes first.
 
 **Optional — IRIS:** If players choose to include IRIS, place her pawn on the Crash Site. She takes her turn automatically after the last human player each round.
@@ -32,9 +32,9 @@ The layout of Base Camp is chosen by players during setup — the six surroundin
 | Location | Effect |
 |---|---|
 | Crash Site | All players begin here. No specific action — this is your anchor point. |
-| Medical Bay | Action: Restore 1 Health token to HEALTHY. |
-| Equipment Locker | Action: Draw 1 Equipment card. One draw per turn maximum. |
-| Cargo Hold | Action: Deposit or withdraw FOOD from communal storage. Starts with 15 FOOD. |
+| Medical Bay | Action: Restore 1 Health token to HEALTHY. Passive (IRIS only): Refills IRIS's Battery fully on entry. |
+| Equipment Locker | Action: Draw 1 Equipment card per visit. Move away and return to draw again. |
+| Cargo Hold | Action: Deposit or withdraw FOOD from communal storage. Starts with 5 FOOD per human player. |
 | Signal Array | Action: Activate Radio Fragments and roll for rescue. Capacity: 1 player only. |
 | Watch Tower | Action: Reveal all face-down tiles adjacent to any crew member currently in the field. |
 | Airlock | Passive: Refill **all** O₂ Tanks automatically when returning from terrain. |
@@ -62,7 +62,7 @@ Each terrain tile contains one or more Points of Interest. Most tiles trigger an
 | Derelict Tower | Lockpick | Recover 1 Radio Fragment. |
 | Collapsed Tower | Plasma Cutter | Recover 1 Radio Fragment. |
 | Abandoned Outpost | Lockpick | Roll 1 die for Food yield. |
-| Mysterious Outpost | Data Spike | Draw 1 Equipment card. |
+| Mysterious Outpost | Data Spike | Recover 1 Radio Fragment. |
 | Recovered Terminal | Data Spike | Draw 1 Equipment card. |
 | Fuselage | — | Draw an Event card. |
 | Cave | — | Draw an Event card. |
@@ -155,7 +155,7 @@ The **Cargo Hold** begins the game with 15 FOOD tokens — a shared, finite comm
 
 There are 5 Radio Fragment tokens in the game. They represent pieces of the ship's emergency transmitter, scattered across the terrain by the crash.
 
-Fragments are found at Signal Tower tiles (Derelict Tower and Collapsed Tower) and through Event cards. Tower tiles require specific tools to access — a Lockpick for the Derelict Tower, a Plasma Cutter for the Collapsed Tower. When a fragment is recovered, the finding player carries the token. To contribute to rescue, a Fragment must be brought to the Signal Array at Base Camp and activated there.
+Fragments are found at terrain tiles and through Event cards. Three are locked behind specific tiles: the Derelict Tower (requires Lockpick), Collapsed Tower (requires Plasma Cutter), and Mysterious Outpost (requires Data Spike). Two more are in the Event deck — they can surface anywhere on the map. When a fragment is recovered, the finding player carries the token. To contribute to rescue, a Fragment must be brought to the Signal Array at Base Camp and activated there.
 
 Each activated Fragment lowers the threshold required to trigger rescue. If a player carrying a Fragment dies, the token is left at their location for others to retrieve.
 
@@ -163,11 +163,11 @@ Each activated Fragment lowers the threshold required to trigger rescue. If a pl
 
 The Integrated Robotic Intelligence System (IRIS) is an optional AI crew member. When included, she operates automatically on her own turn — no player controls her.
 
-**Resources:** IRIS runs on Battery (10 charges) instead of Food and Oxygen. Her battery does not deplete each round but can be damaged by hazards (Shock Traps cost 1 Battery). When her battery reaches 3 or below, she returns to the Airlock to recharge before doing anything else.
+**Resources:** IRIS runs on Battery (10 charges) instead of Food and Oxygen. Her battery depletes by 1 each round and can also be damaged by hazards (Shock Traps cost 1 Battery). Entering the Medical Bay refills her battery fully. When her battery reaches 3 or below, she returns to the Medical Bay to recharge before doing anything else.
 
 **Default Behavior:** IRIS prioritizes her actions in the following order each turn:
 
-1. Recharge at the Airlock if battery is critically low.
+1. Recharge at the Medical Bay if battery is critically low.
 2. Rescue incapacitated crew — she will go to the Equipment Locker to pick up a MedPack if needed.
 3. Carry Radio Fragments to the Signal Array and activate them.
 4. Collect tools to unlock and investigate known fragment tiles (Derelict Tower, Collapsed Tower).
@@ -235,9 +235,9 @@ Each card explains its own effect. There are 15 distinct cards, 3 copies each, f
 
 | Card | Effect |
 |---|---|
-| Stun Baton | A player on your tile skips their next turn. Discard after use. |
+| Stun Baton | A player on your tile loses 1 Health (or Battery) and skips their next turn. Discard after use. |
 | Flare Gun | Force any player within 2 tiles to move to your tile immediately. Discard after use. |
-| Shock Trap | Place on your current tile. The next player or IRIS to enter loses 1 Health or Battery. Discard after use. |
+| Shock Trap | Place on your current tile. The next player or IRIS to enter loses 1 Health (or Battery) and their turn ends immediately. Discard after use. |
 | Signal Jammer | No Signal Roll occurs this round, regardless of Radio Fragments. Discard after use. |
 
 # Event Cards
