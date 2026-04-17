@@ -131,9 +131,10 @@ const PORTRAIT_SVG_UNUSED = [
 ];
 // Portrait helper — individual files in img/Crew/<name><health>.png
 // health: 1–3 (3=healthy, 1=critical/incap). fy: 0=top-aligned, 0.5=centered
-function portBg(portrait, dw, dh, fy=0, health=3){
+function portBg(portrait, dw, dh, fy=0, health=3, variant=''){
   const ypos=fy===0?'top':'center';
-  const url=portrait==='iris'?'img/Crew/IRIS.png':`img/Crew/${portrait}${Math.max(1,Math.min(3,health))}.png`;
+  const sfx=variant?`_${variant}`:'';
+  const url=portrait==='iris'?`img/Crew/IRIS${sfx}.png`:`img/Crew/${portrait}${Math.max(1,Math.min(3,health))}${sfx}.png`;
   return `background-image:url(${url});background-size:cover;`+
          `background-position:center ${ypos};width:${dw}px;height:${dh}px;flex-shrink:0;`;
 }
@@ -275,7 +276,7 @@ const TILE_IMAGE_MAP={
   'Ship Section':       'ship-section1.png',
 };
 
-function getTileImg(t){
+function getTileImg(t, variant=''){
   if(t.imgOverride)return`img/Tiles/${t.imgOverride}`;
   let key;
   if(t.type==='crash_site')key=t.name;
@@ -283,7 +284,9 @@ function getTileImg(t){
   else if(t.type==='anomaly')key=t.anomaly;
   else if(t.type==='ship_section')key='Ship Section';
   const file=TILE_IMAGE_MAP[key];
-  return file?`img/Tiles/${file}`:null;
+  if(!file)return null;
+  const base=file.replace('.png','');
+  return variant?`img/Tiles/${base}_${variant}.png`:`img/Tiles/${file}`;
 }
 function spriteCssForName(name){
   const file=TILE_IMAGE_MAP[name];
@@ -626,7 +629,7 @@ function showTileRevealModal(t, onDismiss){
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
   const trov=document.getElementById('trov');
-  const tileImg=getTileImg(t);
+  const tileImg=getTileImg(t,'overlay');
   trov.style.backgroundImage=tileImg?`url(${tileImg})`:'none';
   document.getElementById('tr-name').textContent=title.toUpperCase();
   trDesc(steps.length?steps:[[0,'','Unknown terrain.']]);
@@ -825,8 +828,8 @@ function showTileRevealModal(t, onDismiss){
         enterBtn.textContent=`Use ${toolName} — Enter`;
         enterBtn.onclick=()=>{
           const reward=t.toolReward;t.toolReward=null;t.investigatedCount=t.pois.length;markTilesDirty();
+          const bg=getTileImg(t,'overlay');
           if(reward==='rollFood'){
-            const bg=getTileImg(t);
             dismiss();
             showDieRoll('Search the outpost. Roll for Food yield.',val=>{
               const gained=Math.min(15-p.food,val);
@@ -927,7 +930,7 @@ function drawTileEvent(t){
       drawnEqCard=drawEqCard(p);const msg=drawnEqCard?`drew ${drawnEqCard.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
     };
   }
-  const evImg=getTileImg(t);
+  const evImg=getTileImg(t,'overlay');
   const _evOv=document.getElementById('evc-ov');
   _evOv.style.backgroundImage=evImg?`url(${evImg})`:'none';
   _evOv.style.backgroundSize='cover';_evOv.style.backgroundPosition='center';
@@ -1384,7 +1387,7 @@ function doEquipLocker(){
   guidance('first_equipment_locker',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment Locker accessed.'],[0,'','Draw one equipment card per visit. Move away and return to draw again. If you already have cards, you can exchange one for a fresh draw.']]);});
   cancelTooltip();
   const trov=document.getElementById('trov');
-  trov.style.backgroundImage='url(img/Tiles/locker.png)';
+  trov.style.backgroundImage='url(img/Tiles/locker_overlay.png)';
   trov.classList.add('equip-locker');
   document.getElementById('tr-name').textContent='EQUIPMENT LOCKER';
   const deck=document.getElementById('tr-deck');
@@ -1423,7 +1426,7 @@ function doEquipLocker(){
           p.lockerUsedThisVisit=true;
           if(newCard){
             addLog(`${p.name} exchanged ${card.name} → ${newCard.name}.`,'good');
-            openCardModal(p.id,newCard,'url(img/Tiles/locker.png)');
+            openCardModal(p.id,newCard,'url(img/Tiles/locker_overlay.png)');
           } else {
             addLog(`${p.name} discarded ${card.name} — deck is now empty.`);
           }
@@ -1444,7 +1447,7 @@ function doEquipLocker(){
       p.lockerUsedThisVisit=true;
       if(c){
         addLog(`${p.name} drew ${c.name} from Equipment Locker.`,'good');
-        openCardModal(p.id,c,'url(img/Tiles/locker.png)');
+        openCardModal(p.id,c,'url(img/Tiles/locker_overlay.png)');
       } else {addLog('Equipment Locker: deck empty.');}
       updateUI();
     };
@@ -1506,7 +1509,7 @@ function doWatchTower(){
   }
   cancelTooltip();
   const trov=document.getElementById('trov');
-  trov.style.backgroundImage='url(img/Tiles/watch-tower.png)';
+  trov.style.backgroundImage='url(img/Tiles/watch-tower_overlay.png)';
   trov.classList.add('watch-tower');
   document.getElementById('tr-name').textContent='WATCH TOWER';
   trDesc(msg);
@@ -1557,7 +1560,7 @@ function doEndTurn(){
       p.alive=false;addLog(`${p.name} has DIED.`,'crit');
       if(p.radioFragments>0){
         const dt=G.tiles.get(hk(p.q,p.r));
-        if(dt){dt.droppedFragments=(dt.droppedFragments||0)+p.radioFragments;markTilesDirty();}
+        if(dt){dt.droppedFragments=(dt.droppedFragments||0)+p.radioFragments;markTilesDirty();render();}
         addLog(`${p.name} dropped ${p.radioFragments} Radio Fragment${p.radioFragments!==1?'s':''} — retrieve them before they\'re lost.`,'frag');
         p.radioFragments=0;
       }
@@ -1597,6 +1600,7 @@ function doEndTurn(){
 
 function advanceTurn(){
   const alive=G.players.filter(p=>p.alive);if(!alive.length){
+    render();
     showModal('ALL CREW LOST','',true,()=>{clearSave();window.Sync?.clearSession();location.reload();},'End Mission',undefined,undefined,'<div id="mov-e7log" class="mov-e7log"></div>');
     e7ScreenSeq('mov-e7log',[
       [200,'crit','> LIFE SIGN MONITOR: no signals detected.'],
@@ -1991,7 +1995,7 @@ function doSynthTurn(){
       const p2=cp();G.phase='action';
       const target=synthChooseTarget(p2);
       synthTakeAction(p2,target,()=>{
-        if(G.movementLeft>0){
+        if(G.movementLeft>0&&target&&target.action!=='idle'){
           G.phase='move';
           setTimeout(()=>synthMove(cp(),synthContinue),600);
         }
@@ -2022,14 +2026,22 @@ function triggerAnomaly(t){
       if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
       if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
       if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food. (Echo Chamber)`,'crit');}
+      if(evt.loseHealth){
+        if(p.equipment.some(c=>c.id==='hazard_suit')){addLog(`${p.name}'s Hazard Suit blocked toxic exposure. (Echo Chamber)`,'good');}
+        else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3. (Echo Chamber)`,'crit');}
+      }
+      if(evt.irisCorruption){
+        const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
+        if(synth){synth.corrupted=true;addLog('> IRIS threat assessment updated. (Echo Chamber)','crit');}
+      }
       if(evt.skipO2){p.skipO2=true;}
       let rollCb=null;
       if(evt.rollFood){rollCb=r=>{const g=Math.min(15-p.food,r);p.food+=g;addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`,g?'good':'');return`Rolled ${r} — gained ${g} Food.`;};}
       else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(15-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}ecDrawnCard=drawEqCard(p);const msg=ecDrawnCard?`drew ${ecDrawnCard.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
       const ecOv=document.getElementById('evc-ov');
-      ecOv.style.backgroundImage='url(img/Tiles/echo-chamber.png)';
+      ecOv.style.backgroundImage='url(img/Tiles/echo-chamber_overlay.png)';
       ecOv.style.backgroundSize='cover';ecOv.style.backgroundPosition='center';
-      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();if(ecDrawnCard)openCardModal(p.id,ecDrawnCard,'url(img/Tiles/echo-chamber.png)');},rollCb);
+      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();if(ecDrawnCard)openCardModal(p.id,ecDrawnCard,'url(img/Tiles/echo-chamber_overlay.png)');},rollCb);
       break;
     }
     case'Inversion Field':{
@@ -2362,7 +2374,7 @@ function drawTile(g,t){
 
   const strokeC=t.type==='anomaly'?'#6a28a8':t.type==='crash_site'?'#b2dbee':'none';
   const sw='1.5';
-  const tileImg=getTileImg(t);
+  const tileImg=getTileImg(t,'hex');
   if(tileImg){
     const hw=SZ*SQRT3,hh=SZ*2;
     const img=svgEl('image',{href:tileImg,x:cx-hw/2,y:cy-hh/2,width:hw,height:hh,'pointer-events':'none',preserveAspectRatio:'xMidYMid slice'});
@@ -2500,7 +2512,7 @@ function drawPawn(g,p){
     defs.appendChild(filt);
   }
   const imgEl=svgEl('image',{
-    href:p.isSynth?'img/Crew/IRIS.png':`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}.png`,
+    href:p.isSynth?'img/Crew/IRIS_pawn.png':`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}_pawn.png`,
     x:px-11, y:py-11,
     width:22, height:22,
     'clip-path':`url(#${cid})`,
@@ -2608,7 +2620,7 @@ function buildCrewTabs(){
     const isCurrent=pl.id===G.currentPlayer;
     const isViewing=pl.id===viewedPlayer;
     t.className='hctab'+(pl.alive?'':' dead');
-    t.style.cssText=`background-image:url(${pl.isSynth?'img/Crew/IRIS.png':`img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}.png`});background-size:cover;background-position:center top;`+
+    t.style.cssText=`background-image:url(${pl.isSynth?'img/Crew/IRIS_dot.png':`img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}_dot.png`});background-size:cover;background-position:center top;`+
       `border-color:${isCurrent?pl.color:isViewing?'rgba(255,255,255,.4)':'transparent'};`+
       `box-shadow:${isCurrent?`0 0 0 1px ${pl.color}`:'none'};`+
       `opacity:${pl.alive?1:.3};`;
@@ -3012,10 +3024,10 @@ function showContestModal(challenger, defender, onChallengerWins, onDefenderWins
   ov.classList.add('show');
 
   // Portraits
-  document.getElementById('contest-challenger-port').style.cssText=portBg(challenger.portrait,80,80,.15,challenger.health);
+  document.getElementById('contest-challenger-port').style.cssText=portBg(challenger.portrait,80,80,.15,challenger.health,'pawn');
   document.getElementById('contest-challenger-port').style.borderColor=challenger.color;
   document.getElementById('contest-challenger-name').textContent=challenger.name;
-  document.getElementById('contest-defender-port').style.cssText=portBg(defender.portrait,80,80,.15,defender.health);
+  document.getElementById('contest-defender-port').style.cssText=portBg(defender.portrait,80,80,.15,defender.health,'pawn');
   document.getElementById('contest-defender-port').style.borderColor=defender.color;
   document.getElementById('contest-defender-name').textContent=defender.name;
   document.getElementById('contest-outcome').textContent='Each crew member rolls — highest wins.';
@@ -3618,7 +3630,7 @@ function renderSiteBuilder(){
       cp.appendChild(cpPoly);defs.appendChild(cp);
       const hw=SZB*SQRT3,hh=SZB*2;
       const img=document.createElementNS(ns,'image');
-      img.setAttribute('href',`img/Tiles/${bFile}`);
+      img.setAttribute('href',`img/Tiles/${bFile.replace('.png','')}_hex.png`);
       img.setAttribute('x',cx-hw/2);img.setAttribute('y',cy-hh/2);
       img.setAttribute('width',hw);img.setAttribute('height',hh);
       img.setAttribute('preserveAspectRatio','xMidYMid slice');
@@ -3755,7 +3767,7 @@ function buildSetup(){
   const row=document.getElementById('crow');row.innerHTML='';
   for(let i=1;i<=6;i++){const b=document.createElement('button');b.className='cbtn'+(i===setupN?' sel':'');b.textContent=i;b.onclick=()=>{setupN=i;buildSetup();};row.appendChild(b);}
   const synthPrev=document.getElementById('synth-preview');
-  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90)+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
+  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90,0,3,'pawn')+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
   const cbx=document.getElementById('addSynthCbx');if(cbx)cbx.checked=addSynth;
   const nl=document.getElementById('plist');const prev=[...nl.querySelectorAll('input')].map(x=>x.value);nl.innerHTML='';
   for(let i=0;i<setupN;i++){
@@ -3765,7 +3777,7 @@ function buildSetup(){
     const d=document.createElement('div');d.className='prow';
     d.innerHTML=`<div class="ppick">
       <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
-      <div style="${portBg(pname,80,90)}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+      <div style="${portBg(pname,80,90,0,3,'pawn')}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
       <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
     </div><input class="pi" type="text" id="pn-${i}" value="${prev[i]!==undefined?prev[i]:pname}" maxlength="16" placeholder="Crew ${i+1}">`;
     nl.appendChild(d);
@@ -4034,7 +4046,7 @@ function buildOnlineSetup(){
   const synthSec=document.getElementById('synth-section');
   if(synthSec)synthSec.style.display=mySlot===0?'block':'none';
   const synthPrev=document.getElementById('synth-preview');
-  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90)+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
+  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90,0,3,'pawn')+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
   const cbx=document.getElementById('addSynthCbx');if(cbx)cbx.checked=addSynth;
   const nl=document.getElementById('plist');nl.innerHTML='';
   const lastFilled=Math.max(...Object.keys(_onlineLobbyData).map(Number),mySlot,-1);
@@ -4058,14 +4070,14 @@ function buildOnlineSetup(){
       const prevName=document.getElementById(`pn-${i}`)?.value||(entry?.name||pname);
       d.innerHTML=`<div class="ppick">
         <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
-        <div style="${portBg(pname,80,90)}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+        <div style="${portBg(pname,80,90,0,3,'pawn')}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
         <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
       </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prevName)}" maxlength="16" oninput="_onlineNameChange()">
       <button class="online-ready-btn${ready?' active':''}" onclick="onlineToggleReady()">${ready?'Ready ✓':'Ready?'}</button>`;
     } else {
       const dname=_escHtml(entry?.name||pname);
       d.innerHTML=`<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>
-        <div style="${portBg(pname,80,90)}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+        <div style="${portBg(pname,80,90,0,3,'pawn')}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
         <button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button>
       </div><span class="pi">${dname}</span>
       <span class="online-ready-ind${ready?' active':''}"> ${ready?'✓ Ready':'Not ready'}</span>`;
