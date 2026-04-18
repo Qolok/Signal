@@ -303,7 +303,7 @@ const EQ_CARDS=[
   {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health. Discard after use.', use:'medpack'},
   {id:'emer_food',     name:'Emergency Rations', cat:'Supply', txt:'Flip 3 EMPTY Food to FULL. Discard after use.', use:'emer_food'},
   {id:'compressed_o2', name:'Compressed O2',     cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
-  {id:'hazard_suit',   name:'Hazard Suit',       cat:'Tech',   txt:'Negates Health loss from toxic exposure Event cards.'},
+  {id:'hazard_suit',   name:'Hazard Suit',       cat:'Tech',   txt:'Negates Health loss from toxic exposure Event cards. Discarded after use.'},
   {id:'scanner',       name:'Scanner',           cat:'Tech',   txt:'Reveals all adjacent undiscovered tiles. Once per round, 3 charges total.',use:'scanner'},
   {id:'rebreather',    name:'Rebreather',        cat:'Tech',   txt:'Your O\u2082 depletes every 2 turns in the field instead of every turn.'},
   {id:'data_spike',    name:'Data Spike',        cat:'Tech',   txt:'Bypass electronic locks on high-tech structures.'},
@@ -912,8 +912,10 @@ function drawTileEvent(t){
     const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
     if(synth){synth.corrupted=true;addLog('> IRIS threat assessment updated. She considers one fewer crew member optimal.','crit');}
   }
+  let suitBlocked=false;
   if(evt.loseHealth){
-    if(p.equipment.some(c=>c.id==='hazard_suit')){addLog(`${p.name}'s Hazard Suit blocked toxic exposure.`,'good');}
+    const suitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
+    if(suitIdx!==-1){suitBlocked=true;p.equipment.splice(suitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,'good');}
     else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
   }
   if(evt.pub)G.lastPublicEvt=evt;
@@ -934,7 +936,7 @@ function drawTileEvent(t){
   const _evOv=document.getElementById('evc-ov');
   _evOv.style.backgroundImage=evImg?`url(${evImg})`:'none';
   _evOv.style.backgroundSize='cover';_evOv.style.backgroundPosition='center';
-  showEventCard(evt,locName,()=>{updateUI();render();if(drawnEqCard)openCardModal(p.id,drawnEqCard,evImg?`url(${evImg})`:'');},rollCallback);
+  showEventCard(evt,locName,()=>{updateUI();render();if(drawnEqCard)openCardModal(p.id,drawnEqCard,evImg?`url(${evImg})`:'');},rollCallback,false,suitBlocked);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1134,9 +1136,20 @@ function applyLanding(p,q,r,path,wasRevealed){
   if(t?.type==='crash_site'){
     if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');
       guidance('first_airlock',()=>{e7Seq([[0,'div',null],[0,'sys','> Airlock pressurised.'],[0,'good','Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.']]);});}
-    if(t.name==='Medical Bay'&&p.isSynth&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
-    if(t.name==='Medical Bay'&&!p.isSynth&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');
-      guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'good','Health has been restored. The Medical Bay heals one point each time you visit. Return here when you are injured — it could save your life.']]);});}
+    if(t.name==='Medical Bay'){
+      if(p.isSynth&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
+      if(!p.isSynth&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
+      guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'','Emergency medical equipment salvaged from the wreckage. Entering automatically restores 1 Health — return here any time you are injured.']]);});
+    }
+    if(t.name==='Equipment Locker'){
+      guidance('first_equipment_locker',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment Locker accessed.'],[0,'','Draw one equipment card per visit. Move away and return to draw again. If you already have a card, you can exchange it for a fresh draw.']]);});
+    }
+    if(t.name==='Cargo Hold'){
+      guidance('first_cargo_hold',()=>{e7Seq([[0,'div',null],[0,'sys','> Cargo Hold accessed.'],[0,'','The Cargo Hold is a shared food reserve for the entire crew. Deposit surplus food when you are well-stocked, and withdraw it when running low. Coordinating as a crew can prevent starvation.']]);});
+    }
+    if(t.name==='Watch Tower'){
+      guidance('first_watch_tower',()=>{e7Seq([[0,'div',null],[0,'sys','> Watch Tower online.'],[0,'','The Watch Tower reveals all face-down tiles adjacent to any crew member currently in the field — without them needing to move. Use it to scout terrain and plan routes before committing.']]);});
+    }
     if(t.name==='Signal Array'){
       guidance('first_signal_array',()=>{
         const fragMsg=p.radioFragments>0
@@ -1384,7 +1397,6 @@ function doEquipLocker(){
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Equipment Locker')return;
   G.phase='action';
   if(p.lockerUsedThisVisit){showModal('Already Used','You have already used the Equipment Locker this visit. Move away and return to draw again.',true,()=>{});return;}
-  guidance('first_equipment_locker',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment Locker accessed.'],[0,'','Draw one equipment card per visit. Move away and return to draw again. If you already have cards, you can exchange one for a fresh draw.']]);});
   cancelTooltip();
   const trov=document.getElementById('trov');
   trov.style.backgroundImage='url(img/Tiles/locker_overlay.png)';
@@ -1459,7 +1471,6 @@ function doCargo(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Cargo Hold')return;
   G.phase='action';
-  guidance('first_cargo_hold',()=>{e7Seq([[0,'div',null],[0,'sys','> Cargo Hold accessed.'],[0,'','The Cargo Hold is a shared food reserve for the entire crew. Deposit surplus food here when you are well-stocked, and withdraw it when you are running low. Coordinating as a crew can prevent starvation.']]);});
   renderCargoModal();
 }
 function renderCargoModal(){
@@ -1489,7 +1500,6 @@ function doWatchTower(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Watch Tower')return;
   G.phase='action';
-  guidance('first_watch_tower',()=>{e7Seq([[0,'div',null],[0,'sys','> Watch Tower online.'],[0,'','The Watch Tower reveals all tiles adjacent to crew currently in the field — without them needing to move. Use it to scout the terrain and plan your routes before committing.']]);});
   const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
   let msg;
   if(!inField.length){
@@ -1615,7 +1625,7 @@ function advanceTurn(){
   while(!G.players[next].alive&&tries++<G.players.length)next=(next+1)%G.players.length;
   if(next<=G.currentPlayer){G.turn++;G.jammerActive=false;}
   G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.signalRolled=false;
-  G.players[next].scannerUsed=false;
+  G.players[next].scannerUsed=false;G.players[next].lockerUsedThisVisit=false;
   if(G.players[next].stunned){
     G.players[next].stunned=false;
     addLog(`${G.players[next].name} is stunned — skipping turn.`,'crit');
@@ -2026,8 +2036,10 @@ function triggerAnomaly(t){
       if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
       if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
       if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food. (Echo Chamber)`,'crit');}
+      let ecSuitBlocked=false;
       if(evt.loseHealth){
-        if(p.equipment.some(c=>c.id==='hazard_suit')){addLog(`${p.name}'s Hazard Suit blocked toxic exposure. (Echo Chamber)`,'good');}
+        const ecSuitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
+        if(ecSuitIdx!==-1){ecSuitBlocked=true;p.equipment.splice(ecSuitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed. (Echo Chamber)`,'good');}
         else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3. (Echo Chamber)`,'crit');}
       }
       if(evt.irisCorruption){
@@ -2041,7 +2053,7 @@ function triggerAnomaly(t){
       const ecOv=document.getElementById('evc-ov');
       ecOv.style.backgroundImage='url(img/Tiles/echo-chamber_overlay.png)';
       ecOv.style.backgroundSize='cover';ecOv.style.backgroundPosition='center';
-      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();if(ecDrawnCard)openCardModal(p.id,ecDrawnCard,'url(img/Tiles/echo-chamber_overlay.png)');},rollCb);
+      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();if(ecDrawnCard)openCardModal(p.id,ecDrawnCard,'url(img/Tiles/echo-chamber_overlay.png)');},rollCb,false,ecSuitBlocked);
       break;
     }
     case'Inversion Field':{
@@ -3156,7 +3168,7 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount=1){
   ov.classList.add('show');
 }
 
-function showEventCard(evt, _locName, onOk, rollCallback, isReview){
+function showEventCard(evt, _locName, onOk, rollCallback, isReview, suitBlocked=false){
   const isPub=evt.pub;
   const card=document.getElementById('evc');
   card.className='evc '+(isPub?'pub':'priv');
@@ -3221,8 +3233,19 @@ function showEventCard(evt, _locName, onOk, rollCallback, isReview){
   }
   const ov=document.getElementById('evc-ov');
   ov.className='';
+  const suitBlocker=document.getElementById('evc-suit-blocker');
+  suitBlocker.classList.remove('dropping');
+  if(suitBlocked){
+    btn.disabled=true;btn.style.opacity='.35';
+    setTimeout(()=>{
+      suitBlocker.classList.add('dropping');
+      setTimeout(()=>{pills.querySelector('.evc-pill.bad')?.classList.add('blocked');},480);
+      setTimeout(()=>{btn.disabled=false;btn.style.opacity='';},750);
+    },280);
+  }
   btn.onclick=()=>{
     if(evt.keep&&!isReview){const p=cp();p.equipment.push({eventCard:evt,uid:++cardUid});}
+    suitBlocker.classList.remove('dropping');
     ov.classList.remove('show');document.getElementById('evc-ov').style.backgroundImage='';if(onOk)onOk();
   };
   cancelTooltip();

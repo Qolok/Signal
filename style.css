@@ -897,6 +897,34 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .evc-bot-corners{display:flex;justify-content:space-between;font-size:13px;line-height:1;margin-top:-2px;cursor:default}
 .evc.pub .evc-bot-corners{color:#1a4060}
 .evc.priv .evc-bot-corners{color:#4a2808}
+/* Hazard Suit block animation */
+#evc-suit-blocker{
+  display:none;position:absolute;
+  left:calc(50% - 55px);top:calc(50% - 40px);
+  width:110px;height:158px;border-radius:4px;
+  background:var(--cc-bg);border:1px solid var(--cc-bdr);
+  box-shadow:0 8px 30px rgba(0,0,0,.9),0 0 20px rgba(112,64,176,.35);
+  z-index:20;overflow:hidden;
+  transform:translateY(-120vh) rotate(-14deg);
+}
+#evc-suit-blocker.dropping{
+  display:flex;flex-direction:column;
+  animation:suit-drop .55s cubic-bezier(.34,1.4,.64,1) forwards;
+}
+@keyframes suit-drop{
+  from{transform:translateY(-120vh) rotate(-14deg)}
+  to  {transform:translateY(0) rotate(3deg)}
+}
+.evc-suit-inner{flex:1;display:flex;flex-direction:column;margin:4px;border:1px solid var(--cc-ibdr);border-radius:2px;}
+.evc-suit-divider{height:1px;background:var(--cc-ibdr);margin:0 3px;}
+.evc-suit-name{font-size:11px;color:var(--cc-loc);padding:4px 5px 3px;letter-spacing:.04em;line-height:1.2;}
+.evc-suit-status{font-size:9px;color:var(--cc-body);padding:3px 5px;letter-spacing:.1em;flex:1;}
+.evc-pill.bad.blocked{
+  text-decoration:line-through;
+  color:#40c050!important;border-color:#1a5020!important;
+  background:rgba(40,100,20,.12)!important;
+  transition:color .4s,border-color .4s,background .4s;
+}
 #evc-die{display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
 .evc-die-result{display:flex;align-items:center;justify-content:center;gap:10px;}
 #evc-btn{opacity:.8}
