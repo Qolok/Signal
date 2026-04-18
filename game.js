@@ -216,12 +216,18 @@ function buildTerrainDeck(){
     {pois:['Derelict Tower'],       radioFragment:true,  requiresTool:'lockpick',      noEvent:true, count:1},
     {pois:['Collapsed Tower'],     radioFragment:true,  requiresTool:'plasma_cutter', noEvent:true, count:1},
     {pois:['Fuselage'],            radioFragment:false, count:2},
-    {pois:['Cave'],                radioFragment:false, count:9},
+    {pois:['Cave'],                radioFragment:false, count:3},
     {pois:['Abandoned Outpost'],   radioFragment:false, requiresTool:'lockpick',   toolReward:'rollFood', noEvent:true, count:1},
     {pois:['Mysterious Outpost'],  radioFragment:true,  requiresTool:'data_spike',  toolReward:null,          noEvent:true, count:1},
-    {pois:['Wreckage Field'],      radioFragment:false, count:9},
+    {pois:['Wreckage Field'],      radioFragment:false, count:3},
+    {pois:['Spore Bog'],           radioFragment:false, count:3},
+    {pois:['Bioluminescent Fen'],  radioFragment:false, noEvent:true, count:2},
+    {pois:['Nest Site'],           radioFragment:false, noEvent:true, count:3},
+    {pois:['Hive Mound'],          radioFragment:false, noEvent:true, count:1},
+    {pois:['Thermal Vent'],        radioFragment:false, count:3},
+    {pois:['Antimatter Chamber'],  radioFragment:false, noEvent:true, count:2},
     {pois:['Cache'],               radioFragment:false, count:3},
-    {pois:['Recovered Terminal'],  radioFragment:false, requiresTool:'data_spike', toolReward:'drawEq', noEvent:true, count:1},
+    {pois:['Recovered Terminal'],  radioFragment:false, requiresTool:'data_spike', toolReward:'drawEq', noEvent:true, count:2},
     {pois:['Passage'],             radioFragment:false, count:1},
     {pois:['Bloody Passage'],      radioFragment:false, count:1},
   ];
@@ -243,6 +249,8 @@ const POI_COLOR={
   'Derelict Tower':'#2870a0','Collapsed Tower':'#1a5080','Wreckage Field':'#705030',
   'Recovered Terminal':'#2060a8','Cache':'#507040',
   'Passage':'#4a4a60','Bloody Passage':'#702020',
+  'Spore Bog':'#4a6020','Bioluminescent Fen':'#1a5050','Nest Site':'#604030',
+  'Hive Mound':'#503020','Thermal Vent':'#804020','Antimatter Chamber':'#503080',
 };
 
 // ── TILE IMAGES ───────────────────────────────────────────────
@@ -266,6 +274,12 @@ const TILE_IMAGE_MAP={
   'Cache':              'cache.png',
   'Passage':            'passage.png',
   'Bloody Passage':     'passage-bloody.png',
+  'Spore Bog':          'spore-bog.png',
+  'Bioluminescent Fen': 'bioluminescent-fen.png',
+  'Nest Site':          'nest-site.png',
+  'Hive Mound':         'hive-mound.png',
+  'Thermal Vent':       'thermal-vent.png',
+  'Antimatter Chamber': 'antimatter-chamber.png',
   'Stasis Pod':         'stasis.png',
   'Temporal Rift':      'temporal-distortion.png',
   'Gravity Well': 'gravity-well.png',
@@ -406,6 +420,12 @@ const TILE_TIPS={
   'Cache':             [[0,'','You find a supply cache half-buried in the sand, but the seal appears to have been broken. You open it to see what\'s inside.'],[500,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
   'Passage':           [[0,'','In a narrow canyon, you find a route through the terrain. Something passed through here recently.'],[300,'','On inspection, you find a high-tech door that doesn\'t belong. What could be on the other side?'],[0,'act','Draw an Event card.']],
   'Bloody Passage':    [[0,'','You find a piece of the ship wedged in a canyon. Some of the crew might have come down here.'],[300,'','A narrow route inside is marked with signs of violence. Whatever happened here was gruesome... and recent.'],[0,'act','Draw an Event card.']],
+  'Spore Bog':         [[0,'','A murky wetland, choked with oversized fungal growths. Thick spores drift through the air like ash.'],[300,'','A sickly greenish-yellow light pulses from somewhere beneath the surface.'],[0,'act','Draw an Event card. Without a Hazard Suit equipped, lose 1 Health.']],
+  'Bioluminescent Fen':[[0,'','A hauntingly alien marsh. Tall, wispy plants pulse with soft teal and blue light.'],[300,'','The mist hangs low. It\'s eerie — but strangely serene. You haven\'t felt that in a while.'],[0,'good','Recover 1 Health. O\u2082 flip skipped this round.']],
+  'Nest Site':         [[0,'','A shallow crater lined with leathery alien eggs. Something large nested here.'],[300,'','You move closer to see if you can get a reading from one of the eggs.'],[300,'act','Roll 1 die.']],
+  'Hive Mound':        [[0,'','A towering structure of hardened biological material rises from the terrain. It shouldn\'t be this large.'],[300,'','The tunnels shift. Something moves inside.'],[0,'act','Roll 3 dice. Each die showing 4 or higher costs 1 Health. Each Hazard Suit negates 1 damage.']],
+  'Thermal Vent':      [[0,'','The ground is fractured, jets of superheated gas venting upward in slow rhythmic bursts.'],[300,'','The heat distortion makes it hard to see. The air tastes like sulfur.'],[0,'act','Draw an Event card. Without a Hazard Suit equipped, lose 1 Health.']],
+  'Antimatter Chamber':[[0,'','A partially buried alien structure. Inside, a sphere of crackling violet-white energy floats in suspension.'],[300,'','The ground around it is warped. Loose debris drifts slowly inward.'],[0,'act','All crew are pulled to this tile. Each player rolls.'],[300,'good','1-3: You pull free'],[0,'crit','4-6: All Tech equipment is destroyed.']],
   'Stasis Pod':        [[0,'','Among the rubble, you find the ship\'s stasis pod. This could be your chance at survival, but the pod only holds one.'],[300,'act','Skip Resource Flip each round inside. Cannot move or interact. Exit any time.']],
   'Temporal Rift':     [[0,'','You experience an unexplained spacetime distortion. Past and future flickers. You fight to keep down your breakfast.'],[300,'act','Roll 1 die.'],[0,'crit','1\u20133: lose that many Food.'],[0,'good','4\u20136: recover that many Food.']],
   'Portal':            [[0,'','You come across abandoned alien technology.'],[0,'','As you approach, a strange vortex opens up. This appears to be some kind of Instantaneous transit point. Origin unknown.'],[0,'act','Option: Move immediately to Crash Site. Turn ends.']],
@@ -645,9 +665,22 @@ function showTileRevealModal(t, onDismiss){
     trov.style.display='none';
     trov.style.backgroundImage='';
     if(onDismiss)onDismiss();
-    else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'||t.pois?.includes('Cache')){updateUI();render();}
+    else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'||t.pois?.includes('Cache')){
+      if(t.pois?.includes('Bioluminescent Fen')){
+        const p=cp();
+        if(p.health<3){p.health++;addLog(`${p.name} rested in the Fen. Health: ${p.health}/3.`,'good');}
+        p.skipO2=true;addLog('Bioluminescent Fen: O\u2082 flip skipped this turn.','good');
+      }
+      updateUI();render();
+    }
     else{
       if(t.pois?.includes('Cave')){cp().skipO2=true;addLog('Cave shelter: O\u2082 flip skipped this turn.','good');}
+      if(t.pois?.includes('Spore Bog')||t.pois?.includes('Thermal Vent')){
+        const p=cp();
+        const suitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
+        if(suitIdx!==-1){p.equipment.splice(suitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,'good');}
+        else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
+      }
       drawTileEvent(t);
     }
   };
@@ -708,6 +741,93 @@ function showTileRevealModal(t, onDismiss){
         actionsEl.appendChild(cont);
       },1500);
     };
+  } else if(t.pois&&t.pois.includes('Nest Site')){
+    deck.style.display='none';
+    trov.onclick=null;
+    const dieWrap=make3DDie('idle');
+    dieWrap.style.cssText='margin:0 auto;';
+    actionsEl.appendChild(dieWrap);
+    dieWrap.onclick=()=>{
+      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      const val=1+(0|Math.random()*6);
+      setTimeout(()=>{
+        actionsEl.innerHTML='';
+        const resDie=makeResultDie(val);
+        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
+        actionsEl.appendChild(resDie);
+        const p=cp();
+        let outcome='';
+        if(val>=4){
+          if(p.health>0)p.health--;
+          outcome=`Rolled ${val} — An egg cracks open. A spider-like creature lunges — lose 1 Health. It vanishes into the terrain.`;
+          addLog(`Nest Site: rolled ${val} — ${p.name} attacked. Health: ${p.health}/3.`,'crit');
+        } else {
+          outcome=`Rolled ${val} — The nest is undisturbed. Nothing stirs.`;
+          addLog(`Nest Site: rolled ${val} — nest undisturbed.`);
+        }
+        const outEl=document.createElement('div');
+        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
+        outEl.textContent=outcome;actionsEl.appendChild(outEl);
+        updateUI();
+        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
+        cont.onclick=dismiss;
+        actionsEl.appendChild(cont);
+      },1500);
+    };
+  } else if(t.pois&&t.pois.includes('Hive Mound')){
+    deck.style.display='none';
+    trov.onclick=null;
+    const diceRow=document.createElement('div');diceRow.style.cssText='display:flex;gap:10px;justify-content:center;';
+    const wraps=[];
+    for(let i=0;i<3;i++){const w=make3DDie('idle');diceRow.appendChild(w);wraps.push(w);}
+    actionsEl.appendChild(diceRow);
+    diceRow.onclick=()=>{
+      if(wraps.some(w=>w.className.includes('rolling')))return;
+      wraps.forEach(w=>{w.className='td-die-wrap rolling';});
+      diceRow.onclick=null;
+      const vals=[1+(0|Math.random()*6),1+(0|Math.random()*6),1+(0|Math.random()*6)];
+      setTimeout(()=>{
+        actionsEl.innerHTML='';
+        const resRow=document.createElement('div');resRow.style.cssText='display:flex;gap:10px;justify-content:center;';
+        vals.forEach(v=>resRow.appendChild(makeResultDie(v)));
+        actionsEl.appendChild(resRow);
+        const p=cp();
+        const hits=vals.filter(v=>v>=4).length;
+        const suitCount=p.equipment.filter(c=>c.id==='hazard_suit').length;
+        const negated=Math.min(hits,suitCount);
+        let suitsToRemove=negated;
+        p.equipment=p.equipment.filter(c=>{if(c.id==='hazard_suit'&&suitsToRemove>0){suitsToRemove--;return false;}return true;});
+        const damage=hits-negated;
+        const actualDmg=Math.min(p.health,damage);
+        p.health-=actualDmg;
+        let outcome='';
+        if(hits===0){outcome=`Rolled ${vals.join(', ')} — The swarm doesn't reach you.`;addLog('Hive Mound: no hits.');}
+        else if(damage===0){outcome=`Rolled ${vals.join(', ')} — ${hits} hit${hits>1?'s':''}, fully negated by Hazard Suit${negated>1?'s':''}.`;addLog(`Hive Mound: ${hits} hit(s) blocked by suit.`,'good');}
+        else{outcome=`Rolled ${vals.join(', ')} — ${hits} hit${hits>1?'s':''}, ${damage} damage${negated?` (${negated} blocked)`:''}. Health: ${p.health}/3.`;addLog(`Hive Mound: ${p.name} took ${damage} damage. Health: ${p.health}/3.`,'crit');}
+        if(negated>0)addLog(`${p.name}'s Hazard Suit${negated>1?'s':''} absorbed ${negated} hit${negated>1?'s':''}.`,'good');
+        const outEl=document.createElement('div');
+        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
+        outEl.textContent=outcome;actionsEl.appendChild(outEl);
+        updateUI();
+        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
+        cont.onclick=dismiss;
+        actionsEl.appendChild(cont);
+      },1500);
+    };
+  } else if(t.pois&&t.pois.includes('Antimatter Chamber')){
+    deck.style.display='none';
+    trov.onclick=null;
+    let tileQ=null,tileR=null;
+    for(const [k,tile] of G.tiles){if(tile===t){const parts=k.split(',');tileQ=+parts[0];tileR=+parts[1];break;}}
+    const alivePlayers=G.players.filter(pl=>pl.alive);
+    if(tileQ!==null){
+      alivePlayers.forEach(pl=>{pl.q=tileQ;pl.r=tileR;pl.location=tileName(t);});
+      addLog('Antimatter Chamber: all crew pulled into the field.','crit');
+      render();
+    }
+    const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
+    cont.onclick=()=>{dismiss();showAntimatterChallenge(alivePlayers);};
+    actionsEl.appendChild(cont);
   } else if(isAnomaly&&t.anomaly==='Portal'){
     deck.style.display='none';
     const p=cp();
@@ -1138,7 +1258,7 @@ function applyLanding(p,q,r,path,wasRevealed){
       guidance('first_airlock',()=>{e7Seq([[0,'div',null],[0,'sys','> Airlock pressurised.'],[0,'good','Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.']]);});}
     if(t.name==='Medical Bay'){
       if(p.isSynth&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
-      if(!p.isSynth&&p.health<3){p.health++;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
+      if(!p.isSynth&&p.health<3){p.health++;p.incapacitated=0;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
       guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'','Emergency medical equipment salvaged from the wreckage. Entering automatically restores 1 Health — return here any time you are injured.']]);});
     }
     if(t.name==='Equipment Locker'){
@@ -1212,7 +1332,7 @@ function useCard(playerIdx,uid){
   else if(c.use==='emer_food'){const gain=Math.min(3,15-p.food);p.food+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Food. +${gain} Food.`,'good');}
   else if(c.use==='compressed_o2'){const gain=Math.min(2,3-p.o2);p.o2+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Compressed O₂. +${gain} O₂.`,'good');}
   else if(c.use==='stretcher'){
-    const incap=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r&&pl.health===0&&pl.incapacitated>0);
+    const incap=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r&&pl.health===0);
     if(!incap.length){addLog('No incapacitated crew on this tile.','act');closeCardModal();return;}
     const applyStretcher=target=>{target.q=1;target.r=0;const ct=G.tiles.get(hk(1,0));target.location=tileName(ct);target.health=1;target.incapacitated=0;p.equipment.splice(ci,1);addLog(`${p.name} carried ${target.name} to the Medical Bay. ${target.name} is back on their feet.`,'good');closeCardModal();updateUI();render();};
     if(incap.length===1){applyStretcher(incap[0]);return;}
@@ -1391,6 +1511,55 @@ function doSignalRoll(){
   ],18);
 }
 
+function showAntimatterChallenge(players){
+  const ov=document.getElementById('amt-ov');
+  const playersEl=document.getElementById('amt-players');
+  const btn=document.getElementById('amt-btn');
+  const outEl=document.getElementById('amt-out');
+  playersEl.innerHTML='';outEl.textContent='';
+  btn.disabled=true;btn.textContent='Continue';
+  const rows=[];
+  let rolled=0;
+  players.forEach(pl=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);';
+    const nameEl=document.createElement('div');
+    nameEl.style.cssText='width:110px;color:#a090c0;font-size:.8rem;letter-spacing:.06em;text-align:right;flex-shrink:0;';
+    nameEl.textContent=pl.name;
+    const dieWrap=make3DDie('idle');
+    dieWrap.style.cssText='flex-shrink:0;cursor:pointer;';
+    const resultEl=document.createElement('div');
+    resultEl.style.cssText='font-size:.75rem;flex:1;color:var(--dim);';
+    resultEl.textContent='click die to roll';
+    row.appendChild(nameEl);row.appendChild(dieWrap);row.appendChild(resultEl);
+    playersEl.appendChild(row);
+    rows.push({pl,dieWrap,resultEl});
+    dieWrap.onclick=()=>{
+      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;dieWrap.style.cursor='';
+      const val=1+(0|Math.random()*6);
+      setTimeout(()=>{
+        const res=makeResultDie(val);res.style.cssText='flex-shrink:0;';
+        dieWrap.replaceWith(res);
+        if(val>=4){
+          const techItems=pl.equipment.filter(c=>c.cat==='Tech');
+          pl.equipment=pl.equipment.filter(c=>c.cat!=='Tech');
+          resultEl.style.color='#d04040';
+          resultEl.textContent=techItems.length?`Tech destroyed: ${techItems.map(c=>c.name).join(', ')}`:'Tech fried — nothing to lose.';
+          if(techItems.length)addLog(`Antimatter Chamber: ${pl.name} lost ${techItems.map(c=>c.name).join(', ')}.`,'crit');
+        } else {
+          resultEl.style.color='#50c840';
+          resultEl.textContent='Pulled free.';
+          addLog(`Antimatter Chamber: ${pl.name} pulled free.`);
+        }
+        updateUI();
+        if(++rolled===players.length)btn.disabled=false;
+      },1500);
+    };
+  });
+  btn.onclick=()=>{ov.classList.remove('show');updateUI();render();};
+  ov.classList.add('show');
+}
+
 // ── BASE CAMP ACTIONS ──────────────────────────────────────────
 function doEquipLocker(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
@@ -1565,20 +1734,9 @@ function doEndTurn(){
     }
   }
   p.skipO2=false;
-  if(p.health===0&&p.alive){p.incapacitated++;
-    if(p.incapacitated>=2){
-      p.alive=false;addLog(`${p.name} has DIED.`,'crit');
-      if(p.radioFragments>0){
-        const dt=G.tiles.get(hk(p.q,p.r));
-        if(dt){dt.droppedFragments=(dt.droppedFragments||0)+p.radioFragments;markTilesDirty();render();}
-        addLog(`${p.name} dropped ${p.radioFragments} Radio Fragment${p.radioFragments!==1?'s':''} — retrieve them before they\'re lost.`,'frag');
-        p.radioFragments=0;
-      }
-    }
-    else{addLog(`${p.name} is INCAPACITATED (${p.incapacitated}/2).`,'crit');
-      const synth=G.players.find(pl=>pl.isSynth&&pl.corrupted&&pl.alive);
-      if(synth){synth.corrupted=false;addLog('IRIS: Active crew count reduced. Threat protocol suspended.','sys');}
-    }}
+  if(p.health===0&&p.alive){
+    addLog(`${p.name} is down. Health: 0/3.`,'crit');
+  }
   // Signal Array occupancy tracking
   if(curTile?.name==='Signal Array'){
     p.signalArrayRounds++;
@@ -1626,6 +1784,27 @@ function advanceTurn(){
   if(next<=G.currentPlayer){G.turn++;G.jammerActive=false;}
   G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.signalRolled=false;
   G.players[next].scannerUsed=false;G.players[next].lockerUsedThisVisit=false;
+  if(G.players[next].health===0&&G.players[next].alive){
+    G.players[next].incapacitated++;
+    if(G.players[next].incapacitated>=3){
+      const dying=G.players[next];
+      dying.alive=false;
+      addLog(`${dying.name} has DIED.`,'crit');
+      if(dying.radioFragments>0){
+        const dt=G.tiles.get(hk(dying.q,dying.r));
+        if(dt){dt.droppedFragments=(dt.droppedFragments||0)+dying.radioFragments;markTilesDirty();}
+        addLog(`${dying.name} dropped ${dying.radioFragments} Radio Fragment${dying.radioFragments!==1?'s':''} — retrieve them before they\'re lost.`,'frag');
+        dying.radioFragments=0;
+      }
+      updateUI();render();
+      advanceTurn();return;
+    }
+    addLog(`${G.players[next].name} is INCAPACITATED (${G.players[next].incapacitated}/2 rounds). Turn skipped.`,'crit');
+    const synth=G.players.find(pl=>pl.isSynth&&pl.corrupted&&pl.alive);
+    if(synth){synth.corrupted=false;addLog('IRIS: Active crew count reduced. Threat protocol suspended.','sys');}
+    updateUI();render();
+    advanceTurn();return;
+  }
   if(G.players[next].stunned){
     G.players[next].stunned=false;
     addLog(`${G.players[next].name} is stunned — skipping turn.`,'crit');
