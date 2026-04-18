@@ -53,11 +53,11 @@ All terrain tiles begin face-down in a single shuffled stack. The map expands ou
 
 **Entering a Face-Down Tile:** When a player moves onto a face-down tile, flip it immediately. Its contents are now visible to everyone.
 
-## Points of Interest
+## Event Cards
 
-Each terrain tile contains one or more Points of Interest. Most tiles trigger an Event card draw when entered. Some POIs are **tool-gated** — a specific piece of equipment is required to access them, and no event card is drawn in the meantime.
+Most tiles trigger an Event card draw when entered. Some are **tool-gated** — a specific piece of equipment is required to access them, and no event card is drawn in the meantime.
 
-| POI | Tool Required | What Happens |
+| Tile | Tool Required | What Happens |
 |---|---|---|
 | Derelict Tower | Lockpick | Recover 1 Radio Fragment. |
 | Collapsed Tower | Plasma Cutter | Recover 1 Radio Fragment. |

@@ -2931,6 +2931,7 @@ function receiveRemoteState(data){
         [0,   'sys',  `> ONLINE SESSION CONNECTED. You are ${myName}.`],
         [0,   'sys',  `Turn ${G.turn}: ${cp().name}. ${cp().name===myName?'Roll for movement.':'Waiting for '+cp().name+' to move.'}`],
       ]);
+      _maybeTourPrompt();
     }
     _updateMpBadge();
   }catch(e){console.error('receiveRemoteState',e);}
@@ -3613,6 +3614,190 @@ function rbSearch(query){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// INTERFACE TOUR
+// ═══════════════════════════════════════════════════════════════
+const TOUR_STEPS=[
+  {selector:'#bwrap',        title:'THE SURFACE MAP',body:'This hex grid is the planet surface. Click an adjacent hex to move there. Unknown tiles are revealed when you enter them. Your base camp is outlined in white.',anchor:'center'},
+  {selector:'#hcrd',         title:'YOUR CREW',      body:"Your active crew member's portrait and status. Use the tabs at the top to check on other survivors.",anchor:'right'},
+  {selector:'.hudres',       title:'RESOURCES',      body:"Food and Oxygen each deplete by 1 per turn. If either hits zero, Health drops instead. Don't let Health reach zero.",anchor:'right'},
+  {selector:'#hudeq',        title:'BACKPACK',        body:'Equipment you carry into the field. Click a card to read what it does. Use the filter icons to sort by type.',anchor:'right'},
+  {selector:'#decks',        title:'CARD DECKS',      body:'Event and Equipment deck counts. Events trigger on tile exploration. Equipment is drawn from the Locker at Base Camp.',anchor:'left'},
+  {selector:'#tabletop-dice',title:'MOVEMENT',        body:'Each turn starts with rolling for movement points. Click the die, then click a destination hex on the map.',anchor:'left'},
+  {selector:'.hudact',       title:'ACTIONS',         body:'Actions available here change based on your location. Base Camp has the Locker and Cargo Hold. Other tiles have their own unique actions.',anchor:'left'},
+  {selector:'#e7panel',      title:'GUIDE MODE',      body:'The E7 log records every action you take and advises next steps. Enable Guide Mode anytime to receive in-context hints throughout the mission. Check the Field Guide for the full rule book. Good luck, crew.',anchor:'left'},
+];
+let _tourStep=0;
+let _deckWasCollapsed=true,_deckStepVisited=false;
+
+function _maybeTourPrompt(){
+  if(!localStorage.getItem('signal-tour-seen')) setTimeout(_showTourPrompt,600);
+}
+
+function _showTourPrompt(){
+  if(!document.getElementById('game').classList.contains('running'))return;
+  _tourStep=-1;
+  document.getElementById('tour-step-lbl').textContent='';
+  document.getElementById('tour-title').textContent='INTERFACE TOUR';
+  document.getElementById('tour-body').textContent="I'm the E7 ship computer. Would you like a tour of the interface before your mission begins?";
+  document.getElementById('tour-footer-prompt').style.display='flex';
+  document.getElementById('tour-footer-nav').style.display='none';
+  _applyTourDim(null);
+  document.getElementById('tour-ov').classList.add('show');
+  _centerTourCard();
+}
+
+function startTour(){
+  // Called from Field Guide — skip prompt, begin step 0 immediately
+  if(!document.getElementById('game').classList.contains('running'))return;
+  closeRulebook();
+  _deckStepVisited=false; _deckWasCollapsed=true;
+  _tourStep=0;
+  document.getElementById('tour-footer-prompt').style.display='none';
+  document.getElementById('tour-footer-nav').style.display='flex';
+  document.getElementById('tour-ov').classList.add('show');
+  _renderTourStep();
+}
+
+function _startTourSteps(){
+  // Called when user answers Yes to the prompt
+  _deckStepVisited=false; _deckWasCollapsed=true;
+  _tourStep=0;
+  document.getElementById('tour-footer-prompt').style.display='none';
+  document.getElementById('tour-footer-nav').style.display='flex';
+  _renderTourStep();
+}
+
+function _applyStepEffects(){
+  const step=TOUR_STEPS[_tourStep]||null;
+  const decksEl=document.getElementById('decks');
+  const e7El=document.getElementById('e7panel');
+  // Deck expansion: expand when on deck step, restore when leaving it
+  if(step?.selector==='#decks'){
+    _deckStepVisited=true;
+    _deckWasCollapsed=decksEl.classList.contains('hud-collapsed');
+    decksEl.classList.remove('hud-collapsed');
+  } else if(_deckStepVisited){
+    if(_deckWasCollapsed) decksEl.classList.add('hud-collapsed');
+    else decksEl.classList.remove('hud-collapsed');
+  }
+  // HUD + E7 panel dim: apply only on the surface map step
+  // (#hud uses display:contents so opacity must target its children directly)
+  const isMapStep=step?.selector==='#bwrap';
+  const o=isMapStep?'0.2':'';
+  document.getElementById('hud-player').style.opacity=o;
+  document.getElementById('hud-action').style.opacity=o;
+  e7El.style.opacity=o;
+}
+
+function _tourStepRect(step){
+  if(step.selectors){
+    let l=Infinity,t=Infinity,r=-Infinity,b=-Infinity,found=false;
+    step.selectors.forEach(sel=>{
+      const el=document.querySelector(sel);
+      if(!el)return;
+      const rc=el.getBoundingClientRect();
+      l=Math.min(l,rc.left);t=Math.min(t,rc.top);
+      r=Math.max(r,rc.right);b=Math.max(b,rc.bottom);
+      found=true;
+    });
+    return found?{left:l,top:t,right:r,bottom:b,width:r-l,height:b-t}:null;
+  }
+  const el=step.selector?document.querySelector(step.selector):null;
+  return el?el.getBoundingClientRect():null;
+}
+
+function _renderTourStep(){
+  const step=TOUR_STEPS[_tourStep];
+  const total=TOUR_STEPS.length;
+  document.getElementById('tour-step-lbl').textContent=`STEP ${_tourStep+1} OF ${total}`;
+  document.getElementById('tour-title').textContent=step.title;
+  document.getElementById('tour-body').textContent=step.body;
+  document.getElementById('tour-prev').disabled=(_tourStep===0);
+  document.getElementById('tour-next').textContent=(_tourStep===total-1)?'Done':'Next →';
+  _applyStepEffects();
+  const doLayout=()=>{
+    const rect=_tourStepRect(step);
+    _applyTourDim(rect);
+    _positionTourCard(rect,step.anchor);
+  };
+  // Defer layout on the deck step so the CSS expand transition (220ms) completes first
+  if(step.selector==='#decks') setTimeout(doLayout,260);
+  else doLayout();
+}
+
+function _applyTourDim(rect){
+  const vw=window.innerWidth,vh=window.innerHeight,pad=12;
+  const top=document.getElementById('tour-dim-top');
+  const bot=document.getElementById('tour-dim-bot');
+  const lft=document.getElementById('tour-dim-lft');
+  const rgt=document.getElementById('tour-dim-rgt');
+  const spot=document.getElementById('tour-dim-spot');
+  const ring=document.getElementById('tour-ring');
+  if(rect){
+    const x1=Math.max(0,rect.left-pad),y1=Math.max(0,rect.top-pad);
+    const x2=Math.min(vw,rect.right+pad),y2=Math.min(vh,rect.bottom+pad);
+    top.style.cssText =`top:0;left:0;width:${vw}px;height:${y1}px`;
+    bot.style.cssText =`top:${y2}px;left:0;width:${vw}px;height:${vh-y2}px`;
+    lft.style.cssText =`top:${y1}px;left:0;width:${x1}px;height:${y2-y1}px`;
+    rgt.style.cssText =`top:${y1}px;left:${x2}px;width:${vw-x2}px;height:${y2-y1}px`;
+    spot.style.cssText=`top:${y1}px;left:${x1}px;width:${x2-x1}px;height:${y2-y1}px`;
+    ring.style.cssText=`display:block;top:${y1}px;left:${x1}px;width:${x2-x1}px;height:${y2-y1}px`;
+  } else {
+    top.style.cssText=`top:0;left:0;width:${vw}px;height:${vh}px`;
+    bot.style.cssText=lft.style.cssText=rgt.style.cssText=spot.style.cssText='width:0;height:0';
+    ring.style.display='none';
+  }
+}
+
+function _positionTourCard(rect,anchor){
+  const card=document.getElementById('tour-card');
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const cw=300,ch=card.offsetHeight||200,gap=22,margin=10;
+  let left,top;
+  if(!rect||anchor==='center'){
+    left=(vw-cw)/2; top=(vh-ch)/2;
+  } else if(anchor==='right'){
+    left=rect.right+gap; top=rect.top+(rect.height/2)-(ch/2);
+  } else if(anchor==='left'){
+    left=rect.left-cw-gap; top=rect.top+(rect.height/2)-(ch/2);
+  } else if(anchor==='bottom'){
+    left=rect.left+(rect.width/2)-(cw/2); top=rect.bottom+gap;
+  } else if(anchor==='top'){
+    left=rect.left+(rect.width/2)-(cw/2); top=rect.top-ch-gap;
+  }
+  left=Math.max(margin,Math.min(vw-cw-margin,left));
+  top =Math.max(margin,Math.min(vh-ch-margin,top));
+  card.style.left=left+'px';
+  card.style.top =top+'px';
+}
+
+function _centerTourCard(){
+  const card=document.getElementById('tour-card');
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const cw=300,ch=card.offsetHeight||170;
+  card.style.left=((vw-cw)/2)+'px';
+  card.style.top =((vh-ch)/2)+'px';
+}
+
+function tourStep(dir){
+  _tourStep+=dir;
+  if(_tourStep>=TOUR_STEPS.length){endTour();return;}
+  if(_tourStep<0)_tourStep=0;
+  _renderTourStep();
+}
+
+function endTour(){
+  document.getElementById('tour-ov').classList.remove('show');
+  // Restore any step-specific effects that may still be active
+  document.getElementById('hud-player').style.opacity='';
+  document.getElementById('hud-action').style.opacity='';
+  document.getElementById('e7panel').style.opacity='';
+  const decksEl=document.getElementById('decks');
+  if(_deckStepVisited&&_deckWasCollapsed) decksEl.classList.add('hud-collapsed');
+  localStorage.setItem('signal-tour-seen','1');
+}
+
+// ═══════════════════════════════════════════════════════════════
 // PAN / ZOOM / INTERACTION
 // ═══════════════════════════════════════════════════════════════
 function initBoard(){
@@ -3952,6 +4137,7 @@ function finalizeGame(){
       [0,   'sys', `Turn 1: ${crew[0]}. Roll for movement.`],
     ]);
     updateE7Prompt();
+    _maybeTourPrompt();
   },40);
 }
 
