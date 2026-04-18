@@ -3934,7 +3934,6 @@ function showOnlineLobby(){
 }
 
 function lobbyBack(){
-  _lobbyMsgPlayed=false;
   document.getElementById('online-lobby').style.display='none';
   document.getElementById('intro').style.display='flex';
   _lobbyShowPanel('lobby-mode-sel');
