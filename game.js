@@ -1734,7 +1734,7 @@ function doEndTurn(){
     }
   }
   p.skipO2=false;
-  if(p.health===0&&p.alive){
+  if(p.health===0&&p.alive&&!p.isSynth){
     addLog(`${p.name} is down. Health: 0/3.`,'crit');
   }
   // Signal Array occupancy tracking
@@ -1784,7 +1784,7 @@ function advanceTurn(){
   if(next<=G.currentPlayer){G.turn++;G.jammerActive=false;}
   G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.signalRolled=false;
   G.players[next].scannerUsed=false;G.players[next].lockerUsedThisVisit=false;
-  if(G.players[next].health===0&&G.players[next].alive){
+  if(G.players[next].health===0&&G.players[next].alive&&!G.players[next].isSynth){
     G.players[next].incapacitated++;
     if(G.players[next].incapacitated>=3){
       const dying=G.players[next];
