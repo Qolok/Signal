@@ -777,7 +777,7 @@ function showTileRevealModal(t, onDismiss){
   } else if(t.pois&&t.pois.includes('Hive Mound')){
     deck.style.display='none';
     trov.onclick=null;
-    const diceRow=document.createElement('div');diceRow.style.cssText='display:flex;gap:10px;justify-content:center;';
+    const diceRow=document.createElement('div');diceRow.style.cssText='display:flex;gap:28px;justify-content:center;';
     const wraps=[];
     for(let i=0;i<3;i++){const w=make3DDie('idle');diceRow.appendChild(w);wraps.push(w);}
     actionsEl.appendChild(diceRow);
