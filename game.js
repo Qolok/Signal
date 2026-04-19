@@ -814,6 +814,12 @@ function showTileRevealModal(t, onDismiss){
         actionsEl.appendChild(cont);
       },1500);
     };
+  } else if(t.pois&&t.pois.includes('Bioluminescent Fen')){
+    deck.style.display='none';
+    trov.onclick=null;
+    const ackBtn=document.createElement('button');ackBtn.className='mbtn';ackBtn.textContent='Acknowledge';
+    ackBtn.onclick=dismiss;
+    actionsEl.appendChild(ackBtn);
   } else if(t.pois&&t.pois.includes('Antimatter Chamber')){
     deck.style.display='none';
     trov.onclick=null;
