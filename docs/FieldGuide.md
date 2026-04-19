@@ -41,21 +41,21 @@ The **Cargo Hold** begins the game with 5 FOOD per human player, up to a maximum
 
 | | Name | Biography |
 |---|---|---|
-| <img src="../img/Crew/Adaeze3.png" class="fg-crew"> | Adaeze | Chief Engineer. Has kept this ship running through worse. Doesn't talk about what "worse" means. |
-| <img src="../img/Crew/Anand3.png" class="fg-crew"> | Anand | Navigation and Systems. Obsessive about data. Before the crash he tracked every anomaly the sensors picked up. He still doesn't know what brought the ship down. |
-| <img src="../img/Crew/Halvorsen3.png" class="fg-crew"> | Halvorsen | Drill Operator. Twelve years on deep-range extraction rigs. Says she's seen it all. The planet is making her reconsider that. |
-| <img src="../img/Crew/Kim3.png" class="fg-crew"> | Kim | Geology and Extraction. Came out here for the mineral survey data. Now she's just trying to make it back. |
-| <img src="../img/Crew/Morrow3.png" class="fg-crew"> | Morrow | Communications Officer. Responsible for the distress signal. Whether anyone received it is another matter. |
-| <img src="../img/Crew/Okonkwo3.png" class="fg-crew"> | Okonkwo | Security. Former military. Quiet, deliberate, always watching. Not everyone finds that comforting. |
-| <img src="../img/Crew/Reyes3.png" class="fg-crew"> | Reyes | Survey Specialist. Knows more about alien terrain than anyone on the crew. That knowledge is the only reason he's still alive. |
-| <img src="../img/Crew/Santos3.png" class="fg-crew"> | Santos | Cargo and Logistics. Keeps track of what's left. The numbers aren't good, and she's the only one who knows exactly how bad it is. |
-| <img src="../img/Crew/Vasquez3.png" class="fg-crew"> | Vasquez | Pilot. The crash wasn't her fault. She needs the crew to understand that. |
-| <img src="../img/Crew/Yun3.png" class="fg-crew"> | Yun | Medical Officer. Calm under pressure. Has seen enough field injuries to know when to save someone and when to say goodbye. |
-| <img src="../img/Crew/Iris.png" class="fg-crew"> | IRIS | The **Integrated Robotic Intelligence System (IRIS)** is an optional, autonomous AI crew member. IRIS is programmed to assist — as long as her directives allow. If she senses a conflict in her mission directives, she will identify the weakest active crew member and begin working against them.<br><br>**Battery:** IRIS runs on Battery (10 charges) instead of Food and Oxygen. Her battery depletes by 1 each round and can also be damaged by hazards (Shock Traps cost 1 Battery). Entering the Medical Bay refills her battery fully.<br><br>**Behavior:** IRIS prioritizes her actions every turn. She may heal crew members, retrieve radio fragments, unlock tiles, or explore the unknown. |
+| <img src="img/Crew/Adaeze3.png" class="fg-crew"> | Adaeze | Chief Engineer. Has kept this ship running through worse. Doesn't talk about what "worse" means. |
+| <img src="img/Crew/Anand3.png" class="fg-crew"> | Anand | Navigation and Systems. Obsessive about data. Before the crash he tracked every anomaly the sensors picked up. He still doesn't know what brought the ship down. |
+| <img src="img/Crew/Halvorsen3.png" class="fg-crew"> | Halvorsen | Drill Operator. Twelve years on deep-range extraction rigs. Says she's seen it all. The planet is making her reconsider that. |
+| <img src="img/Crew/Kim3.png" class="fg-crew"> | Kim | Geology and Extraction. Came out here for the mineral survey data. Now she's just trying to make it back. |
+| <img src="img/Crew/Morrow3.png" class="fg-crew"> | Morrow | Communications Officer. Responsible for the distress signal. Whether anyone received it is another matter. |
+| <img src="img/Crew/Okonkwo3.png" class="fg-crew"> | Okonkwo | Security. Former military. Quiet, deliberate, always watching. Not everyone finds that comforting. |
+| <img src="img/Crew/Reyes3.png" class="fg-crew"> | Reyes | Survey Specialist. Knows more about alien terrain than anyone on the crew. That knowledge is the only reason he's still alive. |
+| <img src="img/Crew/Santos3.png" class="fg-crew"> | Santos | Cargo and Logistics. Keeps track of what's left. The numbers aren't good, and she's the only one who knows exactly how bad it is. |
+| <img src="img/Crew/Vasquez3.png" class="fg-crew"> | Vasquez | Pilot. The crash wasn't her fault. She needs the crew to understand that. |
+| <img src="img/Crew/Yun3.png" class="fg-crew"> | Yun | Medical Officer. Calm under pressure. Has seen enough field injuries to know when to save someone and when to say goodbye. |
+| <img src="img/Crew/Iris.png" class="fg-crew"> | IRIS | The **Integrated Robotic Intelligence System (IRIS)** is an optional, autonomous AI crew member. IRIS is programmed to assist — as long as her directives allow. If she senses a conflict in her mission directives, she will identify the weakest active crew member and begin working against them.<br><br>**Battery:** IRIS runs on Battery (10 charges) instead of Food and Oxygen. Her battery depletes by 1 each round and can also be damaged by hazards (Shock Traps cost 1 Battery). Entering the Medical Bay refills her battery fully.<br><br>**Behavior:** IRIS prioritizes her actions every turn. She may heal crew members, retrieve radio fragments, unlock tiles, or explore the unknown. |
 
 # Game Board
 
-<img src="../img/screens/game.jpg" class="fg-screenshot">
+<img src="img/screens/game.jpg" class="fg-screenshot">
 
 All terrain tiles begin face-down in a single shuffled stack. The map expands outward from Base Camp as players explore. There are 50 tiles total: 7 Base Camp tiles placed during setup, plus a shuffled exploration deck of 40 tiles — 33 terrain, 7 anomaly, and 3 ship sections.
 
@@ -74,35 +74,35 @@ OXYGEN does **not** deplete when you end a turn on any Base Camp tile.
 
 | | Location | Effect |
 |---|---|---|
-| <img src="../img/Tiles/crash-site_overlay.png" class="fg-tile"> | Crash Site | All players begin here. No specific action — this is your anchor point. |
-| <img src="../img/Tiles/medbay_overlay.png" class="fg-tile"> | Medical Bay | Passive: Restore 1 Health automatically when entering. Refills IRIS's Battery to full on entry (IRIS only). |
-| <img src="../img/Tiles/locker_overlay.png" class="fg-tile"> | Equipment Locker | Action: Draw 1 Equipment card per visit. Move away and return to draw again. |
-| <img src="../img/Tiles/cargo_overlay.png" class="fg-tile"> | Cargo Hold | Action: Deposit or withdraw FOOD from communal storage. Starts with 5 FOOD per human player, up to a maximum of 15 (3+ players). |
-| <img src="../img/Tiles/signal-array_overlay.png" class="fg-tile"> | Signal Array | Action: Activate Radio Fragments and roll for rescue. Fits one player at a time. While occupied, no other player may enter. The occupant decides each round whether to roll — they are never required to. If another player wants the occupant out, both roll 1 die and keep rolling until one wins. |
-| <img src="../img/Tiles/watch-tower_overlay.png" class="fg-tile"> | Watch Tower | Action: Reveal all face-down tiles adjacent to any crew member currently in the field. Reveals the fog of war around your scouts without requiring anyone to be in danger. The more crew in the field, the more tiles revealed. |
-| <img src="../img/Tiles/airlock_overlay.png" class="fg-tile"> | Airlock | Passive: Refill all O2 Tanks automatically when entering. |
+| <img src="img/Tiles/crash-site_overlay.png" class="fg-tile"> | Crash Site | All players begin here. No specific action — this is your anchor point. |
+| <img src="img/Tiles/medbay_overlay.png" class="fg-tile"> | Medical Bay | Passive: Restore 1 Health automatically when entering. Refills IRIS's Battery to full on entry (IRIS only). |
+| <img src="img/Tiles/locker_overlay.png" class="fg-tile"> | Equipment Locker | Action: Draw 1 Equipment card per visit. Move away and return to draw again. |
+| <img src="img/Tiles/cargo_overlay.png" class="fg-tile"> | Cargo Hold | Action: Deposit or withdraw FOOD from communal storage. Starts with 5 FOOD per human player, up to a maximum of 15 (3+ players). |
+| <img src="img/Tiles/signal-array_overlay.png" class="fg-tile"> | Signal Array | Action: Activate Radio Fragments and roll for rescue. Fits one player at a time. While occupied, no other player may enter. The occupant decides each round whether to roll — they are never required to. If another player wants the occupant out, both roll 1 die and keep rolling until one wins. |
+| <img src="img/Tiles/watch-tower_overlay.png" class="fg-tile"> | Watch Tower | Action: Reveal all face-down tiles adjacent to any crew member currently in the field. Reveals the fog of war around your scouts without requiring anyone to be in danger. The more crew in the field, the more tiles revealed. |
+| <img src="img/Tiles/airlock_overlay.png" class="fg-tile"> | Airlock | Passive: Refill all O2 Tanks automatically when entering. |
 
 ## Terrain
 
 | | Tile | Tool Required | What Happens |
 |---|---|---|---|
-| <img src="../img/Tiles/signal-tower_overlay.png" class="fg-tile"> | Derelict Tower | Lockpick | Recover 1 Radio Fragment. |
-| <img src="../img/Tiles/signal-tower_overlay.png" class="fg-tile"> | Collapsed Tower | Plasma Cutter | Recover 1 Radio Fragment. |
-| <img src="../img/Tiles/outpost1_overlay.png" class="fg-tile"> | Abandoned Outpost | Lockpick | Roll 1 die for Food yield. |
-| <img src="../img/Tiles/outpost2_overlay.png" class="fg-tile"> | Mysterious Outpost | Data Spike | Recover 1 Radio Fragment. |
-| <img src="../img/Tiles/terminal_overlay.png" class="fg-tile"> | Recovered Terminal | Data Spike | Draw 1 Equipment card. |
-| <img src="../img/Tiles/fuselage_overlay.png" class="fg-tile"> | Fuselage | — | Draw an Event card. |
-| <img src="../img/Tiles/cave_overlay.png" class="fg-tile"> | Cave | — | Draw an Event card. Skip O2 flip this turn. |
-| <img src="../img/Tiles/wreckage_overlay.png" class="fg-tile"> | Wreckage Field | — | Draw an Event card. |
-| <img src="../img/Tiles/cache_overlay.png" class="fg-tile"> | Cache | — | Roll 1 die: 1–2 = +1 Food, 3–4 = +2 Food, 5–6 = +3 Food. |
-| <img src="../img/Tiles/passage_overlay.png" class="fg-tile"> | Passage | — | Draw an Event card. |
-| <img src="../img/Tiles/passage-bloody_overlay.png" class="fg-tile"> | Bloody Passage | — | Draw an Event card. |
-| <img src="../img/Tiles/spore-bog_overlay.png" class="fg-tile"> | Spore Bog | — | Draw an Event card. Lose 1 Health unless carrying a Hazard Suit (suit is then discarded). |
-| <img src="../img/Tiles/thermal-vent_overlay.png" class="fg-tile"> | Thermal Vent | — | Draw an Event card. Lose 1 Health unless carrying a Hazard Suit (suit is then discarded). |
-| <img src="../img/Tiles/bioluminescent-fen_overlay.png" class="fg-tile"> | Bioluminescent Fen | — | Recover 1 Health. O2 flip skipped this turn. No Event card. |
-| <img src="../img/Tiles/nest-site_overlay.png" class="fg-tile"> | Nest Site | — | Roll 1 die for an encounter outcome. |
-| <img src="../img/Tiles/hive-mound_overlay.png" class="fg-tile"> | Hive Mound | — | Roll 3 dice. Each die showing 4 or higher costs 1 Health. Each Hazard Suit negates 1 damage (then discarded). |
-| <img src="../img/Tiles/antimatter-chamber_overlay.png" class="fg-tile"> | Antimatter Chamber | — | All crew on the board are pulled to this tile. Each player rolls 1 die: 1–3 = pull free; 4–6 = all Tech equipment is destroyed. |
+| <img src="img/Tiles/signal-tower_overlay.png" class="fg-tile"> | Derelict Tower | Lockpick | Recover 1 Radio Fragment. |
+| <img src="img/Tiles/signal-tower_overlay.png" class="fg-tile"> | Collapsed Tower | Plasma Cutter | Recover 1 Radio Fragment. |
+| <img src="img/Tiles/outpost1_overlay.png" class="fg-tile"> | Abandoned Outpost | Lockpick | Roll 1 die for Food yield. |
+| <img src="img/Tiles/outpost2_overlay.png" class="fg-tile"> | Mysterious Outpost | Data Spike | Recover 1 Radio Fragment. |
+| <img src="img/Tiles/terminal_overlay.png" class="fg-tile"> | Recovered Terminal | Data Spike | Draw 1 Equipment card. |
+| <img src="img/Tiles/fuselage_overlay.png" class="fg-tile"> | Fuselage | — | Draw an Event card. |
+| <img src="img/Tiles/cave_overlay.png" class="fg-tile"> | Cave | — | Draw an Event card. Skip O2 flip this turn. |
+| <img src="img/Tiles/wreckage_overlay.png" class="fg-tile"> | Wreckage Field | — | Draw an Event card. |
+| <img src="img/Tiles/cache_overlay.png" class="fg-tile"> | Cache | — | Roll 1 die: 1–2 = +1 Food, 3–4 = +2 Food, 5–6 = +3 Food. |
+| <img src="img/Tiles/passage_overlay.png" class="fg-tile"> | Passage | — | Draw an Event card. |
+| <img src="img/Tiles/passage-bloody_overlay.png" class="fg-tile"> | Bloody Passage | — | Draw an Event card. |
+| <img src="img/Tiles/spore-bog_overlay.png" class="fg-tile"> | Spore Bog | — | Draw an Event card. Lose 1 Health unless carrying a Hazard Suit (suit is then discarded). |
+| <img src="img/Tiles/thermal-vent_overlay.png" class="fg-tile"> | Thermal Vent | — | Draw an Event card. Lose 1 Health unless carrying a Hazard Suit (suit is then discarded). |
+| <img src="img/Tiles/bioluminescent-fen_overlay.png" class="fg-tile"> | Bioluminescent Fen | — | Recover 1 Health. O2 flip skipped this turn. No Event card. |
+| <img src="img/Tiles/nest-site_overlay.png" class="fg-tile"> | Nest Site | — | Roll 1 die for an encounter outcome. |
+| <img src="img/Tiles/hive-mound_overlay.png" class="fg-tile"> | Hive Mound | — | Roll 3 dice. Each die showing 4 or higher costs 1 Health. Each Hazard Suit negates 1 damage (then discarded). |
+| <img src="img/Tiles/antimatter-chamber_overlay.png" class="fg-tile"> | Antimatter Chamber | — | All crew on the board are pulled to this tile. Each player rolls 1 die: 1–3 = pull free; 4–6 = all Tech equipment is destroyed. |
 
 ## Anomalies
 
@@ -110,13 +110,13 @@ When a player enters a tile and flips it to find an Anomaly, the effect takes pl
 
 | | Anomaly | Rule |
 |---|---|---|
-| <img src="../img/Tiles/stasis_overlay.png" class="fg-tile"> | Stasis Pod | You may enter. Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time on your turn. |
-| <img src="../img/Tiles/temporal-distortion_overlay.png" class="fg-tile"> | Temporal Rift | Roll 1 die. 1–3: flip that many FOOD to EMPTY. 4–6: flip that many EMPTY FOOD to FULL. |
-| <img src="../img/Tiles/portal_overlay.png" class="fg-tile"> | Portal | You may immediately move your pawn to the Crash Site. Your turn ends. You may decline. |
-| <img src="../img/Tiles/gravity-well_overlay.png" class="fg-tile"> | Gravity Well | Roll 1 die. The player to your left moves your pawn that many hexes in any direction. |
-| <img src="../img/Tiles/dead-zone_overlay.png" class="fg-tile"> | Dead Zone | No Signal Roll occurs this round for any player. |
-| <img src="../img/Tiles/echo-chamber_overlay.png" class="fg-tile"> | Echo Chamber | Resolve the most recent Public Event card again in full. |
-| <img src="../img/Tiles/inversion-field_overlay.png" class="fg-tile"> | Inversion Field | Choose any other player. Swap your FOOD tokens with theirs. They cannot refuse. |
+| <img src="img/Tiles/stasis_overlay.png" class="fg-tile"> | Stasis Pod | You may enter. Turn pawn sideways. Skip Resource Flip each round inside. Cannot move or interact. Exit any time on your turn. |
+| <img src="img/Tiles/temporal-distortion_overlay.png" class="fg-tile"> | Temporal Rift | Roll 1 die. 1–3: flip that many FOOD to EMPTY. 4–6: flip that many EMPTY FOOD to FULL. |
+| <img src="img/Tiles/portal_overlay.png" class="fg-tile"> | Portal | You may immediately move your pawn to the Crash Site. Your turn ends. You may decline. |
+| <img src="img/Tiles/gravity-well_overlay.png" class="fg-tile"> | Gravity Well | Roll 1 die. The player to your left moves your pawn that many hexes in any direction. |
+| <img src="img/Tiles/dead-zone_overlay.png" class="fg-tile"> | Dead Zone | No Signal Roll occurs this round for any player. |
+| <img src="img/Tiles/echo-chamber_overlay.png" class="fg-tile"> | Echo Chamber | Resolve the most recent Public Event card again in full. |
+| <img src="img/Tiles/inversion-field_overlay.png" class="fg-tile"> | Inversion Field | Choose any other player. Swap your FOOD tokens with theirs. They cannot refuse. |
 
 ## Ship Sections
 
@@ -124,7 +124,7 @@ Three Ship Section tiles are shuffled into the terrain deck. When found, they fu
 
 | | Roll Outcome |
 |---|---|
-| <img src="../img/Tiles/ship-section1_overlay.png" class="fg-tile"> | **1–2** Gain up to 3 Food.<br>**3–4** Gain up to 2 Oxygen.<br>**5–6** Restore 1 Health. |
+| <img src="img/Tiles/ship-section1_overlay.png" class="fg-tile"> | **1–2** Gain up to 3 Food.<br>**3–4** Gain up to 2 Oxygen.<br>**5–6** Restore 1 Health. |
 
 # Event Cards
 
