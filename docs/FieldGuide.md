@@ -54,7 +54,7 @@ Before the game begins, each player chooses a crew member to play. Your choice i
 
 ## Resources
 
-<img src="img/Screens/crew.jpg" class="fg-crew">
+<img src="img/screens/crew.png" class="fg-crew">
 
 ### Food
 Each player starts with 5 Food at the start of the game. The maximum a player may carry is 15. One Food token is flipped to empty each turn regardless of location.
@@ -85,7 +85,7 @@ After 2 consecutive rounds of incapacitation, a player dies. **Death** removes p
 | <img src="img/Crew/Santos3.png" class="fg-crew"> | Lucia</br>**Santos** | Cargo and Logistics. She keeps track of what's left. The numbers aren't good, and she's the only one who knows exactly how bad it is. |
 | <img src="img/Crew/Vasquez3.png" class="fg-crew"> | Marisol</br>**Vasquez** | Pilot. The crash wasn't her fault. She needs the crew to understand that. |
 | <img src="img/Crew/Mizuki3.png" class="fg-crew"> | Aiko</br>**Mizuki** | Medical Officer. Calm under pressure. She has seen enough field injuries to know when to save someone and when to say goodbye. |
-| <img src="img/Crew/Iris.png" class="fg-crew"> | **IRIS** | The **Integrated Robotic Intelligence System (IRIS)** is an autonomous AI crew member programmed to assist, but if her mission directives interfere, she will target the weakest crew member and begin working against them.<br><br>IRIS's **Battery** depletes every round and can also be damaged by hazards. She will return to the [Medical Bay](#game_board) when her battery needs charging.<br><br>IRIS prioritizes her actions every turn. She may heal crew members, retrieve [Radio Fragments](#radio_fragments), unlock tiles, or explore the unknown. |
+| <img src="img/Crew/IRIS.png" class="fg-crew"> | **IRIS** | The **Integrated Robotic Intelligence System (IRIS)** is an autonomous AI crew member programmed to assist, but if her mission directives interfere, she will target the weakest crew member and begin working against them.<br><br>IRIS's **Battery** depletes every round and can also be damaged by hazards. She will return to the [Medical Bay](#game_board) when her battery needs charging.<br><br>IRIS prioritizes her actions every turn. She may heal crew members, retrieve [Radio Fragments](#radio_fragments), unlock tiles, or explore the unknown. |
 
 # Game Board
 
