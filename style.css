@@ -827,6 +827,8 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #rbcontent ul{padding-left:18px;margin-bottom:10px}
 #rbcontent li{margin-bottom:7px}
 #rbcontent strong{color:var(--hi)}
+#rbcontent a{color:#ad6060;text-decoration:none}
+#rbcontent a:hover{color:#ad6060;text-decoration:underline}
 #rbcontent img.fg-tile{height:150px;display:block;border-radius:4px;}
 #rbcontent img.fg-screenshot{width:1200px;max-width:100%;display:block;margin:14px 0;border-radius:4px;}
 #rbcontent img.fg-crew{height:200px;display:block;margin:0;border-radius:4px;}

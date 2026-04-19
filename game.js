@@ -2522,7 +2522,11 @@ function render(){
     g.style.transform=`translate(${W/2+pan.x}px,${H/2+pan.y}px) scale(${zoom})`;
     boardGroup=g;
     g.appendChild(svgEl('path',{d:_buildHexGridPath(),fill:'none',stroke:'rgba(255,255,255,0.06)','stroke-width':'0.7','pointer-events':'none'}));
-    for(const[,t]of G.tiles)drawTile(g,t);
+    for(const[,t]of G.tiles){if(t.type!=='crash_site')drawTile(g,t);}
+    const bcg=svgEl('g');
+    bcg.style.filter='drop-shadow(1px 1px 5px rgba(0,0,0,1))';
+    for(const[,t]of G.tiles){if(t.type==='crash_site')drawTile(bcg,t);}
+    g.appendChild(bcg);
     _dynGroup=svgEl('g');
     g.appendChild(_dynGroup);
     svg.appendChild(g);
@@ -2564,7 +2568,7 @@ function drawTile(g,t){
     return;
   }
 
-  const strokeC=t.type==='anomaly'?'#6a28a8':t.type==='crash_site'?'#b2dbee':'none';
+  const strokeC=t.type==='anomaly'?'none':t.type==='crash_site'?'#b2dbee':'none';
   const sw='1.5';
   const tileImg=getTileImg(t,'hex');
   if(tileImg){
@@ -3593,6 +3597,19 @@ function renderRulebookSection(s){
   const c=document.getElementById('rbcontent');
   c.innerHTML=`<h1>${s.title}</h1>${markdownToHtml(s.body)}`;
   c.scrollTop=0;
+  _wireRulebookLinks(c);
+}
+
+function _wireRulebookLinks(c){
+  c.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      const id=a.getAttribute('href').slice(1);
+      const sec=RULEBOOK_SECTIONS.find(s=>s.id===id);
+      if(sec){renderRulebookSection(sec);}
+      else{const el=c.querySelector('[id="'+id+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+    });
+  });
 }
 
 function markdownToHtml(md){
@@ -3614,6 +3631,7 @@ function rbSearch(query){
   c.querySelectorAll('td,th,p,li,blockquote').forEach(el=>{
     if(el.textContent.toLowerCase().includes(q))el.innerHTML=el.innerHTML.replace(re,'<span class="hl">$1</span>');
   });
+  _wireRulebookLinks(c);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4136,7 +4154,6 @@ function finalizeGame(){
       [0,   '',     'Find RADIO FRAGMENTS to activate the SIGNAL ARRAY. Each fragment increases the range of your signal.'],
       [0,   '',     'RESOURCES deplete every turn. Return to the base camp to refuel.'],
       [0,   'div',  null],
-      [0,   'sys', `Mission initialized. ${crew.length} crew active.`],
       [0,   'sys', `Turn 1: ${crew[0]}. Roll for movement.`],
     ]);
     updateE7Prompt();
