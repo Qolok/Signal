@@ -140,7 +140,7 @@ function portBg(portrait, dw, dh, fy=0, health=3, variant=''){
 }
 
 const CREW_PORTRAITS=[
-  {name:'Adaeze'},{name:'Reyes'},{name:'Yun'},{name:'Anand'},{name:'Halvorsen'},
+  {name:'Adaeze'},{name:'Reyes'},{name:'Mizuki'},{name:'Anand'},{name:'Halvorsen'},
   {name:'Santos'},{name:'Vasquez'},{name:'Okonkwo'},{name:'Morrow'},{name:'Kim'},
 ];
 
@@ -3623,7 +3623,7 @@ const TOUR_STEPS=[
   {selector:'#hudeq',        title:'BACKPACK',        body:'Equipment you carry into the field. Click a card to read what it does. Use the filter icons to sort by type.',anchor:'right'},
   {selector:'#decks',        title:'CARD DECKS',      body:'Event and Equipment deck counts. Events trigger on tile exploration. Equipment is drawn from the Locker at Base Camp.',anchor:'left'},
   {selector:'#tabletop-dice',title:'MOVEMENT',        body:'Each turn starts with rolling for movement points. Click the die, then click a destination hex on the map.',anchor:'left'},
-  {selector:'.hudact',       title:'ACTIONS',         body:'Actions available here change based on your location. Base Camp has the Locker and Cargo Hold. Other tiles have their own unique actions.',anchor:'left'},
+  {selector:'.hudact',       title:'ACTIONS',         body:'Actions available here change based on your location. You can perform multiple actions throughout your turn as you move to different tiles.',anchor:'left'},
   {selector:'#e7panel',      title:'GUIDE MODE',      body:'The E7 log records every action you take and advises next steps. Enable Guide Mode anytime to receive in-context hints throughout the mission. Check the Field Guide for the full rule book. Good luck, crew.',anchor:'left'},
 ];
 let _tourStep=0;

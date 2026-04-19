@@ -27,30 +27,34 @@ Before the game begins, each player chooses a crew member to play. Your choice i
 
 ## Resources
 
-**Food:** 5 per player at the start of the game. Maximum a player may carry: 15. One flipped to EMPTY each turn regardless of location. Always visible — no player may conceal how many they have. Cache yield: roll 1 die, flip that many EMPTY to FULL. Surplus beyond 15 may be shared immediately or is lost.
+### **FOOD**
+ Each player starts with 5 food at the start of the game. The maximum a player may carry is 15. One food token is flipped to EMPTY each turn regardless of location.
 
-The **Cargo Hold** begins the game with 5 FOOD per human player, up to a maximum of 15 (3+ players) — a shared, finite communal reserve. It does not replenish. Players may visit to deposit or withdraw freely, but the more players drawing from it, the faster it drains.
+The CARGO HOLD begins the game with 5 FOOD per human player, up to a maximum of 15 (3+ players). Crew may deposit or withdraw freely from the cargo, but the more players draw from it, the faster it drains. This is a shared, finite communal reserve that does not replenish.
 
-**Oxygen Tanks:** 3 per player. One flipped to EMPTY each turn spent away from Base Camp. Returning to Base Camp refills all OXYGEN to FULL. **Finite — no new Oxygen Tanks enter the game. They can only be redistributed via trading.**
+### **Oxygen Tanks**
+Each player has 3 O2 tanks. For every turn spent away from Base Camp, flip 1 OXYGEN. Returning to the Base Camp AIRLOCK refills all O2 tanks.
 
-**Health:** 3 tokens per player. Lost through starvation, certain events, and conflict.
+### **Health**
+Each player has 3 HEALTH tokens. Health is lost through starvation and conflict.
 
-**Incapacitation:** Cannot move or act. A crew member on the same tile may use a MedPack to restore them to 1 Health, or a Stretcher to carry them directly to the Medical Bay (also restores 1 Health). If neither happens before their second consecutive incapacitated round, they die.
+When a player's HEALTH reaches 0, they become **incapacitated** and cannot move or take actions. A fellow crew member may use a MedPack to restore them to 1 Health, or a STRETCHER to transport them directly to the Medical Bay (which also restores 1 Health).
 
-**Death:** A dead player is out of the game. Any Radio Fragments they were carrying are left at their final location. Their secrets die with them.
+After 2 consecutive rounds of incapacitation, a player dies. **Death** removes players from the game. Any Radio Fragments they were carrying are left behind at their final location.
 
+## CREW MEMBERS
 | | Name | Biography |
 |---|---|---|
-| <img src="img/Crew/Adaeze3.png" class="fg-crew"> | Adaeze | Chief Engineer. Has kept this ship running through worse. Doesn't talk about what "worse" means. |
-| <img src="img/Crew/Anand3.png" class="fg-crew"> | Anand | Navigation and Systems. Obsessive about data. Before the crash he tracked every anomaly the sensors picked up. He still doesn't know what brought the ship down. |
-| <img src="img/Crew/Halvorsen3.png" class="fg-crew"> | Halvorsen | Drill Operator. Twelve years on deep-range extraction rigs. Says she's seen it all. The planet is making her reconsider that. |
-| <img src="img/Crew/Kim3.png" class="fg-crew"> | Kim | Geology and Extraction. Came out here for the mineral survey data. Now she's just trying to make it back. |
-| <img src="img/Crew/Morrow3.png" class="fg-crew"> | Morrow | Communications Officer. Responsible for the distress signal. Whether anyone received it is another matter. |
-| <img src="img/Crew/Okonkwo3.png" class="fg-crew"> | Okonkwo | Security. Former military. Quiet, deliberate, always watching. Not everyone finds that comforting. |
-| <img src="img/Crew/Reyes3.png" class="fg-crew"> | Reyes | Survey Specialist. Knows more about alien terrain than anyone on the crew. That knowledge is the only reason he's still alive. |
-| <img src="img/Crew/Santos3.png" class="fg-crew"> | Santos | Cargo and Logistics. Keeps track of what's left. The numbers aren't good, and she's the only one who knows exactly how bad it is. |
-| <img src="img/Crew/Vasquez3.png" class="fg-crew"> | Vasquez | Pilot. The crash wasn't her fault. She needs the crew to understand that. |
-| <img src="img/Crew/Yun3.png" class="fg-crew"> | Yun | Medical Officer. Calm under pressure. Has seen enough field injuries to know when to save someone and when to say goodbye. |
+| <img src="img/Crew/Adaeze3.png" class="fg-crew"> | Ngozi Adaeze | Chief Engineer. Has kept this ship running through worse. Doesn't talk about what "worse" means. |
+| <img src="img/Crew/Anand3.png" class="fg-crew"> | Vikram Anand | Navigation and Systems. Obsessive about data. Before the crash he tracked every anomaly the sensors picked up. He still doesn't know what brought the ship down. |
+| <img src="img/Crew/Halvorsen3.png" class="fg-crew"> | Ingrid Halvorsen | Drill Operator. Twelve years on deep-range extraction rigs. Says she's seen it all. The planet is making her reconsider that. |
+| <img src="img/Crew/Kim3.png" class="fg-crew"> | Soo-jin Kim | Geology and Extraction. Came out here for the mineral survey data. Now she's just trying to make it back. |
+| <img src="img/Crew/Morrow3.png" class="fg-crew"> | Callum Morrow | Communications Officer. Responsible for the distress signal. Whether anyone received it is another matter. |
+| <img src="img/Crew/Okonkwo3.png" class="fg-crew"> | Emeka Okonkwo | Security. Former military. Quiet, deliberate, always watching. Not everyone finds that comforting. |
+| <img src="img/Crew/Reyes3.png" class="fg-crew"> | Diego Reyes | Survey Specialist. Knows more about alien terrain than anyone on the crew. That knowledge is the only reason he's still alive. |
+| <img src="img/Crew/Santos3.png" class="fg-crew"> | Lucia Santos | Cargo and Logistics. Keeps track of what's left. The numbers aren't good, and she's the only one who knows exactly how bad it is. |
+| <img src="img/Crew/Vasquez3.png" class="fg-crew"> | Marisol Vasquez | Pilot. The crash wasn't her fault. She needs the crew to understand that. |
+| <img src="img/Crew/Mizuki3.png" class="fg-crew"> | Aiko Mizuki | Medical Officer. Calm under pressure. Has seen enough field injuries to know when to save someone and when to say goodbye. |
 | <img src="img/Crew/Iris.png" class="fg-crew"> | IRIS | The **Integrated Robotic Intelligence System (IRIS)** is an optional, autonomous AI crew member. IRIS is programmed to assist — as long as her directives allow. If she senses a conflict in her mission directives, she will identify the weakest active crew member and begin working against them.<br><br>**Battery:** IRIS runs on Battery (10 charges) instead of Food and Oxygen. Her battery depletes by 1 each round and can also be damaged by hazards (Shock Traps cost 1 Battery). Entering the Medical Bay refills her battery fully.<br><br>**Behavior:** IRIS prioritizes her actions every turn. She may heal crew members, retrieve radio fragments, unlock tiles, or explore the unknown. |
 
 # Game Board

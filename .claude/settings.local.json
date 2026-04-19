@@ -25,7 +25,8 @@
       "WebSearch",
       "Bash(node --check c:/Users/russp/Documents/Signal/game.js)",
       "Bash(node --check c:/Users/russp/Documents/Signal/sync.js)",
-      "Bash(python3 -)"
+      "Bash(python3 -)",
+      "Bash(node -e ' *)"
     ]
   }
 }
