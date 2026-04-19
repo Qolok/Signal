@@ -313,7 +313,7 @@ const EQ_CARDS=[
   {id:'grappling',     name:'Grappling Hook',    cat:'Tool',   txt:'Move to any adjacent tile without using move points. Use once per round.'},
   {id:'lockpick',      name:'Lockpick',          cat:'Tool',   txt:'Bypass mechanical locks on many structures.',},
   {id:'walkie',        name:'Walkie',            cat:'Tool',   txt:'Trade resources with any crew member anywhere on the board.',use:'walkie'},
-  {id:'stretcher',     name:'Stretcher',         cat:'Tool',   txt:'Move an incapacitated crew member on your tile to the Crash Site. Discard after use.',use:'stretcher'},
+  {id:'stretcher',     name:'Stretcher',         cat:'Tool',   txt:'Move an incapacitated crew member on your tile to the Medical Bay. They regain 1 Health. Discard after use.',use:'stretcher'},
   {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health. Discard after use.', use:'medpack'},
   {id:'emer_food',     name:'Emergency Rations', cat:'Supply', txt:'Flip 3 EMPTY Food to FULL. Discard after use.', use:'emer_food'},
   {id:'compressed_o2', name:'Compressed O2',     cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
@@ -516,7 +516,7 @@ function newGame(names, portraits, placedMap){
     return{id:i,name,color:PCOLORS[i],portrait,q:0,r:0,food:5,o2:3,health:3,
            radioFragments:0,equipment,incapacitated:0,alive:true,location:'Crash Site',skipO2:false,
            inStasis:false,signalArrayRounds:0,soloRescueActive:false,rfExtractionActive:false,
-           scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false,lockerUsedThisVisit:false};
+           scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false,lockerUsedThisVisit:false,medBayHealedThisRound:false};
   });
   if(addSynth){
     players.push({id:players.length,name:'IRIS',color:SYNTH_COLOR,portrait:'iris',
@@ -831,9 +831,43 @@ function showTileRevealModal(t, onDismiss){
       addLog('Antimatter Chamber: all crew pulled into the field.','crit');
       render();
     }
-    const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
-    cont.onclick=()=>{dismiss();showAntimatterChallenge(alivePlayers);};
-    actionsEl.appendChild(cont);
+    let rolled=0;
+    alivePlayers.forEach(pl=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);';
+      const nameEl=document.createElement('div');
+      nameEl.style.cssText=`width:100px;color:${pl.color};font-size:.8rem;letter-spacing:.06em;text-align:right;flex-shrink:0;`;
+      nameEl.textContent=pl.name;
+      const dieWrap=make3DDie('idle');dieWrap.style.cssText='flex-shrink:0;cursor:pointer;';
+      const resultEl=document.createElement('div');resultEl.style.cssText='font-size:.75rem;flex:1;color:var(--dim);';
+      resultEl.textContent='click to roll';
+      row.appendChild(nameEl);row.appendChild(dieWrap);row.appendChild(resultEl);
+      actionsEl.appendChild(row);
+      dieWrap.onclick=()=>{
+        dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;dieWrap.style.cursor='';
+        const val=1+(0|Math.random()*6);
+        setTimeout(()=>{
+          const res=makeResultDie(val);res.style.cssText='flex-shrink:0;';
+          dieWrap.replaceWith(res);
+          if(val>=4){
+            const techItems=pl.equipment.filter(c=>c.cat==='Tech');
+            pl.equipment=pl.equipment.filter(c=>c.cat!=='Tech');
+            resultEl.style.color='#d04040';
+            resultEl.textContent=techItems.length?`Tech destroyed: ${techItems.map(c=>c.name).join(', ')}`:'Tech fried — nothing to lose.';
+            if(techItems.length)addLog(`Antimatter Chamber: ${pl.name} lost ${techItems.map(c=>c.name).join(', ')}.`,'crit');
+          } else {
+            resultEl.style.color='#50c840';
+            resultEl.textContent='Pulled free.';
+            addLog(`Antimatter Chamber: ${pl.name} pulled free.`);
+          }
+          updateUI();
+          if(++rolled===alivePlayers.length){
+            const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
+            cont.onclick=dismiss;actionsEl.appendChild(cont);
+          }
+        },1500);
+      };
+    });
   } else if(isAnomaly&&t.anomaly==='Portal'){
     deck.style.display='none';
     const p=cp();
@@ -1264,7 +1298,7 @@ function applyLanding(p,q,r,path,wasRevealed){
       guidance('first_airlock',()=>{e7Seq([[0,'div',null],[0,'sys','> Airlock pressurised.'],[0,'good','Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.']]);});}
     if(t.name==='Medical Bay'){
       if(p.isSynth&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
-      if(!p.isSynth&&p.health<3){p.health++;p.incapacitated=0;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
+      if(!p.isSynth&&p.health<3&&!p.medBayHealedThisRound){p.health++;p.incapacitated=0;p.medBayHealedThisRound=true;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
       guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'','Emergency medical equipment salvaged from the wreckage. Entering automatically restores 1 Health — return here any time you are injured.']]);});
     }
     if(t.name==='Equipment Locker'){
@@ -1334,7 +1368,16 @@ function useCard(playerIdx,uid){
   const p=G.players[playerIdx];const ci=p.equipment.findIndex(c=>c.uid===uid);if(ci<0)return;
   const c=p.equipment[ci];
   if(!c.use)return;
-  if(c.use==='medpack'){if(p.health<3){p.health++;p.equipment.splice(ci,1);addLog(`${p.name} used MedPack. Health: ${p.health}/3.`,'good');}else{addLog('Health already full.');return;}}
+  if(c.use==='medpack'){
+    const targets=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r&&pl.health<3);
+    if(!targets.length){addLog('No injured crew on this tile.');return;}
+    const applyMed=target=>{target.health++;p.equipment.splice(ci,1);addLog(`${p.name} used MedPack on ${target.name}. Health: ${target.health}/3.`,'good');if(target.incapacitated&&target.health>0)target.incapacitated=0;closeCardModal();updateUI();render();};
+    if(targets.length===1){applyMed(targets[0]);return;}
+    showModal('MEDPACK','Choose a crew member to heal.',true,()=>{},'Cancel',undefined,undefined,'');
+    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+    targets.forEach(tgt=>{const b=document.createElement('button');b.className='mbtn';b.innerHTML=`<span style="color:${tgt.color};font-weight:bold">${tgt.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">\u2665 ${tgt.health}/3</span>`;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyMed(tgt);};btns.appendChild(b);});
+    document.getElementById('mact').prepend(btns);return;
+  }
   else if(c.use==='emer_food'){const gain=Math.min(3,15-p.food);p.food+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Food. +${gain} Food.`,'good');}
   else if(c.use==='compressed_o2'){const gain=Math.min(2,3-p.o2);p.o2+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Compressed O₂. +${gain} O₂.`,'good');}
   else if(c.use==='stretcher'){
@@ -1517,54 +1560,6 @@ function doSignalRoll(){
   ],18);
 }
 
-function showAntimatterChallenge(players){
-  const ov=document.getElementById('amt-ov');
-  const playersEl=document.getElementById('amt-players');
-  const btn=document.getElementById('amt-btn');
-  const outEl=document.getElementById('amt-out');
-  playersEl.innerHTML='';outEl.textContent='';
-  btn.disabled=true;btn.textContent='Continue';
-  const rows=[];
-  let rolled=0;
-  players.forEach(pl=>{
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);';
-    const nameEl=document.createElement('div');
-    nameEl.style.cssText='width:110px;color:#a090c0;font-size:.8rem;letter-spacing:.06em;text-align:right;flex-shrink:0;';
-    nameEl.textContent=pl.name;
-    const dieWrap=make3DDie('idle');
-    dieWrap.style.cssText='flex-shrink:0;cursor:pointer;';
-    const resultEl=document.createElement('div');
-    resultEl.style.cssText='font-size:.75rem;flex:1;color:var(--dim);';
-    resultEl.textContent='click die to roll';
-    row.appendChild(nameEl);row.appendChild(dieWrap);row.appendChild(resultEl);
-    playersEl.appendChild(row);
-    rows.push({pl,dieWrap,resultEl});
-    dieWrap.onclick=()=>{
-      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;dieWrap.style.cursor='';
-      const val=1+(0|Math.random()*6);
-      setTimeout(()=>{
-        const res=makeResultDie(val);res.style.cssText='flex-shrink:0;';
-        dieWrap.replaceWith(res);
-        if(val>=4){
-          const techItems=pl.equipment.filter(c=>c.cat==='Tech');
-          pl.equipment=pl.equipment.filter(c=>c.cat!=='Tech');
-          resultEl.style.color='#d04040';
-          resultEl.textContent=techItems.length?`Tech destroyed: ${techItems.map(c=>c.name).join(', ')}`:'Tech fried — nothing to lose.';
-          if(techItems.length)addLog(`Antimatter Chamber: ${pl.name} lost ${techItems.map(c=>c.name).join(', ')}.`,'crit');
-        } else {
-          resultEl.style.color='#50c840';
-          resultEl.textContent='Pulled free.';
-          addLog(`Antimatter Chamber: ${pl.name} pulled free.`);
-        }
-        updateUI();
-        if(++rolled===players.length)btn.disabled=false;
-      },1500);
-    };
-  });
-  btn.onclick=()=>{ov.classList.remove('show');updateUI();render();};
-  ov.classList.add('show');
-}
 
 // ── BASE CAMP ACTIONS ──────────────────────────────────────────
 function doEquipLocker(){
@@ -1789,7 +1784,7 @@ function advanceTurn(){
   while(!G.players[next].alive&&tries++<G.players.length)next=(next+1)%G.players.length;
   if(next<=G.currentPlayer){G.turn++;G.jammerActive=false;}
   G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.signalRolled=false;
-  G.players[next].scannerUsed=false;G.players[next].lockerUsedThisVisit=false;
+  G.players[next].scannerUsed=false;G.players[next].lockerUsedThisVisit=false;G.players[next].medBayHealedThisRound=false;
   if(G.players[next].health===0&&G.players[next].alive&&!G.players[next].isSynth){
     G.players[next].incapacitated++;
     if(G.players[next].incapacitated>=3){
@@ -3086,6 +3081,8 @@ function updateUI(){
   const trdEnabled=(act||G.phase==='move')&&hereOthers.length>0;
   document.getElementById('btrd').disabled=!trdEnabled;
   document.getElementById('btrd').dataset.tooltip=trdEnabled?'Trade resources and equipment with crew on your tile':'Another crew member must be on your tile to trade';
+  const equpnEl=document.getElementById('equpn');if(equpnEl)equpnEl.textContent=G.eqDeckCount;
+  const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
   updateE7Prompt();
   // In online mode, lock all actions when it's not this player's turn
   if(!isMyTurn()){

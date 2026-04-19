@@ -828,8 +828,11 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #rbcontent li{margin-bottom:7px}
 #rbcontent strong{color:var(--hi)}
 #rbcontent img.fg-tile{height:150px;display:block;border-radius:4px;}
-#rbcontent img.fg-screenshot{width:1200px;max-width:100%;display:block;margin:14px 0}
+#rbcontent img.fg-screenshot{width:1200px;max-width:100%;display:block;margin:14px 0;border-radius:4px;}
 #rbcontent img.fg-crew{height:200px;display:block;margin:0;border-radius:4px;}
+#rbcontent img.fg-card{height:350px;display:block;margin:0;border-radius:4px;}
+#rbcontent img.fg-cat-icon{width:18px;height:18px;vertical-align:middle;margin-right:6px;opacity:0.7;filter:invert(1);}
+#rbcontent .fg-eq-section table td:first-child{width:180px;}
 
 /* ── CARD DETAIL (inline in action HUD) ── */
 .cardview{background:var(--bg3);border:1px solid var(--bdr);width:100%;flex:1;min-height:0;border-radius:2px;overflow-y:auto;display:flex;flex-direction:column;}
@@ -970,28 +973,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 #sig-out{font-size:17px;text-align:center;min-height:1.2em;font-weight:bold;letter-spacing:.05em}
 #sig-e7{width:100%;border-bottom:1px solid var(--bdr);padding-bottom:10px;flex:1;overflow:hidden;text-align:left;}
 
-/* ── ANTIMATTER CHAMBER OVERLAY ── */
-#amt-ov{display:none;position:fixed;inset:0;z-index:107;align-items:center;justify-content:center;
-  background:url(img/Tiles/antimatter-chamber.png) center/cover no-repeat;}
-#amt-ov::before{content:'';position:absolute;inset:0;background:rgba(4,2,10,.6);
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
-#amt-ov.show{display:flex;}
-#amt-card{position:relative;overflow:hidden;
-  background:rgba(7,5,14,.92);border:1px solid rgba(120,60,200,.35);border-radius:10px;
-  padding:32px 36px;width:560px;
-  display:flex;flex-direction:column;align-items:center;gap:16px;
-  box-shadow:0 0 0 1px rgba(80,30,160,.2),0 8px 40px rgba(0,0,0,.9),inset 0 0 60px rgba(0,0,0,.5),inset 0 0 0 1px rgba(140,80,220,.06);
-  z-index:1;}
-#amt-card::before{content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 40%,rgba(120,60,200,.12) 0%,transparent 100%);
-  pointer-events:none;z-index:0;}
-#amt-card>*{position:relative;z-index:2;}
-#amt-head{font-size:12px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;}
-#amt-body{font-size:.82rem;color:#a090c0;text-align:center;line-height:1.5;}
-#amt-players{width:100%;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:8px 0;}
-#amt-out{font-size:.8rem;text-align:center;min-height:1em;color:var(--dim);}
-#amt-btn{width:100%;margin-top:4px;}
-.mbtn:disabled,#amt-btn:disabled{opacity:.4;cursor:not-allowed;}
+.mbtn:disabled{opacity:.4;cursor:not-allowed;}
 
 /* ── INTRO SCREEN ── */
 .version-label{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:13px;letter-spacing:.12em;color:var(--dim);opacity:.35;pointer-events:none;}
