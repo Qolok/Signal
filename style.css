@@ -907,7 +907,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
 .evc.pub .evc-bot-corners{color:#1a4060}
 .evc.priv .evc-bot-corners{color:#4a2808}
 /* Hazard Suit block animation */
-#evc-suit-blocker{
+#evc-suit-blocker,#trov-suit-blocker{
   display:none;position:absolute;
   left:calc(50% - 55px);top:calc(50% - 40px);
   width:110px;height:158px;border-radius:4px;
@@ -916,7 +916,7 @@ body{font-family:ui-monospace,'Cascadia Code','SF Mono',Menlo,monospace;font-siz
   z-index:20;overflow:hidden;
   transform:translateY(-120vh) rotate(-14deg);
 }
-#evc-suit-blocker.dropping{
+#evc-suit-blocker.dropping,#trov-suit-blocker.dropping{
   display:flex;flex-direction:column;
   animation:suit-drop .55s cubic-bezier(.34,1.4,.64,1) forwards;
 }

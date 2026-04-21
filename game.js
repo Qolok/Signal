@@ -1,4 +1,77 @@
 'use strict';
+// ── SFX ──────────────────────────────────────────────────────────
+const _sfxCache = {};
+const _sfxOffsets = { 'dice.wav': 0.83 };
+function _snd(path) {
+  if (!_sfxCache[path]) { const a = new Audio('sfx/' + path); a.volume = 0.65; _sfxCache[path] = a; }
+  return _sfxCache[path];
+}
+function _play(path) {
+  const a = _snd(path);
+  a.currentTime = _sfxOffsets[path] || 0;
+  a.play().catch(() => {});
+}
+function sfx(name) {
+  const picks = {
+    dice_roll:      'dice.wav',
+    move:           'pop.wav',
+    card:           ['card1.wav','card2.wav','card3.wav','card4.wav'],
+    equip:          'base-equip.wav',
+    damage:         'shock.wav',
+    heal:           'base-medbay.wav',
+    signal_success: 'signal-yes.wav',
+    signal_fail:    'signal-no.wav',
+    fragment:       'radio-fragment.wav',
+    activate:       'activate.wav',
+    end_turn:       'phase.wav',
+    contest:        'alarm-act.wav',
+    airlock:        'base-airlock.wav',
+    cargo:          'base-cargo.wav',
+    watchtower:     'base-watch.wav',
+    check_on:       'check-on.wav',
+    check_off:      'check-off.wav',
+    select:         'select.wav',
+    health_up:      'health-up.wav',
+    health_down:    'health-down.wav',
+    death:          'death.wav',
+  };
+  const v = picks[name]; if (!v) return;
+  const path = Array.isArray(v) ? v[0|Math.random()*v.length] : v;
+  _play(path);
+}
+
+
+const _alarmCrit = new Audio('sfx/alarm-crit.wav');
+_alarmCrit.loop = true;
+_alarmCrit.volume = 0.65;
+const _sigAir = new Audio('sfx/signal-air.wav');
+_sigAir.loop = true;
+_sigAir.volume = 0.65;
+const _sigPulse = new Audio('sfx/signal-pulse.wav');
+_sigPulse.loop = true;
+_sigPulse.volume = 0.65;
+
+// Hover + click sounds on interactive UI elements
+const _clickableSelector = 'button:not(:disabled):not(#bend):not(.back-btn), .parr, .eq-nav:not(:disabled), .deckpile, .eqcard, .hud-vtab, .eq-filt:not(:disabled), .sbreset, .sbpalcard:not(.placed), .rbti, [data-tooltip]';
+const _hoverSnd = () => _play('hover.wav');
+let _lastHover = 0;
+document.addEventListener('mouseenter', e => {
+  if (!e.target.matches(_clickableSelector)) return;
+  const now = performance.now();
+  if (now - _lastHover < 60) return;
+  _lastHover = now;
+  _hoverSnd();
+}, true);
+document.addEventListener('mousedown', e => {
+  if (!e.target.matches(_clickableSelector)) return;
+  if (e.target.classList.contains('next-btn')) _play('next.wav');
+  else sfx('select');
+}, true);
+const _tileGeneric = ['tile1.wav','tile2.wav','tile3.wav','tile4.wav','tile5.wav','tile6.wav'];
+function sfxTile(t) {
+  if(t?.type!=='anomaly')return;
+  _play(_tileGeneric[0|Math.random()*_tileGeneric.length]);
+}
 // ═══════════════════════════════════════════════════════════════
 // PORTRAITS  (inline SVG → data URIs)
 // ═══════════════════════════════════════════════════════════════
@@ -313,7 +386,7 @@ const EQ_CARDS=[
   {id:'grappling',     name:'Grappling Hook',    cat:'Tool',   txt:'Move to any adjacent tile without using move points. Use once per round.'},
   {id:'lockpick',      name:'Lockpick',          cat:'Tool',   txt:'Bypass mechanical locks on many structures.',},
   {id:'walkie',        name:'Walkie',            cat:'Tool',   txt:'Trade resources with any crew member anywhere on the board.',use:'walkie'},
-  {id:'stretcher',     name:'Stretcher',         cat:'Tool',   txt:'Move an incapacitated crew member on your tile to the Medical Bay. They regain 1 Health. Discard after use.',use:'stretcher'},
+  {id:'stretcher',     name:'Stretcher',         cat:'Tool',   txt:'Transport an incapacitated crew member to the Medical Bay. Discard after use.',use:'stretcher'},
   {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health. Discard after use.', use:'medpack'},
   {id:'emer_food',     name:'Emergency Rations', cat:'Supply', txt:'Flip 3 EMPTY Food to FULL. Discard after use.', use:'emer_food'},
   {id:'compressed_o2', name:'Compressed O2',     cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
@@ -321,9 +394,9 @@ const EQ_CARDS=[
   {id:'scanner',       name:'Scanner',           cat:'Tech',   txt:'Reveals all adjacent undiscovered tiles. Once per round, 3 charges total.',use:'scanner'},
   {id:'rebreather',    name:'Rebreather',        cat:'Tech',   txt:'Your O\u2082 depletes every 2 turns in the field instead of every turn.'},
   {id:'data_spike',    name:'Data Spike',        cat:'Tech',   txt:'Bypass electronic locks on high-tech structures.'},
-  {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile loses 1 Health (or Battery) and skips their next turn. Discard after use.',use:'stun_baton'},
+  {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile loses 1 Health and skips their turn. Discard after use.',use:'stun_baton'},
   {id:'flare_gun',     name:'Flare Gun',         cat:'Weapon', txt:'Force any player within 2 tiles to move to your tile immediately. Discard after use.',use:'flare_gun'},
-  {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place on your current tile. The next player or IRIS to enter loses 1 Health (or Battery) and their turn ends immediately. Discard after use.',use:'shock_trap'},
+  {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place on your tile. The next player to enter loses 1 Health and ends their turn. Discard after use.',use:'shock_trap'},
   {id:'jammer',        name:'Signal Jammer',     cat:'Weapon', txt:'No Signal Roll occurs this round. Discard after use.',use:'jammer'},
 ];
 
@@ -420,12 +493,12 @@ const TILE_TIPS={
   'Cache':             [[0,'','A supply cache half-buried in the sand. The seal has been broken.'],[500,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
   'Passage':           [[0,'','A route through the canyon. Something passed through here recently.'],[0,'act','Draw an Event card.']],
   'Bloody Passage':    [[0,'','A piece of the ship wedged in a canyon. Signs of violence inside.'],[0,'act','Draw an Event card.']],
-  'Spore Bog':         [[0,'','A murky wetland choked with fungal growths. Spores drift like ash.'],[300,'','A sickly light pulses from beneath the surface.'],[0,'act','Draw an Event card. Without a Hazard Suit, lose 1 Health.']],
+  'Spore Bog':         [[0,'','A murky wetland choked with fungal growths. Spores drift like ash.'],[300,'','A sickly light pulses from beneath the surface.'],[0,'act','Draw an Event card.']],
   'Bioluminescent Fen':[[0,'','A hauntingly alien marsh. Wispy plants pulse with soft teal light.'],[300,'','The mist hangs low — eerie, but strangely serene.'],[0,'good','Recover 1 Health. O\u2082 flip skipped this round.']],
   'Nest Site':         [[0,'','A shallow crater lined with leathery alien eggs. Something large nested here.'],[300,'','You move closer to see if you can get a reading from one of the eggs.'],[300,'act','Roll 1 die.']],
   'Hive Mound':        [[0,'','A towering biological mound. The tunnels inside shift and pulse.'],[0,'act','Roll 3 dice. Each 4+ costs 1 Health. Hazard Suit negates 1 damage.']],
-  'Thermal Vent':      [[0,'','Fractured ground. Jets of superheated gas vent in slow rhythmic bursts.'],[300,'','Heat distortion and sulfur in the air.'],[0,'act','Draw an Event card. Without a Hazard Suit, lose 1 Health.']],
-  'Antimatter Chamber':[[0,'','A buried alien structure. A sphere of crackling energy floats in suspension.'],[300,'','The ground is warped. Loose debris drifts slowly inward.'],[0,'act','All crew are pulled to this tile. Each player rolls.'],[300,'good','1-3: You pull free'],[0,'crit','4-6: All Tech equipment is destroyed.']],
+  'Thermal Vent':      [[0,'','Fractured ground. Jets of superheated gas vent in slow rhythmic bursts.'],[300,'','Heat distortion and sulfur in the air.'],[0,'act','Draw an Event card.']],
+  'Antimatter Chamber':[[0,'','A buried alien structure. A sphere of crackling energy floats in suspension.'],[0,'act','All crew are pulled to this tile. Each player rolls. 1–3: pull free · 4–6: Tech destroyed.']],
   'Stasis Pod':        [[0,'','The ship\'s stasis pod. A chance at survival — but it holds only one.'],[300,'act','Skip Resource Flip each round. Cannot move or interact. Exit any time.']],
   'Temporal Rift':     [[0,'','An unexplained spacetime distortion. Past and future flicker.'],[300,'act','Roll 1 die.'],[0,'crit','1\u20133: lose that many Food.'],[0,'good','4\u20136: recover that many Food.']],
   'Portal':            [[0,'','Abandoned alien technology. A vortex opens — instantaneous transit, origin unknown.'],[0,'act','Option: Move immediately to Crash Site. Turn ends.']],
@@ -446,6 +519,7 @@ let _inGuidance=false;
 function toggleGuidance(){
   const cb=document.getElementById('e7guidance-toggle');
   guidanceMode=cb?cb.checked:!guidanceMode;
+  sfx(guidanceMode?'check_on':'check_off');
   document.querySelectorAll('#e7log .e7-guide').forEach(el=>el.classList.toggle('hidden',!guidanceMode));
 }
 
@@ -562,10 +636,11 @@ function expandFrontier(){
 function revealAt(q,r){
   const k=hk(q,r);const t=G.tiles.get(k);if(!t||t.revealed)return;
   markTilesDirty();
-  if(!G.terrainDeck.length){G.tiles.set(k,{...t,type:'terrain',revealed:true,pois:['Wreckage Field'],investigatedCount:0});expandFrontier();return;}
+  if(!G.terrainDeck.length){G.tiles.set(k,{...t,type:'terrain',revealed:true,pois:['Wreckage Field'],investigatedCount:0});sfxTile(G.tiles.get(k));expandFrontier();return;}
   const drawn=G.terrainDeck.pop();
   G.tiles.set(k,{...t,...drawn,q,r,revealed:true,investigatedCount:0});
   const nt=G.tiles.get(k);
+  sfxTile(nt);
   if(nt.type==='anomaly')addLog(`Tile revealed: Anomaly — ${nt.anomaly}`,'tile');
   else if(nt.type==='ship_section')addLog('Ship Section discovered!','tile');
   else addLog(`Tile revealed: ${nt.pois.join(', ')}`,'tile');
@@ -628,7 +703,7 @@ function showTileRevealModal(t, onDismiss){
     steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
   }
   if(t.radioFragment&&!t.requiresTool){
-    const p=cp();p.radioFragments++;t.radioFragment=false;markTilesDirty();
+    const p=cp();p.radioFragments++;sfx('fragment');t.radioFragment=false;markTilesDirty();
     addLog(`${p.name} recovered a Radio Fragment.`,'frag');
     steps.push([0,'good','\u25c8 Radio Fragment recovered.']);
     guidance('first_rf',()=>{
@@ -645,6 +720,17 @@ function showTileRevealModal(t, onDismiss){
     const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
     steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
     if(!hasTool){guidance('first_tool_tile',()=>{e7Seq([[0,'div',null],[0,'sys',`> Access denied — ${toolName} required.`],[0,'','Some tiles are locked behind specific tools. Tools are found as equipment card draws. If you find a Lockpick, Plasma Cutter, or Data Spike, hold onto it — certain tiles contain Radio Fragments that can only be reached with the right tool.']]);});}
+  }
+  // Toxic tile — inject health-loss indicator into steps
+  const isToxic=t.pois?.includes('Spore Bog')||t.pois?.includes('Thermal Vent');
+  let _hasSuit=false;
+  if(isToxic){
+    const p=cp();
+    _hasSuit=p.equipment.some(c=>c.id==='hazard_suit');
+    let lastAct=-1;
+    for(let i=0;i<steps.length;i++)if(steps[i][1]==='act')lastAct=i;
+    if(lastAct!==-1)steps.splice(lastAct,0,[0,'crit','\u25c8 Lose 1 Health.']);
+    else steps.push([0,'crit','\u25c8 Lose 1 Health.']);
   }
   // Populate overlay
   const isAnomaly=t.type==='anomaly';
@@ -668,7 +754,7 @@ function showTileRevealModal(t, onDismiss){
     else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'||t.pois?.includes('Cache')){
       if(t.pois?.includes('Bioluminescent Fen')){
         const p=cp();
-        if(p.health<3){p.health++;addLog(`${p.name} rested in the Fen. Health: ${p.health}/3.`,'good');}
+        if(p.health<3){p.health++;sfx('health_up');addLog(`${p.name} rested in the Fen. Health: ${p.health}/3.`,'good');}
         p.skipO2=true;addLog('Bioluminescent Fen: O\u2082 flip skipped this turn.','good');
       }
       updateUI();render();
@@ -679,7 +765,7 @@ function showTileRevealModal(t, onDismiss){
         const p=cp();
         const suitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
         if(suitIdx!==-1){p.equipment.splice(suitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,'good');}
-        else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
+        else{if(p.health>0){p.health--;sfx('health_down');}addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
       }
       drawTileEvent(t);
     }
@@ -691,7 +777,7 @@ function showTileRevealModal(t, onDismiss){
     dieWrap.style.cssText='margin:0 auto;';
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick=()=>{
-      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
       const val=1+(0|Math.random()*6);
       setTimeout(()=>{
         actionsEl.innerHTML='';
@@ -702,7 +788,7 @@ function showTileRevealModal(t, onDismiss){
         let outcome='';
         if(val<=2){const gained=Math.min(15-p.food,3);p.food+=gained;outcome=`Rolled ${val} — Food: +${gained}.`;addLog(`${p.name} salvaged ${gained} Food from Ship Section.`,'good');}
         else if(val<=4){const gained=Math.min(3-p.o2,2);p.o2+=gained;outcome=`Rolled ${val} — Oxygen: +${gained}.`;addLog(`${p.name} refilled ${gained} O\u2082 from Ship Section.`,'good');}
-        else{if(p.health<3){p.health++;outcome=`Rolled ${val} — Health restored.`;addLog(`${p.name} treated at Ship Section. Health: ${p.health}/3.`,'good');}else{outcome=`Rolled ${val} — Health already full.`;addLog(`${p.name} searched Ship Section — health already full.`);}}
+        else{if(p.health<3){p.health++;sfx('health_up');outcome=`Rolled ${val} — Health restored.`;addLog(`${p.name} treated at Ship Section. Health: ${p.health}/3.`,'good');}else{outcome=`Rolled ${val} — Health already full.`;addLog(`${p.name} searched Ship Section — health already full.`);}}
         const outEl=document.createElement('div');
         outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
         outEl.textContent=outcome;actionsEl.appendChild(outEl);
@@ -719,7 +805,7 @@ function showTileRevealModal(t, onDismiss){
     dieWrap.style.cssText='margin:0 auto;';
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick=()=>{
-      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
       const val=1+(0|Math.random()*6);
       setTimeout(()=>{
         actionsEl.innerHTML='';
@@ -748,7 +834,7 @@ function showTileRevealModal(t, onDismiss){
     dieWrap.style.cssText='margin:0 auto;';
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick=()=>{
-      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
       const val=1+(0|Math.random()*6);
       setTimeout(()=>{
         actionsEl.innerHTML='';
@@ -758,7 +844,7 @@ function showTileRevealModal(t, onDismiss){
         const p=cp();
         let outcome='';
         if(val>=4){
-          if(p.health>0)p.health--;
+          if(p.health>0){p.health--;sfx('health_down');}
           outcome=`Rolled ${val} — An egg cracks open. A spider-like creature lunges — lose 1 Health. It vanishes into the terrain.`;
           addLog(`Nest Site: rolled ${val} — ${p.name} attacked. Health: ${p.health}/3.`,'crit');
         } else {
@@ -777,16 +863,18 @@ function showTileRevealModal(t, onDismiss){
   } else if(t.pois&&t.pois.includes('Hive Mound')){
     deck.style.display='none';
     trov.onclick=null;
-    const diceRow=document.createElement('div');diceRow.style.cssText='display:flex;gap:28px;justify-content:center;';
+    const diceRow=document.createElement('div');diceRow.style.cssText='display:flex;gap:28px;justify-content:center;width:100%;';
     const wraps=[];
     for(let i=0;i<3;i++){const w=make3DDie('idle');diceRow.appendChild(w);wraps.push(w);}
     actionsEl.appendChild(diceRow);
     diceRow.onclick=()=>{
       if(wraps.some(w=>w.className.includes('rolling')))return;
+      sfx('dice_roll');
       wraps.forEach(w=>{w.className='td-die-wrap rolling';});
       diceRow.onclick=null;
       const vals=[1+(0|Math.random()*6),1+(0|Math.random()*6),1+(0|Math.random()*6)];
       setTimeout(()=>{
+        sfx('dice_land');
         actionsEl.innerHTML='';
         const resRow=document.createElement('div');resRow.style.cssText='display:flex;gap:10px;justify-content:center;';
         vals.forEach(v=>resRow.appendChild(makeResultDie(v)));
@@ -800,6 +888,7 @@ function showTileRevealModal(t, onDismiss){
         const damage=hits-negated;
         const actualDmg=Math.min(p.health,damage);
         p.health-=actualDmg;
+        if(actualDmg>0)sfx('health_down');
         let outcome='';
         if(hits===0){outcome=`Rolled ${vals.join(', ')} — The swarm doesn't reach you.`;addLog('Hive Mound: no hits.');}
         else if(damage===0){outcome=`Rolled ${vals.join(', ')} — ${hits} hit${hits>1?'s':''}, fully negated by Hazard Suit${negated>1?'s':''}.`;addLog(`Hive Mound: ${hits} hit(s) blocked by suit.`,'good');}
@@ -832,42 +921,61 @@ function showTileRevealModal(t, onDismiss){
       render();
     }
     let rolled=0;
-    alivePlayers.forEach(pl=>{
-      const row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);';
-      const nameEl=document.createElement('div');
-      nameEl.style.cssText=`width:100px;color:${pl.color};font-size:.8rem;letter-spacing:.06em;text-align:right;flex-shrink:0;`;
-      nameEl.textContent=pl.name;
-      const dieWrap=make3DDie('idle');dieWrap.style.cssText='flex-shrink:0;cursor:pointer;';
-      const resultEl=document.createElement('div');resultEl.style.cssText='font-size:.75rem;flex:1;color:var(--dim);';
-      resultEl.textContent='click to roll';
-      row.appendChild(nameEl);row.appendChild(dieWrap);row.appendChild(resultEl);
-      actionsEl.appendChild(row);
-      dieWrap.onclick=()=>{
-        dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;dieWrap.style.cursor='';
-        const val=1+(0|Math.random()*6);
-        setTimeout(()=>{
-          const res=makeResultDie(val);res.style.cssText='flex-shrink:0;';
-          dieWrap.replaceWith(res);
-          if(val>=4){
-            const techItems=pl.equipment.filter(c=>c.cat==='Tech');
-            pl.equipment=pl.equipment.filter(c=>c.cat!=='Tech');
-            resultEl.style.color='#d04040';
-            resultEl.textContent=techItems.length?`Tech destroyed: ${techItems.map(c=>c.name).join(', ')}`:'Tech fried — nothing to lose.';
-            if(techItems.length)addLog(`Antimatter Chamber: ${pl.name} lost ${techItems.map(c=>c.name).join(', ')}.`,'crit');
-          } else {
-            resultEl.style.color='#50c840';
-            resultEl.textContent='Pulled free.';
-            addLog(`Antimatter Chamber: ${pl.name} pulled free.`);
-          }
-          updateUI();
-          if(++rolled===alivePlayers.length){
-            const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
-            cont.onclick=dismiss;actionsEl.appendChild(cont);
-          }
-        },1500);
-      };
-    });
+    let arena=null;
+    const ackBtn=document.createElement('button');ackBtn.className='mbtn';ackBtn.textContent='Acknowledge';
+    ackBtn.style.display='none';ackBtn.onclick=()=>{G.lastPublicEvt={_sourceAntimatter:true};if(arena&&arena.parentElement)arena.remove();dismiss();};
+    actionsEl.appendChild(ackBtn);
+    if(!alivePlayers.length){
+      ackBtn.style.display='';
+    } else {
+      const trBox=actionsEl.parentElement;
+      arena=document.createElement('div');
+      arena.style.cssText='display:flex;flex-wrap:wrap;gap:16px;justify-content:center;width:100%;padding:8px 0;';
+      trBox.insertBefore(arena,actionsEl);
+      alivePlayers.forEach(pl=>{
+        const col=document.createElement('div');
+        col.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;min-width:80px;';
+        const port=document.createElement('div');
+        port.className='contest-portrait';
+        port.style.cssText=portBg(pl.portrait,80,80,0,pl.health)+'border-color:'+pl.color+';';
+        const nameEl=document.createElement('div');
+        nameEl.className='contest-name';
+        nameEl.style.color=pl.color;
+        nameEl.textContent=pl.name;
+        const dieContainer=document.createElement('div');
+        dieContainer.style.cssText='width:52px;height:52px;display:flex;align-items:center;justify-content:center;';
+        const die=make3DDie('idle');
+        die.style.cursor='pointer';
+        dieContainer.appendChild(die);
+        const resultEl=document.createElement('div');
+        resultEl.style.cssText='font-size:.75rem;color:var(--dim);min-height:1.2em;text-align:center;max-width:90px;';
+        resultEl.textContent='click to roll';
+        col.appendChild(port);col.appendChild(nameEl);col.appendChild(dieContainer);col.appendChild(resultEl);
+        arena.appendChild(col);
+        die.onclick=()=>{
+          sfx('dice_roll');die.className='td-die-wrap rolling';die.onclick=null;die.style.cursor='';
+          const val=1+(0|Math.random()*6);
+          setTimeout(()=>{
+            dieContainer.innerHTML='';
+            const res=makeResultDie(val);res.style.cssText='width:52px;height:52px;';
+            dieContainer.appendChild(res);
+            if(val>=4){
+              const techItems=pl.equipment.filter(c=>c.cat==='Tech');
+              pl.equipment=pl.equipment.filter(c=>c.cat!=='Tech');
+              resultEl.style.color='#d04040';
+              resultEl.textContent=techItems.length?`Tech destroyed: ${techItems.map(c=>c.name).join(', ')}`:'Tech fried.';
+              if(techItems.length)addLog(`Antimatter Chamber: ${pl.name} lost ${techItems.map(c=>c.name).join(', ')}.`,'crit');
+            } else {
+              resultEl.style.color='#50c840';
+              resultEl.textContent='Pulled free.';
+              addLog(`Antimatter Chamber: ${pl.name} pulled free.`);
+            }
+            updateUI();
+            if(++rolled===alivePlayers.length) ackBtn.style.display='';
+          },1500);
+        };
+      });
+    }
   } else if(isAnomaly&&t.anomaly==='Portal'){
     deck.style.display='none';
     const p=cp();
@@ -918,7 +1026,7 @@ function showTileRevealModal(t, onDismiss){
     dieWrap.style.cssText='margin:0 auto;';
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick=()=>{
-      dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
+      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
       const val=1+(0|Math.random()*6);
       setTimeout(()=>{
         actionsEl.innerHTML='';
@@ -1005,6 +1113,7 @@ function showTileRevealModal(t, onDismiss){
         };
         actionsEl.appendChild(enterBtn);
       } else {
+        _play('reject.wav');
         const leaveBtn=document.createElement('button');
         leaveBtn.className='mbtn';
         leaveBtn.textContent='Leave';
@@ -1021,9 +1130,10 @@ function showTileRevealModal(t, onDismiss){
         const fragBtn=document.createElement('button');
         fragBtn.className='mbtn pri';
         fragBtn.textContent=`Use ${toolName} — Recover Fragment`;
-        fragBtn.onclick=()=>{p.radioFragments++;t.radioFragment=false;t.investigatedCount=t.pois.length;markTilesDirty();addLog(`${p.name} used ${toolName} to recover a Radio Fragment.`,'frag');dismiss();};
+        fragBtn.onclick=()=>{p.radioFragments++;t.radioFragment=false;t.investigatedCount=t.pois.length;markTilesDirty();sfx('fragment');addLog(`${p.name} used ${toolName} to recover a Radio Fragment.`,'frag');dismiss();};
         actionsEl.appendChild(fragBtn);
       } else {
+        _play('reject.wav');
         const leaveBtn=document.createElement('button');
         leaveBtn.className='mbtn';
         leaveBtn.textContent='Leave';
@@ -1035,6 +1145,9 @@ function showTileRevealModal(t, onDismiss){
   cancelTooltip();
   trov.style.display='flex';
   trov.classList.add('show');
+  const _sb=document.getElementById('trov-suit-blocker');
+  _sb.classList.remove('dropping');
+  if(isToxic&&_hasSuit)setTimeout(()=>_sb.classList.add('dropping'),400);
 }
 
 function popEventCard(){
@@ -1051,7 +1164,7 @@ function drawTileEvent(t){
   if(!evt)return;
   // Apply guaranteed (non-roll) effects immediately
   if(evt.rf){
-    p.radioFragments++;addLog(`${p.name} found a Radio Fragment!`,'frag');
+    p.radioFragments++;sfx('fragment');addLog(`${p.name} found a Radio Fragment!`,'frag');
     guidance('first_rf',()=>{
       e7Seq([
         [0, 'div', null],
@@ -1076,7 +1189,7 @@ function drawTileEvent(t){
   if(evt.loseHealth){
     const suitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
     if(suitIdx!==-1){suitBlocked=true;p.equipment.splice(suitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,'good');}
-    else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
+    else{if(p.health>0){p.health--;sfx('health_down');}addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
   }
   if(evt.pub)G.lastPublicEvt=evt;
   if(evt.trackSignalArray){p.soloRescueActive=true;addLog(`${p.name} has a private objective.`,'act');}
@@ -1221,11 +1334,13 @@ function rollTableDice(){
   if(diceState.rolled)return;
   const finalValues=diceState.values.map(()=>1+(0|Math.random()*6));
   diceState.spinning=true;
+  sfx('dice_roll');
   renderTableDice(); // create rolling die once — do NOT recreate during animation
   setTimeout(()=>{
     diceState.spinning=false;
     diceState.values=finalValues;
     diceState.rolled=true;
+    sfx('dice_land');
     if(diceState.mode==='move'){
       const r=finalValues[0];
       if(!G||G.phase!=='roll'){renderTableDice();return;}
@@ -1290,15 +1405,16 @@ function doMove(q,r){
 }
 
 function applyLanding(p,q,r,path,wasRevealed){
+  sfx('move');
   p.q=q;p.r=r;G.movementLeft-=path.length;p.lockerUsedThisVisit=false;renderTableDice();
   const t=G.tiles.get(hk(q,r));
   p.location=tileName(t);
   if(t?.type==='crash_site'){
-    if(t.name==='Airlock'){p.o2=3;addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');
+    if(t.name==='Airlock'){p.o2=3;sfx('airlock');addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');
       guidance('first_airlock',()=>{e7Seq([[0,'div',null],[0,'sys','> Airlock pressurised.'],[0,'good','Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.']]);});}
     if(t.name==='Medical Bay'){
-      if(p.isSynth&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
-      if(!p.isSynth&&p.health<3&&!p.medBayHealedThisRound){p.health++;p.incapacitated=0;p.medBayHealedThisRound=true;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
+      if(p.isSynth&&p.battery<10){p.battery=10;sfx('health_up');addLog('IRIS battery fully recharged at Medical Bay.','good');}
+      if(!p.isSynth&&p.health<3&&!p.medBayHealedThisRound){p.health++;sfx('health_up');p.incapacitated=0;p.medBayHealedThisRound=true;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
       guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'','Emergency medical equipment salvaged from the wreckage. Entering automatically restores 1 Health — return here any time you are injured.']]);});
     }
     if(t.name==='Equipment Locker'){
@@ -1325,13 +1441,14 @@ function applyLanding(p,q,r,path,wasRevealed){
   }
   if(t?.shockTrap&&t.shockTrapOwner!==p.id){
     t.shockTrap=false;t.shockTrapOwner=null;
-    if(p.health>0){p.health--;guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}
+    if(p.health>0){p.health--;sfx('health_down');guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}
     addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3. Turn ended.`,'crit');
     markTilesDirty();G.movementLeft=0;G.phase='action';render();doEndTurn();return;
   }
   if(t?.droppedFragments>0&&!p.isSynth){
     const picked=t.droppedFragments;
     p.radioFragments+=picked;
+    sfx('fragment');
     t.droppedFragments=0;
     markTilesDirty();
     addLog(`${p.name} recovered ${picked} abandoned Radio Fragment${picked!==1?'s':''}.`,'frag');
@@ -1355,6 +1472,7 @@ function applyLanding(p,q,r,path,wasRevealed){
 function drawEqCard(player){
   if(!G.eqDeck.length)return null;
   const card=G.eqDeck.pop();
+  sfx('card');
   player.equipment.push({...card,uid:++cardUid});
   G.eqDeckCount=G.eqDeck.length;
   const el=document.getElementById('equpn');if(el)el.textContent=G.eqDeckCount;
@@ -1371,7 +1489,7 @@ function useCard(playerIdx,uid){
   if(c.use==='medpack'){
     const targets=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r&&pl.health<3);
     if(!targets.length){addLog('No injured crew on this tile.');return;}
-    const applyMed=target=>{target.health++;p.equipment.splice(ci,1);addLog(`${p.name} used MedPack on ${target.name}. Health: ${target.health}/3.`,'good');if(target.incapacitated&&target.health>0)target.incapacitated=0;closeCardModal();updateUI();render();};
+    const applyMed=target=>{target.health++;sfx('health_up');p.equipment.splice(ci,1);addLog(`${p.name} used MedPack on ${target.name}. Health: ${target.health}/3.`,'good');if(target.incapacitated&&target.health>0)target.incapacitated=0;closeCardModal();updateUI();render();};
     if(targets.length===1){applyMed(targets[0]);return;}
     showModal('MEDPACK','Choose a crew member to heal.',true,()=>{},'Cancel',undefined,undefined,'');
     const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
@@ -1411,7 +1529,7 @@ function useCard(playerIdx,uid){
     if(!targets.length){addLog('No crew on this tile to stun.','act');closeCardModal();return;}
     const applyStun=target=>{
       target.stunned=true;
-      if(target.isSynth){if(target.battery>0)target.battery--;}else{if(target.health>0)target.health--;}
+      if(target.isSynth){if(target.battery>0){target.battery--;sfx('health_down');}}else{if(target.health>0){target.health--;sfx('health_down');}}
       p.equipment.splice(ci,1);
       addLog(`${p.name} stunned ${target.name}. They lose 1 ${target.isSynth?'Battery':'Health'} and skip their next turn.`,'crit');
       closeCardModal();updateUI();render();
@@ -1464,6 +1582,7 @@ function doActivateFrag(){
   const t=G.tiles.get(hk(p.q,p.r));if(t?.name!=='Signal Array')return;
   if(G.radioFragmentsActivated>=5)return;
   p.radioFragments--;G.radioFragmentsActivated++;
+  sfx('activate');
   const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
   addLog(`Fragment activated. Array: ${G.radioFragmentsActivated}/5. Threshold: ${thr}+`,'frag');
   guidance('first_frag_activated',()=>{
@@ -1512,25 +1631,32 @@ function doSignalRoll(){
   const wraps=[];
   for(let i=0;i<3;i++){const w=make3DDie('idle');diceEl.appendChild(w);wraps.push(w);}
   function closeOv(){
+    _sigAir.pause();_sigAir.currentTime=0;
     document.getElementById('sig-ov').classList.remove('show');
     updateUI();render();
   }
+  _sigAir.currentTime=0;_sigAir.play().catch(()=>{});
   btn.onclick=()=>{
     if(btn.dataset.done){closeOv();return;}
     btn.disabled=true;
     G.signalRolled=true;
+    sfx('dice_roll');
+    _sigPulse.currentTime=0;_sigPulse.play().catch(()=>{});
     wraps.forEach(w=>{w.className='td-die-wrap';w.getBoundingClientRect();w.className='td-die-wrap rolling';});
     const finals=[1+(0|Math.random()*6),1+(0|Math.random()*6),1+(0|Math.random()*6)];
     setTimeout(()=>{
+      _sigAir.pause();_sigAir.currentTime=0;
+      _sigPulse.pause();_sigPulse.currentTime=0;
       diceEl.innerHTML='';
       const row=document.createElement('div');row.style.cssText='display:flex;gap:14px;';
       finals.forEach(v=>row.appendChild(makeResultDie(v)));
       diceEl.appendChild(row);
       const total=finals.reduce((a,b)=>a+b,0);const success=total>=thr;
+      sfx(success?'signal_success':'signal_fail');
       addLog(`Signal Roll: ${total} vs ${thr} — ${success?'SUCCESS':'FAIL'}`,success?'good':'crit');
       outEl.textContent=`${finals[0]} + ${finals[1]} + ${finals[2]} = ${total} · ${success?'SUCCESS':'FAIL'}`;
       outEl.style.color=success?'#50c840':'#d04040';
-      btn.textContent='OK';btn.disabled=false;btn.dataset.done='1';
+      btn.textContent='OK';btn.disabled=false;btn.dataset.done='1';btn.classList.add('next-btn');
       if(success){
         G.phase='over';
         btn.onclick=()=>{
@@ -1571,6 +1697,7 @@ function doEquipLocker(){
   const trov=document.getElementById('trov');
   trov.style.backgroundImage='url(img/Tiles/locker_overlay.png)';
   trov.classList.add('equip-locker');
+  sfx('equip');
   document.getElementById('tr-name').textContent='EQUIPMENT LOCKER';
   const deck=document.getElementById('tr-deck');
   const actionsEl=document.getElementById('tr-actions');
@@ -1601,6 +1728,7 @@ function doEquipLocker(){
         d.className=`eqcard exchange-target cc-${card.cat}`;
         d.innerHTML=cardFaceHTML(card.cat,card.name,card.txt);
         d.onclick=()=>{
+          _play('next.wav');
           const ci=p.equipment.findIndex(c=>c.uid===card.uid);
           if(ci>=0){p.equipment.splice(ci,1);G.eqDeckCount++;}// return card to deck
           dismiss();
@@ -1624,6 +1752,7 @@ function doEquipLocker(){
     document.getElementById('tr-deck-lbl').textContent='Draw Equipment Card';
     deck.style.display=deckEmpty?'none':'';
     deck.onclick=()=>{
+      _play('next.wav');
       dismiss();
       const c=drawEqCard(p);
       p.lockerUsedThisVisit=true;
@@ -1640,6 +1769,7 @@ function doEquipLocker(){
 function doCargo(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Cargo Hold')return;
+  sfx('cargo');
   G.phase='action';
   renderCargoModal();
 }
@@ -1661,7 +1791,7 @@ function renderCargoModal(){
   const w1=document.createElement('button');w1.className='mbtn wrn';w1.textContent='Withdraw 1';w1.disabled=hold<=0||cap<=0;
   w1.onclick=()=>{if(hold>0&&cap>0){G.cargoHold--;p.food++;addLog(`${p.name} withdrew 1 Food. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
   // Close
-  const cl=document.createElement('button');cl.className='mbtn pri';cl.textContent='Done';
+  const cl=document.createElement('button');cl.className='mbtn pri next-btn';cl.textContent='Done';
   cl.onclick=()=>{const m=document.getElementById('mov');m.classList.remove('show','cargo');};
   ma.appendChild(d1);ma.appendChild(w1);ma.appendChild(cl);
   document.getElementById('mov').classList.add('show');
@@ -1669,6 +1799,7 @@ function renderCargoModal(){
 function doWatchTower(){
   const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
   if(G.tiles.get(hk(p.q,p.r))?.name!=='Watch Tower')return;
+  sfx('watchtower');
   G.phase='action';
   const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
   let msg;
@@ -1703,7 +1834,7 @@ function doWatchTower(){
   };
   const wtActionsEl=document.getElementById('tr-actions');
   wtActionsEl.innerHTML='';
-  const wtAckBtn=document.createElement('button');wtAckBtn.className='mbtn';wtAckBtn.textContent='Acknowledge';
+  const wtAckBtn=document.createElement('button');wtAckBtn.className='mbtn next-btn';wtAckBtn.textContent='Acknowledge';
   wtAckBtn.onclick=dismiss;
   wtActionsEl.appendChild(wtAckBtn);
   trov.style.display='flex';
@@ -1712,11 +1843,12 @@ function doWatchTower(){
 
 function doEndTurn(){
   if(G.phase==='roll')return;
+  sfx('end_turn');
   const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
   // Synth: battery logic only
   if(p.isSynth){
     if(p.battery>0)p.battery--;
-    if(p.battery===0){p.alive=false;addLog('IRIS: Power depleted. Systems offline.','crit');}
+    if(p.battery===0){p.alive=false;sfx('death');addLog('IRIS: Power depleted. Systems offline.','crit');}
     advanceTurn();return;
   }
   // Stasis: skip all depletion
@@ -1725,13 +1857,13 @@ function doEndTurn(){
     else{advanceTurn();return;}
   }
   if(p.food>0){p.food--;guidance('first_food_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Resource consumption logged.'],[0,'','Food depletes by 1 each turn. If it reaches zero, you will lose Health instead. Deposit surplus food in the Cargo Hold to build a shared reserve for the crew.']]);});}
-  else{if(p.health>0){p.health--;guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} is starving. Health: ${p.health}/3.`,'crit');}
+  else{if(p.health>0){p.health--;sfx('health_down');guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} is starving. Health: ${p.health}/3.`,'crit');}
   if(!onBase&&!p.skipO2){
     const hasRebreather=p.equipment.some(c=>c.id==='rebreather');
     if(hasRebreather){p.rebreatherCycle=!p.rebreatherCycle;}
     if(!hasRebreather||p.rebreatherCycle){
       if(p.o2>0){p.o2--;guidance('first_o2_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Oxygen consumption logged.'],[0,'','O\u2082 depletes by 1 each turn you spend outside the crash site. If it reaches zero, you will lose Health instead. Pass through the Airlock to fully restore your O\u2082.']]);});}
-      else{if(p.health>0){p.health--;guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} has no O₂. Health: ${p.health}/3.`,'crit');}
+      else{if(p.health>0){p.health--;sfx('health_down');guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} has no O₂. Health: ${p.health}/3.`,'crit');}
     }
   }
   p.skipO2=false;
@@ -1769,6 +1901,7 @@ function doEndTurn(){
 
 function advanceTurn(){
   const alive=G.players.filter(p=>p.alive);if(!alive.length){
+    _alarmCrit.pause(); _alarmCrit.currentTime = 0;
     render();
     showModal('ALL CREW LOST','',true,()=>{clearSave();window.Sync?.clearSession();location.reload();},'End Mission',undefined,undefined,'<div id="mov-e7log" class="mov-e7log"></div>');
     e7ScreenSeq('mov-e7log',[
@@ -1790,6 +1923,7 @@ function advanceTurn(){
     if(G.players[next].incapacitated>=3){
       const dying=G.players[next];
       dying.alive=false;
+      sfx('death');
       addLog(`${dying.name} has DIED.`,'crit');
       if(dying.radioFragments>0){
         const dt=G.tiles.get(hk(dying.q,dying.r));
@@ -1812,6 +1946,15 @@ function advanceTurn(){
     advanceTurn();return;
   }
   addLog(`Turn ${G.turn}: ${G.players[next].name}.`,'act');
+  _alarmCrit.pause(); _alarmCrit.currentTime = 0;
+  if(isMyTurn()){
+    const _ap=G.players[next];
+    if(_ap.health===1){
+      _alarmCrit.play().catch(()=>{});
+    } else if(_ap.isSynth?_ap.battery<=3:_ap.o2<=1){
+      _play('alarm-act.wav');
+    }
+  }
   showTableDice('move');
   updateUI();render();
   panToPlayer(G.players[next]);
@@ -1877,21 +2020,21 @@ function synthChooseTarget(p){
     const locker=synthFindTile('Equipment Locker');
     if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:toolNeeded[0].requiresTool};
   }
-  // Priority 4b: revealed tool-reward tiles with equipment reward (e.g. Mysterious Outpost)
-  const toolRewardTiles=[];
+  // Priority 4b: revealed gated non-fragment tiles IRIS can unlock
+  const gatedTiles=[];
   for(const[k,t]of G.tiles){
-    if(t.revealed&&!t.radioFragment&&t.requiresTool&&t.toolReward==='drawEq'&&(t.investigatedCount||0)<(t.pois?t.pois.length:1)){
-      const[q,r]=hparse(k);toolRewardTiles.push({q,r,requiresTool:t.requiresTool});
+    if(t.revealed&&!t.radioFragment&&t.requiresTool&&(t.investigatedCount||0)<(t.pois?t.pois.length:1)){
+      const[q,r]=hparse(k);gatedTiles.push({q,r,requiresTool:t.requiresTool,toolReward:t.toolReward||null});
     }
   }
-  if(toolRewardTiles.length){
-    const reachable=toolRewardTiles.filter(t=>p.equipment.some(c=>c.id===t.requiresTool));
-    const nearReward=synthNearest(p,reachable);
-    if(nearReward)return{...nearReward,action:'tool_reward'};
-    const needForReward=toolRewardTiles.filter(t=>!p.equipment.some(c=>c.id===t.requiresTool));
-    if(needForReward.length){
+  if(gatedTiles.length){
+    const reachable=gatedTiles.filter(t=>p.equipment.some(c=>c.id===t.requiresTool));
+    const nearGated=synthNearest(p,reachable);
+    if(nearGated)return{...nearGated,action:'tool_reward'};
+    const needForGated=gatedTiles.filter(t=>!p.equipment.some(c=>c.id===t.requiresTool));
+    if(needForGated.length){
       const locker=synthFindTile('Equipment Locker');
-      if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:needForReward[0].requiresTool};
+      if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:needForGated[0].requiresTool};
     }
   }
   // Priority 5: explore nearest face-down tile
@@ -1942,11 +2085,12 @@ function synthApplyStep(p,q,r,onInterrupted){
   if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
   G.movementLeft--;
   p.q=q;p.r=r;
+  sfx('move');
   const t=G.tiles.get(hk(q,r));
   p.location=tileName(t);
   if(t?.shockTrap&&t.shockTrapOwner!==p.id){
     t.shockTrap=false;t.shockTrapOwner=null;
-    if(p.battery>0)p.battery--;
+    if(p.battery>0){p.battery--;sfx('health_down');}
     addLog('IRIS triggered a Shock Trap! Battery: '+p.battery+'/10. Turn ended.','crit');
     markTilesDirty();updateUI();render();setTimeout(()=>doEndTurn(),1000);return true;
   }
@@ -1954,7 +2098,7 @@ function synthApplyStep(p,q,r,onInterrupted){
     p.q=0;p.r=0;const ct=G.tiles.get(hk(0,0));p.location=tileName(ct);G.movementLeft=0;
     addLog('IRIS transited Portal → Crash Site.');markTilesDirty();
   }
-  if(t?.name==='Medical Bay'&&p.battery<10){p.battery=10;addLog('IRIS battery fully recharged at Medical Bay.','good');}
+  if(t?.name==='Medical Bay'&&p.battery<10){p.battery=10;sfx('health_up');addLog('IRIS battery fully recharged at Medical Bay.','good');}
   if(t?.radioFragment&&!t.requiresTool){
     p.radioFragments++;t.radioFragment=false;markTilesDirty();
     addLog('IRIS recovered a Radio Fragment.','frag');
@@ -2015,6 +2159,7 @@ function synthTakeAction(p,target,onDone){
       if(t?.name==='Signal Array'&&p.radioFragments>0){
         while(p.radioFragments>0&&G.radioFragmentsActivated<5){
           p.radioFragments--;G.radioFragmentsActivated++;
+          sfx('activate');
           const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
           addLog('IRIS activated fragment. Array: '+G.radioFragmentsActivated+'/5. Threshold: '+thr+'+','frag');
         }
@@ -2044,7 +2189,7 @@ function synthTakeAction(p,target,onDone){
       if(t?.radioFragment&&t.requiresTool){
         const tool=p.equipment.find(c=>c.id===t.requiresTool);
         if(tool){
-          p.radioFragments++;t.radioFragment=false;
+          p.radioFragments++;sfx('fragment');t.radioFragment=false;
           t.investigatedCount=t.pois?t.pois.length:1;
           const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
           if(ci>=0)p.equipment.splice(ci,1);
@@ -2082,7 +2227,7 @@ function synthTakeAction(p,target,onDone){
           const ci=p.equipment.findIndex(c=>c.uid===weapon.uid);
           if(weapon.id==='stun_baton'){
             cr.stunned=true;
-            if(cr.isSynth){if(cr.battery>0)cr.battery--;}else{if(cr.health>0)cr.health--;}
+            if(cr.isSynth){if(cr.battery>0){cr.battery--;sfx('health_down');}}else{if(cr.health>0){cr.health--;sfx('health_down');}}
             if(ci>=0)p.equipment.splice(ci,1);
             addLog('IRIS used Stun Baton on '+cr.name+'. They lose 1 '+(cr.isSynth?'Battery':'Health')+' and skip their next turn.','crit');
           }else if(weapon.id==='shock_trap'){
@@ -2121,7 +2266,7 @@ function synthTakeAction(p,target,onDone){
       onDone();break;
     }
     case'tool_reward':{
-      if(t?.requiresTool&&t.toolReward&&!t.radioFragment){
+      if(t?.requiresTool&&!t.radioFragment){
         const tool=p.equipment.find(c=>c.id===t.requiresTool);
         if(tool){
           const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
@@ -2129,6 +2274,8 @@ function synthTakeAction(p,target,onDone){
             const card=drawEqCard(p);
             if(card)addLog('IRIS used '+tool.name+' at '+p.location+'. Acquired '+card.name+'.','good');
             else addLog('IRIS used '+tool.name+' at '+p.location+'.','act');
+          } else {
+            addLog('IRIS used '+tool.name+' — unlocked '+p.location+'.','act');
           }
           if(ci>=0)p.equipment.splice(ci,1);
           t.investigatedCount=(t.pois?t.pois.length:1);markTilesDirty();
@@ -2208,7 +2355,7 @@ function triggerAnomaly(t){
     case'Gravity Well':
       showTileRevealModal(t,()=>{updateUI();render();});break;
     case'Echo Chamber':{
-      if(!G.lastPublicEvt){addLog('Echo Chamber: no prior public event to repeat.','act');break;}
+      if(!G.lastPublicEvt||G.lastPublicEvt._sourceAntimatter){addLog('Echo Chamber: no prior public event to repeat.','act');break;}
       const evt=G.lastPublicEvt;
       if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment! (Echo Chamber)`,'frag');}
       let ecDrawnCard=null;
@@ -2220,7 +2367,7 @@ function triggerAnomaly(t){
       if(evt.loseHealth){
         const ecSuitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
         if(ecSuitIdx!==-1){ecSuitBlocked=true;p.equipment.splice(ecSuitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed. (Echo Chamber)`,'good');}
-        else{if(p.health>0)p.health--;addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3. (Echo Chamber)`,'crit');}
+        else{if(p.health>0){p.health--;sfx('health_down');}addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3. (Echo Chamber)`,'crit');}
       }
       if(evt.irisCorruption){
         const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
@@ -2430,12 +2577,13 @@ function confirmTrade(){
   pA.o2=Math.max(0,Math.min(3,pA.o2-aO2+bO2));
   pB.o2=Math.max(0,Math.min(3,pB.o2-bO2+aO2));
   addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`,'good');
-  closeTrade();
+  closeTrade(false);
   viewedPlayer=G.currentPlayer;
   updateUI();render();
 }
 
-function closeTrade(){
+function closeTrade(playBack=true){
+  if(playBack)_play('back.wav');
   tradeState=null;
   document.getElementById('trademodal').classList.remove('show');
 }
@@ -2880,6 +3028,8 @@ function receiveRemoteState(data){
     sg.evtDeck=_fa(sg.evtDeck);
     sg.players=_fa(sg.players).map(p=>({...p,equipment:_fa(p.equipment)}));
     const prevPlayer=G?.currentPlayer;
+    const prevPositions=G?.players?.map(p=>({q:p.q,r:p.r}))||[];
+    const prevFragments=G?.players?.map(p=>p.radioFragments)||[];
     const incomingLogs=_fa(sg._pendingLogs);
     delete sg._pendingLogs;
     G=sg;
@@ -2896,6 +3046,9 @@ function receiveRemoteState(data){
       if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
       markTilesDirty();
       render(); updateUI();
+      const myIdx=window.Sync?.myPlayerIndex()??-1;
+      G.players.forEach((p,i)=>{if(i===myIdx)return;const prev=prevPositions[i];if(prev&&(p.q!==prev.q||p.r!==prev.r))sfx('move');});
+      G.players.forEach((p,i)=>{if(i===myIdx)return;if(p.radioFragments>(prevFragments[i]||0))sfx('fragment');});
       incomingLogs.forEach(({msg,cls})=>addLog(msg,cls));
       if(turnChanged){
         showTableDice('move');panToPlayer(cp());
@@ -2988,6 +3141,7 @@ function confirmNewGame(){
 }
 function updateUI(){
   if(!G)return;
+  if(cp().health>1&&!_alarmCrit.paused){_alarmCrit.pause();_alarmCrit.currentTime=0;}
   saveGame();
   const p=cp();                          // active player (actions)
   const v=G.players[viewedPlayer]||p;   // viewed player (card display)
@@ -3155,13 +3309,13 @@ function buildEqHand(p){
       d.dataset.uid=c.uid;
       if(c.uid===selectedCardUid)d.classList.add('selected');
       d.innerHTML=`<div class="eqcard-inner eqcard-event-back"><span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/person-solid-full.svg')"></span><div class="eqcard-event-back-lbl">PRIVATE<br>EVENT</div></div>`;
-      d.onclick=()=>{selectedCardUid=c.uid;showEventCard(c.eventCard,null,()=>{selectedCardUid=null;updateUI();},null,true);};
+      d.onclick=()=>{sfx('select');selectedCardUid=c.uid;showEventCard(c.eventCard,null,()=>{selectedCardUid=null;updateUI();},null,true);};
     } else {
       d.className=`eqcard cc-${c.cat}`;
       d.dataset.uid=c.uid;
       if(c.uid===selectedCardUid)d.classList.add('selected');
       d.innerHTML=cardFaceHTML(c.cat,c.name,c.txt);
-      d.onclick=()=>openCardModal(p.id,c);
+      d.onclick=()=>{sfx('select');openCardModal(p.id,c);};
     }
     hand.appendChild(d);
   }
@@ -3219,6 +3373,7 @@ function closeCardModal(){
 // SIGNAL ARRAY CONTEST
 // ═══════════════════════════════════════════════════════════════
 function showContestModal(challenger, defender, onChallengerWins, onDefenderWins){
+  sfx('contest');
   const ov=document.getElementById('contest-ov');
   ov.classList.add('show');
 
@@ -3264,7 +3419,7 @@ function showContestModal(challenger, defender, onChallengerWins, onDefenderWins
     wrap.innerHTML='';
     const die=make3DDie('idle');
     die.onclick=()=>{
-      die.className='td-die-wrap rolling';
+      sfx('dice_roll');die.className='td-die-wrap rolling';
       die.onclick=null;
       const val=1+(0|Math.random()*6);
       setTimeout(()=>{
@@ -3335,10 +3490,12 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount=1){
   for(let i=0;i<diceCount;i++){const w=make3DDie('idle');dieEl.appendChild(w);wraps.push(w);}
   dieEl.onclick=()=>{
     if(wraps.some(w=>w.className.includes('rolling')))return;
+    sfx('dice_roll');
     wraps.forEach(w=>{w.className='td-die-wrap rolling';});
     dieEl.onclick=null;
     const vals=wraps.map(()=>1+(0|Math.random()*6));
     setTimeout(()=>{
+      sfx('dice_land');
       dieEl.innerHTML='';
       const res=document.createElement('div');res.className='evc-die-result';
       vals.forEach(v=>res.appendChild(makeResultDie(v)));
@@ -3356,6 +3513,7 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount=1){
 }
 
 function showEventCard(evt, _locName, onOk, rollCallback, isReview, suitBlocked=false){
+  if(!isReview)sfx('card');
   const isPub=evt.pub;
   const card=document.getElementById('evc');
   card.className='evc '+(isPub?'pub':'priv');
@@ -3397,10 +3555,12 @@ function showEventCard(evt, _locName, onOk, rollCallback, isReview, suitBlocked=
     btn.disabled=true;
     btn.style.opacity='.35';
     wrap.onclick=()=>{
+      sfx('dice_roll');
       wrap.className='td-die-wrap rolling';
       wrap.onclick=null;
       const finalVal=1+(0|Math.random()*6);
       setTimeout(()=>{
+        sfx('dice_land');
         dieEl.innerHTML='';
         const result=document.createElement('div');
         result.className='evc-die-result';
@@ -3491,6 +3651,7 @@ function termSeq(container,steps,charDelay=15,lineGap=0){
 // Convenience wrappers — all existing call sites unchanged
 function addE7(msg,cls='',charDelay=15){termAppend(document.getElementById('e7log'),msg,cls,charDelay);}
 function addLog(msg,cls='',charDelay=15){
+  if(cls==='act')_play('hint.wav');
   termAppend(document.getElementById('e7log'),msg,cls,charDelay,'le');
   // Queue for sync to other players (skip during receive to avoid echo)
   if(G&&_isOnlineMode&&!window.Sync?.isReceiving()){
@@ -3557,6 +3718,7 @@ fetch('docs/FieldGuide.md')
 
 function toggleE7(){
   const p=document.getElementById('e7panel');
+  if(p.classList.contains('show'))_play('back.wav');
   p.classList.toggle('show');
   if(p.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;updateE7Prompt();}
 }
@@ -3580,7 +3742,7 @@ function openRulebook(){
   buildRulebookToc();
   renderRulebookSection(RULEBOOK_SECTIONS[0]);
 }
-function closeRulebook(){document.getElementById('rbmodal').classList.remove('show');}
+function closeRulebook(){_play('back.wav');document.getElementById('rbmodal').classList.remove('show');}
 
 function buildRulebookToc(){
   const toc=document.getElementById('rbtoc');toc.innerHTML='';
@@ -3606,8 +3768,8 @@ function _wireRulebookLinks(c){
       e.preventDefault();
       const id=a.getAttribute('href').slice(1);
       const sec=RULEBOOK_SECTIONS.find(s=>s.id===id);
-      if(sec){renderRulebookSection(sec);}
-      else{const el=c.querySelector('[id="'+id+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+      if(sec){sfx('select');renderRulebookSection(sec);}
+      else{const el=c.querySelector('[id="'+id+'"]');if(el){sfx('select');el.scrollIntoView({behavior:'smooth',block:'start'});}}
     });
   });
 }
@@ -3801,6 +3963,7 @@ function _centerTourCard(){
 }
 
 function tourStep(dir){
+  if(dir<0)_play('back.wav');
   _tourStep+=dir;
   if(_tourStep>=TOUR_STEPS.length){endTour();return;}
   if(_tourStep<0)_tourStep=0;
@@ -3913,6 +4076,7 @@ function selectBuilderTile(idx){
   if(_builderReadOnly)return;
   const item=builderState.palette[idx];
   if(item.placed)return;
+  sfx('select');
   builderState.selectedIdx=(builderState.selectedIdx===idx?-1:idx);
   renderPalette();
   renderSiteBuilder();
@@ -4055,7 +4219,7 @@ function renderSiteBuilder(){
     const border=document.createElementNS(ns,'polygon');
     border.setAttribute('points',pts);border.setAttribute('fill','transparent');
     border.setAttribute('stroke','#b2dbee');border.setAttribute('stroke-width','1.5');border.setAttribute('style','cursor:default');
-    border.addEventListener('mouseenter',e=>startBuilderTooltip(info,e));
+    border.addEventListener('mouseenter',e=>{_hoverSnd();startBuilderTooltip(info,e);});
     border.addEventListener('mouseleave',cancelBuilderTooltip);
     g.appendChild(border);
     const icon=BASECAMP_ICON_MAP[info.name];
@@ -4094,7 +4258,8 @@ function renderSiteBuilder(){
       poly.setAttribute('stroke-dasharray','3.81 2.86');
       poly.setAttribute('stroke-dashoffset','5.24');
       poly.setAttribute('cursor','pointer');
-      poly.addEventListener('click',()=>placeBuilderTile(q,r));
+      poly.addEventListener('mouseenter',()=>_hoverSnd());
+      poly.addEventListener('click',()=>{sfx('select');placeBuilderTile(q,r);});
       g.appendChild(poly);
       const plus=document.createElementNS(ns,'text');
       plus.setAttribute('x',cx);plus.setAttribute('y',cy+5);
@@ -4121,6 +4286,7 @@ function finalizeGame(){
   document.getElementById('setup-site').classList.remove('show');
   document.getElementById('setup-site').style.display='none';
   document.getElementById('game').className='running';
+  _play('start.wav');
   clearSave();
   _updateMpBadge();
   guidanceSeen=new Set(); // reset guidance milestones for new game
@@ -4203,7 +4369,7 @@ function cyclePortrait(i, dir){
   buildSetup();
 }
 
-function toggleSynth(v){addSynth=v;buildSetup();}
+function toggleSynth(v){sfx(v?'check_on':'check_off');addSynth=v;buildSetup();}
 
 function goToSiteBuilder(){
   if(_isOnlineMode){
@@ -4250,7 +4416,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>2||e.ctrlKey)usesTrackpad=true;},{passive:true,once:false,capture:true});
   document.querySelectorAll('.hud-vtab').forEach(tab=>{
     const parent=tab.parentElement;
-    tab.addEventListener('click',()=>parent?.classList.toggle('hud-collapsed'));
+    tab.addEventListener('click',()=>{parent?.classList.toggle('hud-collapsed');_play('hud.wav');});
   });
 
   document.getElementById('setup').style.display='none';
@@ -4342,6 +4508,7 @@ function showOnlineLobby(){
 }
 
 function lobbyBack(){
+  _play('back.wav');
   document.getElementById('online-lobby').style.display='none';
   document.getElementById('intro').style.display='flex';
   _lobbyShowPanel('lobby-mode-sel');
@@ -4539,6 +4706,7 @@ function showCrewSetup(){
 }
 
 function backToIntro(){
+  _play('back.wav');
   _crewMsgPlayed=false;_sbMsgPlayed=false;
   document.getElementById('setup').style.display='none';
   document.getElementById('su-back').style.display='none';
@@ -4546,6 +4714,7 @@ function backToIntro(){
 }
 
 function backToCrewSetup(){
+  _play('back.wav');
   const ss=document.getElementById('setup-site');
   ss.style.display='none';ss.classList.remove('show');
   document.getElementById('setup').style.display='flex';

@@ -22,7 +22,7 @@
       </label>
     </div>
     <div class="e7sub">SHIP COMPUTER</div>
-    <button class="e7close" onclick="toggleE7()">✕</button>
+    <button class="e7close back-btn" onclick="toggleE7()">✕</button>
   </div>
   <div id="e7log"></div>
   <div id="e7prompt"></div>
@@ -40,11 +40,11 @@
     </div>
     <div id="e7-intro-msg" class="e7-screen-msg"></div>
     <div class="sbox-footer">
-      <button class="sbtn secondary" onclick="showCrewSetup()">Local Game</button>
-      <button class="sbtn" onclick="showOnlineLobby()">Online Game</button>
+      <button class="sbtn secondary next-btn" onclick="showCrewSetup()">Local Game</button>
+      <button class="sbtn next-btn" onclick="showOnlineLobby()">Online Game</button>
     </div>
   </div>
-  <div class="version-label">v1.1.15</div>
+  <div class="version-label">v1.1.16</div>
 </div>
 
 <!-- ── ONLINE LOBBY ── -->
@@ -81,16 +81,16 @@
 
     <!-- Footers: one per panel, pinned to bottom of card -->
     <div id="lobby-footer-sel" class="sbox-footer" style="display:none">
-      <button class="sbtn" onclick="lobbyHost()">Host a Game</button>
-      <button class="sbtn" onclick="lobbyJoinMode()">Join a Game</button>
+      <button class="sbtn next-btn" onclick="lobbyHost()">Host a Game</button>
+      <button class="sbtn next-btn" onclick="lobbyJoinMode()">Join a Game</button>
     </div>
     <div id="lobby-footer-host" class="sbox-footer" style="display:none">
-      <button class="sbtn secondary" onclick="lobbyBack()">← Back</button>
-      <button class="sbtn" onclick="enterOnlineCrewSetup()">Continue →</button>
+      <button class="sbtn secondary back-btn" onclick="lobbyBack()">← Back</button>
+      <button class="sbtn next-btn" onclick="enterOnlineCrewSetup()">Continue →</button>
     </div>
     <div id="lobby-footer-join" class="sbox-footer" style="display:none">
-      <button class="sbtn secondary" onclick="lobbyBack()">← Back</button>
-      <button class="sbtn" id="lobby-join-btn" onclick="lobbyJoinConnect()">Connect</button>
+      <button class="sbtn secondary back-btn" onclick="lobbyBack()">← Back</button>
+      <button class="sbtn next-btn" id="lobby-join-btn" onclick="lobbyJoinConnect()">Connect</button>
     </div>
   </div>
 </div>
@@ -141,9 +141,9 @@
     </div>
   </div>
   <div id="sufooter">
-    <button id="su-back" class="mbtn" onclick="backToIntro()">← Back</button>
+    <button id="su-back" class="mbtn back-btn" onclick="backToIntro()">← Back</button>
     <button id="su-leave" class="mbtn" onclick="leaveOnlineSetup()">← Leave Game</button>
-    <button id="su-confirm" class="mbtn pri" onclick="goToSiteBuilder()">Confirm Crew</button>
+    <button id="su-confirm" class="mbtn pri next-btn" onclick="goToSiteBuilder()">Confirm Crew</button>
   </div>
 </div>
 
@@ -181,8 +181,8 @@
     </div>
   </div>
   <div id="sbfooter">
-    <button class="mbtn" style="max-width:180px;flex-shrink:0;" onclick="backToCrewSetup()">← Back</button>
-    <button id="sblaunbtn" class="mbtn dng" disabled onclick="finalizeGame()" style="flex:1;">Launch Mission</button>
+    <button class="mbtn back-btn" style="max-width:180px;flex-shrink:0;" onclick="backToCrewSetup()">← Back</button>
+    <button id="sblaunbtn" class="mbtn dng next-btn" disabled onclick="finalizeGame()" style="flex:1;">Launch Mission</button>
   </div>
 </div>
 
@@ -328,7 +328,16 @@
       <div id="tr-deck-lbl">Draw Event</div>
     </div>
   </div>
-  <button id="trov-cancel" style="display:none">Cancel</button>
+  <div id="trov-suit-blocker" class="cc-Tech">
+    <div class="evc-suit-inner">
+      <span class="eq-icon" style="--eq-icon-url:url('img/Icons/microchip-solid-full.svg')"></span>
+      <div class="evc-suit-divider"></div>
+      <div class="evc-suit-name">HAZARD SUIT</div>
+      <div class="evc-suit-divider"></div>
+      <div class="evc-suit-status">DEPLOYED</div>
+    </div>
+  </div>
+  <button id="trov-cancel" class="back-btn" style="display:none">Cancel</button>
 </div>
 
 <!-- ── EQUIP DRAW OVERLAY ── -->
@@ -351,7 +360,7 @@
     <h2>SIGNAL · FIELD GUIDE</h2>
     <input id="rbsearch" type="text" placeholder="Search guide..." oninput="rbSearch(this.value)">
     <button id="rbtour" onclick="startTour()">Interface Tour</button>
-    <button id="rbclose" onclick="closeRulebook()">✕</button>
+    <button id="rbclose" class="back-btn" onclick="closeRulebook()">✕</button>
   </div>
   <div id="rbbody">
     <nav id="rbtoc"></nav>
@@ -373,14 +382,14 @@
     <div id="tour-title" class="tour-title"></div>
     <div id="tour-body" class="tour-body"></div>
     <div class="tour-footer" id="tour-footer-prompt">
-      <button type="button" class="tour-skip" onclick="endTour()">Skip</button>
-      <button type="button" class="tour-btn tour-btn-primary" onclick="_startTourSteps()">Yes, show me →</button>
+      <button type="button" class="tour-skip next-btn" onclick="endTour()">Skip</button>
+      <button type="button" class="tour-btn tour-btn-primary next-btn" onclick="_startTourSteps()">Yes, show me →</button>
     </div>
     <div class="tour-footer" id="tour-footer-nav">
-      <button type="button" class="tour-skip" onclick="endTour()">Skip Tour</button>
+      <button type="button" class="tour-skip next-btn" onclick="endTour()">Skip Tour</button>
       <div class="tour-nav">
-        <button type="button" class="tour-btn" id="tour-prev" onclick="tourStep(-1)">← Back</button>
-        <button type="button" class="tour-btn tour-btn-primary" id="tour-next" onclick="tourStep(1)">Next →</button>
+        <button type="button" class="tour-btn back-btn" id="tour-prev" onclick="tourStep(-1)">← Back</button>
+        <button type="button" class="tour-btn tour-btn-primary next-btn" id="tour-next" onclick="tourStep(1)">Next →</button>
       </div>
     </div>
   </div>
@@ -461,12 +470,12 @@
 <div id="trademodal">
   <div id="trhdr">
     <h2>TRADE</h2>
-    <button id="trclose" onclick="closeTrade()">✕</button>
+    <button id="trclose" class="back-btn" onclick="closeTrade()">✕</button>
   </div>
   <div id="trbody"><!-- built by renderTradeModal() --></div>
   <div id="trfooter">
-    <button class="mbtn pri" onclick="confirmTrade()">Confirm Trade</button>
-    <button class="mbtn" onclick="closeTrade()">Cancel</button>
+    <button class="mbtn pri next-btn" onclick="confirmTrade()">Confirm Trade</button>
+    <button class="mbtn back-btn" onclick="closeTrade()">Cancel</button>
   </div>
 </div>
 
