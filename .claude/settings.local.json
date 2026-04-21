@@ -26,7 +26,14 @@
       "Bash(node --check c:/Users/russp/Documents/Signal/game.js)",
       "Bash(node --check c:/Users/russp/Documents/Signal/sync.js)",
       "Bash(python3 -)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(ls c:/Users/russp/Documents/Signal/sfx/dice*)",
+      "Bash(ffmpeg -version)",
+      "Bash(where sox *)",
+      "Bash(where audacity *)",
+      "Read(//c/Program Files/**)",
+      "Bash(grep -n \"suit-blocker\\\\|dropping\" c:/Users/russp/Documents/Signal/*.css)",
+      "Bash(xargs grep *)"
     ]
   }
 }
