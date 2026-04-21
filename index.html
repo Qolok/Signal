@@ -28,6 +28,16 @@
   <div id="e7prompt"></div>
 </div>
 
+<!-- ── WAKE SCREEN ── -->
+<div id="wake-screen">
+  <div class="sbox wake-box">
+    <div class="wake-text">
+      <div class="e7m">&gt; ENDYMION 7 — SYSTEM OFFLINE</div>
+      <div class="e7m">&gt; PRESS ANY KEY TO WAKE<span class="wake-cursor">▌</span></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── INTRO ── -->
 <div id="intro">
   <div class="sbox intro-box intro-startup">
@@ -308,6 +318,10 @@
         <button class="btn wrn" id="bfrag"  onclick="doActivateFrag()" disabled>Activate Fragment</button>
         <button class="btn wrn" id="bsig"   onclick="doSignalRoll()" disabled>Roll Signal</button>
         <button class="btn" id="bend"   onclick="doEndTurn()" disabled>End Turn</button>
+        <div class="hud-media">
+          <button class="hud-media-btn" id="btn-music" onclick="toggleMusic()"><span class="hud-media-icon vol-on" id="icon-music"></span>Music</button>
+          <button class="hud-media-btn" id="btn-sfx"   onclick="toggleSfx()"><span class="hud-media-icon vol-on" id="icon-sfx"></span>SFX</button>
+        </div>
       </div>
     </div>
   </div>

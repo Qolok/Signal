@@ -2,12 +2,15 @@
 // ── SFX ──────────────────────────────────────────────────────────
 const _sfxCache = {};
 const _sfxOffsets = { 'dice.wav': 0.83 };
+const _sfxVolumes = { 'dice.wav': 0.5, 'phase.wav': 0.6, 'start.wav': 1 };
 function _snd(path) {
-  if (!_sfxCache[path]) { const a = new Audio('sfx/' + path); a.volume = 0.65; _sfxCache[path] = a; }
+  if (!_sfxCache[path]) { _sfxCache[path] = new Audio('sfx/' + path); }
   return _sfxCache[path];
 }
 function _play(path) {
+  if(!_sfxEnabled)return;
   const a = _snd(path);
+  a.volume = _sfxVolumes[path] ?? 1;
   a.currentTime = _sfxOffsets[path] || 0;
   a.play().catch(() => {});
 }
@@ -28,6 +31,7 @@ function sfx(name) {
     airlock:        'base-airlock.wav',
     cargo:          'base-cargo.wav',
     watchtower:     'base-watch.wav',
+    confirm:        'success.wav',
     check_on:       'check-on.wav',
     check_off:      'check-off.wav',
     select:         'select.wav',
@@ -41,15 +45,47 @@ function sfx(name) {
 }
 
 
+const _music = new Audio('sfx/music.wav');
+_music.loop = true;
+_music.volume = 0.5;
+let _musicEnabled = true;
+let _sfxEnabled = true;
+function toggleMusic(){
+  _musicEnabled=!_musicEnabled;
+  if(_musicEnabled)_music.play().catch(()=>{});else _music.pause();
+  const btn=document.getElementById('btn-music');
+  if(btn){btn.classList.toggle('media-off',!_musicEnabled);document.getElementById('icon-music').className='hud-media-icon '+(_musicEnabled?'vol-on':'vol-off');}
+}
+function toggleSfx(){
+  _sfxEnabled=!_sfxEnabled;
+  const btn=document.getElementById('btn-sfx');
+  if(btn){btn.classList.toggle('media-off',!_sfxEnabled);document.getElementById('icon-sfx').className='hud-media-icon '+(_sfxEnabled?'vol-on':'vol-off');}
+}
+
 const _alarmCrit = new Audio('sfx/alarm-crit.wav');
 _alarmCrit.loop = true;
-_alarmCrit.volume = 0.65;
+_alarmCrit.volume = 0.7;
 const _sigAir = new Audio('sfx/signal-air.wav');
 _sigAir.loop = true;
-_sigAir.volume = 0.65;
+_sigAir.volume = 0.7;
 const _sigPulse = new Audio('sfx/signal-pulse.wav');
 _sigPulse.loop = true;
-_sigPulse.volume = 0.65;
+_sigPulse.volume = 0.7;
+const _textSnd = new Audio('sfx/text.wav');
+_textSnd.loop = true;
+_textSnd.volume = 0.4;
+let _textSndTimer = null;
+function _startTextSnd(ms){
+  if(!_sfxEnabled)return;
+  if(_textSnd.paused)_textSnd.play().catch(()=>{});
+  clearTimeout(_textSndTimer);
+  _textSndTimer=setTimeout(()=>{_textSnd.pause();_textSnd.currentTime=0;},ms);
+}
+function _stopTextSnd(){
+  clearTimeout(_textSndTimer);
+  _textSnd.pause();
+  _textSnd.currentTime=0;
+}
 
 // Hover + click sounds on interactive UI elements
 const _clickableSelector = 'button:not(:disabled):not(#bend):not(.back-btn), .parr, .eq-nav:not(:disabled), .deckpile, .eqcard, .hud-vtab, .eq-filt:not(:disabled), .sbreset, .sbpalcard:not(.placed), .rbti, [data-tooltip]';
@@ -64,6 +100,7 @@ document.addEventListener('mouseenter', e => {
 }, true);
 document.addEventListener('mousedown', e => {
   if (!e.target.matches(_clickableSelector)) return;
+  _lastHover = performance.now() + 300; // suppress hover re-trigger after click
   if (e.target.classList.contains('next-btn')) _play('next.wav');
   else sfx('select');
 }, true);
@@ -496,7 +533,7 @@ const TILE_TIPS={
   'Spore Bog':         [[0,'','A murky wetland choked with fungal growths. Spores drift like ash.'],[300,'','A sickly light pulses from beneath the surface.'],[0,'act','Draw an Event card.']],
   'Bioluminescent Fen':[[0,'','A hauntingly alien marsh. Wispy plants pulse with soft teal light.'],[300,'','The mist hangs low — eerie, but strangely serene.'],[0,'good','Recover 1 Health. O\u2082 flip skipped this round.']],
   'Nest Site':         [[0,'','A shallow crater lined with leathery alien eggs. Something large nested here.'],[300,'','You move closer to see if you can get a reading from one of the eggs.'],[300,'act','Roll 1 die.']],
-  'Hive Mound':        [[0,'','A towering biological mound. The tunnels inside shift and pulse.'],[0,'act','Roll 3 dice. Each 4+ costs 1 Health. Hazard Suit negates 1 damage.']],
+  'Hive Mound':        [[0,'','A towering biological mound from one of the planet\'s native species. The tunnels inside shift and pulse. You don\'t like the look of this.'],[0,'','As you draw near, a horde of insectoid creatures rush you.'],[0,'act','Roll 3 dice. Each roll over 4 costs 1 Health. Hazard Suit negates 1 damage.']],
   'Thermal Vent':      [[0,'','Fractured ground. Jets of superheated gas vent in slow rhythmic bursts.'],[300,'','Heat distortion and sulfur in the air.'],[0,'act','Draw an Event card.']],
   'Antimatter Chamber':[[0,'','A buried alien structure. A sphere of crackling energy floats in suspension.'],[0,'act','All crew are pulled to this tile. Each player rolls. 1–3: pull free · 4–6: Tech destroyed.']],
   'Stasis Pod':        [[0,'','The ship\'s stasis pod. A chance at survival — but it holds only one.'],[300,'act','Skip Resource Flip each round. Cannot move or interact. Exit any time.']],
@@ -526,6 +563,7 @@ function toggleGuidance(){
 function guidance(key, fn){
   if(!guidanceMode||guidanceSeen.has(key))return;
   guidanceSeen.add(key);
+  //_play('hint.wav');
   _inGuidance=true;
   fn();
   _inGuidance=false;
@@ -963,7 +1001,7 @@ function showTileRevealModal(t, onDismiss){
               const techItems=pl.equipment.filter(c=>c.cat==='Tech');
               pl.equipment=pl.equipment.filter(c=>c.cat!=='Tech');
               resultEl.style.color='#d04040';
-              resultEl.textContent=techItems.length?`Tech destroyed: ${techItems.map(c=>c.name).join(', ')}`:'Tech fried.';
+              resultEl.textContent='Tech destroyed.';
               if(techItems.length)addLog(`Antimatter Chamber: ${pl.name} lost ${techItems.map(c=>c.name).join(', ')}.`,'crit');
             } else {
               resultEl.style.color='#50c840';
@@ -1091,6 +1129,7 @@ function showTileRevealModal(t, onDismiss){
       const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
       const toolName=TOOL_NAMES[t.requiresTool];
       if(hasTool){
+        sfx('confirm');
         const enterBtn=document.createElement('button');
         enterBtn.className='mbtn pri';
         enterBtn.textContent=`Use ${toolName} — Enter`;
@@ -1125,6 +1164,7 @@ function showTileRevealModal(t, onDismiss){
       const p=cp();
       const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
       if(hasTool){
+        sfx('confirm');
         const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
         const toolName=TOOL_NAMES[t.requiresTool];
         const fragBtn=document.createElement('button');
@@ -1183,7 +1223,7 @@ function drawTileEvent(t){
   if(evt.takeCargoFood){const taken=Math.min(evt.takeCargoFood,Math.min(15-p.food,G.cargoHold||0));p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
   if(evt.irisCorruption){
     const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
-    if(synth){synth.corrupted=true;addLog('> IRIS threat assessment updated. She considers one fewer crew member optimal.','crit');}
+    if(synth){synth.corrupted=true;_play('corrupt.wav');addLog('> IRIS threat assessment updated. She considers one fewer crew member optimal.','crit');}
   }
   let suitBlocked=false;
   if(evt.loseHealth){
@@ -1900,7 +1940,7 @@ function doEndTurn(){
 }
 
 function advanceTurn(){
-  const alive=G.players.filter(p=>p.alive);if(!alive.length){
+  const alive=G.players.filter(p=>p.alive&&!p.isSynth);if(!alive.length){
     _alarmCrit.pause(); _alarmCrit.currentTime = 0;
     render();
     showModal('ALL CREW LOST','',true,()=>{clearSave();window.Sync?.clearSession();location.reload();},'End Mission',undefined,undefined,'<div id="mov-e7log" class="mov-e7log"></div>');
@@ -1999,7 +2039,7 @@ function synthChooseTarget(p){
     if(hasMed){
       // Already have medpack — deliver it
       return{q:t.q,r:t.r,action:'medic',crewRef:t};
-    } else {
+    } else if(!G.tileActionUsed){
       // Go get a medpack first
       const locker=synthFindTile('Equipment Locker');
       if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:'medpack'};
@@ -2016,7 +2056,7 @@ function synthChooseTarget(p){
   if(nearest)return{...nearest,action:'fragment'};
   // Priority 4: need a tool for known fragment -> Equipment Locker
   const toolNeeded=synthKnownFragTiles().filter(t=>t.requiresTool&&!p.equipment.some(c=>c.id===t.requiresTool));
-  if(toolNeeded.length){
+  if(toolNeeded.length&&!G.tileActionUsed){
     const locker=synthFindTile('Equipment Locker');
     if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:toolNeeded[0].requiresTool};
   }
@@ -2032,7 +2072,7 @@ function synthChooseTarget(p){
     const nearGated=synthNearest(p,reachable);
     if(nearGated)return{...nearGated,action:'tool_reward'};
     const needForGated=gatedTiles.filter(t=>!p.equipment.some(c=>c.id===t.requiresTool));
-    if(needForGated.length){
+    if(needForGated.length&&!G.tileActionUsed){
       const locker=synthFindTile('Equipment Locker');
       if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:needForGated[0].requiresTool};
     }
@@ -2061,7 +2101,7 @@ function synthChooseCorrupted(p){
   }
   const arr=synthFindTile('Signal Array');
   const hasWeapon=p.equipment.some(c=>c.cat==='Weapon');
-  if(!hasWeapon){
+  if(!hasWeapon&&!G.tileActionUsed){
     const locker=synthFindTile('Equipment Locker');
     if(locker)return{q:locker.q,r:locker.r,action:'equipment_corrupted',needWeapon:['stun_baton','shock_trap','flare_gun','jammer']};
   }
@@ -2196,6 +2236,8 @@ function synthTakeAction(p,target,onDone){
           markTilesDirty();
           addLog('IRIS used '+tool.name+' to recover a Radio Fragment.','frag');
           updateUI();render();
+        } else {
+          _play('reject.wav');
         }
       }
       if(t&&!t.investigatedCount&&(t.type==='terrain'||t.type==='ship_section')){
@@ -2269,6 +2311,7 @@ function synthTakeAction(p,target,onDone){
       if(t?.requiresTool&&!t.radioFragment){
         const tool=p.equipment.find(c=>c.id===t.requiresTool);
         if(tool){
+          sfx('confirm');
           const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
           if(t.toolReward==='drawEq'){
             const card=drawEqCard(p);
@@ -2280,6 +2323,8 @@ function synthTakeAction(p,target,onDone){
           if(ci>=0)p.equipment.splice(ci,1);
           t.investigatedCount=(t.pois?t.pois.length:1);markTilesDirty();
           updateUI();render();
+        } else {
+          _play('reject.wav');
         }
       }
       onDone();break;
@@ -2371,7 +2416,7 @@ function triggerAnomaly(t){
       }
       if(evt.irisCorruption){
         const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
-        if(synth){synth.corrupted=true;addLog('> IRIS threat assessment updated. (Echo Chamber)','crit');}
+        if(synth){synth.corrupted=true;_play('corrupt.wav');addLog('> IRIS threat assessment updated. (Echo Chamber)','crit');}
       }
       if(evt.skipO2){p.skipO2=true;}
       let rollCb=null;
@@ -3606,6 +3651,7 @@ function showEventCard(evt, _locName, onOk, rollCallback, isReview, suitBlocked=
 // Type text character-by-character into el; auto-scrolls parent container
 function e7Type(el,msg,charDelay=15){
   el.textContent='';
+  if(!el.closest('#e7log'))_startTextSnd(msg.length*charDelay);
   for(let i=0;i<msg.length;i++)
     setTimeout(()=>{el.textContent=msg.slice(0,i+1);const p=el.parentElement;if(p){const sc=p._scrollTarget||p;sc.scrollTop=sc.scrollHeight;}},i*charDelay);
 }
@@ -3630,6 +3676,7 @@ function termDiv(container){
 //      'div' for a divider (msg ignored)
 // lineGap: extra pause (ms) held after each line before the next starts — makes sequential nature visible
 function termSeq(container,steps,charDelay=15,lineGap=0){
+  _stopTextSnd();
   const seq=Date.now()+Math.random();
   container._termSeq=seq;
   let t=0;
@@ -3651,7 +3698,6 @@ function termSeq(container,steps,charDelay=15,lineGap=0){
 // Convenience wrappers — all existing call sites unchanged
 function addE7(msg,cls='',charDelay=15){termAppend(document.getElementById('e7log'),msg,cls,charDelay);}
 function addLog(msg,cls='',charDelay=15){
-  if(cls==='act')_play('hint.wav');
   termAppend(document.getElementById('e7log'),msg,cls,charDelay,'le');
   // Queue for sync to other players (skip during receive to avoid echo)
   if(G&&_isOnlineMode&&!window.Sync?.isReceiving()){
@@ -4425,12 +4471,15 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   // Check for an existing multiplayer session (page reload mid-game)
   const mpSession=window.Sync?.restoreSession();
+  const _dismissWake=()=>{ document.getElementById('wake-screen').style.display='none'; };
+
   if(mpSession && window.Sync?.init()){
     if(mpSession.playerIndex===0){
       // HOST: restore from localStorage (always current), then reattach Firebase sync
       if(loadGame()){
         window.Sync.onStateUpdate(receiveRemoteState);
         window.Sync.reconnect(mpSession.joinCode,0).catch(()=>window.Sync?.clearSession());
+        _dismissWake();
         document.getElementById('intro').style.display='none';
         document.getElementById('game').className='running';
         preloadTileImages();initBoard();render();updateUI();
@@ -4443,6 +4492,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       }
     } else {
       // JOINER: no local save — reattach Firebase and restore crew setup or game state
+      _dismissWake();
       window.Sync.reconnect(mpSession.joinCode,mpSession.playerIndex)
         .then(()=>enterOnlineCrewSetup())
         .catch(()=>window.Sync?.clearSession());
@@ -4454,6 +4504,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   if(loadGame()){
     // Resume saved local game
+    _dismissWake();
     document.getElementById('intro').style.display='none';
     document.getElementById('game').className='running';
     preloadTileImages();initBoard();render();updateUI();
@@ -4463,28 +4514,87 @@ window.addEventListener('DOMContentLoaded',()=>{
     addE7('> Session restored.','sys');
     return;
   }
-  // Phase 1→2: spin ends, begin merge (text reveals then lockup slides up)
-  setTimeout(()=>{
-    const b=document.querySelector('.intro-box');
-    if(!b)return;
-    b.classList.remove('intro-startup');
-    b.classList.add('intro-merging');
-  },2300);
-  // Phase 2→3: merge done, lockup in normal flow, reveal e7 screen + start log
-  setTimeout(()=>{
-    const b=document.querySelector('.intro-box');
-    if(!b)return;
-    b.classList.remove('intro-merging');
-    e7ScreenSeq('e7-intro-msg',[
-      [300, '',       '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-      [1500, '',      '> PRIMARY DIAGNOSTICS: COMPLETE'],
-      [500, 'crit',   '> SIGNAL ARRAY: DAMAGED'],
-      [500, 'sys',    'Attention crew of the Endymion 7. The ship has crash landed on an uncharted planet. Cargo has been scattered across the wilds.'],
-      [500, 'sys',    'You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.'],
-      [500, 'sys',    'You have a 0.173% chance of survival.'],
-      [500, 'sys',    'Please acknowledge.'],
-    ]);
-  },3650);
+
+  // Fresh game: hide intro until user wakes the terminal
+  document.getElementById('intro').style.display='none';
+
+  const _launchIntro=()=>{
+    // Show intro — CSS animation on signal-intro-glow starts fresh from display:none
+    document.getElementById('intro').style.display='flex';
+    _music.play().catch(()=>{});
+    // startup.wav + hdd1 play simultaneously at 0.5 volume.
+    // hdd1 crossfades into hdd2 (1.5s overlap); hdd2 loops 3× while fading out.
+    const _sndStartup=new Audio('sfx/startup.wav');
+    const _sndHdd1=new Audio('sfx/startup-hdd1.mp3');
+    const _sndHdd2=new Audio('sfx/startup-hdd2.mp3');
+    _sndStartup.volume=0.3; _sndHdd1.volume=0.1; _sndHdd2.volume=0;
+    _sndStartup.play().catch(()=>{}); _sndHdd1.play().catch(()=>{});
+    // Loop hdd2 up to 3 times total
+    let _hdd2Plays=0,_hdd2FadeTimer=null;
+    const _onHdd2End=()=>{
+      _hdd2Plays++;
+      if(_hdd2Plays<3){_sndHdd2.currentTime=0;_sndHdd2.play().catch(()=>{});}
+      else{_sndHdd2.removeEventListener('ended',_onHdd2End);clearInterval(_hdd2FadeTimer);}
+    };
+    _sndHdd2.addEventListener('ended',_onHdd2End);
+    // Begin slow fade spanning all 3 loops; called once crossfade ramp finishes
+    const _startHdd2Fade=()=>{
+      const dur=(_sndHdd2.duration||30)*3*1000;
+      const step=120,decr=0.5/(dur/step);
+      _hdd2FadeTimer=setInterval(()=>{
+        if(_sndHdd2.volume>decr){_sndHdd2.volume=Math.max(0,_sndHdd2.volume-decr);}
+        else{_sndHdd2.volume=0;_sndHdd2.pause();clearInterval(_hdd2FadeTimer);}
+      },step);
+    };
+    // Crossfade: 1.5s before hdd1 ends ramp hdd1→0 and hdd2→0.5 simultaneously
+    const XFADE=1.5;
+    let _xfDone=false;
+    _sndHdd1.addEventListener('timeupdate',()=>{
+      if(_xfDone||!_sndHdd1.duration||_sndHdd1.currentTime<_sndHdd1.duration-XFADE)return;
+      _xfDone=true;
+      _sndHdd2.play().catch(()=>{});
+      const steps=Math.round(XFADE*1000/40);let s=0;
+      const _xf=setInterval(()=>{
+        s++;const t=Math.min(1,s/steps);
+        _sndHdd1.volume=0.1*(1-t);
+        _sndHdd2.volume=0.1*t;
+        if(s>=steps){clearInterval(_xf);_startHdd2Fade();}
+      },40);
+    });
+    // Phase 1→2: spin ends, begin merge
+    setTimeout(()=>{
+      const b=document.querySelector('.intro-box');
+      if(!b)return;
+      b.classList.remove('intro-startup');
+      b.classList.add('intro-merging');
+    },2300);
+    // Phase 2→3: merge done, reveal e7 screen + start log
+    setTimeout(()=>{
+      const b=document.querySelector('.intro-box');
+      if(!b)return;
+      b.classList.remove('intro-merging');
+      b.querySelector('.signal-intro-glow')?.classList.add('intro-logo-done');
+      e7ScreenSeq('e7-intro-msg',[
+        [300, '',       '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
+        [1500, '',      '> PRIMARY DIAGNOSTICS: COMPLETE'],
+        [500, 'crit',   '> SIGNAL ARRAY: DAMAGED'],
+        [500, 'sys',    'Attention crew of the Endymion 7. The ship has crash landed on an uncharted planet. Cargo has been scattered across the wilds.'],
+        [500, 'sys',    'You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.'],
+        [500, 'sys',    'You have a 0.173% chance of survival.'],
+        [500, 'sys',    'Please acknowledge.'],
+      ]);
+    },3650);
+  };
+
+  const _ws=document.getElementById('wake-screen');
+  const _wake=()=>{
+    _ws.removeEventListener('click',_wake);
+    document.removeEventListener('keydown',_wake);
+    _dismissWake();
+    _launchIntro();
+  };
+  _ws.addEventListener('click',_wake);
+  document.addEventListener('keydown',_wake);
 });
 // ═══════════════════════════════════════════════════════════════
 // ONLINE LOBBY
