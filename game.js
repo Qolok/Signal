@@ -4463,15 +4463,28 @@ window.addEventListener('DOMContentLoaded',()=>{
     addE7('> Session restored.','sys');
     return;
   }
-  e7ScreenSeq('e7-intro-msg',[
-    [300, '',       '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-    [1500, '',      '> PRIMARY DIAGNOSTICS: COMPLETE'],
-    [500, 'crit',   '> SIGNAL ARRAY: DAMAGED'],
-    [500, 'sys',    'Attention crew of the Endymion 7. The ship has crash landed on an uncharted planet. Cargo has been scattered across the wilds.'],
-    [500, 'sys',    'You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.'],
-    [500, 'sys',    'You have a 0.173% chance of survival.'],
-    [500, 'sys',    'Please acknowledge.'],
-  ]);
+  // Phase 1→2: spin ends, begin merge (text reveals then lockup slides up)
+  setTimeout(()=>{
+    const b=document.querySelector('.intro-box');
+    if(!b)return;
+    b.classList.remove('intro-startup');
+    b.classList.add('intro-merging');
+  },2300);
+  // Phase 2→3: merge done, lockup in normal flow, reveal e7 screen + start log
+  setTimeout(()=>{
+    const b=document.querySelector('.intro-box');
+    if(!b)return;
+    b.classList.remove('intro-merging');
+    e7ScreenSeq('e7-intro-msg',[
+      [300, '',       '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
+      [1500, '',      '> PRIMARY DIAGNOSTICS: COMPLETE'],
+      [500, 'crit',   '> SIGNAL ARRAY: DAMAGED'],
+      [500, 'sys',    'Attention crew of the Endymion 7. The ship has crash landed on an uncharted planet. Cargo has been scattered across the wilds.'],
+      [500, 'sys',    'You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.'],
+      [500, 'sys',    'You have a 0.173% chance of survival.'],
+      [500, 'sys',    'Please acknowledge.'],
+    ]);
+  },3650);
 });
 // ═══════════════════════════════════════════════════════════════
 // ONLINE LOBBY
