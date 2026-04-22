@@ -788,6 +788,7 @@ function showTileRevealModal(t, onDismiss){
     trov.classList.remove('show','anomaly-mode');
     trov.style.display='none';
     trov.style.backgroundImage='';
+    document.getElementById('trov-suit-blocker').classList.remove('dropping');
     if(onDismiss)onDismiss();
     else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'||t.pois?.includes('Cache')){
       if(t.pois?.includes('Bioluminescent Fen')){
@@ -1093,6 +1094,7 @@ function showTileRevealModal(t, onDismiss){
         cont.onclick=()=>{
           trov.onclick=null;deck.onclick=null;actionsEl.innerHTML='';
           trov.classList.remove('show','anomaly-mode');trov.style.display='none';trov.style.backgroundImage='';
+          document.getElementById('trov-suit-blocker').classList.remove('dropping');
           if(t.anomaly==='Gravity Well'){
             const newTile=G.tiles.get(hk(p.q,p.r));
             const stillPending=newTile?.requiresTool&&(newTile.radioFragment||newTile.toolReward);
@@ -1187,7 +1189,7 @@ function showTileRevealModal(t, onDismiss){
   trov.classList.add('show');
   const _sb=document.getElementById('trov-suit-blocker');
   _sb.classList.remove('dropping');
-  if(isToxic&&_hasSuit)setTimeout(()=>_sb.classList.add('dropping'),400);
+  if(isToxic&&_hasSuit)setTimeout(()=>{if(trov.style.display!=='none')_sb.classList.add('dropping');},400);
 }
 
 function popEventCard(){
@@ -3883,7 +3885,7 @@ function rbSearch(query){
 // INTERFACE TOUR
 // ═══════════════════════════════════════════════════════════════
 const TOUR_STEPS=[
-  {selector:'#bwrap',        title:'THE SURFACE MAP',body:'This hex grid is the planet surface. Click an adjacent hex to move there. Unknown tiles are revealed when you enter them. Your base camp is outlined in white.',anchor:'center'},
+  {selector:'#bwrap',        title:'THE SURFACE MAP',body:'This hex grid is the planet\'s surface. Click a hex to move there. Unknown tiles are revealed when you enter them. Your base camp is outlined in white.',anchor:'center'},
   {selector:'#hcrd',         title:'YOUR CREW',      body:"Your active crew member's portrait and status. Use the tabs at the top to check on other survivors.",anchor:'right'},
   {selector:'.hudres',       title:'RESOURCES',      body:"Food and Oxygen each deplete by 1 per turn. If either hits zero, Health drops instead. Don't let Health reach zero.",anchor:'right'},
   {selector:'#hudeq',        title:'BACKPACK',        body:'Equipment you carry into the field. Click a card to read what it does. Use the filter icons to sort by type.',anchor:'right'},
@@ -4497,6 +4499,19 @@ function goToSiteBuilder(){
 
 window.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>2||e.ctrlKey)usesTrackpad=true;},{passive:true,once:false,capture:true});
+  // ── TILE REVEAL PEEK (hold outside box to see tile beneath) ──
+  const _trovEl=document.getElementById('trov');
+  const _trBox=document.getElementById('tr-box');
+  _trovEl.addEventListener('mousedown',e=>{if(!_trBox.contains(e.target))_trovEl.classList.add('peeking');});
+  const _sigOv=document.getElementById('sig-ov');
+  const _sigCard=document.getElementById('sig-card');
+  _sigOv.addEventListener('mousedown',e=>{if(!_sigCard.contains(e.target))_sigOv.classList.add('peeking');});
+  const _movEl=document.getElementById('mov');
+  _movEl.addEventListener('mousedown',e=>{
+    if((_movEl.classList.contains('cargo')||_movEl.classList.contains('rescue'))&&!e.target.closest('.mbox'))
+      _movEl.classList.add('peeking');
+  });
+  document.addEventListener('mouseup',()=>{_trovEl.classList.remove('peeking');_sigOv.classList.remove('peeking');_movEl.classList.remove('peeking');});
   document.querySelectorAll('.hud-vtab').forEach(tab=>{
     const parent=tab.parentElement;
     tab.addEventListener('click',()=>{parent?.classList.toggle('hud-collapsed');_play('hud.wav');});
