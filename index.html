@@ -35,6 +35,7 @@
       <div class="signal-intro-icon wake-icon"></div>
     </div>
     <div class="wake-hint">
+      <div class="ssub wake-sub">Hibernation Mode active<br>Awaiting user input to reactivate system functions</div>
       <div>PRESS ANY KEY<span class="wake-cursor">▌</span></div>
     </div>
   </div>
@@ -56,7 +57,7 @@
       <button class="sbtn next-btn" onclick="showOnlineLobby()">Online Game</button>
     </div>
   </div>
-  <div class="version-label">v1.1.18</div>
+  <div class="version-label">v1.1.19</div>
 </div>
 
 <!-- ── ONLINE LOBBY ── -->
@@ -317,6 +318,7 @@
         <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
         <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
         <button class="btn trd" id="btrd"   onclick="openTrade()" disabled>Trade</button>
+        <button class="btn" id="biris" onclick="toggleIrisDeactivation()" style="display:none">Deactivate IRIS</button>
         <button class="btn wrn" id="bfrag"  onclick="doActivateFrag()" disabled>Activate Fragment</button>
         <button class="btn wrn" id="bsig"   onclick="doSignalRoll()" disabled>Roll Signal</button>
         <button class="btn" id="bstay"  onclick="doStasisEndTurn()" style="display:none">Stay in Stasis</button>
@@ -345,6 +347,7 @@
       </div>
       <div id="tr-deck-lbl">Draw Event</div>
     </div>
+    <button id="trov-cancel" class="back-btn" style="display:none">Cancel</button>
   </div>
   <div id="trov-suit-blocker" class="cc-Tech">
     <div class="evc-suit-inner">
@@ -355,7 +358,6 @@
       <div class="evc-suit-status">DEPLOYED</div>
     </div>
   </div>
-  <button id="trov-cancel" class="back-btn" style="display:none">Cancel</button>
 </div>
 
 <!-- ── EQUIP DRAW OVERLAY ── -->

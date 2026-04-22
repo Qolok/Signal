@@ -531,7 +531,7 @@ const TILE_TIPS={
   'Passage':           [[0,'','A route through the canyon. Something passed through here recently.'],[0,'act','Draw an Event card.']],
   'Bloody Passage':    [[0,'','A piece of the ship wedged in a canyon. Signs of violence inside.'],[0,'act','Draw an Event card.']],
   'Spore Bog':         [[0,'','A murky wetland choked with fungal growths. Spores drift like ash.'],[300,'','A sickly light pulses from beneath the surface.'],[0,'act','Draw an Event card.']],
-  'Bioluminescent Fen':[[0,'','A hauntingly alien marsh. Wispy plants pulse with soft teal light.'],[300,'','The mist hangs low — eerie, but strangely serene.'],[0,'good','Recover 1 Health. O\u2082 flip skipped this round.']],
+  'Bioluminescent Fen':[[0,'','A hauntingly alien marsh. Wispy plants pulse with soft teal light.'],[300,'','The mist hangs low — eerie, but strangely serene. You stop to rest here.'],[0,'good','Recover 1 Health. O\u2082 flip skipped this round.']],
   'Nest Site':         [[0,'','A shallow crater lined with leathery alien eggs. Something large nested here.'],[300,'','You move closer to see if you can get a reading from one of the eggs.'],[300,'act','Roll 1 die.']],
   'Hive Mound':        [[0,'','A towering biological mound from one of the planet\'s native species. The tunnels inside shift and pulse. You don\'t like the look of this.'],[0,'','As you draw near, a horde of insectoid creatures rush you.'],[0,'act','Roll 3 dice.']],
   'Thermal Vent':      [[0,'','Fractured ground. Jets of superheated gas vent in slow rhythmic bursts.'],[300,'','Heat distortion and sulfur in the air.'],[0,'act','Draw an Event card.']],
@@ -636,7 +636,7 @@ function newGame(names, portraits, placedMap){
       radioFragments:0,equipment:[],incapacitated:0,alive:true,location:'Crash Site',
       skipO2:true,inStasis:false,signalArrayRounds:0,soloRescueActive:false,
       rfExtractionActive:false,scannerUsed:false,scannerCharges:0,rebreatherCycle:false,
-      stunned:false,isSynth:true,cpu:true,corrupted:false});
+      stunned:false,isSynth:true,cpu:true,corrupted:false,deactivated:false});
   }
   const evtDeck=buildEventDeck();
   G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
@@ -1902,8 +1902,10 @@ function doEndTurn(){
   const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
   // Synth: battery logic only
   if(p.isSynth){
-    if(p.battery>0)p.battery--;
-    if(p.battery===0){p.alive=false;sfx('death');addLog('IRIS: Power depleted. Systems offline.','crit');}
+    if(!p.deactivated){
+      if(p.battery>0)p.battery--;
+      if(p.battery===0){p.alive=false;sfx('death');addLog('IRIS: Power depleted. Systems offline.','crit');}
+    }
     advanceTurn();return;
   }
   // Stasis: skip all depletion
@@ -1929,10 +1931,12 @@ function doEndTurn(){
   if(curTile?.name==='Signal Array'){
     p.signalArrayRounds++;
     if(p.soloRescueActive&&p.signalArrayRounds>=3){
+      let _soloExtracted=false;
       showDieRoll(`${p.name} — Solo Extraction attempt. Roll 10 or higher to be rescued alone.`,val=>{
         addLog(`${p.name} solo rescue: rolled ${val}.`,val>=10?'good':'crit');
         if(val>=10){
-          p.alive=false;
+          _soloExtracted=true;
+          p.alive=false;p.extracted=true;
           const synth=G.players.find(pl=>pl.isSynth&&pl.corrupted&&pl.alive);
           if(synth){synth.corrupted=false;addLog('IRIS: Active crew count reduced. Threat protocol suspended.','sys');}
           showModal('SOLO EXTRACTION','',true,()=>{advanceTurn();},undefined,undefined,undefined,
@@ -1945,7 +1949,7 @@ function doEndTurn(){
           return`Rolled ${val} — EXTRACTED.`;
         }
         return`Rolled ${val} — signal not strong enough. Remain on the array.`;
-      },()=>advanceTurn(),undefined,3);
+      },()=>{if(!_soloExtracted)advanceTurn();},undefined,3);
       return;
     }
   } else {
@@ -1958,6 +1962,7 @@ function advanceTurn(){
   const alive=G.players.filter(p=>p.alive&&!p.isSynth);if(!alive.length){
     _alarmCrit.pause(); _alarmCrit.currentTime = 0;
     render();
+    if(G.players.some(p=>p.extracted&&!p.isSynth)){clearSave();window.Sync?.clearSession();location.reload();return;}
     showModal('ALL CREW LOST','',true,()=>{clearSave();window.Sync?.clearSession();location.reload();},'End Mission',undefined,undefined,'<div id="mov-e7log" class="mov-e7log"></div>');
     e7ScreenSeq('mov-e7log',[
       [200,'crit','> LIFE SIGN MONITOR: no signals detected.'],
@@ -2025,6 +2030,15 @@ function advanceTurn(){
 // ═══════════════════════════════════════════════════════════════
 // IRIS AI
 // ═══════════════════════════════════════════════════════════════
+function toggleIrisDeactivation(){
+  const iris=G.players.find(p=>p.isSynth);
+  if(!iris||!iris.alive)return;
+  iris.deactivated=!iris.deactivated;
+  sfx('select');
+  if(iris.deactivated)addLog(cp().name+' deactivated IRIS. She will skip turns until reactivated.','act');
+  else addLog(cp().name+' reactivated IRIS.','act');
+  updateUI();render();
+}
 function synthFindTile(name){
   for(const[k,t]of G.tiles){if(t.name===name){const[q,r]=hparse(k);return{q,r,tile:t};}}
   return null;
@@ -2144,6 +2158,7 @@ function synthChooseCorrupted(p){
 
 // Returns true if movement was interrupted (async contest triggered), false if sync step completed.
 function synthApplyStep(p,q,r,onInterrupted){
+  const prevQ=p.q,prevR=p.r,prevLoc=p.location;
   if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
   G.movementLeft--;
   p.q=q;p.r=r;
@@ -2194,7 +2209,7 @@ function synthApplyStep(p,q,r,onInterrupted){
           occupant.q=0;occupant.r=0;const ct=G.tiles.get(hk(0,0));occupant.location=tileName(ct);
           updateUI();render();onInterrupted();},
         ()=>{addLog(occupant.name+' holds the Signal Array.','act');
-          p.q=occupant.q;p.r=occupant.r;p.location=occupant.location;
+          p.q=prevQ;p.r=prevR;p.location=prevLoc;
           G.movementLeft=0;updateUI();render();onInterrupted();}
       );
       return true;
@@ -2392,6 +2407,7 @@ function synthObjectiveLabel(target){
 
 function doSynthTurn(){
   const p=cp();if(!p||!p.isSynth)return;
+  if(p.deactivated){addLog('IRIS is deactivated — turn skipped.','sys');advanceTurn();return;}
   rollTableDice();
   setTimeout(()=>{
     G.phase='move';
@@ -2515,14 +2531,14 @@ function openTrade(){
 }
 
 function initTradeModal(pA,pB){
-  tradeState={pA,pB,stagedAtoB:new Set(),stagedBtoA:new Set(),aFood:0,bFood:0,aO2:0,bO2:0};
+  tradeState={pA,pB,stagedAtoB:new Set(),stagedBtoA:new Set(),aFood:0,bFood:0,aO2:0,bO2:0,aFrags:0,bFrags:0};
   renderTradeModal();
   document.getElementById('trademodal').classList.add('show');
 }
 
 function renderTradeModal(){
   if(!tradeState)return;
-  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2}=tradeState;
+  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2,aFrags,bFrags}=tradeState;
   const body=document.getElementById('trbody');
   body.innerHTML='';
   [pA,pB].forEach((p,side)=>{
@@ -2546,7 +2562,11 @@ function renderTradeModal(){
     for(let i=0,vis=Math.max(5,Math.ceil(Math.max(p.food,netFood)/5)*5);i<vis;i++){const s=document.createElement('span');s.className=`tok ${i<netFood?'rf':'re'}`;foodGrid.appendChild(s);}
     const o2Row=makeToks(netO2,3,'of','oe');
     const hpRow=makeToks(p.health,3,'hf','he');
+    const netFrags=isA?p.radioFragments-aFrags+bFrags:p.radioFragments-bFrags+aFrags;
+    const fragTokRow=document.createElement('div');fragTokRow.className='tokrow';
+    for(let i=0;i<netFrags;i++){const s=document.createElement('span');s.className='frag-tok';s.textContent='◈';fragTokRow.appendChild(s);}
     nameBlock.appendChild(nameSpan);nameBlock.appendChild(foodGrid);nameBlock.appendChild(o2Row);nameBlock.appendChild(hpRow);
+    if(netFrags>0||p.radioFragments>0)nameBlock.appendChild(fragTokRow);
     nameRow.appendChild(portEl);nameRow.appendChild(nameBlock);
     panel.appendChild(nameRow);
     // Equipment area label
@@ -2616,7 +2636,13 @@ function renderTradeModal(){
         <span class="trcnt">${o2Give}</span>
         <button class="trbtn" onclick="trAdj('${isA?'aO2':'bO2'}',1)">+</button>
         <span style="font-size:.58rem;color:var(--dim)">/ ${o2Max}</span>
-      </div>`;
+      </div>
+      ${p.radioFragments>0?`<div class="trresrow" style="margin-top:6px"><label>Give ◈</label>
+        <button class="trbtn" onclick="trAdj('${isA?'aFrags':'bFrags'}',-1)">−</button>
+        <span class="trcnt">${isA?aFrags:bFrags}</span>
+        <button class="trbtn" onclick="trAdj('${isA?'aFrags':'bFrags'}',1)">+</button>
+        <span style="font-size:.58rem;color:var(--dim)">/ ${p.radioFragments}</span>
+      </div>`:''}`;
     panel.appendChild(resDiv);
     body.appendChild(panel);
   });
@@ -2625,14 +2651,14 @@ function renderTradeModal(){
 function trAdj(field,delta){
   if(!tradeState)return;
   const{pA,pB}=tradeState;
-  const maxMap={aFood:pA.food,bFood:pB.food,aO2:pA.o2,bO2:pB.o2};
+  const maxMap={aFood:pA.food,bFood:pB.food,aO2:pA.o2,bO2:pB.o2,aFrags:pA.radioFragments,bFrags:pB.radioFragments};
   tradeState[field]=Math.max(0,Math.min(maxMap[field],tradeState[field]+delta));
   renderTradeModal();
 }
 
 function confirmTrade(){
   if(!tradeState)return;
-  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2}=tradeState;
+  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2,aFrags,bFrags}=tradeState;
   // Transfer equipment A→B
   stagedAtoB.forEach(uid=>{
     const ci=pA.equipment.findIndex(c=>c.uid===uid);
@@ -2648,6 +2674,8 @@ function confirmTrade(){
   pB.food=Math.max(0,Math.min(15,pB.food-bFood+aFood));
   pA.o2=Math.max(0,Math.min(3,pA.o2-aO2+bO2));
   pB.o2=Math.max(0,Math.min(3,pB.o2-bO2+aO2));
+  pA.radioFragments=Math.max(0,pA.radioFragments-aFrags+bFrags);
+  pB.radioFragments=Math.max(0,pB.radioFragments-bFrags+aFrags);
   addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`,'good');
   closeTrade(false);
   viewedPlayer=G.currentPlayer;
@@ -2835,7 +2863,7 @@ const BASECAMP_ICON_MAP={
 function drawTileArtwork(g,cx,cy,t){
   if(t.type==='terrain'&&t.radioFragment){
     const poi=t.pois?.[0];
-    if(poi==='Derelict Tower'||poi==='Collapsed Tower'){
+    if(poi==='Derelict Tower'||poi==='Collapsed Tower'||poi==='Mysterious Outpost'){
       const fragTok=svgEl('text',{x:cx+18,y:cy-13,'text-anchor':'middle','font-family':'monospace','font-size':'13',fill:'#8a28c8',style:'filter:drop-shadow(0 0 4px rgba(138,40,200,0.7))','pointer-events':'none'});
       fragTok.textContent='◈';
       g.appendChild(fragTok);
@@ -2944,6 +2972,7 @@ function drawPawn(g,p){
 }
 
 function onHexClick(q,r){
+  cancelTooltip();
   if(!G)return;
   if(G.phase!=='move'&&G.phase!=='action')return;
   if(!G.movementLeft)return;
@@ -3035,12 +3064,12 @@ function buildCrewTabs(){
     const t=document.createElement('div');
     const isCurrent=pl.id===G.currentPlayer;
     const isViewing=pl.id===viewedPlayer;
-    t.className='hctab'+(pl.alive?'':' dead');
+    t.className='hctab'+(pl.extracted?' extracted':pl.alive?'':' dead');
     t.style.cssText=`background-image:url(${pl.isSynth?'img/Crew/IRIS_dot.png':`img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}_dot.png`});background-size:cover;background-position:center top;`+
       `border-color:${isCurrent?pl.color:isViewing?'rgba(255,255,255,.4)':'transparent'};`+
       `box-shadow:${isCurrent?`0 0 0 1px ${pl.color}`:'none'};`+
-      `opacity:${pl.alive?1:.3};`;
-    t.dataset.tooltip=pl.name+(isCurrent?' · Active':'')+(!pl.alive?' · Dead':pl.incapacitated?' · Incap':'');
+      `opacity:${pl.extracted?0.65:pl.alive?1:.3};`;
+    t.dataset.tooltip=pl.name+(isCurrent?' · Active':'')+(pl.extracted?' · Rescued':!pl.alive?' · Dead':pl.incapacitated?' · Incap':'');
     if(pl.alive)t.onclick=()=>{viewedPlayer=pl.id;eqGalleryOffset=0;updateUI();};
     tabs.appendChild(t);
   });
@@ -3315,12 +3344,16 @@ function updateUI(){
   const trdEnabled=(act||G.phase==='move')&&hereOthers.length>0;
   document.getElementById('btrd').disabled=!trdEnabled;
   document.getElementById('btrd').dataset.tooltip=trdEnabled?'Trade resources and equipment with crew on your tile':'Another crew member must be on your tile to trade';
+  const _iris=G.players.find(x=>x.isSynth&&x.alive);
+  const _irisHere=_iris&&!p.isSynth&&_iris.q===p.q&&_iris.r===p.r;
+  const _birisBtn=document.getElementById('biris');
+  if(_birisBtn){_birisBtn.style.display=show(!!_irisHere);_birisBtn.disabled=!(actOrMove&&_irisHere);_birisBtn.textContent=_iris?.deactivated?'Reactivate IRIS':'Deactivate IRIS';}
   const equpnEl=document.getElementById('equpn');if(equpnEl)equpnEl.textContent=G.eqDeckCount;
   const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
   updateE7Prompt();
   // In online mode, lock all actions when it's not this player's turn
   if(!isMyTurn()){
-    ['bend','bequip','bcargo','bwatch','bfrag','bsig','btrd'].forEach(id=>{
+    ['bend','bequip','bcargo','bwatch','bfrag','bsig','btrd','biris'].forEach(id=>{
       const b=document.getElementById(id);if(b)b.disabled=true;
     });
   }
@@ -3892,7 +3925,7 @@ const TOUR_STEPS=[
   {selector:'#decks',        title:'CARD DECKS',      body:'Event and Equipment deck counts. Events trigger on tile exploration. Equipment is drawn from the Locker at Base Camp.',anchor:'left'},
   {selector:'#tabletop-dice',title:'MOVEMENT',        body:'Each turn starts with rolling for movement points. Click the die, then click a destination hex on the map.',anchor:'left'},
   {selector:'.hudact',       title:'ACTIONS',         body:'Actions available here change based on your location. You can perform multiple actions throughout your turn as you move to different tiles.',anchor:'left'},
-  {selector:'#e7panel',      title:'GUIDE MODE',      body:'The E7 log records every action you take and advises next steps. Enable Guide Mode anytime to receive in-context hints throughout the mission. Check the Field Guide for the full rule book. Good luck, crew.',anchor:'left'},
+  {selector:'#e7panel',      title:'SHIP COMPUTER',      body:'The E7 log records every action you take and advises next steps. Enable Guide Mode anytime to receive in-context hints throughout the mission. Check the Field Guide for the full rule book. Good luck, crew.',anchor:'left'},
 ];
 let _tourStep=0;
 let _deckWasCollapsed=true,_deckStepVisited=false;
@@ -4179,6 +4212,7 @@ function selectBuilderTile(idx){
 }
 
 function placeBuilderTile(q,r){
+  cancelBuilderTooltip();
   if(_builderReadOnly||builderState.selectedIdx<0)return;
   if(!isValidBuilderPos(q,r))return;
   const item=builderState.palette[builderState.selectedIdx];
@@ -4186,6 +4220,25 @@ function placeBuilderTile(q,r){
   builderState.placed.set(hk(q,r),{q,r,name:item.name,short:item.short});
   item.placed=true;
   builderState.selectedIdx=-1;
+  renderPalette();
+  renderSiteBuilder();
+  updateBuilderProgress();
+  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
+}
+function removeBuilderTile(q,r){
+  cancelBuilderTooltip();
+  if(_builderReadOnly)return;
+  if(q===0&&r===0)return;
+  const k=hk(q,r);
+  const info=builderState.placed.get(k);
+  if(!info)return;
+  const paletteIdx=builderState.palette.findIndex(p=>p.name===info.name);
+  builderState.placed.delete(k);
+  if(paletteIdx>=0){
+    builderState.palette[paletteIdx].placed=false;
+    builderState.selectedIdx=paletteIdx;
+  }
+  sfx('select');
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
@@ -4303,9 +4356,11 @@ function renderSiteBuilder(){
     }
     const border=document.createElementNS(ns,'polygon');
     border.setAttribute('points',pts);border.setAttribute('fill','transparent');
-    border.setAttribute('stroke','#b2dbee');border.setAttribute('stroke-width','1.5');border.setAttribute('style','cursor:default');
+    const isCrashSite=info.q===0&&info.r===0;
+    border.setAttribute('stroke','#b2dbee');border.setAttribute('stroke-width','1.5');border.setAttribute('style',isCrashSite?'cursor:default':'cursor:pointer');
     border.addEventListener('mouseenter',e=>{_hoverSnd();startBuilderTooltip(info,e);});
     border.addEventListener('mouseleave',cancelBuilderTooltip);
+    if(!isCrashSite)border.addEventListener('click',()=>removeBuilderTile(info.q,info.r));
     g.appendChild(border);
     const icon=BASECAMP_ICON_MAP[info.name];
     if(icon){
