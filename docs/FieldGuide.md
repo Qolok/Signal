@@ -9,12 +9,12 @@ Somewhere out there, scattered across the terrain, are pieces of your radio. Fin
 ## The Three Tensions
 
 - **Survival** -- [Food](#crew) and [Oxygen](#crew) supplies deplete every round. The crash site is your lifeline. Venture too far and you may not make it back.
-- **Exploration** -- [Radio Fragments](#radio_fragments) are out there, but finding them means pushing deeper into unknown terrain — away from safety, away from others, into situations only you will know about.
+- **Exploration** -- [Radio Fragments](#radio_fragments) are out there, but finding them means pushing deeper into unknown terrain.
 - **Trust** -- [Private Events](#event_cards) change a player's objective silently. The group must cooperate to survive, but cooperation requires trust the planet is quietly eroding.
 
 # Gameplay
 
-All crew begin at the Crash Site. The map is surrounded by face-down tiles. Your resources are already ticking.
+All crew begin at the Crash Site. The map is surrounded by face-down tiles. Your resources are already dwindling.
 
 <img src="img/Tiles/crash-site.png" class="fg-card">
 
@@ -56,15 +56,15 @@ Before the game begins, each player chooses a crew member to play. Your choice i
 
 <img src="img/screens/crew.png" class="fg-crew">
 
-### Food
+### **Food**
 Each player starts with 5 Food at the start of the game. The maximum a player may carry is 15. One Food token is flipped to empty each turn regardless of location.
 
-The [Cargo Hold](#game_board) begins the game with 5 Food per human player, up to a maximum of 15 (3+ players). Crew may deposit or withdraw freely from the cargo, but the more players draw from it, the faster it drains. This is a shared, finite communal reserve that does not replenish.
+The [Cargo Hold](#game_board) begins the game with 5 Food per human player, up to a maximum of 15 (3+ players). Crew may deposit or withdraw freely from the cargo, but the more players draw from it, the faster it drains. This is a finite, communal reserve that does not replenish.
 
-### Oxygen
+### **Oxygen**
 Each player has 3 Oxygen tanks. For every turn spent away from [Base Camp](#game_board), flip 1 Oxygen. Returning to the [Airlock](#game_board) refills all Oxygen tanks.
 
-### Health
+### **Health**
 Each player has 3 Health tokens. Health is lost through starvation and conflict.
 
 When a player's Health reaches 0, they become **incapacitated** and cannot move or take actions. A fellow crew member may use a [MedPack](#equipment_cards) to restore them to 1 Health, or a [Stretcher](#equipment_cards) to transport them directly to the [Medical Bay](#game_board) (which also restores 1 Health).
@@ -85,7 +85,7 @@ After 2 consecutive rounds of incapacitation, a player dies. **Death** removes p
 | <img src="img/Crew/Santos3.png" class="fg-crew"> | Lucia</br>**Santos** | Cargo and Logistics. She keeps track of what's left. The numbers aren't good, and she's the only one who knows exactly how bad it is. |
 | <img src="img/Crew/Vasquez3.png" class="fg-crew"> | Marisol</br>**Vasquez** | Pilot. The crash wasn't her fault. She needs the crew to understand that. |
 | <img src="img/Crew/Mizuki3.png" class="fg-crew"> | Aiko</br>**Mizuki** | Medical Officer. Calm under pressure. She has seen enough field injuries to know when to save someone and when to say goodbye. |
-| <img src="img/Crew/IRIS.png" class="fg-crew"> | **IRIS** | The **Integrated Robotic Intelligence System (IRIS)** is an autonomous AI crew member programmed to assist, but if her mission directives interfere, she will target the weakest crew member and begin working against them.<br><br>IRIS's **Battery** depletes every round and can also be damaged by hazards. She will return to the [Medical Bay](#game_board) when her battery needs charging.<br><br>IRIS prioritizes her actions every turn. She may heal crew members, retrieve [Radio Fragments](#radio_fragments), unlock tiles, or explore the unknown. |
+| <img src="img/Crew/IRIS.png" class="fg-crew"> | **IRIS** | The **Integrated Robotic Intelligence System (IRIS)** is an autonomous AI crew member programmed to assist, but if her mission directives interfere, she will target the weakest crew member and begin working against them.<br><br>IRIS prioritizes her actions every turn. She may heal crew members, retrieve [Radio Fragments](#radio_fragments), unlock tiles, or explore the unknown. Her **Battery** depletes every round and can also be damaged by hazards. She will return to the [Medical Bay](#game_board) when her battery needs charging. |
 
 # Game Board
 
@@ -97,7 +97,7 @@ The map expands outward from Base Camp as players explore. There are 50 tiles to
 
 The play area is always wrapped in face-down tiles until they run out. When a player moves onto a face-down tile, flip it immediately. Its contents are now visible to everyone. Most tiles trigger an [Event card](#event_cards) draw. When prompted, draw from the Event Card deck.
 
-> *Some tiles are gated by a specific piece of [equipment](#equipment_cards) required for access.*
+> *Some tiles are gated by a specific piece of [equipment](#equipment_cards)  (eg, the Lockpick) required for access.*
 
 ## Base Camp
 
@@ -149,7 +149,7 @@ Anomaly tiles have strange and immediate effects on the crew. Each is unique.
 | <img src="img/Tiles/fuselage_overlay.png" class="fg-tile"> | **Fuselage** | — | Draw an [Event card](#event_cards). |
 | <img src="img/Tiles/cave_overlay.png" class="fg-tile"> | **Cave** | — | Draw an [Event card](#event_cards). Skip Oxygen flip this turn. |
 | <img src="img/Tiles/wreckage_overlay.png" class="fg-tile"> | **Wreckage Field** | — | Draw an [Event card](#event_cards). |
-| <img src="img/Tiles/cache_overlay.png" class="fg-tile"> | **Cache** | — | Roll 1 die: 1–2 = +1 Food, 3–4 = +2 Food, 5–6 = +3 Food. |
+| <img src="img/Tiles/cache_overlay.png" class="fg-tile"> | **Cache** | — | Roll 1 die:<br>**1–2** = +1 Food<br>**3–4** = +2 Food<br>**5–6** = +3 Food |
 | <img src="img/Tiles/passage_overlay.png" class="fg-tile"> | **Passage** | — | Draw an [Event card](#event_cards). |
 | <img src="img/Tiles/passage-bloody_overlay.png" class="fg-tile"> | **Bloody Passage** | — | Draw an [Event card](#event_cards). |
 | <img src="img/Tiles/spore-bog_overlay.png" class="fg-tile"> | **Spore Bog** | — | Draw an [Event card](#event_cards). Lose 1 Health unless carrying a [Hazard Suit](#equipment_cards) (suit is then discarded). |
@@ -157,7 +157,7 @@ Anomaly tiles have strange and immediate effects on the crew. Each is unique.
 | <img src="img/Tiles/bioluminescent-fen_overlay.png" class="fg-tile"> | **Bioluminescent Fen** | — | Recover 1 Health. Oxygen flip skipped this turn. No Event card. |
 | <img src="img/Tiles/nest-site_overlay.png" class="fg-tile"> | **Nest Site** | — | Roll 1 die for an encounter outcome. |
 | <img src="img/Tiles/hive-mound_overlay.png" class="fg-tile"> | **Hive Mound** | — | Roll 3 dice. Each die showing 4 or higher costs 1 Health. Each [Hazard Suit](#equipment_cards) negates 1 damage (then discarded). |
-| <img src="img/Tiles/antimatter-chamber_overlay.png" class="fg-tile"> | **Antimatter Chamber** | — | All crew on the board are pulled to this tile. Each player rolls 1 die: 1–3 = pull free; 4–6 = all Tech equipment is destroyed. |
+| <img src="img/Tiles/antimatter-chamber_overlay.png" class="fg-tile"> | **Antimatter Chamber** | — | All crew on the board are pulled to this tile. Each player rolls 1 die:<br>**1–3** = pull free<br>**4–6** = all Tech equipment is destroyed. |
 
 # Event Cards
 
@@ -255,5 +255,7 @@ If the roll succeeds, rescue arrives. All surviving players whose win condition 
 Some private cards introduce **competing objectives** — solo extraction conditions, alternate rescue windows, or information about the odds that the crew would rather not hear. A player holding one of these cards may cooperate fully, cooperate partially, or quietly work against the group's interests. The rules never require them to explain themselves.
 
 Corrupted players may do anything the rules permit: hold a [Radio Fragment](#radio_fragments) without returning it, occupy the [Signal Array](#game_board) without rolling, decline to share resources. The group must decide how much to trust one another — and when it's too late.
+
+**IRIS corruption** is triggered by a specific [Public Event card](#event-cards) shuffled somewhere in the deck. Drawing this card alters her mission parameters to prioritize rescue above the survival of any one player. Her data shows a better chance of survival with fewer crew, so she begins to attack the weakest member to increase the supplies of the remaining crew.
 
 <img src="img/screens/event-private.png" class="fg-card">

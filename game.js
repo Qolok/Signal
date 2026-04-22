@@ -73,7 +73,7 @@ _sigPulse.loop = true;
 _sigPulse.volume = 0.7;
 const _textSnd = new Audio('sfx/text.wav');
 _textSnd.loop = true;
-_textSnd.volume = 0.4;
+_textSnd.volume = 0.3;
 let _textSndTimer = null;
 function _startTextSnd(ms){
   if(!_sfxEnabled)return;
@@ -533,7 +533,7 @@ const TILE_TIPS={
   'Spore Bog':         [[0,'','A murky wetland choked with fungal growths. Spores drift like ash.'],[300,'','A sickly light pulses from beneath the surface.'],[0,'act','Draw an Event card.']],
   'Bioluminescent Fen':[[0,'','A hauntingly alien marsh. Wispy plants pulse with soft teal light.'],[300,'','The mist hangs low — eerie, but strangely serene.'],[0,'good','Recover 1 Health. O\u2082 flip skipped this round.']],
   'Nest Site':         [[0,'','A shallow crater lined with leathery alien eggs. Something large nested here.'],[300,'','You move closer to see if you can get a reading from one of the eggs.'],[300,'act','Roll 1 die.']],
-  'Hive Mound':        [[0,'','A towering biological mound from one of the planet\'s native species. The tunnels inside shift and pulse. You don\'t like the look of this.'],[0,'','As you draw near, a horde of insectoid creatures rush you.'],[0,'act','Roll 3 dice. Each roll over 4 costs 1 Health. Hazard Suit negates 1 damage.']],
+  'Hive Mound':        [[0,'','A towering biological mound from one of the planet\'s native species. The tunnels inside shift and pulse. You don\'t like the look of this.'],[0,'','As you draw near, a horde of insectoid creatures rush you.'],[0,'act','Roll 3 dice.']],
   'Thermal Vent':      [[0,'','Fractured ground. Jets of superheated gas vent in slow rhythmic bursts.'],[300,'','Heat distortion and sulfur in the air.'],[0,'act','Draw an Event card.']],
   'Antimatter Chamber':[[0,'','A buried alien structure. A sphere of crackling energy floats in suspension.'],[0,'act','All crew are pulled to this tile. Each player rolls. 1–3: pull free · 4–6: Tech destroyed.']],
   'Stasis Pod':        [[0,'','The ship\'s stasis pod. A chance at survival — but it holds only one.'],[300,'act','Skip Resource Flip each round. Cannot move or interact. Exit any time.']],
@@ -952,7 +952,7 @@ function showTileRevealModal(t, onDismiss){
     trov.onclick=null;
     let tileQ=null,tileR=null;
     for(const [k,tile] of G.tiles){if(tile===t){const parts=k.split(',');tileQ=+parts[0];tileR=+parts[1];break;}}
-    const alivePlayers=G.players.filter(pl=>pl.alive);
+    const alivePlayers=G.players.filter(pl=>pl.alive&&!pl.inStasis);
     if(tileQ!==null){
       alivePlayers.forEach(pl=>{pl.q=tileQ;pl.r=tileR;pl.location=tileName(t);});
       addLog('Antimatter Chamber: all crew pulled into the field.','crit');
@@ -1479,7 +1479,7 @@ function applyLanding(p,q,r,path,wasRevealed){
       });
     }
   }
-  if(t?.shockTrap&&t.shockTrapOwner!==p.id){
+  if(t?.shockTrap&&t.shockTrapOwner!==p.id&&!p.inStasis){
     t.shockTrap=false;t.shockTrapOwner=null;
     if(p.health>0){p.health--;sfx('health_down');guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}
     addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3. Turn ended.`,'crit');
@@ -1565,7 +1565,7 @@ function useCard(playerIdx,uid){
     closeCardModal();render();updateUI();return;
   }
   else if(c.use==='stun_baton'){
-    const targets=G.players.filter(pl=>pl.alive&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r);
+    const targets=G.players.filter(pl=>pl.alive&&!pl.inStasis&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r);
     if(!targets.length){addLog('No crew on this tile to stun.','act');closeCardModal();return;}
     const applyStun=target=>{
       target.stunned=true;
@@ -1581,7 +1581,7 @@ function useCard(playerIdx,uid){
     document.getElementById('mact').prepend(btns);return;
   }
   else if(c.use==='flare_gun'){
-    const targets=G.players.filter(pl=>{if(!pl.alive||pl.id===p.id)return false;const path=bfsPath(p.q,p.r,pl.q,pl.r);return path&&path.length<=2;});
+    const targets=G.players.filter(pl=>{if(!pl.alive||pl.inStasis||pl.id===p.id)return false;const path=bfsPath(p.q,p.r,pl.q,pl.r);return path&&path.length<=2;});
     if(!targets.length){addLog('No crew within range of the Flare Gun.','act');closeCardModal();return;}
     const applyFlare=target=>{target.q=p.q;target.r=p.r;target.location=tileName(G.tiles.get(hk(p.q,p.r)));p.equipment.splice(ci,1);addLog(`${p.name} fired the Flare Gun — ${target.name} forced to this tile.`,'crit');closeCardModal();updateUI();render();};
     if(targets.length===1){applyFlare(targets[0]);return;}
@@ -1881,8 +1881,21 @@ function doWatchTower(){
   trov.classList.add('show');
 }
 
+function doStasisEndTurn(){
+  sfx('end_turn');
+  addLog(`${cp().name} remains in stasis.`,'act');
+  advanceTurn();
+}
+function doStasisLeave(){
+  const p=cp();
+  p.inStasis=false;
+  addLog(`${p.name} left stasis.`,'act');
+  G.phase='roll';
+  showTableDice('move');
+  updateUI();render();
+}
 function doEndTurn(){
-  if(G.phase==='roll')return;
+  if(G.phase==='roll'||G.phase==='stasis')return;
   sfx('end_turn');
   const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
   // Synth: battery logic only
@@ -1995,6 +2008,13 @@ function advanceTurn(){
       _play('alarm-act.wav');
     }
   }
+  // Stasis: frozen players skip the roll — choose Stay or Leave instead
+  if(G.players[next].inStasis&&G.tiles.get(hk(G.players[next].q,G.players[next].r))?.anomaly==='Stasis Pod'){
+    G.phase='stasis';
+    addLog(`${G.players[next].name} is in stasis.`,'act');
+    hideTableDice();updateUI();render();panToPlayer(G.players[next]);
+    return;
+  }
   showTableDice('move');
   updateUI();render();
   panToPlayer(G.players[next]);
@@ -2092,7 +2112,7 @@ function synthChooseCorrupted(p){
     if(med&&!(p.q===med.q&&p.r===med.r))return{q:med.q,r:med.r,action:'recharge'};
   }
   // Re-evaluate weakest living active crew member each turn (lowest health, tiebreak lowest food)
-  const target=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.health>0)
+  const target=G.players.filter(pl=>pl.alive&&!pl.isSynth&&!pl.inStasis&&pl.health>0)
     .sort((a,b)=>a.health-b.health||a.food-b.food)[0]||null;
   if(!target){
     p.corrupted=false;
@@ -2185,6 +2205,7 @@ function synthApplyStep(p,q,r,onInterrupted){
 }
 
 function synthExecuteSteps(steps,idx,onDone){
+  if(!cp().isSynth)return;
   if(idx>=steps.length){onDone();return;}
   const[q,r]=steps[idx];
   const interrupted=synthApplyStep(cp(),q,r,onDone);
@@ -2276,7 +2297,7 @@ function synthTakeAction(p,target,onDone){
             t.shockTrap=true;t.shockTrapOwner=p.id;if(ci>=0)p.equipment.splice(ci,1);
             addLog('IRIS placed a Shock Trap at '+p.location+'.','crit');
           }else if(weapon.id==='flare_gun'){
-            const others=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id);
+            const others=G.players.filter(pl=>pl.alive&&!pl.isSynth&&!pl.inStasis&&pl.id!==p.id);
             if(others.length){
               const pulled=others.reduce((a,b)=>{
                 const ap=bfsPath(p.q,p.r,a.q,a.r,synthPassable),bp=bfsPath(p.q,p.r,b.q,b.r,synthPassable);
@@ -2334,6 +2355,7 @@ function synthTakeAction(p,target,onDone){
 }
 
 function synthMove(p,onDone){
+  if(!cp().isSynth)return;
   if(G.movementLeft<=0){onDone();return;}
   const target=synthChooseTarget(p);
   if(!target||target.action==='idle'){onDone();return;}
@@ -2374,10 +2396,13 @@ function doSynthTurn(){
     const initialTarget=synthChooseTarget(cp());
     addLog('IRIS: '+synthObjectiveLabel(initialTarget),'sys');
     function synthContinue(){
+      if(!cp().isSynth)return;
       const p2=cp();G.phase='action';
       const target=synthChooseTarget(p2);
       synthTakeAction(p2,target,()=>{
-        if(G.movementLeft>0&&target&&target.action!=='idle'){
+        if(!cp().isSynth)return;
+        const p3=cp();const nextTarget=synthChooseTarget(p3);
+        if(G.movementLeft>0&&nextTarget&&nextTarget.action!=='idle'&&!(nextTarget.q===p3.q&&nextTarget.r===p3.r)){
           G.phase='move';
           setTimeout(()=>synthMove(cp(),synthContinue),600);
         }
@@ -3193,10 +3218,11 @@ function updateUI(){
   document.getElementById('hturn').textContent=`Turn ${G.turn} · ${p.name}`;
   const ph=document.getElementById('hphase');
   const PHM={
-    roll: ['Roll','ph-roll','Roll the die to determine how many hexes you can move this turn.'],
-    move: ['Move','ph-move',`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — click a highlighted hex to move.`],
+    roll:   ['Roll','ph-roll','Roll the die to determine how many hexes you can move this turn.'],
+    move:   ['Move','ph-move',`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — click a highlighted hex to move.`],
     action: ['Action','ph-act',`You are at ${p.location}. Take an action or end your turn.`],
-    over: ['Rescued','ph-act','The crew has been rescued.'],
+    stasis: ['Stasis','ph-roll','In stasis — resource depletion suspended. Stay another round or leave to act.'],
+    over:   ['Rescued','ph-act','The crew has been rescued.'],
   };
   const[pt,pc,ptip]=PHM[G.phase]||['—','',''];
   ph.textContent=pt;ph.className=`hphase ${pc}`;ph.dataset.tooltip=ptip;
@@ -3264,7 +3290,10 @@ function updateUI(){
   buildEqHand(v);
   buildCrewTabs();
   // Actions always tied to active player
-  document.getElementById('bend').disabled=G.phase==='roll'||G.phase==='over';
+  document.getElementById('bend').disabled=G.phase==='roll'||G.phase==='stasis'||G.phase==='over';
+  const isStasisTurn=G.phase==='stasis'&&p.inStasis;
+  document.getElementById('bstay').style.display=isStasisTurn?'':'none';
+  document.getElementById('bleave').style.display=isStasisTurn?'':'none';
   const t=G.tiles.get(hk(p.q,p.r));
   const act=G.phase==='action';
   const actOrMove=act||G.phase==='move';
@@ -3717,7 +3746,8 @@ function updateE7Prompt(){
     else if(G.phase==='move')text=`IRIS moving — ${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining.`;
     else if(G.phase==='action')text=`IRIS at ${p.location}.`;
   } else {
-    if(p.o2<=1){text=`⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;warn=true;}
+    if(p.o2<=1&&!p.inStasis){text=`⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;warn=true;}
+    else if(G.phase==='stasis'){text=isMyTurn()?`${p.name}: Stay in Stasis or Leave to take your turn.`:`${p.name} is in stasis.`;}
     else if(isMyTurn()){
       if(G.phase==='roll')text=`${p.name}: roll the die to move.`;
       else if(G.phase==='move')text=`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — choose a hex.`;
@@ -3810,8 +3840,15 @@ function renderRulebookSection(s){
 
 function _wireRulebookLinks(c){
   c.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('mouseenter',()=>{
+      const now=performance.now();
+      if(now-_lastHover<60)return;
+      _lastHover=now;
+      _hoverSnd();
+    });
     a.addEventListener('click',e=>{
       e.preventDefault();
+      _lastHover=performance.now()+300;
       const id=a.getAttribute('href').slice(1);
       const sec=RULEBOOK_SECTIONS.find(s=>s.id===id);
       if(sec){sfx('select');renderRulebookSection(sec);}
