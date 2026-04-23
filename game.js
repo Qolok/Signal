@@ -597,8 +597,52 @@ const TILE_IMAGE_MAP = {
   "Ship Section": "ship-section1.png",
 };
 
+const _BLUR_TILES = new Set([
+  "airlock",
+  "all-dead",
+  "antimatter-chamber",
+  "bioluminescent-fen",
+  "cache",
+  "cargo",
+  "cave",
+  "cockpit",
+  "crash-site",
+  "dead-zone",
+  "echo-chamber",
+  "fuselage",
+  "gravity-well",
+  "hive-mound",
+  "inversion-field",
+  "locker",
+  "medbay",
+  "medbay-bloody",
+  "nest-site",
+  "outpost1",
+  "outpost2",
+  "passage",
+  "passage-bloody",
+  "portal",
+  "rescue",
+  "ship-section1",
+  "ship-section2",
+  "signal-array",
+  "signal-tower",
+  "spore-bog",
+  "stasis",
+  "temporal-distortion",
+  "terminal",
+  "thermal-vent",
+  "watch-tower",
+  "wreckage",
+]);
 function getTileImg(t, variant = "") {
-  if (t.imgOverride) return `img/tiles/${t.imgOverride}`;
+  if (t.imgOverride) {
+    const base = t.imgOverride.replace(".png", "");
+    if (variant === "overlay_blur" && !_BLUR_TILES.has(base)) return null;
+    return variant
+      ? `img/tiles/${base}_${variant}.png`
+      : `img/tiles/${t.imgOverride}`;
+  }
   let key;
   if (t.type === "crash_site") key = t.name;
   else if (t.type === "terrain") key = t.pois?.[0];
@@ -607,6 +651,7 @@ function getTileImg(t, variant = "") {
   const file = TILE_IMAGE_MAP[key];
   if (!file) return null;
   const base = file.replace(".png", "");
+  if (variant === "overlay_blur" && !_BLUR_TILES.has(base)) return null;
   return variant ? `img/tiles/${base}_${variant}.png` : `img/tiles/${file}`;
 }
 function spriteCssForName(name) {
@@ -1682,8 +1727,14 @@ function showTileRevealModal(t, onDismiss) {
   // Populate overlay
   const isAnomaly = t.type === "anomaly";
   const trov = document.getElementById("trov");
-  const tileImg = getTileImg(t, "overlay");
-  trov.style.backgroundImage = tileImg ? `url(${tileImg})` : "none";
+  const blurImg = getTileImg(t, "overlay_blur");
+  const sharpImg = getTileImg(t, "overlay");
+  trov.style.backgroundImage = sharpImg ? `url(${sharpImg})` : "none";
+  trov.style.setProperty(
+    "--trov-blur-img",
+    blurImg ? `url(${blurImg})` : "none",
+  );
+  trov.classList.toggle("blur-baked", !!blurImg);
   document.getElementById("tr-name").textContent = title.toUpperCase();
   trDesc(steps.length ? steps : [[0, "", "Unknown terrain."]]);
   const deck = document.getElementById("tr-deck");
@@ -1694,9 +1745,10 @@ function showTileRevealModal(t, onDismiss) {
     trov.onclick = null;
     deck.onclick = null;
     actionsEl.innerHTML = "";
-    trov.classList.remove("show", "anomaly-mode");
+    trov.classList.remove("show", "anomaly-mode", "blur-baked");
     trov.style.display = "none";
     trov.style.backgroundImage = "";
+    trov.style.removeProperty("--trov-blur-img");
     document.getElementById("trov-suit-blocker").classList.remove("dropping");
     if (onDismiss) onDismiss();
     else if (
@@ -1753,15 +1805,10 @@ function showTileRevealModal(t, onDismiss) {
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick = () => {
       sfx("dice_roll");
-      dieWrap.className = "td-die-wrap rolling";
       dieWrap.onclick = null;
       const val = 1 + (0 | (Math.random() * 6));
+      rollDie3D(dieWrap, val);
       setTimeout(() => {
-        actionsEl.innerHTML = "";
-        const resDie = makeResultDie(val);
-        resDie.style.cssText =
-          "width:52px;height:52px;margin:0 auto;display:block;";
-        actionsEl.appendChild(resDie);
         const p = cp();
         let outcome = "";
         if (val <= 2) {
@@ -1815,15 +1862,10 @@ function showTileRevealModal(t, onDismiss) {
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick = () => {
       sfx("dice_roll");
-      dieWrap.className = "td-die-wrap rolling";
       dieWrap.onclick = null;
       const val = 1 + (0 | (Math.random() * 6));
+      rollDie3D(dieWrap, val);
       setTimeout(() => {
-        actionsEl.innerHTML = "";
-        const resDie = makeResultDie(val);
-        resDie.style.cssText =
-          "width:52px;height:52px;margin:0 auto;display:block;";
-        actionsEl.appendChild(resDie);
         const p = cp();
         const yield_ = val <= 2 ? 1 : val <= 4 ? 2 : 3;
         const gained = Math.min(15 - p.food, yield_);
@@ -1851,15 +1893,10 @@ function showTileRevealModal(t, onDismiss) {
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick = () => {
       sfx("dice_roll");
-      dieWrap.className = "td-die-wrap rolling";
       dieWrap.onclick = null;
       const val = 1 + (0 | (Math.random() * 6));
+      rollDie3D(dieWrap, val);
       setTimeout(() => {
-        actionsEl.innerHTML = "";
-        const resDie = makeResultDie(val);
-        resDie.style.cssText =
-          "width:52px;height:52px;margin:0 auto;display:block;";
-        actionsEl.appendChild(resDie);
         const p = cp();
         let outcome = "";
         if (val >= 4) {
@@ -1903,24 +1940,17 @@ function showTileRevealModal(t, onDismiss) {
     }
     actionsEl.appendChild(diceRow);
     diceRow.onclick = () => {
-      if (wraps.some((w) => w.className.includes("rolling"))) return;
+      if (wraps.some((w) => w.classList.contains("rolling"))) return;
       sfx("dice_roll");
-      wraps.forEach((w) => {
-        w.className = "td-die-wrap rolling";
-      });
       diceRow.onclick = null;
       const vals = [
         1 + (0 | (Math.random() * 6)),
         1 + (0 | (Math.random() * 6)),
         1 + (0 | (Math.random() * 6)),
       ];
+      wraps.forEach((w, i) => rollDie3D(w, vals[i]));
       setTimeout(() => {
         sfx("dice_land");
-        actionsEl.innerHTML = "";
-        const resRow = document.createElement("div");
-        resRow.style.cssText = "display:flex;gap:10px;justify-content:center;";
-        vals.forEach((v) => resRow.appendChild(makeResultDie(v)));
-        actionsEl.appendChild(resRow);
         const p = cp();
         const hits = vals.filter((v) => v >= 4).length;
         const suitCount = p.equipment.filter(
@@ -2054,15 +2084,11 @@ function showTileRevealModal(t, onDismiss) {
         arena.appendChild(col);
         die.onclick = () => {
           sfx("dice_roll");
-          die.className = "td-die-wrap rolling";
           die.onclick = null;
           die.style.cursor = "";
           const val = 1 + (0 | (Math.random() * 6));
+          rollDie3D(die, val);
           setTimeout(() => {
-            dieContainer.innerHTML = "";
-            const res = makeResultDie(val);
-            res.style.cssText = "width:52px;height:52px;";
-            dieContainer.appendChild(res);
             if (val >= 4) {
               const techItems = pl.equipment.filter((c) => c.cat === "Tech");
               pl.equipment = pl.equipment.filter((c) => c.cat !== "Tech");
@@ -2211,15 +2237,10 @@ function showTileRevealModal(t, onDismiss) {
     actionsEl.appendChild(dieWrap);
     dieWrap.onclick = () => {
       sfx("dice_roll");
-      dieWrap.className = "td-die-wrap rolling";
       dieWrap.onclick = null;
       const val = 1 + (0 | (Math.random() * 6));
+      rollDie3D(dieWrap, val);
       setTimeout(() => {
-        actionsEl.innerHTML = "";
-        const resDie = makeResultDie(val);
-        resDie.style.cssText =
-          "width:52px;height:52px;margin:0 auto;display:block;";
-        actionsEl.appendChild(resDie);
         let outcome = "";
         const p = cp();
         if (t.anomaly === "Temporal Rift") {
@@ -2351,7 +2372,7 @@ function showTileRevealModal(t, onDismiss) {
           t.toolReward = null;
           t.investigatedCount = t.pois.length;
           markTilesDirty();
-          const bg = getTileImg(t, "overlay");
+          const bg = getTileImg(t, "overlay_blur") || getTileImg(t, "overlay");
           if (reward === "rollFood") {
             dismiss();
             showDieRoll(
@@ -2580,7 +2601,7 @@ function drawTileEvent(t) {
       return `Rolled 6 \u2014 ${msg}`;
     };
   }
-  const evImg = getTileImg(t, "overlay");
+  const evImg = getTileImg(t, "overlay_blur") || getTileImg(t, "overlay");
   const _evOv = document.getElementById("evc-ov");
   _evOv.style.backgroundImage = evImg ? `url(${evImg})` : "none";
   _evOv.style.backgroundSize = "cover";
@@ -2663,6 +2684,32 @@ function makeDieFace(cls, val) {
     f.appendChild(p);
   });
   return f;
+}
+const _FACE_ROTS = {
+  1: { rx: 0, ry: 0 },
+  2: { rx: 0, ry: 90 },
+  3: { rx: -90, ry: 0 },
+  4: { rx: 90, ry: 0 },
+  5: { rx: 0, ry: -90 },
+  6: { rx: 0, ry: 180 },
+};
+function rollDie3D(wrap, val) {
+  const cube = wrap.querySelector(".td-die3");
+  const idle = cube.getAnimations().find((a) => a.animationName === "die-idle");
+  let startY = 0;
+  if (idle) {
+    startY = -(((idle.currentTime % 6000) / 6000) * 360);
+    idle.cancel();
+  }
+  wrap.className = "td-die-wrap";
+  const t = _FACE_ROTS[val] || _FACE_ROTS[1];
+  cube.animate(
+    [
+      { transform: `rotateX(0deg) rotateY(${startY}deg)` },
+      { transform: `rotateX(${t.rx - 720}deg) rotateY(${t.ry - 1080}deg)` },
+    ],
+    { duration: 1500, easing: "ease-out", fill: "forwards" },
+  );
 }
 function make3DDie(state) {
   const wrap = document.createElement("div");
@@ -2764,9 +2811,12 @@ function renderTableDice() {
 function rollTableDice() {
   if (diceState.rolled) return;
   const finalValues = diceState.values.map(() => 1 + (0 | (Math.random() * 6)));
-  diceState.spinning = true;
   sfx("dice_roll");
-  renderTableDice(); // create rolling die once — do NOT recreate during animation
+  diceState.spinning = true;
+  const _tdRow = document.getElementById("td-row");
+  [..._tdRow.querySelectorAll(".td-die-wrap")].forEach((w, i) =>
+    rollDie3D(w, finalValues[i]),
+  );
   setTimeout(() => {
     diceState.spinning = false;
     diceState.values = finalValues;
@@ -3579,26 +3629,17 @@ function doSignalRoll() {
     sfx("dice_roll");
     _sigPulse.currentTime = 0;
     _sigPulse.play().catch(() => {});
-    wraps.forEach((w) => {
-      w.className = "td-die-wrap";
-      w.getBoundingClientRect();
-      w.className = "td-die-wrap rolling";
-    });
     const finals = [
       1 + (0 | (Math.random() * 6)),
       1 + (0 | (Math.random() * 6)),
       1 + (0 | (Math.random() * 6)),
     ];
+    wraps.forEach((w, i) => rollDie3D(w, finals[i]));
     setTimeout(() => {
       _sigAir.pause();
       _sigAir.currentTime = 0;
       _sigPulse.pause();
       _sigPulse.currentTime = 0;
-      diceEl.innerHTML = "";
-      const row = document.createElement("div");
-      row.style.cssText = "display:flex;gap:14px;";
-      finals.forEach((v) => row.appendChild(makeResultDie(v)));
-      diceEl.appendChild(row);
       const total = finals.reduce((a, b) => a + b, 0);
       const success = total >= thr;
       sfx(success ? "signal_success" : "signal_fail");
@@ -3684,7 +3725,11 @@ function doEquipLocker() {
   cancelTooltip();
   const trov = document.getElementById("trov");
   trov.style.backgroundImage = "url(img/tiles/locker_overlay.png)";
-  trov.classList.add("equip-locker");
+  trov.style.setProperty(
+    "--trov-blur-img",
+    "url(img/tiles/locker_overlay_blur.png)",
+  );
+  trov.classList.add("equip-locker", "blur-baked");
   sfx("equip");
   document.getElementById("tr-name").textContent = "EQUIPMENT LOCKER";
   const deck = document.getElementById("tr-deck");
@@ -3698,9 +3743,10 @@ function doEquipLocker() {
     cancelBtn.style.display = "none";
     actionsEl.innerHTML = "";
     actionsEl.style.cssText = "";
-    trov.classList.remove("show", "equip-locker");
+    trov.classList.remove("show", "equip-locker", "blur-baked");
     trov.style.display = "none";
     trov.style.backgroundImage = "";
+    trov.style.removeProperty("--trov-blur-img");
   };
   cancelBtn.onclick = dismiss;
   trov.onclick = null;
@@ -3738,7 +3784,11 @@ function doEquipLocker() {
                 `${p.name} exchanged ${card.name} → ${newCard.name}.`,
                 "good",
               );
-              openCardModal(p.id, newCard, "url(img/tiles/locker_overlay.png)");
+              openCardModal(
+                p.id,
+                newCard,
+                "url(img/tiles/locker_overlay_blur.png)",
+              );
             } else {
               addLog(`${p.name} discarded ${card.name} — deck is now empty.`);
             }
@@ -3764,7 +3814,7 @@ function doEquipLocker() {
       p.lockerUsedThisVisit = true;
       if (c) {
         addLog(`${p.name} drew ${c.name} from Equipment Locker.`, "good");
-        openCardModal(p.id, c, "url(img/tiles/locker_overlay.png)");
+        openCardModal(p.id, c, "url(img/tiles/locker_overlay_blur.png)");
       } else {
         addLog("Equipment Locker: deck empty.");
       }
@@ -3870,16 +3920,21 @@ function doWatchTower() {
   cancelTooltip();
   const trov = document.getElementById("trov");
   trov.style.backgroundImage = "url(img/tiles/watch-tower_overlay.png)";
-  trov.classList.add("watch-tower");
+  trov.style.setProperty(
+    "--trov-blur-img",
+    "url(img/tiles/watch-tower_overlay_blur.png)",
+  );
+  trov.classList.add("watch-tower", "blur-baked");
   document.getElementById("tr-name").textContent = "WATCH TOWER";
   trDesc(msg);
   const deck = document.getElementById("tr-deck");
   deck.style.display = "none";
   const dismiss = () => {
     trov.onclick = null;
-    trov.classList.remove("show", "anomaly-mode", "watch-tower");
+    trov.classList.remove("show", "anomaly-mode", "watch-tower", "blur-baked");
     trov.style.display = "none";
     trov.style.backgroundImage = "";
+    trov.style.removeProperty("--trov-blur-img");
   };
   const wtActionsEl = document.getElementById("tr-actions");
   wtActionsEl.innerHTML = "";
@@ -5057,7 +5112,8 @@ function triggerAnomaly(t) {
         };
       }
       const ecOv = document.getElementById("evc-ov");
-      ecOv.style.backgroundImage = "url(img/tiles/echo-chamber_overlay.png)";
+      ecOv.style.backgroundImage =
+        "url(img/tiles/echo-chamber_overlay_blur.png)";
       ecOv.style.backgroundSize = "cover";
       ecOv.style.backgroundPosition = "center";
       showEventCard(
@@ -5070,7 +5126,7 @@ function triggerAnomaly(t) {
             openCardModal(
               p.id,
               ecDrawnCard,
-              "url(img/tiles/echo-chamber_overlay.png)",
+              "url(img/tiles/echo-chamber_overlay_blur.png)",
             );
         },
         rollCb,
@@ -6804,6 +6860,7 @@ function openCardModal(playerIdx, c, bgImage) {
   ov.style.backgroundSize = "cover";
   ov.style.backgroundPosition = "center";
   ov.className = `cc-${c.cat}`;
+  if (bgImage && bgImage.includes("_blur")) ov.classList.add("blur-baked");
   card.className = "evc eq";
   const badge = document.getElementById("evc-badge");
   const iconHtml = CAT_ICONS[c.cat]
@@ -6932,16 +6989,13 @@ function showContestModal(
     const die = make3DDie("idle");
     die.onclick = () => {
       sfx("dice_roll");
-      die.className = "td-die-wrap rolling";
       die.onclick = null;
       const val = 1 + (0 | (Math.random() * 6));
+      rollDie3D(die, val);
       setTimeout(() => {
-        wrap.innerHTML = "";
-        const res = makeResultDie(val);
-        wrap.appendChild(res);
         onRolled(val);
         checkBoth();
-      }, 1000);
+      }, 1500);
     };
     wrap.appendChild(die);
   }
@@ -7053,6 +7107,7 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount = 1) {
   ov.style.backgroundImage = bgImage || "";
   ov.style.backgroundSize = "cover";
   ov.style.backgroundPosition = "center";
+  if (bgImage && bgImage.includes("_blur")) ov.classList.add("blur-baked");
   const card = document.getElementById("evc");
   card.className = "evc pub";
   document.getElementById("evc-badge").textContent = "ROLL";
@@ -7076,27 +7131,20 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount = 1) {
     wraps.push(w);
   }
   dieEl.onclick = () => {
-    if (wraps.some((w) => w.className.includes("rolling"))) return;
+    if (wraps.some((w) => w.classList.contains("rolling"))) return;
     sfx("dice_roll");
-    wraps.forEach((w) => {
-      w.className = "td-die-wrap rolling";
-    });
     dieEl.onclick = null;
     const vals = wraps.map(() => 1 + (0 | (Math.random() * 6)));
+    wraps.forEach((w, i) => rollDie3D(w, vals[i]));
     setTimeout(() => {
       sfx("dice_land");
-      dieEl.innerHTML = "";
-      const res = document.createElement("div");
-      res.className = "evc-die-result";
-      vals.forEach((v) => res.appendChild(makeResultDie(v)));
       if (diceCount > 1) {
         const tot = document.createElement("div");
         tot.style.cssText =
           "font-size:13px;letter-spacing:.1em;color:var(--dim);align-self:center;padding-left:6px;";
         tot.textContent = `= ${vals.reduce((a, b) => a + b, 0)}`;
-        res.appendChild(tot);
+        dieEl.appendChild(tot);
       }
-      dieEl.appendChild(res);
       const outcome = onRoll(vals.reduce((a, b) => a + b, 0));
       if (outcome) {
         outEl.textContent = outcome;
@@ -7184,16 +7232,11 @@ function showEventCard(
     btn.style.opacity = ".35";
     wrap.onclick = () => {
       sfx("dice_roll");
-      wrap.className = "td-die-wrap rolling";
       wrap.onclick = null;
       const finalVal = 1 + (0 | (Math.random() * 6));
+      rollDie3D(wrap, finalVal);
       setTimeout(() => {
         sfx("dice_land");
-        dieEl.innerHTML = "";
-        const result = document.createElement("div");
-        result.className = "evc-die-result";
-        result.appendChild(makeResultDie(finalVal));
-        dieEl.appendChild(result);
         const outcome = rollCallback(finalVal);
         if (outcome) {
           outEl.textContent = outcome;
@@ -7210,7 +7253,9 @@ function showEventCard(
     btn.style.opacity = "";
   }
   const ov = document.getElementById("evc-ov");
+  const _prevBg = ov.style.backgroundImage;
   ov.className = "";
+  if (_prevBg && _prevBg.includes("_blur")) ov.classList.add("blur-baked");
   const suitBlocker = document.getElementById("evc-suit-blocker");
   suitBlocker.classList.remove("dropping");
   if (suitBlocked) {
@@ -7249,15 +7294,26 @@ function showEventCard(
 function e7Type(el, msg, charDelay = 15) {
   el.textContent = "";
   if (!el.closest("#e7log")) _startTextSnd(msg.length * charDelay);
-  for (let i = 0; i < msg.length; i++)
-    setTimeout(() => {
-      el.textContent = msg.slice(0, i + 1);
+  if (!msg.length) return;
+  const token = {};
+  el._typeToken = token;
+  const start = performance.now();
+  let lastLen = 0;
+  function tick(now) {
+    if (el._typeToken !== token) return;
+    const len = Math.min(msg.length, 1 + Math.floor((now - start) / charDelay));
+    if (len > lastLen) {
+      el.textContent = msg.slice(0, len);
+      lastLen = len;
       const p = el.parentElement;
       if (p) {
         const sc = p._scrollTarget || p;
         sc.scrollTop = sc.scrollHeight;
       }
-    }, i * charDelay);
+    }
+    if (len < msg.length) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 // Append a colored line to any terminal container
 // cls: 'sys'|'good'|'act'|'crit'|'imp'|'frag'|'tile'|''   base: 'e7m' (voice) or 'le' (log entry)
