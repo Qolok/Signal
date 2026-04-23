@@ -1,14 +1,16 @@
-'use strict';
+"use strict";
 // ── SFX ──────────────────────────────────────────────────────────
 const _sfxCache = {};
-const _sfxOffsets = { 'dice.wav': 0.83 };
-const _sfxVolumes = { 'dice.wav': 0.5, 'phase.wav': 0.6, 'start.wav': 1 };
+const _sfxOffsets = { "dice.wav": 0.83 };
+const _sfxVolumes = { "dice.wav": 0.5, "phase.wav": 0.6, "start.wav": 1 };
 function _snd(path) {
-  if (!_sfxCache[path]) { _sfxCache[path] = new Audio('sfx/' + path); }
+  if (!_sfxCache[path]) {
+    _sfxCache[path] = new Audio("sfx/" + path);
+  }
   return _sfxCache[path];
 }
 function _play(path) {
-  if(!_sfxEnabled)return;
+  if (!_sfxEnabled) return;
   const a = _snd(path);
   a.volume = _sfxVolumes[path] ?? 1;
   a.currentTime = _sfxOffsets[path] || 0;
@@ -16,105 +18,133 @@ function _play(path) {
 }
 function sfx(name) {
   const picks = {
-    dice_roll:      'dice.wav',
-    move:           'pop.wav',
-    card:           ['card1.wav','card2.wav','card3.wav','card4.wav'],
-    equip:          'base-equip.wav',
-    damage:         'shock.wav',
-    heal:           'base-medbay.wav',
-    signal_success: 'signal-yes.wav',
-    signal_fail:    'signal-no.wav',
-    fragment:       'radio-fragment.wav',
-    activate:       'activate.wav',
-    end_turn:       'phase.wav',
-    contest:        'alarm-act.wav',
-    airlock:        'base-airlock.wav',
-    cargo:          'base-cargo.wav',
-    watchtower:     'base-watch.wav',
-    confirm:        'success.wav',
-    check_on:       'check-on.wav',
-    check_off:      'check-off.wav',
-    select:         'select.wav',
-    health_up:      'health-up.wav',
-    health_down:    'health-down.wav',
-    death:          'death.wav',
+    dice_roll: "dice.wav",
+    move: "pop.wav",
+    card: ["card1.wav", "card2.wav", "card3.wav", "card4.wav"],
+    equip: "base-equip.wav",
+    damage: "shock.wav",
+    heal: "base-medbay.wav",
+    signal_success: "signal-yes.wav",
+    signal_fail: "signal-no.wav",
+    fragment: "radio-fragment.wav",
+    activate: "activate.wav",
+    end_turn: "phase.wav",
+    contest: "alarm-act.wav",
+    airlock: "base-airlock.wav",
+    cargo: "base-cargo.wav",
+    watchtower: "base-watch.wav",
+    confirm: "success.wav",
+    check_on: "check-on.wav",
+    check_off: "check-off.wav",
+    select: "select.wav",
+    health_up: "health-up.wav",
+    health_down: "health-down.wav",
+    death: "death.wav",
   };
-  const v = picks[name]; if (!v) return;
-  const path = Array.isArray(v) ? v[0|Math.random()*v.length] : v;
+  const v = picks[name];
+  if (!v) return;
+  const path = Array.isArray(v) ? v[0 | (Math.random() * v.length)] : v;
   _play(path);
 }
 
-
-const _music = new Audio('sfx/music.wav');
+const _music = new Audio("sfx/music.wav");
 _music.loop = true;
 _music.volume = 0.5;
 let _musicEnabled = true;
 let _sfxEnabled = true;
-function toggleMusic(){
-  _musicEnabled=!_musicEnabled;
-  if(_musicEnabled)_music.play().catch(()=>{});else _music.pause();
-  const btn=document.getElementById('btn-music');
-  if(btn){btn.classList.toggle('media-off',!_musicEnabled);document.getElementById('icon-music').className='hud-media-icon '+(_musicEnabled?'vol-on':'vol-off');}
+function toggleMusic() {
+  _musicEnabled = !_musicEnabled;
+  if (_musicEnabled) _music.play().catch(() => {});
+  else _music.pause();
+  const btn = document.getElementById("btn-music");
+  if (btn) {
+    btn.classList.toggle("media-off", !_musicEnabled);
+    document.getElementById("icon-music").className =
+      "hud-media-icon " + (_musicEnabled ? "vol-on" : "vol-off");
+  }
 }
-function toggleSfx(){
-  _sfxEnabled=!_sfxEnabled;
-  const btn=document.getElementById('btn-sfx');
-  if(btn){btn.classList.toggle('media-off',!_sfxEnabled);document.getElementById('icon-sfx').className='hud-media-icon '+(_sfxEnabled?'vol-on':'vol-off');}
+function toggleSfx() {
+  _sfxEnabled = !_sfxEnabled;
+  const btn = document.getElementById("btn-sfx");
+  if (btn) {
+    btn.classList.toggle("media-off", !_sfxEnabled);
+    document.getElementById("icon-sfx").className =
+      "hud-media-icon " + (_sfxEnabled ? "vol-on" : "vol-off");
+  }
 }
 
-const _alarmCrit = new Audio('sfx/alarm-crit.wav');
+const _alarmCrit = new Audio("sfx/alarm-crit.wav");
 _alarmCrit.loop = true;
 _alarmCrit.volume = 0.7;
-const _sigAir = new Audio('sfx/signal-air.wav');
+const _sigAir = new Audio("sfx/signal-air.wav");
 _sigAir.loop = true;
 _sigAir.volume = 0.7;
-const _sigPulse = new Audio('sfx/signal-pulse.wav');
+const _sigPulse = new Audio("sfx/signal-pulse.wav");
 _sigPulse.loop = true;
 _sigPulse.volume = 0.7;
-const _textSnd = new Audio('sfx/text.wav');
+const _textSnd = new Audio("sfx/text.wav");
 _textSnd.loop = true;
 _textSnd.volume = 0.3;
 let _textSndTimer = null;
-function _startTextSnd(ms){
-  if(!_sfxEnabled)return;
-  if(_textSnd.paused)_textSnd.play().catch(()=>{});
+function _startTextSnd(ms) {
+  if (!_sfxEnabled) return;
+  if (_textSnd.paused) _textSnd.play().catch(() => {});
   clearTimeout(_textSndTimer);
-  _textSndTimer=setTimeout(()=>{_textSnd.pause();_textSnd.currentTime=0;},ms);
+  _textSndTimer = setTimeout(() => {
+    _textSnd.pause();
+    _textSnd.currentTime = 0;
+  }, ms);
 }
-function _stopTextSnd(){
+function _stopTextSnd() {
   clearTimeout(_textSndTimer);
   _textSnd.pause();
-  _textSnd.currentTime=0;
+  _textSnd.currentTime = 0;
 }
 
 // Hover + click sounds on interactive UI elements
-const _clickableSelector = 'button:not(:disabled):not(#bend):not(.back-btn), .parr, .eq-nav:not(:disabled), .deckpile, .eqcard, .hud-vtab, .eq-filt:not(:disabled), .sbreset, .sbpalcard:not(.placed), .rbti, [data-tooltip]';
-const _hoverSnd = () => _play('hover.wav');
+const _clickableSelector =
+  "button:not(:disabled):not(#bend):not(.back-btn), .parr, .eq-nav:not(:disabled), .deckpile, .eqcard, .hud-vtab, .eq-filt:not(:disabled), .sbreset, .sbpalcard:not(.placed), .rbti, [data-tooltip]";
+const _hoverSnd = () => _play("hover.wav");
 let _lastHover = 0;
-document.addEventListener('mouseenter', e => {
-  if (!e.target.matches(_clickableSelector)) return;
-  const now = performance.now();
-  if (now - _lastHover < 60) return;
-  _lastHover = now;
-  _hoverSnd();
-}, true);
-document.addEventListener('mousedown', e => {
-  if (!e.target.matches(_clickableSelector)) return;
-  _lastHover = performance.now() + 300; // suppress hover re-trigger after click
-  if (e.target.classList.contains('next-btn')) _play('next.wav');
-  else sfx('select');
-}, true);
-const _tileGeneric = ['tile1.wav','tile2.wav','tile3.wav','tile4.wav','tile5.wav','tile6.wav'];
+document.addEventListener(
+  "mouseenter",
+  (e) => {
+    if (!e.target.matches(_clickableSelector)) return;
+    const now = performance.now();
+    if (now - _lastHover < 60) return;
+    _lastHover = now;
+    _hoverSnd();
+  },
+  true,
+);
+document.addEventListener(
+  "mousedown",
+  (e) => {
+    if (!e.target.matches(_clickableSelector)) return;
+    _lastHover = performance.now() + 300; // suppress hover re-trigger after click
+    if (e.target.classList.contains("next-btn")) _play("next.wav");
+    else sfx("select");
+  },
+  true,
+);
+const _tileGeneric = [
+  "tile1.wav",
+  "tile2.wav",
+  "tile3.wav",
+  "tile4.wav",
+  "tile5.wav",
+  "tile6.wav",
+];
 function sfxTile(t) {
-  if(t?.type!=='anomaly')return;
-  _play(_tileGeneric[0|Math.random()*_tileGeneric.length]);
+  if (t?.type !== "anomaly") return;
+  _play(_tileGeneric[0 | (Math.random() * _tileGeneric.length)]);
 }
 // ═══════════════════════════════════════════════════════════════
 // PORTRAITS  (inline SVG → data URIs)
 // ═══════════════════════════════════════════════════════════════
 const PORTRAIT_SVG_UNUSED = [
-/* 0 Vasquez — warm brown skin, dark bun, navy suit */
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
+  /* 0 Vasquez — warm brown skin, dark bun, navy suit */
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
 <rect width="60" height="72" fill="#07101c"/>
 <rect x="0" y="46" width="60" height="26" rx="0" fill="#0c2235"/>
 <polygon points="30,45 19,50 30,54 41,50" fill="#163850"/>
@@ -133,8 +163,8 @@ const PORTRAIT_SVG_UNUSED = [
 <path d="M24,38 Q30,42 36,38" stroke="#904020" stroke-width="1.5" fill="none"/>
 </svg>`,
 
-/* 1 Okonkwo — deep brown skin, shaved, rust suit */
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
+  /* 1 Okonkwo — deep brown skin, shaved, rust suit */
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
 <rect width="60" height="72" fill="#12080a"/>
 <rect x="0" y="46" width="60" height="26" fill="#201010"/>
 <polygon points="30,45 19,50 30,54 41,50" fill="#2e1414"/>
@@ -153,8 +183,8 @@ const PORTRAIT_SVG_UNUSED = [
 <path d="M23,34 Q30,37 37,34" stroke="#7a3018" stroke-width="0.8" fill="none" opacity=".5"/>
 </svg>`,
 
-/* 2 Reyes — tan skin, dark fade cut, olive suit */
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
+  /* 2 Reyes — tan skin, dark fade cut, olive suit */
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
 <rect width="60" height="72" fill="#080f08"/>
 <rect x="0" y="46" width="60" height="26" fill="#0e1e0a"/>
 <polygon points="30,45 19,50 30,54 41,50" fill="#182c10"/>
@@ -173,8 +203,8 @@ const PORTRAIT_SVG_UNUSED = [
 <path d="M23,38 Q30,42 37,38" stroke="#804020" stroke-width="1.5" fill="none"/>
 </svg>`,
 
-/* 3 Kim — light skin, straight black hair, amber suit */
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
+  /* 3 Kim — light skin, straight black hair, amber suit */
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
 <rect width="60" height="72" fill="#100c04"/>
 <rect x="0" y="46" width="60" height="26" fill="#201408"/>
 <polygon points="30,45 19,50 30,54 41,50" fill="#302010"/>
@@ -196,8 +226,8 @@ const PORTRAIT_SVG_UNUSED = [
 <line x1="44" y1="18" x2="46" y2="44" stroke="#120806" stroke-width="3"/>
 </svg>`,
 
-/* 4 Halvorsen — light skin, blonde, stubble, purple suit */
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
+  /* 4 Halvorsen — light skin, blonde, stubble, purple suit */
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
 <rect width="60" height="72" fill="#0c0810"/>
 <rect x="0" y="46" width="60" height="26" fill="#180e22"/>
 <polygon points="30,45 19,50 30,54 41,50" fill="#241432"/>
@@ -218,8 +248,8 @@ const PORTRAIT_SVG_UNUSED = [
 <rect x="18" y="34" width="24" height="6" rx="3" fill="#c0a070" opacity=".25"/>
 </svg>`,
 
-/* 5 Tran — medium skin, short dark asymmetric hair, teal suit */
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
+  /* 5 Tran — medium skin, short dark asymmetric hair, teal suit */
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 72">
 <rect width="60" height="72" fill="#060e0e"/>
 <rect x="0" y="46" width="60" height="26" fill="#081818"/>
 <polygon points="30,45 19,50 30,54 41,50" fill="#102828"/>
@@ -239,3162 +269,6463 @@ const PORTRAIT_SVG_UNUSED = [
 <path d="M24,38 Q30,41 36,38" stroke="#7a5030" stroke-width="1.5" fill="none"/>
 </svg>`,
 ];
-// Portrait helper — individual files in img/Crew/<name><health>.png
+// Portrait helper — individual files in img/crew/<name><health>.png
 // health: 1–3 (3=healthy, 1=critical/incap). fy: 0=top-aligned, 0.5=centered
-function portBg(portrait, dw, dh, fy=0, health=3, variant=''){
-  const ypos=fy===0?'top':'center';
-  const sfx=variant?`_${variant}`:'';
-  const url=portrait==='iris'?`img/Crew/IRIS${sfx}.png`:`img/Crew/${portrait}${Math.max(1,Math.min(3,health))}${sfx}.png`;
-  return `background-image:url(${url});background-size:cover;`+
-         `background-position:center ${ypos};width:${dw}px;height:${dh}px;flex-shrink:0;`;
+function portBg(portrait, dw, dh, fy = 0, health = 3, variant = "") {
+  const ypos = fy === 0 ? "top" : "center";
+  const sfx = variant ? `_${variant}` : "";
+  const url =
+    portrait === "iris"
+      ? `img/crew/IRIS${sfx}.png`
+      : `img/crew/${portrait}${Math.max(1, Math.min(3, health))}${sfx}.png`;
+  return (
+    `background-image:url(${url});background-size:cover;` +
+    `background-position:center ${ypos};width:${dw}px;height:${dh}px;flex-shrink:0;`
+  );
 }
 
-const CREW_PORTRAITS=[
-  {name:'Adaeze'},{name:'Reyes'},{name:'Mizuki'},{name:'Anand'},{name:'Halvorsen'},
-  {name:'Santos'},{name:'Vasquez'},{name:'Okonkwo'},{name:'Morrow'},{name:'Kim'},
+const CREW_PORTRAITS = [
+  { name: "Adaeze" },
+  { name: "Reyes" },
+  { name: "Mizuki" },
+  { name: "Anand" },
+  { name: "Halvorsen" },
+  { name: "Santos" },
+  { name: "Vasquez" },
+  { name: "Okonkwo" },
+  { name: "Morrow" },
+  { name: "Kim" },
 ];
 
 // ═══════════════════════════════════════════════════════════════
 // HEX MATH  (pointy-top, axial)
 // ═══════════════════════════════════════════════════════════════
-const SQRT3=Math.sqrt(3), SZ=54, SZB=42;
-const DIRS=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
-const NS='http://www.w3.org/2000/svg';
-function h2p(q,r){return[SZ*SQRT3*(q+r/2),SZ*1.5*r];}
-function h2pb(q,r){return[SZB*SQRT3*(q+r/2),SZB*1.5*r];}
-function p2h(x,y){const q=(x*SQRT3/3-y/3)/SZ,r=(y*2/3)/SZ,s=-q-r;
-  let rq=Math.round(q),rr=Math.round(r),rs=Math.round(s);
-  if(Math.abs(rq-q)>Math.abs(rr-r)&&Math.abs(rq-q)>Math.abs(rs-s))rq=-rr-rs;
-  else if(Math.abs(rr-r)>Math.abs(rs-s))rr=-rq-rs;return[rq,rr];}
-function hexPts(cx,cy,sz){sz=sz||SZ-2;let s='';
-  for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;s+=`${(cx+sz*Math.cos(a)).toFixed(1)},${(cy+sz*Math.sin(a)).toFixed(1)} `;}return s.trim();}
-const hk=(q,r)=>`${q},${r}`;
-const hparse=k=>k.split(',').map(Number);
-const hnbr=(q,r)=>DIRS.map(([dq,dr])=>[q+dq,r+dr]);
+const SQRT3 = Math.sqrt(3),
+  SZ = 54,
+  SZB = 42;
+const DIRS = [
+  [1, 0],
+  [1, -1],
+  [0, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, 1],
+];
+const NS = "http://www.w3.org/2000/svg";
+function h2p(q, r) {
+  return [SZ * SQRT3 * (q + r / 2), SZ * 1.5 * r];
+}
+function h2pb(q, r) {
+  return [SZB * SQRT3 * (q + r / 2), SZB * 1.5 * r];
+}
+function p2h(x, y) {
+  const q = ((x * SQRT3) / 3 - y / 3) / SZ,
+    r = (y * 2) / 3 / SZ,
+    s = -q - r;
+  let rq = Math.round(q),
+    rr = Math.round(r),
+    rs = Math.round(s);
+  if (
+    Math.abs(rq - q) > Math.abs(rr - r) &&
+    Math.abs(rq - q) > Math.abs(rs - s)
+  )
+    rq = -rr - rs;
+  else if (Math.abs(rr - r) > Math.abs(rs - s)) rr = -rq - rs;
+  return [rq, rr];
+}
+function hexPts(cx, cy, sz) {
+  sz = sz || SZ - 2;
+  let s = "";
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 6;
+    s += `${(cx + sz * Math.cos(a)).toFixed(1)},${(cy + sz * Math.sin(a)).toFixed(1)} `;
+  }
+  return s.trim();
+}
+const hk = (q, r) => `${q},${r}`;
+const hparse = (k) => k.split(",").map(Number);
+const hnbr = (q, r) => DIRS.map(([dq, dr]) => [q + dq, r + dr]);
 
-function bfsReach(fq,fr,mp){
-  const dist=new Map([[hk(fq,fr),0]]),q=[[fq,fr]];
-  while(q.length){const[cq,cr]=q.shift(),cd=dist.get(hk(cq,cr));
-    if(cd>=mp)continue;
-    for(const[nq,nr]of hnbr(cq,cr)){const k=hk(nq,nr);
-      if(!dist.has(k)&&G.tiles.has(k)){dist.set(k,cd+1);q.push([nq,nr]);}}}
-  dist.delete(hk(fq,fr));return dist;}
+function bfsReach(fq, fr, mp) {
+  const dist = new Map([[hk(fq, fr), 0]]),
+    q = [[fq, fr]];
+  while (q.length) {
+    const [cq, cr] = q.shift(),
+      cd = dist.get(hk(cq, cr));
+    if (cd >= mp) continue;
+    for (const [nq, nr] of hnbr(cq, cr)) {
+      const k = hk(nq, nr);
+      if (!dist.has(k) && G.tiles.has(k)) {
+        dist.set(k, cd + 1);
+        q.push([nq, nr]);
+      }
+    }
+  }
+  dist.delete(hk(fq, fr));
+  return dist;
+}
 
-function bfsPath(fq,fr,tq,tr,passable){
-  if(fq===tq&&fr===tr)return[];
-  const prev=new Map([[hk(fq,fr),null]]),q=[[fq,fr]];
-  while(q.length){const[cq,cr]=q.shift();
-    for(const[nq,nr]of hnbr(cq,cr)){const k=hk(nq,nr);
-      if(prev.has(k)||!G.tiles.has(k))continue;
-      if(passable&&!passable(nq,nr))continue;
-      prev.set(k,hk(cq,cr));
-      if(nq===tq&&nr===tr){const path=[];let cur=k;
-        while(cur){const p=prev.get(cur);if(p)path.unshift(hparse(cur));cur=p;}return path;}
-      q.push([nq,nr]);}}return null;}
-const synthPassable=(q,r)=>G.tiles.get(hk(q,r))?.anomaly!=='Gravity Well';
+function bfsPath(fq, fr, tq, tr, passable) {
+  if (fq === tq && fr === tr) return [];
+  const prev = new Map([[hk(fq, fr), null]]),
+    q = [[fq, fr]];
+  while (q.length) {
+    const [cq, cr] = q.shift();
+    for (const [nq, nr] of hnbr(cq, cr)) {
+      const k = hk(nq, nr);
+      if (prev.has(k) || !G.tiles.has(k)) continue;
+      if (passable && !passable(nq, nr)) continue;
+      prev.set(k, hk(cq, cr));
+      if (nq === tq && nr === tr) {
+        const path = [];
+        let cur = k;
+        while (cur) {
+          const p = prev.get(cur);
+          if (p) path.unshift(hparse(cur));
+          cur = p;
+        }
+        return path;
+      }
+      q.push([nq, nr]);
+    }
+  }
+  return null;
+}
+const synthPassable = (q, r) =>
+  G.tiles.get(hk(q, r))?.anomaly !== "Gravity Well";
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
-const PCOLORS=['#4a8fbd','#c04444','#4ab04a','#c09040','#9040c0','#40b0b0'];
-const SYNTH_COLOR='#9ab0c0';
+const PCOLORS = [
+  "#4a8fbd",
+  "#c04444",
+  "#4ab04a",
+  "#c09040",
+  "#9040c0",
+  "#40b0b0",
+];
+const SYNTH_COLOR = "#9ab0c0";
 
-const CRASH_HEXES_DEFAULT=[
-  {q:0,r:0,  name:'Crash Site',      short:'CRASH'},
-  {q:1,r:0,  name:'Medical Bay',     short:'MED'},
-  {q:1,r:-1, name:'Signal Array',    short:'SIG\nARR'},
-  {q:0,r:-1, name:'Watch Tower',     short:'WATCH'},
-  {q:-1,r:0, name:'Equipment Locker',short:'EQUIP'},
-  {q:-1,r:1, name:'Airlock',         short:'AIR'},
-  {q:0,r:1,  name:'Cargo Hold',      short:'CARGO'},
+const CRASH_HEXES_DEFAULT = [
+  { q: 0, r: 0, name: "Crash Site", short: "CRASH" },
+  { q: 1, r: 0, name: "Medical Bay", short: "MED" },
+  { q: 1, r: -1, name: "Signal Array", short: "SIG\nARR" },
+  { q: 0, r: -1, name: "Watch Tower", short: "WATCH" },
+  { q: -1, r: 0, name: "Equipment Locker", short: "EQUIP" },
+  { q: -1, r: 1, name: "Airlock", short: "AIR" },
+  { q: 0, r: 1, name: "Cargo Hold", short: "CARGO" },
 ];
 
-const ANOMALIES=['Stasis Pod','Temporal Rift','Portal','Gravity Well','Dead Zone','Echo Chamber','Inversion Field'];
+const ANOMALIES = [
+  "Stasis Pod",
+  "Temporal Rift",
+  "Portal",
+  "Gravity Well",
+  "Dead Zone",
+  "Echo Chamber",
+  "Inversion Field",
+];
 
 // ═══════════════════════════════════════════════════════════════
 // FIXED 43-TILE TERRAIN DECK SPEC
 // ═══════════════════════════════════════════════════════════════
-function buildTerrainDeck(){
-  const deck=[];
+function buildTerrainDeck() {
+  const deck = [];
   // 3 Ship Sections — alternate image variants
-  const shipImgs=['ship-section1.png','ship-section2.png','ship-section1.png'];
-  for(let i=0;i<3;i++)deck.push({type:'ship_section',pois:['Airlock','Emergency Bay','Supply Cache'],investigatedCount:0,imgOverride:shipImgs[i]});
-  // 7 Anomalies
-  ANOMALIES.forEach(a=>deck.push({type:'anomaly',anomaly:a,pois:[],investigatedCount:0}));
-  // 33 Terrain tiles — single POI per tile
-  const terrainSpec=[
-    {pois:['Derelict Tower'],       radioFragment:true,  requiresTool:'lockpick',      noEvent:true, count:1},
-    {pois:['Collapsed Tower'],     radioFragment:true,  requiresTool:'plasma_cutter', noEvent:true, count:1},
-    {pois:['Fuselage'],            radioFragment:false, count:2},
-    {pois:['Cave'],                radioFragment:false, count:3},
-    {pois:['Abandoned Outpost'],   radioFragment:false, requiresTool:'lockpick',   toolReward:'rollFood', noEvent:true, count:1},
-    {pois:['Mysterious Outpost'],  radioFragment:true,  requiresTool:'data_spike',  toolReward:null,          noEvent:true, count:1},
-    {pois:['Wreckage Field'],      radioFragment:false, count:3},
-    {pois:['Spore Bog'],           radioFragment:false, count:3},
-    {pois:['Bioluminescent Fen'],  radioFragment:false, noEvent:true, count:2},
-    {pois:['Nest Site'],           radioFragment:false, noEvent:true, count:3},
-    {pois:['Hive Mound'],          radioFragment:false, noEvent:true, count:1},
-    {pois:['Thermal Vent'],        radioFragment:false, count:3},
-    {pois:['Antimatter Chamber'],  radioFragment:false, noEvent:true, count:2},
-    {pois:['Cache'],               radioFragment:false, count:3},
-    {pois:['Recovered Terminal'],  radioFragment:false, requiresTool:'data_spike', toolReward:'drawEq', noEvent:true, count:2},
-    {pois:['Passage'],             radioFragment:false, count:1},
-    {pois:['Bloody Passage'],      radioFragment:false, count:1},
+  const shipImgs = [
+    "ship-section1.png",
+    "ship-section2.png",
+    "ship-section1.png",
   ];
-  terrainSpec.forEach(spec=>{
-    for(let i=0;i<spec.count;i++){
-      const tile={type:'terrain',pois:[...spec.pois],radioFragment:spec.radioFragment,requiresTool:spec.requiresTool||null,toolReward:spec.toolReward||null,noEvent:spec.noEvent||false,investigatedCount:0};
-      if(spec.pois[0]==='Abandoned Outpost'){tile.imgOverride='outpost1.png';}
-      if(spec.pois[0]==='Mysterious Outpost'){tile.imgOverride='outpost2.png';}
+  for (let i = 0; i < 3; i++)
+    deck.push({
+      type: "ship_section",
+      pois: ["Airlock", "Emergency Bay", "Supply Cache"],
+      investigatedCount: 0,
+      imgOverride: shipImgs[i],
+    });
+  // 7 Anomalies
+  ANOMALIES.forEach((a) =>
+    deck.push({ type: "anomaly", anomaly: a, pois: [], investigatedCount: 0 }),
+  );
+  // 33 Terrain tiles — single POI per tile
+  const terrainSpec = [
+    {
+      pois: ["Derelict Tower"],
+      radioFragment: true,
+      requiresTool: "lockpick",
+      noEvent: true,
+      count: 1,
+    },
+    {
+      pois: ["Collapsed Tower"],
+      radioFragment: true,
+      requiresTool: "plasma_cutter",
+      noEvent: true,
+      count: 1,
+    },
+    { pois: ["Fuselage"], radioFragment: false, count: 2 },
+    { pois: ["Cave"], radioFragment: false, count: 3 },
+    {
+      pois: ["Abandoned Outpost"],
+      radioFragment: false,
+      requiresTool: "lockpick",
+      toolReward: "rollFood",
+      noEvent: true,
+      count: 1,
+    },
+    {
+      pois: ["Mysterious Outpost"],
+      radioFragment: true,
+      requiresTool: "data_spike",
+      toolReward: null,
+      noEvent: true,
+      count: 1,
+    },
+    { pois: ["Wreckage Field"], radioFragment: false, count: 3 },
+    { pois: ["Spore Bog"], radioFragment: false, count: 3 },
+    {
+      pois: ["Bioluminescent Fen"],
+      radioFragment: false,
+      noEvent: true,
+      count: 2,
+    },
+    { pois: ["Nest Site"], radioFragment: false, noEvent: true, count: 3 },
+    { pois: ["Hive Mound"], radioFragment: false, noEvent: true, count: 1 },
+    { pois: ["Thermal Vent"], radioFragment: false, count: 3 },
+    {
+      pois: ["Antimatter Chamber"],
+      radioFragment: false,
+      noEvent: true,
+      count: 2,
+    },
+    { pois: ["Cache"], radioFragment: false, count: 3 },
+    {
+      pois: ["Recovered Terminal"],
+      radioFragment: false,
+      requiresTool: "data_spike",
+      toolReward: "drawEq",
+      noEvent: true,
+      count: 2,
+    },
+    { pois: ["Passage"], radioFragment: false, count: 1 },
+    { pois: ["Bloody Passage"], radioFragment: false, count: 1 },
+  ];
+  terrainSpec.forEach((spec) => {
+    for (let i = 0; i < spec.count; i++) {
+      const tile = {
+        type: "terrain",
+        pois: [...spec.pois],
+        radioFragment: spec.radioFragment,
+        requiresTool: spec.requiresTool || null,
+        toolReward: spec.toolReward || null,
+        noEvent: spec.noEvent || false,
+        investigatedCount: 0,
+      };
+      if (spec.pois[0] === "Abandoned Outpost") {
+        tile.imgOverride = "outpost1.png";
+      }
+      if (spec.pois[0] === "Mysterious Outpost") {
+        tile.imgOverride = "outpost2.png";
+      }
       deck.push(tile);
     }
   });
   // shuffle
-  for(let i=deck.length-1;i>0;i--){const j=0|Math.random()*(i+1);[deck[i],deck[j]]=[deck[j],deck[i]];}
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = 0 | (Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
   return deck;
 }
 
-const POI_COLOR={
-  'Fuselage':'#3a7080','Cave':'#2a5030','Abandoned Outpost':'#7a6030','Mysterious Outpost':'#305060',
-  'Derelict Tower':'#2870a0','Collapsed Tower':'#1a5080','Wreckage Field':'#705030',
-  'Recovered Terminal':'#2060a8','Cache':'#507040',
-  'Passage':'#4a4a60','Bloody Passage':'#702020',
-  'Spore Bog':'#4a6020','Bioluminescent Fen':'#1a5050','Nest Site':'#604030',
-  'Hive Mound':'#503020','Thermal Vent':'#804020','Antimatter Chamber':'#503080',
+const POI_COLOR = {
+  Fuselage: "#3a7080",
+  Cave: "#2a5030",
+  "Abandoned Outpost": "#7a6030",
+  "Mysterious Outpost": "#305060",
+  "Derelict Tower": "#2870a0",
+  "Collapsed Tower": "#1a5080",
+  "Wreckage Field": "#705030",
+  "Recovered Terminal": "#2060a8",
+  Cache: "#507040",
+  Passage: "#4a4a60",
+  "Bloody Passage": "#702020",
+  "Spore Bog": "#4a6020",
+  "Bioluminescent Fen": "#1a5050",
+  "Nest Site": "#604030",
+  "Hive Mound": "#503020",
+  "Thermal Vent": "#804020",
+  "Antimatter Chamber": "#503080",
 };
 
 // ── TILE IMAGES ───────────────────────────────────────────────
-// Individual PNG files in img/Tiles/ — one per tile/POI name
-const TILE_IMAGE_MAP={
-  'Crash Site':         'crash-site.png',
-  'Cave':               'cave.png',
-  'Equipment Locker':   'locker.png',
-  'Signal Array':       'signal-array.png',
-  'Watch Tower':        'watch-tower.png',
-  'Medical Bay':        'medbay.png',
-  'Cargo Hold':         'cargo.png',
-  'Airlock':            'airlock.png',
-  'Derelict Tower':     'signal-tower.png',
-  'Collapsed Tower':    'signal-tower.png',
-  'Abandoned Outpost':  'outpost1.png',
-  'Mysterious Outpost': 'outpost2.png',
-  'Fuselage':           'fuselage.png',
-  'Wreckage Field':     'wreckage.png',
-  'Recovered Terminal': 'terminal.png',
-  'Cache':              'cache.png',
-  'Passage':            'passage.png',
-  'Bloody Passage':     'passage-bloody.png',
-  'Spore Bog':          'spore-bog.png',
-  'Bioluminescent Fen': 'bioluminescent-fen.png',
-  'Nest Site':          'nest-site.png',
-  'Hive Mound':         'hive-mound.png',
-  'Thermal Vent':       'thermal-vent.png',
-  'Antimatter Chamber': 'antimatter-chamber.png',
-  'Stasis Pod':         'stasis.png',
-  'Temporal Rift':      'temporal-distortion.png',
-  'Gravity Well': 'gravity-well.png',
-  'Echo Chamber':       'echo-chamber.png',
-  'Dead Zone':          'dead-zone.png',
-  'Portal':             'portal.png',
-  'Inversion Field':    'inversion-field.png',
-  'Ship Section':       'ship-section1.png',
+// Individual PNG files in img/tiles/ — one per tile/POI name
+const TILE_IMAGE_MAP = {
+  "Crash Site": "crash-site.png",
+  Cave: "cave.png",
+  "Equipment Locker": "locker.png",
+  "Signal Array": "signal-array.png",
+  "Watch Tower": "watch-tower.png",
+  "Medical Bay": "medbay.png",
+  "Cargo Hold": "cargo.png",
+  Airlock: "airlock.png",
+  "Derelict Tower": "signal-tower.png",
+  "Collapsed Tower": "signal-tower.png",
+  "Abandoned Outpost": "outpost1.png",
+  "Mysterious Outpost": "outpost2.png",
+  Fuselage: "fuselage.png",
+  "Wreckage Field": "wreckage.png",
+  "Recovered Terminal": "terminal.png",
+  Cache: "cache.png",
+  Passage: "passage.png",
+  "Bloody Passage": "passage-bloody.png",
+  "Spore Bog": "spore-bog.png",
+  "Bioluminescent Fen": "bioluminescent-fen.png",
+  "Nest Site": "nest-site.png",
+  "Hive Mound": "hive-mound.png",
+  "Thermal Vent": "thermal-vent.png",
+  "Antimatter Chamber": "antimatter-chamber.png",
+  "Stasis Pod": "stasis.png",
+  "Temporal Rift": "temporal-distortion.png",
+  "Gravity Well": "gravity-well.png",
+  "Echo Chamber": "echo-chamber.png",
+  "Dead Zone": "dead-zone.png",
+  Portal: "portal.png",
+  "Inversion Field": "inversion-field.png",
+  "Ship Section": "ship-section1.png",
 };
 
-function getTileImg(t, variant=''){
-  if(t.imgOverride)return`img/Tiles/${t.imgOverride}`;
+function getTileImg(t, variant = "") {
+  if (t.imgOverride) return `img/tiles/${t.imgOverride}`;
   let key;
-  if(t.type==='crash_site')key=t.name;
-  else if(t.type==='terrain')key=t.pois?.[0];
-  else if(t.type==='anomaly')key=t.anomaly;
-  else if(t.type==='ship_section')key='Ship Section';
-  const file=TILE_IMAGE_MAP[key];
-  if(!file)return null;
-  const base=file.replace('.png','');
-  return variant?`img/Tiles/${base}_${variant}.png`:`img/Tiles/${file}`;
+  if (t.type === "crash_site") key = t.name;
+  else if (t.type === "terrain") key = t.pois?.[0];
+  else if (t.type === "anomaly") key = t.anomaly;
+  else if (t.type === "ship_section") key = "Ship Section";
+  const file = TILE_IMAGE_MAP[key];
+  if (!file) return null;
+  const base = file.replace(".png", "");
+  return variant ? `img/tiles/${base}_${variant}.png` : `img/tiles/${file}`;
 }
-function spriteCssForName(name){
-  const file=TILE_IMAGE_MAP[name];
-  if(!file)return'background-color:#0e1e30';
-  return`background:#0e1e30 url(img/Tiles/${file}) center/cover no-repeat`;
+function spriteCssForName(name) {
+  const file = TILE_IMAGE_MAP[name];
+  if (!file) return "background-color:#0e1e30";
+  return `background:#0e1e30 url(img/tiles/${file}) center/cover no-repeat`;
 }
 
-const EQ_CARDS=[
-  {id:'plasma_cutter', name:'Plasma Cutter',     cat:'Tool',   txt:'Cut through sealed structures.'},
-  {id:'grappling',     name:'Grappling Hook',    cat:'Tool',   txt:'Move to any adjacent tile without using move points. Use once per round.'},
-  {id:'lockpick',      name:'Lockpick',          cat:'Tool',   txt:'Bypass mechanical locks on many structures.',},
-  {id:'walkie',        name:'Walkie',            cat:'Tool',   txt:'Trade resources with any crew member anywhere on the board.',use:'walkie'},
-  {id:'stretcher',     name:'Stretcher',         cat:'Tool',   txt:'Transport an incapacitated crew member to the Medical Bay. Discard after use.',use:'stretcher'},
-  {id:'medpack',       name:'MedPack',           cat:'Supply', txt:'Restore 1 Health. Discard after use.', use:'medpack'},
-  {id:'emer_food',     name:'Emergency Rations', cat:'Supply', txt:'Flip 3 EMPTY Food to FULL. Discard after use.', use:'emer_food'},
-  {id:'compressed_o2', name:'Compressed O2',     cat:'Supply', txt:'Flip 2 EMPTY O2 Tanks to FULL. Discard after use.', use:'compressed_o2'},
-  {id:'hazard_suit',   name:'Hazard Suit',       cat:'Tech',   txt:'Negates Health loss from toxic exposure Event cards. Discarded after use.'},
-  {id:'scanner',       name:'Scanner',           cat:'Tech',   txt:'Reveals all adjacent undiscovered tiles. Once per round, 3 charges total.',use:'scanner'},
-  {id:'rebreather',    name:'Rebreather',        cat:'Tech',   txt:'Your O\u2082 depletes every 2 turns in the field instead of every turn.'},
-  {id:'data_spike',    name:'Data Spike',        cat:'Tech',   txt:'Bypass electronic locks on high-tech structures.'},
-  {id:'stun_baton',    name:'Stun Baton',        cat:'Weapon', txt:'A player on your tile loses 1 Health and skips their turn. Discard after use.',use:'stun_baton'},
-  {id:'flare_gun',     name:'Flare Gun',         cat:'Weapon', txt:'Force any player within 2 tiles to move to your tile immediately. Discard after use.',use:'flare_gun'},
-  {id:'shock_trap',    name:'Shock Trap',        cat:'Weapon', txt:'Place on your tile. The next player to enter loses 1 Health and ends their turn. Discard after use.',use:'shock_trap'},
-  {id:'jammer',        name:'Signal Jammer',     cat:'Weapon', txt:'No Signal Roll occurs this round. Discard after use.',use:'jammer'},
+const EQ_CARDS = [
+  {
+    id: "plasma_cutter",
+    name: "Plasma Cutter",
+    cat: "Tool",
+    txt: "Cut through sealed structures.",
+  },
+  {
+    id: "grappling",
+    name: "Grappling Hook",
+    cat: "Tool",
+    txt: "Move to any adjacent tile without using move points. Use once per round.",
+  },
+  {
+    id: "lockpick",
+    name: "Lockpick",
+    cat: "Tool",
+    txt: "Bypass mechanical locks on many structures.",
+  },
+  {
+    id: "walkie",
+    name: "Walkie",
+    cat: "Tool",
+    txt: "Trade resources with any crew member anywhere on the board.",
+    use: "walkie",
+  },
+  {
+    id: "stretcher",
+    name: "Stretcher",
+    cat: "Tool",
+    txt: "Transport an incapacitated crew member to the Medical Bay. Discard after use.",
+    use: "stretcher",
+  },
+  {
+    id: "medpack",
+    name: "MedPack",
+    cat: "Supply",
+    txt: "Restore 1 Health. Discard after use.",
+    use: "medpack",
+  },
+  {
+    id: "emer_food",
+    name: "Emergency Rations",
+    cat: "Supply",
+    txt: "Flip 3 EMPTY Food to FULL. Discard after use.",
+    use: "emer_food",
+  },
+  {
+    id: "compressed_o2",
+    name: "Compressed O2",
+    cat: "Supply",
+    txt: "Flip 2 EMPTY O2 Tanks to FULL. Discard after use.",
+    use: "compressed_o2",
+  },
+  {
+    id: "hazard_suit",
+    name: "Hazard Suit",
+    cat: "Tech",
+    txt: "Negates Health loss from toxic exposure Event cards. Discarded after use.",
+  },
+  {
+    id: "scanner",
+    name: "Scanner",
+    cat: "Tech",
+    txt: "Reveals all adjacent undiscovered tiles. Once per round, 3 charges total.",
+    use: "scanner",
+  },
+  {
+    id: "rebreather",
+    name: "Rebreather",
+    cat: "Tech",
+    txt: "Your O\u2082 depletes every 2 turns in the field instead of every turn.",
+  },
+  {
+    id: "data_spike",
+    name: "Data Spike",
+    cat: "Tech",
+    txt: "Bypass electronic locks on high-tech structures.",
+  },
+  {
+    id: "stun_baton",
+    name: "Stun Baton",
+    cat: "Weapon",
+    txt: "A player on your tile loses 1 Health and skips their turn. Discard after use.",
+    use: "stun_baton",
+  },
+  {
+    id: "flare_gun",
+    name: "Flare Gun",
+    cat: "Weapon",
+    txt: "Force any player within 2 tiles to move to your tile immediately. Discard after use.",
+    use: "flare_gun",
+  },
+  {
+    id: "shock_trap",
+    name: "Shock Trap",
+    cat: "Weapon",
+    txt: "Place on your tile. The next player to enter loses 1 Health and ends their turn. Discard after use.",
+    use: "shock_trap",
+  },
+  {
+    id: "jammer",
+    name: "Signal Jammer",
+    cat: "Weapon",
+    txt: "No Signal Roll occurs this round. Discard after use.",
+    use: "jammer",
+  },
 ];
 
-function buildEventDeck(){
-  const deck=[];
-  function add(n,card){for(let i=0;i<n;i++)deck.push(card);}
+function buildEventDeck() {
+  const deck = [];
+  function add(n, card) {
+    for (let i = 0; i < n; i++) deck.push(card);
+  }
   // Public — yield
-  add(addSynth?3:4,{text:'Emergency supplies found, partially intact. Roll 1 die for Food yield.',pub:true,rollFood:true});
-  add(4,{text:['Salvageable material nearby. Roll 1 die:','1–3: nothing','4–5: +1 Food','6: Equipment card'],pub:true,rollWreckage:true});
-  add(4,{text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true});
-  add(1,{text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true});
-  add(1,{text:'In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive.',pub:true,rf:true});
-  add(1,{text:'The atmosphere here is thick with chemical residue from the crash. You breathe it in before you realize the risk. Lose 1 Health.',pub:true,loseHealth:1});
-  add(addSynth?3:4,{text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true});
+  add(addSynth ? 3 : 4, {
+    text: "Emergency supplies found, partially intact. Roll 1 die for Food yield.",
+    pub: true,
+    rollFood: true,
+  });
+  add(4, {
+    text: [
+      "Salvageable material nearby. Roll 1 die:",
+      "1–3: nothing",
+      "4–5: +1 Food",
+      "6: Equipment card",
+    ],
+    pub: true,
+    rollWreckage: true,
+  });
+  add(4, {
+    text: "A sealed equipment cache. Contents intact.",
+    pub: true,
+    drawEq: true,
+  });
+  add(1, {
+    text: "Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.",
+    pub: true,
+    rf: true,
+  });
+  add(1, {
+    text: "In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive.",
+    pub: true,
+    rf: true,
+  });
+  add(1, {
+    text: "The atmosphere here is thick with chemical residue from the crash. You breathe it in before you realize the risk. Lose 1 Health.",
+    pub: true,
+    loseHealth: 1,
+  });
+  add(addSynth ? 3 : 4, {
+    text: "Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.",
+    pub: true,
+    skipO2: true,
+  });
   // Public — hazard
-  add(4,{text:'Structural instability. The ground shifts — brace yourself. Lose 1 Health.',pub:true,loseHealth:1});
-  add(4,{text:'Toxic residue from the crash. Lose 1 Health.',pub:true,loseHealth:1});
-  add(4,{text:'The air here reeks of chemical burn. Something toxic has seeped into the soil. Your lungs are burning.',pub:true,loseHealth:1});
-  add(4,{text:'Your suit registers a spike in atmospheric toxins. The source is somewhere in the wreckage above you. You inhale before you can seal the mask.',pub:true,loseHealth:1});
+  add(4, {
+    text: "Structural instability. The ground shifts — brace yourself. Lose 1 Health.",
+    pub: true,
+    loseHealth: 1,
+  });
+  add(4, {
+    text: "Toxic residue from the crash. Lose 1 Health.",
+    pub: true,
+    loseHealth: 1,
+  });
+  add(4, {
+    text: "The air here reeks of chemical burn. Something toxic has seeped into the soil. Your lungs are burning.",
+    pub: true,
+    loseHealth: 1,
+  });
+  add(4, {
+    text: "Your suit registers a spike in atmospheric toxins. The source is somewhere in the wreckage above you. You inhale before you can seal the mask.",
+    pub: true,
+    loseHealth: 1,
+  });
   // Public — narrative
-  add(4,{text:'Nothing here. Whatever this place held has been taken by the terrain.',pub:true});
-  add(4,{text:'Signs of prior occupation — too recent to be from the crash. Someone else was here.',pub:true});
-  add(4,{text:'Clear. No hazards, no yield. Move on.',pub:true});
-  add(4,{text:"Something jammed the sensors on the way in. You can't tell if it was the terrain or something else.",pub:true});
+  add(4, {
+    text: "Nothing here. Whatever this place held has been taken by the terrain.",
+    pub: true,
+  });
+  add(4, {
+    text: "Signs of prior occupation — too recent to be from the crash. Someone else was here.",
+    pub: true,
+  });
+  add(4, { text: "Clear. No hazards, no yield. Move on.", pub: true });
+  add(4, {
+    text: "Something jammed the sensors on the way in. You can't tell if it was the terrain or something else.",
+    pub: true,
+  });
   // Public — IRIS threat (only when IRIS is in the game)
-  if(addSynth)add(2,{text:"IRIS's last data upload is concerning. She appears to think the odds of survival would be higher with one fewer crew member. Keep an eye on her.",pub:true,irisCorruption:true});
+  if (addSynth)
+    add(2, {
+      text: "IRIS's last data upload is concerning. She appears to think the odds of survival would be higher with one fewer crew member. Keep an eye on her.",
+      pub: true,
+      irisCorruption: true,
+    });
   // Private — resource
-  add(4,{text:'A hidden cache — stowed deliberately, not by the crash. You pocket the contents before anyone else arrives.',pub:false,drawEq:true});
-  add(4,{text:"There's food here nobody logged. Take it. If anyone asks about your count, you found it in the field. That's true enough.",pub:false,gainFood:1});
-  add(4,{text:'You were at the equipment locker before your turn. Draw 1 Equipment card now.',pub:false,drawEq:true});
-  add(4,{text:"It's not fair. Everyone else had a meal before the crash while you were on shift. Take 2 Food from the Cargo Hold. You deserve it.",pub:false,takeCargoFood:2});
+  add(4, {
+    text: "A hidden cache — stowed deliberately, not by the crash. You pocket the contents before anyone else arrives.",
+    pub: false,
+    drawEq: true,
+  });
+  add(4, {
+    text: "There's food here nobody logged. Take it. If anyone asks about your count, you found it in the field. That's true enough.",
+    pub: false,
+    gainFood: 1,
+  });
+  add(4, {
+    text: "You were at the equipment locker before your turn. Draw 1 Equipment card now.",
+    pub: false,
+    drawEq: true,
+  });
+  add(4, {
+    text: "It's not fair. Everyone else had a meal before the crash while you were on shift. Take 2 Food from the Cargo Hold. You deserve it.",
+    pub: false,
+    takeCargoFood: 2,
+  });
   // Private — competing objective
-  add(2,{text:"Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll 10 or higher on 3 dice to abandon the others and be rescued alone. The choice is yours.",pub:false,trackSignalArray:true,keep:true});
-  add(2,{text:"Your mission briefing had a clause the others weren't cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.",pub:false,rfExtraction:true,keep:true});
+  add(2, {
+    text: "Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll 10 or higher on 3 dice to abandon the others and be rescued alone. The choice is yours.",
+    pub: false,
+    trackSignalArray: true,
+    keep: true,
+  });
+  add(2, {
+    text: "Your mission briefing had a clause the others weren't cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.",
+    pub: false,
+    rfExtraction: true,
+    keep: true,
+  });
   // Private — psychological
-  add(3,{text:"You're playing a different game than the others. Help when it's convenient. Nod along. But you know what you'd do if it came down to it.",pub:false,keep:true});
-  add(3,{text:"Someone was at the Cargo Hold when they shouldn't have been. You didn't see who. Say nothing. Information is worth more than accusations.",pub:false,keep:true});
-  add(3,{text:(n)=>{const others=n-1;return`You've calculated the O\u2082 supply against the extraction window. It supports ${others} ${others===1?'person':'people'}. Not ${n}. You haven't corrected anyone's assumptions. You're still running the numbers.`;},pub:false,keep:true});
+  add(3, {
+    text: "You're playing a different game than the others. Help when it's convenient. Nod along. But you know what you'd do if it came down to it.",
+    pub: false,
+    keep: true,
+  });
+  add(3, {
+    text: "Someone was at the Cargo Hold when they shouldn't have been. You didn't see who. Say nothing. Information is worth more than accusations.",
+    pub: false,
+    keep: true,
+  });
+  add(3, {
+    text: (n) => {
+      const others = n - 1;
+      return `You've calculated the O\u2082 supply against the extraction window. It supports ${others} ${others === 1 ? "person" : "people"}. Not ${n}. You haven't corrected anyone's assumptions. You're still running the numbers.`;
+    },
+    pub: false,
+    keep: true,
+  });
   // shuffle
-  for(let i=deck.length-1;i>0;i--){const j=0|Math.random()*(i+1);[deck[i],deck[j]]=[deck[j],deck[i]];}
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = 0 | (Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
   return deck;
 }
 
 // Note: The Event Cards should be designed to sew distrust among the crew. They should also be based in the actual game mechanics with real consequences.
-const EVENT_CARDS=[
+const EVENT_CARDS = [
   // Public — yields
-  {text:'Emergency supplies found, partially intact. Roll 1 die for Food yield.',pub:true,rollFood:true},
-  {text:['Salvageable material nearby. Roll 1 die:','1–3: nothing','4–5: +1 Food','6: Equipment card'],pub:true,rollWreckage:true},
-  {text:'A sealed equipment cache. Contents intact.',pub:true,drawEq:true},
-  {text:'Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.',pub:true,rf:true},
-  {text:'In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive. If you take it back to the Signal Array, it might take a charge.',pub:true,rf:true},
-  {text:'The atmosphere here is thick with chemical residue from the crash. You breathe it in before you realize the risk. Lose 1 Health.',pub:true,loseHealth:1},
-  {text:'Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.',pub:true,skipO2:true},
+  {
+    text: "Emergency supplies found, partially intact. Roll 1 die for Food yield.",
+    pub: true,
+    rollFood: true,
+  },
+  {
+    text: [
+      "Salvageable material nearby. Roll 1 die:",
+      "1–3: nothing",
+      "4–5: +1 Food",
+      "6: Equipment card",
+    ],
+    pub: true,
+    rollWreckage: true,
+  },
+  {
+    text: "A sealed equipment cache. Contents intact.",
+    pub: true,
+    drawEq: true,
+  },
+  {
+    text: "Half-buried in the soil, you find a Radio Fragment from the Endymion 7 that was jettisoned with the rest of the cargo before impact.",
+    pub: true,
+    rf: true,
+  },
+  {
+    text: "In a pile of debris, you find a Radio Fragment in a makeshift casing. Someone wanted it to survive. If you take it back to the Signal Array, it might take a charge.",
+    pub: true,
+    rf: true,
+  },
+  {
+    text: "The atmosphere here is thick with chemical residue from the crash. You breathe it in before you realize the risk. Lose 1 Health.",
+    pub: true,
+    loseHealth: 1,
+  },
+  {
+    text: "Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.",
+    pub: true,
+    skipO2: true,
+  },
   // Public — hazards
-  {text:'Structural instability. The ground shifts — brace yourself. Lose 1 Food.',pub:true,loseFood:1},
-  {text:'Toxic residue from the crash. Lose 1 Food.',pub:true,loseFood:1},
-  {text:'The air here reeks of chemical burn. Something toxic has seeped into the soil. Your lungs are burning.',pub:true,loseHealth:1},
-  {text:'Your suit registers a spike in atmospheric toxins. The source is somewhere in the wreckage above you. You inhale before you can seal the mask.',pub:true,loseHealth:1},
+  {
+    text: "Structural instability. The ground shifts — brace yourself. Lose 1 Food.",
+    pub: true,
+    loseFood: 1,
+  },
+  {
+    text: "Toxic residue from the crash. Lose 1 Food.",
+    pub: true,
+    loseFood: 1,
+  },
+  {
+    text: "The air here reeks of chemical burn. Something toxic has seeped into the soil. Your lungs are burning.",
+    pub: true,
+    loseHealth: 1,
+  },
+  {
+    text: "Your suit registers a spike in atmospheric toxins. The source is somewhere in the wreckage above you. You inhale before you can seal the mask.",
+    pub: true,
+    loseHealth: 1,
+  },
   // Public — narrative
-  {text:'Nothing here. Whatever this place held has been taken by the terrain.',pub:true},
-  {text:'Signs of prior occupation — too recent to be from the crash. Someone else was here.',pub:true},
-  {text:'Clear. No hazards, no yield. Move on.',pub:true},
-  {text:'Something jammed the sensors on the way in. You can\'t tell if it was the terrain or something else.',pub:true},
+  {
+    text: "Nothing here. Whatever this place held has been taken by the terrain.",
+    pub: true,
+  },
+  {
+    text: "Signs of prior occupation — too recent to be from the crash. Someone else was here.",
+    pub: true,
+  },
+  { text: "Clear. No hazards, no yield. Move on.", pub: true },
+  {
+    text: "Something jammed the sensors on the way in. You can't tell if it was the terrain or something else.",
+    pub: true,
+  },
   // Private — resources
-  {text:'A hidden cache — stowed deliberately, not by the crash. You pocket the contents before anyone else arrives.',pub:false,drawEq:true},
-  {text:'There\'s food here nobody logged. Take it. If anyone asks about your count, you found it in the field. That\'s true enough.',pub:false,gainFood:1},
-  {text:'You were at the equipment locker before your turn. Draw 1 Equipment card now and keep it face-down. Don\'t mention it.',pub:false,drawEqHidden:true},
-  {text:'You reached this cache first. Refill your depleted Food from the Cargo Hold — take only what you\'re missing. No rule says you have to tell anyone.',pub:false,takeAllCargo:true},
+  {
+    text: "A hidden cache — stowed deliberately, not by the crash. You pocket the contents before anyone else arrives.",
+    pub: false,
+    drawEq: true,
+  },
+  {
+    text: "There's food here nobody logged. Take it. If anyone asks about your count, you found it in the field. That's true enough.",
+    pub: false,
+    gainFood: 1,
+  },
+  {
+    text: "You were at the equipment locker before your turn. Draw 1 Equipment card now and keep it face-down. Don't mention it.",
+    pub: false,
+    drawEqHidden: true,
+  },
+  {
+    text: "You reached this cache first. Refill your depleted Food from the Cargo Hold — take only what you're missing. No rule says you have to tell anyone.",
+    pub: false,
+    takeAllCargo: true,
+  },
   // Private — competing objectives
-  {text:'Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll 10 or higher on 3 dice to abandon the others and be rescued alone. The choice is yours.',pub:false,trackSignalArray:true,keep:true},
-  {text:'Your mission briefing had a clause the others weren\'t cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.',pub:false,rfExtraction:true,keep:true},
+  {
+    text: "Everyone else is just slowing you down. Occupy the Signal Array for 3 consecutive rounds, then roll 10 or higher on 3 dice to abandon the others and be rescued alone. The choice is yours.",
+    pub: false,
+    trackSignalArray: true,
+    keep: true,
+  },
+  {
+    text: "Your mission briefing had a clause the others weren't cleared for. Bring a Radio Fragment to the Signal Array and your extraction is guaranteed. Everyone else is on their own.",
+    pub: false,
+    rfExtraction: true,
+    keep: true,
+  },
   // Private — psychological
-  {text:'You\'re playing a different game than the others. Help when it\'s convenient. Nod along. But you know what you\'d do if it came down to it.',pub:false,keep:true},
-  {text:'Someone was at the Cargo Hold when they shouldn\'t have been. You didn\'t see who. Say nothing. Information is worth more than accusations.',pub:false,keep:true},
-  {text:(n)=>{const others=n-1;return`You\'ve calculated the O\u2082 supply against the extraction window. It supports ${others} ${others===1?'person':'people'}. Not ${n}. You haven\'t corrected anyone\'s assumptions. You\'re still running the numbers.`;},pub:false,keep:true},
+  {
+    text: "You're playing a different game than the others. Help when it's convenient. Nod along. But you know what you'd do if it came down to it.",
+    pub: false,
+    keep: true,
+  },
+  {
+    text: "Someone was at the Cargo Hold when they shouldn't have been. You didn't see who. Say nothing. Information is worth more than accusations.",
+    pub: false,
+    keep: true,
+  },
+  {
+    text: (n) => {
+      const others = n - 1;
+      return `You\'ve calculated the O\u2082 supply against the extraction window. It supports ${others} ${others === 1 ? "person" : "people"}. Not ${n}. You haven\'t corrected anyone\'s assumptions. You\'re still running the numbers.`;
+    },
+    pub: false,
+    keep: true,
+  },
 ];
 
-const TILE_TIPS={
-  'Crash Site':        [[0,'','Starting point for all crew. The heart of Base Camp.'],[0,'act','No specific action — this is your anchor point.']],
-  'Medical Bay':       [[0,'','Emergency medical equipment salvaged from the wreckage.'],[0,'act','Passive: Restore 1 Health automatically when entering.']],
-  'Signal Array':      [[0,'','The ship\'s emergency transmitter. Fits one player at a time.'],[0,'act','Activate Radio Fragments. Roll Signal dice. Contest if blocked.']],
-  'Equipment Locker':  [[0,'','The crew\'s tool cache. Raided but not empty.'],[0,'act','Draw 1 Equipment card.']],
-  'Cargo Hold':        [[0,'','Communal food and supply storage.'],[0,'act','Deposit or withdraw Food freely.']],
-  'Airlock':           [[0,'','The pressurized entry point from the field.'],[0,'act','Passive: Refill all O₂ Tanks when entering from terrain.']],
-  'Watch Tower':       [[0,'','An elevated vantage point over the surrounding terrain.'],[0,'act','Reveal face-down tiles adjacent to any crew in the field.']],
-  'Derelict Tower':    [[0,'','A hand-built broadcast tower, long abandoned.'],[0,'act','Use Lockpick to recover 1 Radio Fragment.']],
-  'Collapsed Tower':   [[0,'','A relay tower on the ridge, partially collapsed. A dead body inside.'],[0,'act','Use Plasma Cutter to get inside and salvage the Radio Fragment.']],
-  'Cave':              [[0,'','Natural shelter. Atmospheric sensors can\'t reach inside.'],[0,'good','Skip O2 Tank flip this round.'],[300,'act','Draw an Event card.']],
-  'Abandoned Outpost': [[0,'','An abandoned structure in a valley — likely a small settlement or research station.'],[0,'act','Use the Lockpick to enter.'],[0,'act','Roll 1 die for Food yield.']],
-  'Mysterious Outpost':[[0,'','A structure that doesn\'t match anything on your planetary scans.'],[300,'','Someone built this here and didn\'t want visitors.'],[0,'act','Use Data Spike to enter. Recover 1 Radio Fragment.']],
-  'Fuselage':          [[0,'','An intact hull section from the Endymion 7. May contain cargo.'],[0,'act','Draw an Event card.']],
-  'Wreckage Field':    [[0,'','The Endymion 7 broke into several pieces in the upper atmosphere.'],[0,'','Debris scattered across the terrain — hazardous, but potentially useful.'],[0,'act','Draw an Event card.']],
-  'Recovered Terminal':[[0,'','A terminal still drawing power from an unknown source.'],[0,'act','Draw an Equipment card.']],
-  'Cache':             [[0,'','A supply cache half-buried in the sand. The seal has been broken.'],[500,'act','Roll 1 die.'],[0,'good','1–2: +1 Food'],[0,'good','3–4: +2 Food'],[0,'good','5–6: +3 Food']],
-  'Passage':           [[0,'','A route through the canyon. Something passed through here recently.'],[0,'act','Draw an Event card.']],
-  'Bloody Passage':    [[0,'','A piece of the ship wedged in a canyon. Signs of violence inside.'],[0,'act','Draw an Event card.']],
-  'Spore Bog':         [[0,'','A murky wetland choked with fungal growths. Spores drift like ash.'],[300,'','A sickly light pulses from beneath the surface.'],[0,'act','Draw an Event card.']],
-  'Bioluminescent Fen':[[0,'','A hauntingly alien marsh. Wispy plants pulse with soft teal light.'],[300,'','The mist hangs low — eerie, but strangely serene. You stop to rest here.'],[0,'good','Recover 1 Health. O\u2082 flip skipped this round.']],
-  'Nest Site':         [[0,'','A shallow crater lined with leathery alien eggs. Something large nested here.'],[300,'','You move closer to see if you can get a reading from one of the eggs.'],[300,'act','Roll 1 die.']],
-  'Hive Mound':        [[0,'','A towering biological mound from one of the planet\'s native species. The tunnels inside shift and pulse. You don\'t like the look of this.'],[0,'','As you draw near, a horde of insectoid creatures rush you.'],[0,'act','Roll 3 dice.']],
-  'Thermal Vent':      [[0,'','Fractured ground. Jets of superheated gas vent in slow rhythmic bursts.'],[300,'','Heat distortion and sulfur in the air.'],[0,'act','Draw an Event card.']],
-  'Antimatter Chamber':[[0,'','A buried alien structure. A sphere of crackling energy floats in suspension.'],[0,'act','All crew are pulled to this tile. Each player rolls. 1–3: pull free · 4–6: Tech destroyed.']],
-  'Stasis Pod':        [[0,'','The ship\'s stasis pod. A chance at survival — but it holds only one.'],[300,'act','Skip Resource Flip each round. Cannot move or interact. Exit any time.']],
-  'Temporal Rift':     [[0,'','An unexplained spacetime distortion. Past and future flicker.'],[300,'act','Roll 1 die.'],[0,'crit','1\u20133: lose that many Food.'],[0,'good','4\u20136: recover that many Food.']],
-  'Portal':            [[0,'','Abandoned alien technology. A vortex opens — instantaneous transit, origin unknown.'],[0,'act','Option: Move immediately to Crash Site. Turn ends.']],
-  'Gravity Well':      [[0,'','An intense localized gravity field. You\'re tossed around like a rag doll.'],[500,'act','Roll 1 die.'],[0,'act','You will be moved that many steps in a random direction.']],
-  'Dead Zone':         [[0,'','Strange electricity in the air. All radio transmissions are blocked.'],[0,'act','No Signal Roll occurs this round for any player.']],
-  'Echo Chamber':      [[0,'','The terrain resonates with past events.'],[0,'act','Resolve the most recent Public Event card again in full.']],
-  'Inversion Field':   [[0,'','Gravity inversion. Resources change hands involuntarily.'],[0,'act','Choose any other player. Swap your Food with theirs.']],
-  'Ship Section':      [[0,'','A section of the Endymion 7 that came down separately.'],[300,'','Emergency systems appear to be still online.'],[0,'act','Roll 1 die.'],[0,'good','1\u20132: Food'],[0,'sys','3\u20134: Oxygen'],[0,'crit','5\u20136: Health']],
+const TILE_TIPS = {
+  "Crash Site": [
+    [0, "", "Starting point for all crew. The heart of Base Camp."],
+    [0, "act", "No specific action — this is your anchor point."],
+  ],
+  "Medical Bay": [
+    [0, "", "Emergency medical equipment salvaged from the wreckage."],
+    [0, "act", "Passive: Restore 1 Health automatically when entering."],
+  ],
+  "Signal Array": [
+    [0, "", "The ship's emergency transmitter. Fits one player at a time."],
+    [
+      0,
+      "act",
+      "Activate Radio Fragments. Roll Signal dice. Contest if blocked.",
+    ],
+  ],
+  "Equipment Locker": [
+    [0, "", "The crew's tool cache. Raided but not empty."],
+    [0, "act", "Draw 1 Equipment card."],
+  ],
+  "Cargo Hold": [
+    [0, "", "Communal food and supply storage."],
+    [0, "act", "Deposit or withdraw Food freely."],
+  ],
+  Airlock: [
+    [0, "", "The pressurized entry point from the field."],
+    [0, "act", "Passive: Refill all O₂ Tanks when entering from terrain."],
+  ],
+  "Watch Tower": [
+    [0, "", "An elevated vantage point over the surrounding terrain."],
+    [0, "act", "Reveal face-down tiles adjacent to any crew in the field."],
+  ],
+  "Derelict Tower": [
+    [0, "", "A hand-built broadcast tower, long abandoned."],
+    [0, "act", "Use Lockpick to recover 1 Radio Fragment."],
+  ],
+  "Collapsed Tower": [
+    [
+      0,
+      "",
+      "A relay tower on the ridge, partially collapsed. A dead body inside.",
+    ],
+    [
+      0,
+      "act",
+      "Use Plasma Cutter to get inside and salvage the Radio Fragment.",
+    ],
+  ],
+  Cave: [
+    [0, "", "Natural shelter. Atmospheric sensors can't reach inside."],
+    [0, "good", "Skip O2 Tank flip this round."],
+    [300, "act", "Draw an Event card."],
+  ],
+  "Abandoned Outpost": [
+    [
+      0,
+      "",
+      "An abandoned structure in a valley — likely a small settlement or research station.",
+    ],
+    [0, "act", "Use the Lockpick to enter."],
+    [0, "act", "Roll 1 die for Food yield."],
+  ],
+  "Mysterious Outpost": [
+    [0, "", "A structure that doesn't match anything on your planetary scans."],
+    [300, "", "Someone built this here and didn't want visitors."],
+    [0, "act", "Use Data Spike to enter. Recover 1 Radio Fragment."],
+  ],
+  Fuselage: [
+    [0, "", "An intact hull section from the Endymion 7. May contain cargo."],
+    [0, "act", "Draw an Event card."],
+  ],
+  "Wreckage Field": [
+    [
+      0,
+      "",
+      "The Endymion 7 broke into several pieces in the upper atmosphere.",
+    ],
+    [
+      0,
+      "",
+      "Debris scattered across the terrain — hazardous, but potentially useful.",
+    ],
+    [0, "act", "Draw an Event card."],
+  ],
+  "Recovered Terminal": [
+    [0, "", "A terminal still drawing power from an unknown source."],
+    [0, "act", "Draw an Equipment card."],
+  ],
+  Cache: [
+    [
+      0,
+      "",
+      "A supply cache half-buried in the sand. The seal has been broken.",
+    ],
+    [500, "act", "Roll 1 die."],
+    [0, "good", "1–2: +1 Food"],
+    [0, "good", "3–4: +2 Food"],
+    [0, "good", "5–6: +3 Food"],
+  ],
+  Passage: [
+    [
+      0,
+      "",
+      "A route through the canyon. Something passed through here recently.",
+    ],
+    [0, "act", "Draw an Event card."],
+  ],
+  "Bloody Passage": [
+    [
+      0,
+      "",
+      "A piece of the ship wedged in a canyon. Signs of violence inside.",
+    ],
+    [0, "act", "Draw an Event card."],
+  ],
+  "Spore Bog": [
+    [
+      0,
+      "",
+      "A murky wetland choked with fungal growths. Spores drift like ash.",
+    ],
+    [300, "", "A sickly light pulses from beneath the surface."],
+    [0, "act", "Draw an Event card."],
+  ],
+  "Bioluminescent Fen": [
+    [
+      0,
+      "",
+      "A hauntingly alien marsh. Wispy plants pulse with soft teal light.",
+    ],
+    [
+      300,
+      "",
+      "The mist hangs low — eerie, but strangely serene. You stop to rest here.",
+    ],
+    [0, "good", "Recover 1 Health. O\u2082 flip skipped this round."],
+  ],
+  "Nest Site": [
+    [
+      0,
+      "",
+      "A shallow crater lined with leathery alien eggs. Something large nested here.",
+    ],
+    [
+      300,
+      "",
+      "You move closer to see if you can get a reading from one of the eggs.",
+    ],
+    [300, "act", "Roll 1 die."],
+  ],
+  "Hive Mound": [
+    [
+      0,
+      "",
+      "A towering biological mound from one of the planet's native species. The tunnels inside shift and pulse. You don't like the look of this.",
+    ],
+    [0, "", "As you draw near, a horde of insectoid creatures rush you."],
+    [0, "act", "Roll 3 dice."],
+  ],
+  "Thermal Vent": [
+    [
+      0,
+      "",
+      "Fractured ground. Jets of superheated gas vent in slow rhythmic bursts.",
+    ],
+    [300, "", "Heat distortion and sulfur in the air."],
+    [0, "act", "Draw an Event card."],
+  ],
+  "Antimatter Chamber": [
+    [
+      0,
+      "",
+      "A buried alien structure. A sphere of crackling energy floats in suspension.",
+    ],
+    [
+      0,
+      "act",
+      "All crew are pulled to this tile. Each player rolls. 1–3: pull free · 4–6: Tech destroyed.",
+    ],
+  ],
+  "Stasis Pod": [
+    [
+      0,
+      "",
+      "The ship's stasis pod. A chance at survival — but it holds only one.",
+    ],
+    [
+      300,
+      "act",
+      "Skip Resource Flip each round. Cannot move or interact. Exit any time.",
+    ],
+  ],
+  "Temporal Rift": [
+    [0, "", "An unexplained spacetime distortion. Past and future flicker."],
+    [300, "act", "Roll 1 die."],
+    [0, "crit", "1\u20133: lose that many Food."],
+    [0, "good", "4\u20136: recover that many Food."],
+  ],
+  Portal: [
+    [
+      0,
+      "",
+      "Abandoned alien technology. A vortex opens — instantaneous transit, origin unknown.",
+    ],
+    [0, "act", "Option: Move immediately to Crash Site. Turn ends."],
+  ],
+  "Gravity Well": [
+    [
+      0,
+      "",
+      "An intense localized gravity field. You're tossed around like a rag doll.",
+    ],
+    [500, "act", "Roll 1 die."],
+    [0, "act", "You will be moved that many steps in a random direction."],
+  ],
+  "Dead Zone": [
+    [
+      0,
+      "",
+      "Strange electricity in the air. All radio transmissions are blocked.",
+    ],
+    [0, "act", "No Signal Roll occurs this round for any player."],
+  ],
+  "Echo Chamber": [
+    [0, "", "The terrain resonates with past events."],
+    [0, "act", "Resolve the most recent Public Event card again in full."],
+  ],
+  "Inversion Field": [
+    [0, "", "Gravity inversion. Resources change hands involuntarily."],
+    [0, "act", "Choose any other player. Swap your Food with theirs."],
+  ],
+  "Ship Section": [
+    [0, "", "A section of the Endymion 7 that came down separately."],
+    [300, "", "Emergency systems appear to be still online."],
+    [0, "act", "Roll 1 die."],
+    [0, "good", "1\u20132: Food"],
+    [0, "sys", "3\u20134: Oxygen"],
+    [0, "crit", "5\u20136: Health"],
+  ],
 };
 
 // ═══════════════════════════════════════════════════════════════
 // GUIDANCE MODE
 // ═══════════════════════════════════════════════════════════════
-let guidanceMode=true;
-let guidanceSeen=new Set(); // milestone keys shown this session — reset on new game
-let _inGuidance=false;
+let guidanceMode = true;
+let guidanceSeen = new Set(); // milestone keys shown this session — reset on new game
+let _inGuidance = false;
 
-function toggleGuidance(){
-  const cb=document.getElementById('e7guidance-toggle');
-  guidanceMode=cb?cb.checked:!guidanceMode;
-  sfx(guidanceMode?'check_on':'check_off');
-  document.querySelectorAll('#e7log .e7-guide').forEach(el=>el.classList.toggle('hidden',!guidanceMode));
+function toggleGuidance() {
+  const cb = document.getElementById("e7guidance-toggle");
+  guidanceMode = cb ? cb.checked : !guidanceMode;
+  sfx(guidanceMode ? "check_on" : "check_off");
+  document
+    .querySelectorAll("#e7log .e7-guide")
+    .forEach((el) => el.classList.toggle("hidden", !guidanceMode));
 }
 
-function guidance(key, fn){
-  if(!guidanceMode||guidanceSeen.has(key))return;
+function guidance(key, fn) {
+  if (!guidanceMode || guidanceSeen.has(key)) return;
   guidanceSeen.add(key);
   //_play('hint.wav');
-  _inGuidance=true;
+  _inGuidance = true;
   fn();
-  _inGuidance=false;
+  _inGuidance = false;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // CUSTOM TOOLTIP ENGINE
 // ═══════════════════════════════════════════════════════════════
-(function(){
-  const tip=document.getElementById('tip-custom');
-  let visible=false,delayTimer=null;
-  function pos(x,y){
-    const pad=14,tw=tip.offsetWidth,th=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
-    let lx=x+pad,ly=y+pad;
-    if(lx+tw>vw-pad)lx=x-tw-pad;
-    if(ly+th>vh-pad)ly=y-th-pad;
-    tip.style.left=lx+'px';tip.style.top=ly+'px';
+(function () {
+  const tip = document.getElementById("tip-custom");
+  let visible = false,
+    delayTimer = null;
+  function pos(x, y) {
+    const pad = 14,
+      tw = tip.offsetWidth,
+      th = tip.offsetHeight,
+      vw = window.innerWidth,
+      vh = window.innerHeight;
+    let lx = x + pad,
+      ly = y + pad;
+    if (lx + tw > vw - pad) lx = x - tw - pad;
+    if (ly + th > vh - pad) ly = y - th - pad;
+    tip.style.left = lx + "px";
+    tip.style.top = ly + "px";
   }
-  function show(text,x,y){tip.textContent=text;tip.style.display='block';visible=true;pos(x,y);}
-  function hide(){clearTimeout(delayTimer);delayTimer=null;tip.style.display='none';visible=false;}
-  document.addEventListener('mouseover',e=>{
-    const el=e.target.closest('[data-tooltip]');
-    if(el){
+  function show(text, x, y) {
+    tip.textContent = text;
+    tip.style.display = "block";
+    visible = true;
+    pos(x, y);
+  }
+  function hide() {
+    clearTimeout(delayTimer);
+    delayTimer = null;
+    tip.style.display = "none";
+    visible = false;
+  }
+  document.addEventListener("mouseover", (e) => {
+    const el = e.target.closest("[data-tooltip]");
+    if (el) {
       clearTimeout(delayTimer);
-      delayTimer=setTimeout(()=>show(el.dataset.tooltip,e.clientX,e.clientY),1000);
+      delayTimer = setTimeout(
+        () => show(el.dataset.tooltip, e.clientX, e.clientY),
+        1000,
+      );
     } else hide();
   });
-  document.addEventListener('mousemove',e=>{if(visible)pos(e.clientX,e.clientY);});
-  document.addEventListener('mouseleave',()=>hide());
+  document.addEventListener("mousemove", (e) => {
+    if (visible) pos(e.clientX, e.clientY);
+  });
+  document.addEventListener("mouseleave", () => hide());
 })();
 
 // ═══════════════════════════════════════════════════════════════
 // GAME STATE
 // ═══════════════════════════════════════════════════════════════
-let G=null, cardUid=0;
-let pendingNames=[], pendingPortraits=[];
-let addSynth=false;
-let viewedPlayer=0;
-function cp(){return G.players[G.currentPlayer];}
+let G = null,
+  cardUid = 0;
+let pendingNames = [],
+  pendingPortraits = [];
+let addSynth = false;
+let viewedPlayer = 0;
+function cp() {
+  return G.players[G.currentPlayer];
+}
 
-function dealEquipment(){
-  const pool=[...EQ_CARDS,...EQ_CARDS,...EQ_CARDS];
-  for(let i=pool.length-1;i>0;i--){const j=0|Math.random()*(i+1);[pool[i],pool[j]]=[pool[j],pool[i]];}
+function dealEquipment() {
+  const pool = [...EQ_CARDS, ...EQ_CARDS, ...EQ_CARDS];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = 0 | (Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
   return pool;
 }
 
-function newGame(names, portraits, placedMap){
-  _tilesDirty=true;_dynGroup=null;_lastRenderW=0;_lastRenderH=0;
-  const tiles=new Map();
+function newGame(names, portraits, placedMap) {
+  _tilesDirty = true;
+  _dynGroup = null;
+  _lastRenderW = 0;
+  _lastRenderH = 0;
+  const tiles = new Map();
   // Use builder placed map or defaults
-  if(placedMap && placedMap.size>0){
-    placedMap.forEach((info,k)=>{
-      tiles.set(k,{...info,type:'crash_site',revealed:true,short:info.short||info.name.toUpperCase().slice(0,5)});
+  if (placedMap && placedMap.size > 0) {
+    placedMap.forEach((info, k) => {
+      tiles.set(k, {
+        ...info,
+        type: "crash_site",
+        revealed: true,
+        short: info.short || info.name.toUpperCase().slice(0, 5),
+      });
     });
   } else {
-    CRASH_HEXES_DEFAULT.forEach(h=>tiles.set(hk(h.q,h.r),{...h,type:'crash_site',revealed:true}));
+    CRASH_HEXES_DEFAULT.forEach((h) =>
+      tiles.set(hk(h.q, h.r), { ...h, type: "crash_site", revealed: true }),
+    );
   }
-  const eqDeck=dealEquipment();
-  const players=names.map((name,i)=>{
-    const equipment=eqDeck.splice(0,3).map(c=>({...c,uid:++cardUid}));
-    const portrait=(portraits&&portraits[i])||CREW_PORTRAITS[i%CREW_PORTRAITS.length].name;
-    return{id:i,name,color:PCOLORS[i],portrait,q:0,r:0,food:5,o2:3,health:3,
-           radioFragments:0,equipment,incapacitated:0,alive:true,location:'Crash Site',skipO2:false,
-           inStasis:false,signalArrayRounds:0,soloRescueActive:false,rfExtractionActive:false,
-           scannerUsed:false,scannerCharges:3,rebreatherCycle:false,stunned:false,lockerUsedThisVisit:false,medBayHealedThisRound:false};
+  const eqDeck = dealEquipment();
+  const players = names.map((name, i) => {
+    const equipment = eqDeck
+      .splice(0, 3)
+      .map((c) => ({ ...c, uid: ++cardUid }));
+    const portrait =
+      (portraits && portraits[i]) ||
+      CREW_PORTRAITS[i % CREW_PORTRAITS.length].name;
+    return {
+      id: i,
+      name,
+      color: PCOLORS[i],
+      portrait,
+      q: 0,
+      r: 0,
+      food: 5,
+      o2: 3,
+      health: 3,
+      radioFragments: 0,
+      equipment,
+      incapacitated: 0,
+      alive: true,
+      location: "Crash Site",
+      skipO2: false,
+      inStasis: false,
+      signalArrayRounds: 0,
+      soloRescueActive: false,
+      rfExtractionActive: false,
+      scannerUsed: false,
+      scannerCharges: 3,
+      rebreatherCycle: false,
+      stunned: false,
+      lockerUsedThisVisit: false,
+      medBayHealedThisRound: false,
+    };
   });
-  if(addSynth){
-    players.push({id:players.length,name:'IRIS',color:SYNTH_COLOR,portrait:'iris',
-      q:0,r:0,battery:10,food:0,o2:0,health:0,
-      radioFragments:0,equipment:[],incapacitated:0,alive:true,location:'Crash Site',
-      skipO2:true,inStasis:false,signalArrayRounds:0,soloRescueActive:false,
-      rfExtractionActive:false,scannerUsed:false,scannerCharges:0,rebreatherCycle:false,
-      stunned:false,isSynth:true,cpu:true,corrupted:false,deactivated:false});
+  if (addSynth) {
+    players.push({
+      id: players.length,
+      name: "IRIS",
+      color: SYNTH_COLOR,
+      portrait: "iris",
+      q: 0,
+      r: 0,
+      battery: 10,
+      food: 0,
+      o2: 0,
+      health: 0,
+      radioFragments: 0,
+      equipment: [],
+      incapacitated: 0,
+      alive: true,
+      location: "Crash Site",
+      skipO2: true,
+      inStasis: false,
+      signalArrayRounds: 0,
+      soloRescueActive: false,
+      rfExtractionActive: false,
+      scannerUsed: false,
+      scannerCharges: 0,
+      rebreatherCycle: false,
+      stunned: false,
+      isSynth: true,
+      cpu: true,
+      corrupted: false,
+      deactivated: false,
+    });
   }
-  const evtDeck=buildEventDeck();
-  G={players,currentPlayer:0,tiles,terrainDeck:buildTerrainDeck(),
-     eqDeck,eqDeckCount:eqDeck.length,evtDeck,evtDeckCount:evtDeck.length,
-     radioFragmentsActivated:0,turn:1,phase:'roll',movementLeft:0,reach:new Map(),tileActionUsed:false,signalRolled:false,cargoHold:Math.min(players.filter(p=>!p.isSynth).length,3)*5,lastPublicEvt:null,jammerActive:false};
+  const evtDeck = buildEventDeck();
+  G = {
+    players,
+    currentPlayer: 0,
+    tiles,
+    terrainDeck: buildTerrainDeck(),
+    eqDeck,
+    eqDeckCount: eqDeck.length,
+    evtDeck,
+    evtDeckCount: evtDeck.length,
+    radioFragmentsActivated: 0,
+    turn: 1,
+    phase: "roll",
+    movementLeft: 0,
+    reach: new Map(),
+    tileActionUsed: false,
+    signalRolled: false,
+    cargoHold: Math.min(players.filter((p) => !p.isSynth).length, 3) * 5,
+    lastPublicEvt: null,
+    jammerActive: false,
+  };
   expandFrontier();
 }
 
 // ═══════════════════════════════════════════════════════════════
 // TERRAIN DECK & FRONTIER  (capped at 43)
 // ═══════════════════════════════════════════════════════════════
-function countTerrainTiles(){
-  let n=0;
-  for(const[,t]of G.tiles){if(t.type==='face_down'||t.type==='terrain'||t.type==='anomaly'||t.type==='ship_section')n++;}
+function countTerrainTiles() {
+  let n = 0;
+  for (const [, t] of G.tiles) {
+    if (
+      t.type === "face_down" ||
+      t.type === "terrain" ||
+      t.type === "anomaly" ||
+      t.type === "ship_section"
+    )
+      n++;
+  }
   return n;
 }
 
-function expandFrontier(){
+function expandFrontier() {
   markTilesDirty();
-  const MAX_TERRAIN=43;
-  for(const[k,t]of G.tiles){
-    if(!t.revealed)continue;
-    const[q,r]=hparse(k);
-    for(const[nq,nr]of hnbr(q,r)){
-      const nk=hk(nq,nr);
-      if(!G.tiles.has(nk)){
-        if(countTerrainTiles()<MAX_TERRAIN){
-          G.tiles.set(nk,{q:nq,r:nr,type:'face_down',revealed:false,pois:[]});
+  const MAX_TERRAIN = 43;
+  for (const [k, t] of G.tiles) {
+    if (!t.revealed) continue;
+    const [q, r] = hparse(k);
+    for (const [nq, nr] of hnbr(q, r)) {
+      const nk = hk(nq, nr);
+      if (!G.tiles.has(nk)) {
+        if (countTerrainTiles() < MAX_TERRAIN) {
+          G.tiles.set(nk, {
+            q: nq,
+            r: nr,
+            type: "face_down",
+            revealed: false,
+            pois: [],
+          });
         }
       }
     }
   }
 }
 
-function revealAt(q,r){
-  const k=hk(q,r);const t=G.tiles.get(k);if(!t||t.revealed)return;
+function revealAt(q, r) {
+  const k = hk(q, r);
+  const t = G.tiles.get(k);
+  if (!t || t.revealed) return;
   markTilesDirty();
-  if(!G.terrainDeck.length){G.tiles.set(k,{...t,type:'terrain',revealed:true,pois:['Wreckage Field'],investigatedCount:0});sfxTile(G.tiles.get(k));expandFrontier();return;}
-  const drawn=G.terrainDeck.pop();
-  G.tiles.set(k,{...t,...drawn,q,r,revealed:true,investigatedCount:0});
-  const nt=G.tiles.get(k);
+  if (!G.terrainDeck.length) {
+    G.tiles.set(k, {
+      ...t,
+      type: "terrain",
+      revealed: true,
+      pois: ["Wreckage Field"],
+      investigatedCount: 0,
+    });
+    sfxTile(G.tiles.get(k));
+    expandFrontier();
+    return;
+  }
+  const drawn = G.terrainDeck.pop();
+  G.tiles.set(k, {
+    ...t,
+    ...drawn,
+    q,
+    r,
+    revealed: true,
+    investigatedCount: 0,
+  });
+  const nt = G.tiles.get(k);
   sfxTile(nt);
-  if(nt.type==='anomaly')addLog(`Tile revealed: Anomaly — ${nt.anomaly}`,'tile');
-  else if(nt.type==='ship_section')addLog('Ship Section discovered!','tile');
-  else addLog(`Tile revealed: ${nt.pois.join(', ')}`,'tile');
+  if (nt.type === "anomaly")
+    addLog(`Tile revealed: Anomaly — ${nt.anomaly}`, "tile");
+  else if (nt.type === "ship_section")
+    addLog("Ship Section discovered!", "tile");
+  else addLog(`Tile revealed: ${nt.pois.join(", ")}`, "tile");
   expandFrontier();
 }
 
-function tileName(t){
-  if(!t)return'Unknown';if(t.name)return t.name;if(t.type==='anomaly')return t.anomaly||'Anomaly';
-  if(t.type==='ship_section')return'Ship Section';if(t.pois&&t.pois.length)return t.pois[0];return'Terrain';
+function tileName(t) {
+  if (!t) return "Unknown";
+  if (t.name) return t.name;
+  if (t.type === "anomaly") return t.anomaly || "Anomaly";
+  if (t.type === "ship_section") return "Ship Section";
+  if (t.pois && t.pois.length) return t.pois[0];
+  return "Terrain";
 }
 
 // ═══════════════════════════════════════════════════════════════
 // TILE REVEAL + EVENT DRAW
 // ═══════════════════════════════════════════════════════════════
-function setTileHeroSprite(el,t){
-  const img=getTileImg(t);
-  if(!img){el.style.backgroundImage='none';return;}
-  el.style.backgroundImage=`url(${img})`;
-  el.style.backgroundSize='cover';
-  el.style.backgroundPosition='center';
+function setTileHeroSprite(el, t) {
+  const img = getTileImg(t);
+  if (!img) {
+    el.style.backgroundImage = "none";
+    return;
+  }
+  el.style.backgroundImage = `url(${img})`;
+  el.style.backgroundSize = "cover";
+  el.style.backgroundPosition = "center";
 }
 
-function tileImgHtml(t){
-  const img=getTileImg(t);
-  if(!img)return'';
+function tileImgHtml(t) {
+  const img = getTileImg(t);
+  if (!img) return "";
   return `<div style="width:200px;height:140px;background:url(${img}) center/cover no-repeat;border-radius:4px;margin:0 auto 10px;overflow:hidden;display:block"></div>`;
 }
 
-let _trDescTimers=[];
-function trDesc(steps,charDelay=15){
-  _trDescTimers.forEach(id=>clearTimeout(id));
-  _trDescTimers=[];
-  const el=document.getElementById('tr-desc');
-  el.innerHTML='';
+let _trDescTimers = [];
+function trDesc(steps, charDelay = 15) {
+  _trDescTimers.forEach((id) => clearTimeout(id));
+  _trDescTimers = [];
+  const el = document.getElementById("tr-desc");
+  el.innerHTML = "";
   // Patch: collect timer IDs from this call
-  const origSet=window.setTimeout;
-  const ids=[];
-  window.setTimeout=(fn,ms)=>{const id=origSet(fn,ms);ids.push(id);_trDescTimers=ids;return id;};
-  termSeq(el,Array.isArray(steps[0])?steps:[[0,'',steps]],charDelay,100);
-  window.setTimeout=origSet;
+  const origSet = window.setTimeout;
+  const ids = [];
+  window.setTimeout = (fn, ms) => {
+    const id = origSet(fn, ms);
+    ids.push(id);
+    _trDescTimers = ids;
+    return id;
+  };
+  termSeq(
+    el,
+    Array.isArray(steps[0]) ? steps : [[0, "", steps]],
+    charDelay,
+    100,
+  );
+  window.setTimeout = origSet;
 }
-function showTileRevealModal(t, onDismiss){
+function showTileRevealModal(t, onDismiss) {
   let title;
-  let steps=[];
-  if(t.type==='anomaly'){
-    title=t.anomaly||'Anomaly';
-    steps=[...(TILE_TIPS[t.anomaly]||[[0,'','An anomaly of unknown origin.']])];
-  } else if(t.type==='ship_section'){
-    title='Ship Section — Endymion 7';
-    steps=[...TILE_TIPS['Ship Section']];
+  let steps = [];
+  if (t.type === "anomaly") {
+    title = t.anomaly || "Anomaly";
+    steps = [
+      ...(TILE_TIPS[t.anomaly] || [[0, "", "An anomaly of unknown origin."]]),
+    ];
+  } else if (t.type === "ship_section") {
+    title = "Ship Section — Endymion 7";
+    steps = [...TILE_TIPS["Ship Section"]];
   } else {
-    title=t.pois.join(' \u00b7 ');
-    t.pois.forEach(poi=>{if(TILE_TIPS[poi])steps.push(...TILE_TIPS[poi]);});
+    title = t.pois.join(" \u00b7 ");
+    t.pois.forEach((poi) => {
+      if (TILE_TIPS[poi]) steps.push(...TILE_TIPS[poi]);
+    });
   }
-  if(t.requiresTool&&!t.radioFragment){
-    const p=cp();
-    const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
-    const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
-    const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. You can enter.`:`\u25c8 Requires ${toolName} to enter.`]);
+  if (t.requiresTool && !t.radioFragment) {
+    const p = cp();
+    const TOOL_NAMES = {
+      lockpick: "Lockpick",
+      plasma_cutter: "Plasma Cutter",
+      data_spike: "Data Spike",
+    };
+    const toolName = TOOL_NAMES[t.requiresTool] || t.requiresTool;
+    const hasTool =
+      p.equipment && p.equipment.some((c) => c.id === t.requiresTool);
+    steps.push([
+      0,
+      hasTool ? "good" : "crit",
+      hasTool
+        ? `\u25c8 You have a ${toolName}. You can enter.`
+        : `\u25c8 Requires ${toolName} to enter.`,
+    ]);
   }
-  if(t.radioFragment&&!t.requiresTool){
-    const p=cp();p.radioFragments++;sfx('fragment');t.radioFragment=false;markTilesDirty();
-    addLog(`${p.name} recovered a Radio Fragment.`,'frag');
-    steps.push([0,'good','\u25c8 Radio Fragment recovered.']);
-    guidance('first_rf',()=>{
+  if (t.radioFragment && !t.requiresTool) {
+    const p = cp();
+    p.radioFragments++;
+    sfx("fragment");
+    t.radioFragment = false;
+    markTilesDirty();
+    addLog(`${p.name} recovered a Radio Fragment.`, "frag");
+    steps.push([0, "good", "\u25c8 Radio Fragment recovered."]);
+    guidance("first_rf", () => {
       e7Seq([
-        [0, 'div', null],
-        [0, 'sys', '> Radio Fragment recovered.'],
-        [0, '',    'Bring it to the SIGNAL ARRAY to activate. Each activation lowers the threshold needed to establish a signal.'],
+        [0, "div", null],
+        [0, "sys", "> Radio Fragment recovered."],
+        [
+          0,
+          "",
+          "Bring it to the SIGNAL ARRAY to activate. Each activation lowers the threshold needed to establish a signal.",
+        ],
       ]);
     });
-  } else if(t.radioFragment&&t.requiresTool){
-    const p=cp();
-    const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
-    const toolName=TOOL_NAMES[t.requiresTool]||t.requiresTool;
-    const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-    steps.push([0,hasTool?'good':'crit',hasTool?`\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`:`\u25c8 Requires ${toolName} to access the Radio Fragment.`]);
-    if(!hasTool){guidance('first_tool_tile',()=>{e7Seq([[0,'div',null],[0,'sys',`> Access denied — ${toolName} required.`],[0,'','Some tiles are locked behind specific tools. Tools are found as equipment card draws. If you find a Lockpick, Plasma Cutter, or Data Spike, hold onto it — certain tiles contain Radio Fragments that can only be reached with the right tool.']]);});}
+  } else if (t.radioFragment && t.requiresTool) {
+    const p = cp();
+    const TOOL_NAMES = { lockpick: "Lockpick", plasma_cutter: "Plasma Cutter" };
+    const toolName = TOOL_NAMES[t.requiresTool] || t.requiresTool;
+    const hasTool =
+      p.equipment && p.equipment.some((c) => c.id === t.requiresTool);
+    steps.push([
+      0,
+      hasTool ? "good" : "crit",
+      hasTool
+        ? `\u25c8 You have a ${toolName}. Use it to recover the Radio Fragment.`
+        : `\u25c8 Requires ${toolName} to access the Radio Fragment.`,
+    ]);
+    if (!hasTool) {
+      guidance("first_tool_tile", () => {
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", `> Access denied — ${toolName} required.`],
+          [
+            0,
+            "",
+            "Some tiles are locked behind specific tools. Tools are found as equipment card draws. If you find a Lockpick, Plasma Cutter, or Data Spike, hold onto it — certain tiles contain Radio Fragments that can only be reached with the right tool.",
+          ],
+        ]);
+      });
+    }
   }
   // Toxic tile — inject health-loss indicator into steps
-  const isToxic=t.pois?.includes('Spore Bog')||t.pois?.includes('Thermal Vent');
-  let _hasSuit=false;
-  if(isToxic){
-    const p=cp();
-    _hasSuit=p.equipment.some(c=>c.id==='hazard_suit');
-    let lastAct=-1;
-    for(let i=0;i<steps.length;i++)if(steps[i][1]==='act')lastAct=i;
-    if(lastAct!==-1)steps.splice(lastAct,0,[0,'crit','\u25c8 Lose 1 Health.']);
-    else steps.push([0,'crit','\u25c8 Lose 1 Health.']);
+  const isToxic =
+    t.pois?.includes("Spore Bog") || t.pois?.includes("Thermal Vent");
+  let _hasSuit = false;
+  if (isToxic) {
+    const p = cp();
+    _hasSuit = p.equipment.some((c) => c.id === "hazard_suit");
+    let lastAct = -1;
+    for (let i = 0; i < steps.length; i++)
+      if (steps[i][1] === "act") lastAct = i;
+    if (lastAct !== -1)
+      steps.splice(lastAct, 0, [0, "crit", "\u25c8 Lose 1 Health."]);
+    else steps.push([0, "crit", "\u25c8 Lose 1 Health."]);
   }
   // Populate overlay
-  const isAnomaly=t.type==='anomaly';
-  const trov=document.getElementById('trov');
-  const tileImg=getTileImg(t,'overlay');
-  trov.style.backgroundImage=tileImg?`url(${tileImg})`:'none';
-  document.getElementById('tr-name').textContent=title.toUpperCase();
-  trDesc(steps.length?steps:[[0,'','Unknown terrain.']]);
-  const deck=document.getElementById('tr-deck');
-  const actionsEl=document.getElementById('tr-actions');
-  actionsEl.innerHTML='';
-  document.getElementById('trov-cancel').style.display='none';
-  const dismiss=()=>{
-    trov.onclick=null;
-    deck.onclick=null;
-    actionsEl.innerHTML='';
-    trov.classList.remove('show','anomaly-mode');
-    trov.style.display='none';
-    trov.style.backgroundImage='';
-    document.getElementById('trov-suit-blocker').classList.remove('dropping');
-    if(onDismiss)onDismiss();
-    else if(t.noEvent||t.type==='ship_section'||t.type==='anomaly'||t.pois?.includes('Cache')){
-      if(t.pois?.includes('Bioluminescent Fen')){
-        const p=cp();
-        if(p.health<3){p.health++;sfx('health_up');addLog(`${p.name} rested in the Fen. Health: ${p.health}/3.`,'good');}
-        p.skipO2=true;addLog('Bioluminescent Fen: O\u2082 flip skipped this turn.','good');
+  const isAnomaly = t.type === "anomaly";
+  const trov = document.getElementById("trov");
+  const tileImg = getTileImg(t, "overlay");
+  trov.style.backgroundImage = tileImg ? `url(${tileImg})` : "none";
+  document.getElementById("tr-name").textContent = title.toUpperCase();
+  trDesc(steps.length ? steps : [[0, "", "Unknown terrain."]]);
+  const deck = document.getElementById("tr-deck");
+  const actionsEl = document.getElementById("tr-actions");
+  actionsEl.innerHTML = "";
+  document.getElementById("trov-cancel").style.display = "none";
+  const dismiss = () => {
+    trov.onclick = null;
+    deck.onclick = null;
+    actionsEl.innerHTML = "";
+    trov.classList.remove("show", "anomaly-mode");
+    trov.style.display = "none";
+    trov.style.backgroundImage = "";
+    document.getElementById("trov-suit-blocker").classList.remove("dropping");
+    if (onDismiss) onDismiss();
+    else if (
+      t.noEvent ||
+      t.type === "ship_section" ||
+      t.type === "anomaly" ||
+      t.pois?.includes("Cache")
+    ) {
+      if (t.pois?.includes("Bioluminescent Fen")) {
+        const p = cp();
+        if (p.health < 3) {
+          p.health++;
+          sfx("health_up");
+          addLog(`${p.name} rested in the Fen. Health: ${p.health}/3.`, "good");
+        }
+        p.skipO2 = true;
+        addLog("Bioluminescent Fen: O\u2082 flip skipped this turn.", "good");
       }
-      updateUI();render();
-    }
-    else{
-      if(t.pois?.includes('Cave')){cp().skipO2=true;addLog('Cave shelter: O\u2082 flip skipped this turn.','good');}
-      if(t.pois?.includes('Spore Bog')||t.pois?.includes('Thermal Vent')){
-        const p=cp();
-        const suitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
-        if(suitIdx!==-1){p.equipment.splice(suitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,'good');}
-        else{if(p.health>0){p.health--;sfx('health_down');}addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
+      updateUI();
+      render();
+    } else {
+      if (t.pois?.includes("Cave")) {
+        cp().skipO2 = true;
+        addLog("Cave shelter: O\u2082 flip skipped this turn.", "good");
+      }
+      if (t.pois?.includes("Spore Bog") || t.pois?.includes("Thermal Vent")) {
+        const p = cp();
+        const suitIdx = p.equipment.findIndex((c) => c.id === "hazard_suit");
+        if (suitIdx !== -1) {
+          p.equipment.splice(suitIdx, 1);
+          addLog(
+            `${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,
+            "good",
+          );
+        } else {
+          if (p.health > 0) {
+            p.health--;
+            sfx("health_down");
+          }
+          addLog(
+            `${p.name} suffered toxic exposure. Health: ${p.health}/3.`,
+            "crit",
+          );
+        }
       }
       drawTileEvent(t);
     }
   };
-  if(t.type==='ship_section'){
-    deck.style.display='none';
-    trov.onclick=null;
-    const dieWrap=make3DDie('idle');
-    dieWrap.style.cssText='margin:0 auto;';
+  if (t.type === "ship_section") {
+    deck.style.display = "none";
+    trov.onclick = null;
+    const dieWrap = make3DDie("idle");
+    dieWrap.style.cssText = "margin:0 auto;";
     actionsEl.appendChild(dieWrap);
-    dieWrap.onclick=()=>{
-      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
-      const val=1+(0|Math.random()*6);
-      setTimeout(()=>{
-        actionsEl.innerHTML='';
-        const resDie=makeResultDie(val);
-        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
+    dieWrap.onclick = () => {
+      sfx("dice_roll");
+      dieWrap.className = "td-die-wrap rolling";
+      dieWrap.onclick = null;
+      const val = 1 + (0 | (Math.random() * 6));
+      setTimeout(() => {
+        actionsEl.innerHTML = "";
+        const resDie = makeResultDie(val);
+        resDie.style.cssText =
+          "width:52px;height:52px;margin:0 auto;display:block;";
         actionsEl.appendChild(resDie);
-        const p=cp();
-        let outcome='';
-        if(val<=2){const gained=Math.min(15-p.food,3);p.food+=gained;outcome=`Rolled ${val} — Food: +${gained}.`;addLog(`${p.name} salvaged ${gained} Food from Ship Section.`,'good');}
-        else if(val<=4){const gained=Math.min(3-p.o2,2);p.o2+=gained;outcome=`Rolled ${val} — Oxygen: +${gained}.`;addLog(`${p.name} refilled ${gained} O\u2082 from Ship Section.`,'good');}
-        else{if(p.health<3){p.health++;sfx('health_up');outcome=`Rolled ${val} — Health restored.`;addLog(`${p.name} treated at Ship Section. Health: ${p.health}/3.`,'good');}else{outcome=`Rolled ${val} — Health already full.`;addLog(`${p.name} searched Ship Section — health already full.`);}}
-        const outEl=document.createElement('div');
-        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;actionsEl.appendChild(outEl);
-        updateUI();
-        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
-        cont.onclick=dismiss;
-        actionsEl.appendChild(cont);
-      },1500);
-    };
-  } else if(t.pois&&t.pois.includes('Cache')){
-    deck.style.display='none';
-    trov.onclick=null;
-    const dieWrap=make3DDie('idle');
-    dieWrap.style.cssText='margin:0 auto;';
-    actionsEl.appendChild(dieWrap);
-    dieWrap.onclick=()=>{
-      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
-      const val=1+(0|Math.random()*6);
-      setTimeout(()=>{
-        actionsEl.innerHTML='';
-        const resDie=makeResultDie(val);
-        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
-        actionsEl.appendChild(resDie);
-        const p=cp();
-        const yield_=val<=2?1:val<=4?2:3;
-        const gained=Math.min(15-p.food,yield_);
-        p.food+=gained;
-        const outcome=`Rolled ${val} — Food: +${gained}.`;
-        addLog(`${p.name} raided the cache — gained ${gained} Food.`,'good');
-        const outEl=document.createElement('div');
-        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;actionsEl.appendChild(outEl);
-        updateUI();
-        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
-        cont.onclick=dismiss;
-        actionsEl.appendChild(cont);
-      },1500);
-    };
-  } else if(t.pois&&t.pois.includes('Nest Site')){
-    deck.style.display='none';
-    trov.onclick=null;
-    const dieWrap=make3DDie('idle');
-    dieWrap.style.cssText='margin:0 auto;';
-    actionsEl.appendChild(dieWrap);
-    dieWrap.onclick=()=>{
-      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
-      const val=1+(0|Math.random()*6);
-      setTimeout(()=>{
-        actionsEl.innerHTML='';
-        const resDie=makeResultDie(val);
-        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
-        actionsEl.appendChild(resDie);
-        const p=cp();
-        let outcome='';
-        if(val>=4){
-          if(p.health>0){p.health--;sfx('health_down');}
-          outcome=`Rolled ${val} — An egg cracks open. A spider-like creature lunges — lose 1 Health. It vanishes into the terrain.`;
-          addLog(`Nest Site: rolled ${val} — ${p.name} attacked. Health: ${p.health}/3.`,'crit');
+        const p = cp();
+        let outcome = "";
+        if (val <= 2) {
+          const gained = Math.min(15 - p.food, 3);
+          p.food += gained;
+          outcome = `Rolled ${val} — Food: +${gained}.`;
+          addLog(
+            `${p.name} salvaged ${gained} Food from Ship Section.`,
+            "good",
+          );
+        } else if (val <= 4) {
+          const gained = Math.min(3 - p.o2, 2);
+          p.o2 += gained;
+          outcome = `Rolled ${val} — Oxygen: +${gained}.`;
+          addLog(
+            `${p.name} refilled ${gained} O\u2082 from Ship Section.`,
+            "good",
+          );
         } else {
-          outcome=`Rolled ${val} — The nest is undisturbed. Nothing stirs.`;
+          if (p.health < 3) {
+            p.health++;
+            sfx("health_up");
+            outcome = `Rolled ${val} — Health restored.`;
+            addLog(
+              `${p.name} treated at Ship Section. Health: ${p.health}/3.`,
+              "good",
+            );
+          } else {
+            outcome = `Rolled ${val} — Health already full.`;
+            addLog(`${p.name} searched Ship Section — health already full.`);
+          }
+        }
+        const outEl = document.createElement("div");
+        outEl.style.cssText =
+          "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
+        outEl.textContent = outcome;
+        actionsEl.appendChild(outEl);
+        updateUI();
+        const cont = document.createElement("button");
+        cont.className = "mbtn";
+        cont.textContent = "Continue";
+        cont.onclick = dismiss;
+        actionsEl.appendChild(cont);
+      }, 1500);
+    };
+  } else if (t.pois && t.pois.includes("Cache")) {
+    deck.style.display = "none";
+    trov.onclick = null;
+    const dieWrap = make3DDie("idle");
+    dieWrap.style.cssText = "margin:0 auto;";
+    actionsEl.appendChild(dieWrap);
+    dieWrap.onclick = () => {
+      sfx("dice_roll");
+      dieWrap.className = "td-die-wrap rolling";
+      dieWrap.onclick = null;
+      const val = 1 + (0 | (Math.random() * 6));
+      setTimeout(() => {
+        actionsEl.innerHTML = "";
+        const resDie = makeResultDie(val);
+        resDie.style.cssText =
+          "width:52px;height:52px;margin:0 auto;display:block;";
+        actionsEl.appendChild(resDie);
+        const p = cp();
+        const yield_ = val <= 2 ? 1 : val <= 4 ? 2 : 3;
+        const gained = Math.min(15 - p.food, yield_);
+        p.food += gained;
+        const outcome = `Rolled ${val} — Food: +${gained}.`;
+        addLog(`${p.name} raided the cache — gained ${gained} Food.`, "good");
+        const outEl = document.createElement("div");
+        outEl.style.cssText =
+          "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
+        outEl.textContent = outcome;
+        actionsEl.appendChild(outEl);
+        updateUI();
+        const cont = document.createElement("button");
+        cont.className = "mbtn";
+        cont.textContent = "Continue";
+        cont.onclick = dismiss;
+        actionsEl.appendChild(cont);
+      }, 1500);
+    };
+  } else if (t.pois && t.pois.includes("Nest Site")) {
+    deck.style.display = "none";
+    trov.onclick = null;
+    const dieWrap = make3DDie("idle");
+    dieWrap.style.cssText = "margin:0 auto;";
+    actionsEl.appendChild(dieWrap);
+    dieWrap.onclick = () => {
+      sfx("dice_roll");
+      dieWrap.className = "td-die-wrap rolling";
+      dieWrap.onclick = null;
+      const val = 1 + (0 | (Math.random() * 6));
+      setTimeout(() => {
+        actionsEl.innerHTML = "";
+        const resDie = makeResultDie(val);
+        resDie.style.cssText =
+          "width:52px;height:52px;margin:0 auto;display:block;";
+        actionsEl.appendChild(resDie);
+        const p = cp();
+        let outcome = "";
+        if (val >= 4) {
+          if (p.health > 0) {
+            p.health--;
+            sfx("health_down");
+          }
+          outcome = `Rolled ${val} — An egg cracks open. A spider-like creature lunges — lose 1 Health. It vanishes into the terrain.`;
+          addLog(
+            `Nest Site: rolled ${val} — ${p.name} attacked. Health: ${p.health}/3.`,
+            "crit",
+          );
+        } else {
+          outcome = `Rolled ${val} — The nest is undisturbed. Nothing stirs.`;
           addLog(`Nest Site: rolled ${val} — nest undisturbed.`);
         }
-        const outEl=document.createElement('div');
-        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;actionsEl.appendChild(outEl);
+        const outEl = document.createElement("div");
+        outEl.style.cssText =
+          "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
+        outEl.textContent = outcome;
+        actionsEl.appendChild(outEl);
         updateUI();
-        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
-        cont.onclick=dismiss;
+        const cont = document.createElement("button");
+        cont.className = "mbtn";
+        cont.textContent = "Continue";
+        cont.onclick = dismiss;
         actionsEl.appendChild(cont);
-      },1500);
+      }, 1500);
     };
-  } else if(t.pois&&t.pois.includes('Hive Mound')){
-    deck.style.display='none';
-    trov.onclick=null;
-    const diceRow=document.createElement('div');diceRow.style.cssText='display:flex;gap:28px;justify-content:center;width:100%;';
-    const wraps=[];
-    for(let i=0;i<3;i++){const w=make3DDie('idle');diceRow.appendChild(w);wraps.push(w);}
+  } else if (t.pois && t.pois.includes("Hive Mound")) {
+    deck.style.display = "none";
+    trov.onclick = null;
+    const diceRow = document.createElement("div");
+    diceRow.style.cssText =
+      "display:flex;gap:28px;justify-content:center;width:100%;";
+    const wraps = [];
+    for (let i = 0; i < 3; i++) {
+      const w = make3DDie("idle");
+      diceRow.appendChild(w);
+      wraps.push(w);
+    }
     actionsEl.appendChild(diceRow);
-    diceRow.onclick=()=>{
-      if(wraps.some(w=>w.className.includes('rolling')))return;
-      sfx('dice_roll');
-      wraps.forEach(w=>{w.className='td-die-wrap rolling';});
-      diceRow.onclick=null;
-      const vals=[1+(0|Math.random()*6),1+(0|Math.random()*6),1+(0|Math.random()*6)];
-      setTimeout(()=>{
-        sfx('dice_land');
-        actionsEl.innerHTML='';
-        const resRow=document.createElement('div');resRow.style.cssText='display:flex;gap:10px;justify-content:center;';
-        vals.forEach(v=>resRow.appendChild(makeResultDie(v)));
+    diceRow.onclick = () => {
+      if (wraps.some((w) => w.className.includes("rolling"))) return;
+      sfx("dice_roll");
+      wraps.forEach((w) => {
+        w.className = "td-die-wrap rolling";
+      });
+      diceRow.onclick = null;
+      const vals = [
+        1 + (0 | (Math.random() * 6)),
+        1 + (0 | (Math.random() * 6)),
+        1 + (0 | (Math.random() * 6)),
+      ];
+      setTimeout(() => {
+        sfx("dice_land");
+        actionsEl.innerHTML = "";
+        const resRow = document.createElement("div");
+        resRow.style.cssText = "display:flex;gap:10px;justify-content:center;";
+        vals.forEach((v) => resRow.appendChild(makeResultDie(v)));
         actionsEl.appendChild(resRow);
-        const p=cp();
-        const hits=vals.filter(v=>v>=4).length;
-        const suitCount=p.equipment.filter(c=>c.id==='hazard_suit').length;
-        const negated=Math.min(hits,suitCount);
-        let suitsToRemove=negated;
-        p.equipment=p.equipment.filter(c=>{if(c.id==='hazard_suit'&&suitsToRemove>0){suitsToRemove--;return false;}return true;});
-        const damage=hits-negated;
-        const actualDmg=Math.min(p.health,damage);
-        p.health-=actualDmg;
-        if(actualDmg>0)sfx('health_down');
-        let outcome='';
-        if(hits===0){outcome=`Rolled ${vals.join(', ')} — The swarm doesn't reach you.`;addLog('Hive Mound: no hits.');}
-        else if(damage===0){outcome=`Rolled ${vals.join(', ')} — ${hits} hit${hits>1?'s':''}, fully negated by Hazard Suit${negated>1?'s':''}.`;addLog(`Hive Mound: ${hits} hit(s) blocked by suit.`,'good');}
-        else{outcome=`Rolled ${vals.join(', ')} — ${hits} hit${hits>1?'s':''}, ${damage} damage${negated?` (${negated} blocked)`:''}. Health: ${p.health}/3.`;addLog(`Hive Mound: ${p.name} took ${damage} damage. Health: ${p.health}/3.`,'crit');}
-        if(negated>0)addLog(`${p.name}'s Hazard Suit${negated>1?'s':''} absorbed ${negated} hit${negated>1?'s':''}.`,'good');
-        const outEl=document.createElement('div');
-        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;actionsEl.appendChild(outEl);
+        const p = cp();
+        const hits = vals.filter((v) => v >= 4).length;
+        const suitCount = p.equipment.filter(
+          (c) => c.id === "hazard_suit",
+        ).length;
+        const negated = Math.min(hits, suitCount);
+        let suitsToRemove = negated;
+        p.equipment = p.equipment.filter((c) => {
+          if (c.id === "hazard_suit" && suitsToRemove > 0) {
+            suitsToRemove--;
+            return false;
+          }
+          return true;
+        });
+        const damage = hits - negated;
+        const actualDmg = Math.min(p.health, damage);
+        p.health -= actualDmg;
+        if (actualDmg > 0) sfx("health_down");
+        let outcome = "";
+        if (hits === 0) {
+          outcome = `Rolled ${vals.join(", ")} — The swarm doesn't reach you.`;
+          addLog("Hive Mound: no hits.");
+        } else if (damage === 0) {
+          outcome = `Rolled ${vals.join(", ")} — ${hits} hit${hits > 1 ? "s" : ""}, fully negated by Hazard Suit${negated > 1 ? "s" : ""}.`;
+          addLog(`Hive Mound: ${hits} hit(s) blocked by suit.`, "good");
+        } else {
+          outcome = `Rolled ${vals.join(", ")} — ${hits} hit${hits > 1 ? "s" : ""}, ${damage} damage${negated ? ` (${negated} blocked)` : ""}. Health: ${p.health}/3.`;
+          addLog(
+            `Hive Mound: ${p.name} took ${damage} damage. Health: ${p.health}/3.`,
+            "crit",
+          );
+        }
+        if (negated > 0)
+          addLog(
+            `${p.name}'s Hazard Suit${negated > 1 ? "s" : ""} absorbed ${negated} hit${negated > 1 ? "s" : ""}.`,
+            "good",
+          );
+        const outEl = document.createElement("div");
+        outEl.style.cssText =
+          "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
+        outEl.textContent = outcome;
+        actionsEl.appendChild(outEl);
         updateUI();
-        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
-        cont.onclick=dismiss;
+        const cont = document.createElement("button");
+        cont.className = "mbtn";
+        cont.textContent = "Continue";
+        cont.onclick = dismiss;
         actionsEl.appendChild(cont);
-      },1500);
+      }, 1500);
     };
-  } else if(t.pois&&t.pois.includes('Bioluminescent Fen')){
-    deck.style.display='none';
-    trov.onclick=null;
-    const ackBtn=document.createElement('button');ackBtn.className='mbtn';ackBtn.textContent='Acknowledge';
-    ackBtn.onclick=dismiss;
+  } else if (t.pois && t.pois.includes("Bioluminescent Fen")) {
+    deck.style.display = "none";
+    trov.onclick = null;
+    const ackBtn = document.createElement("button");
+    ackBtn.className = "mbtn";
+    ackBtn.textContent = "Acknowledge";
+    ackBtn.onclick = dismiss;
     actionsEl.appendChild(ackBtn);
-  } else if(t.pois&&t.pois.includes('Antimatter Chamber')){
-    deck.style.display='none';
-    trov.onclick=null;
-    let tileQ=null,tileR=null;
-    for(const [k,tile] of G.tiles){if(tile===t){const parts=k.split(',');tileQ=+parts[0];tileR=+parts[1];break;}}
-    const alivePlayers=G.players.filter(pl=>pl.alive&&!pl.inStasis);
-    if(tileQ!==null){
-      alivePlayers.forEach(pl=>{pl.q=tileQ;pl.r=tileR;pl.location=tileName(t);});
-      addLog('Antimatter Chamber: all crew pulled into the field.','crit');
+  } else if (t.pois && t.pois.includes("Antimatter Chamber")) {
+    deck.style.display = "none";
+    trov.onclick = null;
+    let tileQ = null,
+      tileR = null;
+    for (const [k, tile] of G.tiles) {
+      if (tile === t) {
+        const parts = k.split(",");
+        tileQ = +parts[0];
+        tileR = +parts[1];
+        break;
+      }
+    }
+    const alivePlayers = G.players.filter((pl) => pl.alive && !pl.inStasis);
+    if (tileQ !== null) {
+      alivePlayers.forEach((pl) => {
+        pl.q = tileQ;
+        pl.r = tileR;
+        pl.location = tileName(t);
+      });
+      addLog("Antimatter Chamber: all crew pulled into the field.", "crit");
       render();
     }
-    let rolled=0;
-    let arena=null;
-    const ackBtn=document.createElement('button');ackBtn.className='mbtn';ackBtn.textContent='Acknowledge';
-    ackBtn.style.display='none';ackBtn.onclick=()=>{G.lastPublicEvt={_sourceAntimatter:true};if(arena&&arena.parentElement)arena.remove();dismiss();};
+    let rolled = 0;
+    let arena = null;
+    const ackBtn = document.createElement("button");
+    ackBtn.className = "mbtn";
+    ackBtn.textContent = "Acknowledge";
+    ackBtn.style.display = "none";
+    ackBtn.onclick = () => {
+      G.lastPublicEvt = { _sourceAntimatter: true };
+      if (arena && arena.parentElement) arena.remove();
+      dismiss();
+    };
     actionsEl.appendChild(ackBtn);
-    if(!alivePlayers.length){
-      ackBtn.style.display='';
+    if (!alivePlayers.length) {
+      ackBtn.style.display = "";
     } else {
-      const trBox=actionsEl.parentElement;
-      arena=document.createElement('div');
-      arena.style.cssText='display:flex;flex-wrap:wrap;gap:16px;justify-content:center;width:100%;padding:8px 0;';
-      trBox.insertBefore(arena,actionsEl);
-      alivePlayers.forEach(pl=>{
-        const col=document.createElement('div');
-        col.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;min-width:80px;';
-        const port=document.createElement('div');
-        port.className='contest-portrait';
-        port.style.cssText=portBg(pl.portrait,80,80,0,pl.health)+'border-color:'+pl.color+';';
-        const nameEl=document.createElement('div');
-        nameEl.className='contest-name';
-        nameEl.style.color=pl.color;
-        nameEl.textContent=pl.name;
-        const dieContainer=document.createElement('div');
-        dieContainer.style.cssText='width:52px;height:52px;display:flex;align-items:center;justify-content:center;';
-        const die=make3DDie('idle');
-        die.style.cursor='pointer';
+      const trBox = actionsEl.parentElement;
+      arena = document.createElement("div");
+      arena.style.cssText =
+        "display:flex;flex-wrap:wrap;gap:16px;justify-content:center;width:100%;padding:8px 0;";
+      trBox.insertBefore(arena, actionsEl);
+      alivePlayers.forEach((pl) => {
+        const col = document.createElement("div");
+        col.style.cssText =
+          "display:flex;flex-direction:column;align-items:center;gap:8px;min-width:80px;";
+        const port = document.createElement("div");
+        port.className = "contest-portrait";
+        port.style.cssText =
+          portBg(pl.portrait, 80, 80, 0, pl.health) +
+          "border-color:" +
+          pl.color +
+          ";";
+        const nameEl = document.createElement("div");
+        nameEl.className = "contest-name";
+        nameEl.style.color = pl.color;
+        nameEl.textContent = pl.name;
+        const dieContainer = document.createElement("div");
+        dieContainer.style.cssText =
+          "width:52px;height:52px;display:flex;align-items:center;justify-content:center;";
+        const die = make3DDie("idle");
+        die.style.cursor = "pointer";
         dieContainer.appendChild(die);
-        const resultEl=document.createElement('div');
-        resultEl.style.cssText='font-size:.75rem;color:var(--dim);min-height:1.2em;text-align:center;max-width:90px;';
-        resultEl.textContent='click to roll';
-        col.appendChild(port);col.appendChild(nameEl);col.appendChild(dieContainer);col.appendChild(resultEl);
+        const resultEl = document.createElement("div");
+        resultEl.style.cssText =
+          "font-size:.75rem;color:var(--dim);min-height:1.2em;text-align:center;max-width:90px;";
+        resultEl.textContent = "click to roll";
+        col.appendChild(port);
+        col.appendChild(nameEl);
+        col.appendChild(dieContainer);
+        col.appendChild(resultEl);
         arena.appendChild(col);
-        die.onclick=()=>{
-          sfx('dice_roll');die.className='td-die-wrap rolling';die.onclick=null;die.style.cursor='';
-          const val=1+(0|Math.random()*6);
-          setTimeout(()=>{
-            dieContainer.innerHTML='';
-            const res=makeResultDie(val);res.style.cssText='width:52px;height:52px;';
+        die.onclick = () => {
+          sfx("dice_roll");
+          die.className = "td-die-wrap rolling";
+          die.onclick = null;
+          die.style.cursor = "";
+          const val = 1 + (0 | (Math.random() * 6));
+          setTimeout(() => {
+            dieContainer.innerHTML = "";
+            const res = makeResultDie(val);
+            res.style.cssText = "width:52px;height:52px;";
             dieContainer.appendChild(res);
-            if(val>=4){
-              const techItems=pl.equipment.filter(c=>c.cat==='Tech');
-              pl.equipment=pl.equipment.filter(c=>c.cat!=='Tech');
-              resultEl.style.color='#d04040';
-              resultEl.textContent='Tech destroyed.';
-              if(techItems.length)addLog(`Antimatter Chamber: ${pl.name} lost ${techItems.map(c=>c.name).join(', ')}.`,'crit');
+            if (val >= 4) {
+              const techItems = pl.equipment.filter((c) => c.cat === "Tech");
+              pl.equipment = pl.equipment.filter((c) => c.cat !== "Tech");
+              resultEl.style.color = "#d04040";
+              resultEl.textContent = "Tech destroyed.";
+              if (techItems.length)
+                addLog(
+                  `Antimatter Chamber: ${pl.name} lost ${techItems.map((c) => c.name).join(", ")}.`,
+                  "crit",
+                );
             } else {
-              resultEl.style.color='#50c840';
-              resultEl.textContent='Pulled free.';
+              resultEl.style.color = "#50c840";
+              resultEl.textContent = "Pulled free.";
               addLog(`Antimatter Chamber: ${pl.name} pulled free.`);
             }
             updateUI();
-            if(++rolled===alivePlayers.length) ackBtn.style.display='';
-          },1500);
+            if (++rolled === alivePlayers.length) ackBtn.style.display = "";
+          }, 1500);
         };
       });
     }
-  } else if(isAnomaly&&t.anomaly==='Portal'){
-    deck.style.display='none';
-    const p=cp();
-    const useBtn=document.createElement('button');useBtn.className='mbtn pri';useBtn.textContent='Use Portal';
-    useBtn.onclick=()=>{dismiss();p.q=0;p.r=0;p.location='Crash Site';G.movementLeft=0;G.phase='action';addLog(`${p.name} used Portal — returned to Crash Site.`);updateUI();render();};
-    const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Decline';
-    decBtn.onclick=()=>{dismiss();addLog(`${p.name} declined the Portal.`);updateUI();};
-    actionsEl.appendChild(decBtn);actionsEl.appendChild(useBtn);
-  } else if(isAnomaly&&t.anomaly==='Inversion Field'){
-    deck.style.display='none';
-    const p=cp();
-    const others=G.players.filter(pl=>pl.alive&&pl.id!==p.id);
-    if(!others.length){
-      const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Acknowledge';
-      decBtn.onclick=()=>{dismiss();addLog('Inversion Field: no other players to swap with.','act');updateUI();};
+  } else if (isAnomaly && t.anomaly === "Portal") {
+    deck.style.display = "none";
+    const p = cp();
+    const useBtn = document.createElement("button");
+    useBtn.className = "mbtn pri";
+    useBtn.textContent = "Use Portal";
+    useBtn.onclick = () => {
+      dismiss();
+      p.q = 0;
+      p.r = 0;
+      p.location = "Crash Site";
+      G.movementLeft = 0;
+      G.phase = "action";
+      addLog(`${p.name} used Portal — returned to Crash Site.`);
+      updateUI();
+      render();
+    };
+    const decBtn = document.createElement("button");
+    decBtn.className = "mbtn";
+    decBtn.textContent = "Decline";
+    decBtn.onclick = () => {
+      dismiss();
+      addLog(`${p.name} declined the Portal.`);
+      updateUI();
+    };
+    actionsEl.appendChild(decBtn);
+    actionsEl.appendChild(useBtn);
+  } else if (isAnomaly && t.anomaly === "Inversion Field") {
+    deck.style.display = "none";
+    const p = cp();
+    const others = G.players.filter((pl) => pl.alive && pl.id !== p.id);
+    if (!others.length) {
+      const decBtn = document.createElement("button");
+      decBtn.className = "mbtn";
+      decBtn.textContent = "Acknowledge";
+      decBtn.onclick = () => {
+        dismiss();
+        addLog("Inversion Field: no other players to swap with.", "act");
+        updateUI();
+      };
       actionsEl.appendChild(decBtn);
     } else {
-      others.forEach(other=>{
-        const b=document.createElement('button');b.className='mbtn pri';
-        b.textContent=`Swap with ${other.name} (${other.food} Food)`;
-        b.onclick=()=>{dismiss();const tmp=p.food;p.food=other.food;other.food=tmp;addLog(`Inversion Field: ${p.name} swapped Food with ${other.name}.`,'crit');updateUI();render();};
+      others.forEach((other) => {
+        const b = document.createElement("button");
+        b.className = "mbtn pri";
+        b.textContent = `Swap with ${other.name} (${other.food} Food)`;
+        b.onclick = () => {
+          dismiss();
+          const tmp = p.food;
+          p.food = other.food;
+          other.food = tmp;
+          addLog(
+            `Inversion Field: ${p.name} swapped Food with ${other.name}.`,
+            "crit",
+          );
+          updateUI();
+          render();
+        };
         actionsEl.appendChild(b);
       });
-      const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Decline';
-      decBtn.onclick=()=>{dismiss();addLog(`${p.name} declined the Inversion Field.`);updateUI();};
+      const decBtn = document.createElement("button");
+      decBtn.className = "mbtn";
+      decBtn.textContent = "Decline";
+      decBtn.onclick = () => {
+        dismiss();
+        addLog(`${p.name} declined the Inversion Field.`);
+        updateUI();
+      };
       actionsEl.appendChild(decBtn);
     }
-  } else if(isAnomaly&&t.anomaly==='Stasis Pod'){
-    deck.style.display='none';
-    const p=cp();
-    if(p.inStasis){
-      const exitBtn=document.createElement('button');exitBtn.className='mbtn pri';exitBtn.textContent='Exit Stasis';
-      exitBtn.onclick=()=>{dismiss();p.inStasis=false;addLog(`${p.name} exited stasis.`,'act');updateUI();render();};
-      const stayBtn=document.createElement('button');stayBtn.className='mbtn';stayBtn.textContent='Stay in Stasis';
-      stayBtn.onclick=()=>{dismiss();updateUI();render();};
-      actionsEl.appendChild(stayBtn);actionsEl.appendChild(exitBtn);
-    } else {
-      const enterBtn=document.createElement('button');enterBtn.className='mbtn pri';enterBtn.textContent='Enter Stasis';
-      enterBtn.onclick=()=>{dismiss();p.inStasis=true;addLog(`${p.name} entered stasis.`,'act');updateUI();render();};
-      const decBtn=document.createElement('button');decBtn.className='mbtn';decBtn.textContent='Decline';
-      decBtn.onclick=()=>{dismiss();updateUI();render();};
-      actionsEl.appendChild(decBtn);actionsEl.appendChild(enterBtn);
-    }
-  } else if(isAnomaly&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravity Well')){
-    deck.style.display='none';
-    trov.onclick=null;
-    const dieWrap=make3DDie('idle');
-    dieWrap.style.cssText='margin:0 auto;';
-    actionsEl.appendChild(dieWrap);
-    dieWrap.onclick=()=>{
-      sfx('dice_roll');dieWrap.className='td-die-wrap rolling';dieWrap.onclick=null;
-      const val=1+(0|Math.random()*6);
-      setTimeout(()=>{
-        actionsEl.innerHTML='';
-        const resDie=makeResultDie(val);
-        resDie.style.cssText='width:52px;height:52px;margin:0 auto;display:block;';
-        actionsEl.appendChild(resDie);
-        let outcome='';
-        const p=cp();
-        if(t.anomaly==='Temporal Rift'){
-          if(val<=3){const lost=Math.min(p.food,val);p.food-=lost;outcome=`Rolled ${val} — lost ${lost} Food.`;addLog(`Temporal Rift: rolled ${val} — lost ${lost} Food.`,'crit');}
-          else{const gain=Math.min(15-p.food,val);p.food+=gain;outcome=`Rolled ${val} — gained ${gain} Food.`;addLog(`Temporal Rift: rolled ${val} — gained ${gain} Food.`,'good');}
-        } else if(t.anomaly==='Gravity Well'){
-          let q=p.q,r=p.r;
-          for(let i=0;i<val;i++){const d=DIRS[0|Math.random()*6];const nq=q+d[0],nr=r+d[1];if(G.tiles.has(hk(nq,nr))){q=nq;r=nr;}}
-          p.q=q;p.r=r;
-          if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
-          const dest=G.tiles.get(hk(q,r));p.location=tileName(dest);
-          outcome=`Rolled ${val} — thrown to ${p.location}.`;
-          addLog(`Gravity Well: rolled ${val} — ${p.name} thrown to ${p.location}.`,'crit');render();
-        }
-        const outEl=document.createElement('div');
-        outEl.style.cssText='color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;';
-        outEl.textContent=outcome;actionsEl.appendChild(outEl);
+  } else if (isAnomaly && t.anomaly === "Stasis Pod") {
+    deck.style.display = "none";
+    const p = cp();
+    if (p.inStasis) {
+      const exitBtn = document.createElement("button");
+      exitBtn.className = "mbtn pri";
+      exitBtn.textContent = "Exit Stasis";
+      exitBtn.onclick = () => {
+        dismiss();
+        p.inStasis = false;
+        addLog(`${p.name} exited stasis.`, "act");
         updateUI();
-        const cont=document.createElement('button');cont.className='mbtn';cont.textContent='Continue';
-        cont.onclick=()=>{
-          trov.onclick=null;deck.onclick=null;actionsEl.innerHTML='';
-          trov.classList.remove('show','anomaly-mode');trov.style.display='none';trov.style.backgroundImage='';
-          document.getElementById('trov-suit-blocker').classList.remove('dropping');
-          if(t.anomaly==='Gravity Well'){
-            const newTile=G.tiles.get(hk(p.q,p.r));
-            const stillPending=newTile?.requiresTool&&(newTile.radioFragment||newTile.toolReward);
-            const wasInvestigated=(newTile?.investigatedCount||0)>0;
-            const needsDraw=newTile&&!wasInvestigated&&(newTile.type==='terrain'||newTile.type==='ship_section')&&newTile.pois?.length>0||stillPending;
-            if(needsDraw&&!stillPending){newTile.investigatedCount=newTile.pois.length;markTilesDirty();}
-            if(needsDraw)showTileRevealModal(newTile);
-            else if(onDismiss)onDismiss();else{updateUI();render();}
+        render();
+      };
+      const stayBtn = document.createElement("button");
+      stayBtn.className = "mbtn";
+      stayBtn.textContent = "Stay in Stasis";
+      stayBtn.onclick = () => {
+        dismiss();
+        updateUI();
+        render();
+      };
+      actionsEl.appendChild(stayBtn);
+      actionsEl.appendChild(exitBtn);
+    } else {
+      const enterBtn = document.createElement("button");
+      enterBtn.className = "mbtn pri";
+      enterBtn.textContent = "Enter Stasis";
+      enterBtn.onclick = () => {
+        dismiss();
+        p.inStasis = true;
+        addLog(`${p.name} entered stasis.`, "act");
+        updateUI();
+        render();
+      };
+      const decBtn = document.createElement("button");
+      decBtn.className = "mbtn";
+      decBtn.textContent = "Decline";
+      decBtn.onclick = () => {
+        dismiss();
+        updateUI();
+        render();
+      };
+      actionsEl.appendChild(decBtn);
+      actionsEl.appendChild(enterBtn);
+    }
+  } else if (
+    isAnomaly &&
+    (t.anomaly === "Temporal Rift" || t.anomaly === "Gravity Well")
+  ) {
+    deck.style.display = "none";
+    trov.onclick = null;
+    const dieWrap = make3DDie("idle");
+    dieWrap.style.cssText = "margin:0 auto;";
+    actionsEl.appendChild(dieWrap);
+    dieWrap.onclick = () => {
+      sfx("dice_roll");
+      dieWrap.className = "td-die-wrap rolling";
+      dieWrap.onclick = null;
+      const val = 1 + (0 | (Math.random() * 6));
+      setTimeout(() => {
+        actionsEl.innerHTML = "";
+        const resDie = makeResultDie(val);
+        resDie.style.cssText =
+          "width:52px;height:52px;margin:0 auto;display:block;";
+        actionsEl.appendChild(resDie);
+        let outcome = "";
+        const p = cp();
+        if (t.anomaly === "Temporal Rift") {
+          if (val <= 3) {
+            const lost = Math.min(p.food, val);
+            p.food -= lost;
+            outcome = `Rolled ${val} — lost ${lost} Food.`;
+            addLog(`Temporal Rift: rolled ${val} — lost ${lost} Food.`, "crit");
           } else {
-            if(onDismiss)onDismiss();else{updateUI();render();}
+            const gain = Math.min(15 - p.food, val);
+            p.food += gain;
+            outcome = `Rolled ${val} — gained ${gain} Food.`;
+            addLog(
+              `Temporal Rift: rolled ${val} — gained ${gain} Food.`,
+              "good",
+            );
+          }
+        } else if (t.anomaly === "Gravity Well") {
+          let q = p.q,
+            r = p.r;
+          for (let i = 0; i < val; i++) {
+            const d = DIRS[0 | (Math.random() * 6)];
+            const nq = q + d[0],
+              nr = r + d[1];
+            if (G.tiles.has(hk(nq, nr))) {
+              q = nq;
+              r = nr;
+            }
+          }
+          p.q = q;
+          p.r = r;
+          if (!G.tiles.get(hk(q, r))?.revealed) revealAt(q, r);
+          const dest = G.tiles.get(hk(q, r));
+          p.location = tileName(dest);
+          outcome = `Rolled ${val} — thrown to ${p.location}.`;
+          addLog(
+            `Gravity Well: rolled ${val} — ${p.name} thrown to ${p.location}.`,
+            "crit",
+          );
+          render();
+        }
+        const outEl = document.createElement("div");
+        outEl.style.cssText =
+          "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
+        outEl.textContent = outcome;
+        actionsEl.appendChild(outEl);
+        updateUI();
+        const cont = document.createElement("button");
+        cont.className = "mbtn";
+        cont.textContent = "Continue";
+        cont.onclick = () => {
+          trov.onclick = null;
+          deck.onclick = null;
+          actionsEl.innerHTML = "";
+          trov.classList.remove("show", "anomaly-mode");
+          trov.style.display = "none";
+          trov.style.backgroundImage = "";
+          document
+            .getElementById("trov-suit-blocker")
+            .classList.remove("dropping");
+          if (t.anomaly === "Gravity Well") {
+            const newTile = G.tiles.get(hk(p.q, p.r));
+            const stillPending =
+              newTile?.requiresTool &&
+              (newTile.radioFragment || newTile.toolReward);
+            const wasInvestigated = (newTile?.investigatedCount || 0) > 0;
+            const needsDraw =
+              (newTile &&
+                !wasInvestigated &&
+                (newTile.type === "terrain" ||
+                  newTile.type === "ship_section") &&
+                newTile.pois?.length > 0) ||
+              stillPending;
+            if (needsDraw && !stillPending) {
+              newTile.investigatedCount = newTile.pois.length;
+              markTilesDirty();
+            }
+            if (needsDraw) showTileRevealModal(newTile);
+            else if (onDismiss) onDismiss();
+            else {
+              updateUI();
+              render();
+            }
+          } else {
+            if (onDismiss) onDismiss();
+            else {
+              updateUI();
+              render();
+            }
           }
         };
         actionsEl.appendChild(cont);
-      },1500);
+      }, 1500);
     };
-  } else if(isAnomaly){
-    deck.style.display='none';
-    const ackBtn=document.createElement('button');ackBtn.className='mbtn';ackBtn.textContent='Acknowledge';
-    ackBtn.onclick=dismiss;
+  } else if (isAnomaly) {
+    deck.style.display = "none";
+    const ackBtn = document.createElement("button");
+    ackBtn.className = "mbtn";
+    ackBtn.textContent = "Acknowledge";
+    ackBtn.onclick = dismiss;
     actionsEl.appendChild(ackBtn);
   } else {
-    trov.onclick=null;
-    if(t.noEvent){
-      deck.style.display='none';
+    trov.onclick = null;
+    if (t.noEvent) {
+      deck.style.display = "none";
     } else {
-      deck.style.display='';
-      document.getElementById('tr-evtn').textContent=G.evtDeckCount;
-      document.getElementById('tr-deck-lbl').textContent='Draw Event';
-      deck.onclick=dismiss;
+      deck.style.display = "";
+      document.getElementById("tr-evtn").textContent = G.evtDeckCount;
+      document.getElementById("tr-deck-lbl").textContent = "Draw Event";
+      deck.onclick = dismiss;
     }
-    if(t.requiresTool&&!t.radioFragment){
-      const p=cp();
-      const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-      const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
-      const toolName=TOOL_NAMES[t.requiresTool];
-      if(hasTool){
-        sfx('confirm');
-        const enterBtn=document.createElement('button');
-        enterBtn.className='mbtn pri';
-        enterBtn.textContent=`Use ${toolName} — Enter`;
-        enterBtn.onclick=()=>{
-          const reward=t.toolReward;t.toolReward=null;t.investigatedCount=t.pois.length;markTilesDirty();
-          const bg=getTileImg(t,'overlay');
-          if(reward==='rollFood'){
+    if (t.requiresTool && !t.radioFragment) {
+      const p = cp();
+      const hasTool =
+        p.equipment && p.equipment.some((c) => c.id === t.requiresTool);
+      const TOOL_NAMES = {
+        lockpick: "Lockpick",
+        plasma_cutter: "Plasma Cutter",
+        data_spike: "Data Spike",
+      };
+      const toolName = TOOL_NAMES[t.requiresTool];
+      if (hasTool) {
+        sfx("confirm");
+        const enterBtn = document.createElement("button");
+        enterBtn.className = "mbtn pri";
+        enterBtn.textContent = `Use ${toolName} — Enter`;
+        enterBtn.onclick = () => {
+          const reward = t.toolReward;
+          t.toolReward = null;
+          t.investigatedCount = t.pois.length;
+          markTilesDirty();
+          const bg = getTileImg(t, "overlay");
+          if (reward === "rollFood") {
             dismiss();
-            showDieRoll('Search the outpost. Roll for Food yield.',val=>{
-              const gained=Math.min(15-p.food,val);
-              p.food+=gained;
-              addLog(`${p.name} searched the outpost — gained ${gained} Food.`,'good');
-              return`Rolled ${val} — gained ${gained} Food.`;
-            },null,bg?`url(${bg})`:undefined);
-          } else if(reward==='drawEq'){
-            const c=drawEqCard(p);
-            if(c){addLog(`${p.name} found ${c.name} inside.`,'good');dismiss();openCardModal(p.id,c,bg?`url(${bg})`:undefined);}
-            else{addLog(`${p.name} searched the outpost — equipment cache empty.`);dismiss();}
+            showDieRoll(
+              "Search the outpost. Roll for Food yield.",
+              (val) => {
+                const gained = Math.min(15 - p.food, val);
+                p.food += gained;
+                addLog(
+                  `${p.name} searched the outpost — gained ${gained} Food.`,
+                  "good",
+                );
+                return `Rolled ${val} — gained ${gained} Food.`;
+              },
+              null,
+              bg ? `url(${bg})` : undefined,
+            );
+          } else if (reward === "drawEq") {
+            const c = drawEqCard(p);
+            if (c) {
+              addLog(`${p.name} found ${c.name} inside.`, "good");
+              dismiss();
+              openCardModal(p.id, c, bg ? `url(${bg})` : undefined);
+            } else {
+              addLog(`${p.name} searched the outpost — equipment cache empty.`);
+              dismiss();
+            }
           }
         };
         actionsEl.appendChild(enterBtn);
       } else {
-        _play('reject.wav');
-        const leaveBtn=document.createElement('button');
-        leaveBtn.className='mbtn';
-        leaveBtn.textContent='Leave';
-        leaveBtn.onclick=dismiss;
+        _play("reject.wav");
+        const leaveBtn = document.createElement("button");
+        leaveBtn.className = "mbtn";
+        leaveBtn.textContent = "Leave";
+        leaveBtn.onclick = dismiss;
         actionsEl.appendChild(leaveBtn);
       }
     }
-    if(t.radioFragment&&t.requiresTool){
-      const p=cp();
-      const hasTool=p.equipment&&p.equipment.some(c=>c.id===t.requiresTool);
-      if(hasTool){
-        sfx('confirm');
-        const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter'};
-        const toolName=TOOL_NAMES[t.requiresTool];
-        const fragBtn=document.createElement('button');
-        fragBtn.className='mbtn pri';
-        fragBtn.textContent=`Use ${toolName} — Recover Fragment`;
-        fragBtn.onclick=()=>{p.radioFragments++;t.radioFragment=false;t.investigatedCount=t.pois.length;markTilesDirty();sfx('fragment');addLog(`${p.name} used ${toolName} to recover a Radio Fragment.`,'frag');dismiss();};
+    if (t.radioFragment && t.requiresTool) {
+      const p = cp();
+      const hasTool =
+        p.equipment && p.equipment.some((c) => c.id === t.requiresTool);
+      if (hasTool) {
+        sfx("confirm");
+        const TOOL_NAMES = {
+          lockpick: "Lockpick",
+          plasma_cutter: "Plasma Cutter",
+        };
+        const toolName = TOOL_NAMES[t.requiresTool];
+        const fragBtn = document.createElement("button");
+        fragBtn.className = "mbtn pri";
+        fragBtn.textContent = `Use ${toolName} — Recover Fragment`;
+        fragBtn.onclick = () => {
+          p.radioFragments++;
+          t.radioFragment = false;
+          t.investigatedCount = t.pois.length;
+          markTilesDirty();
+          sfx("fragment");
+          addLog(
+            `${p.name} used ${toolName} to recover a Radio Fragment.`,
+            "frag",
+          );
+          dismiss();
+        };
         actionsEl.appendChild(fragBtn);
       } else {
-        _play('reject.wav');
-        const leaveBtn=document.createElement('button');
-        leaveBtn.className='mbtn';
-        leaveBtn.textContent='Leave';
-        leaveBtn.onclick=dismiss;
+        _play("reject.wav");
+        const leaveBtn = document.createElement("button");
+        leaveBtn.className = "mbtn";
+        leaveBtn.textContent = "Leave";
+        leaveBtn.onclick = dismiss;
         actionsEl.appendChild(leaveBtn);
       }
     }
   }
   cancelTooltip();
-  trov.style.display='flex';
-  trov.classList.add('show');
-  const _sb=document.getElementById('trov-suit-blocker');
-  _sb.classList.remove('dropping');
-  if(isToxic&&_hasSuit)setTimeout(()=>{if(trov.style.display!=='none')_sb.classList.add('dropping');},400);
+  trov.style.display = "flex";
+  trov.classList.add("show");
+  const _sb = document.getElementById("trov-suit-blocker");
+  _sb.classList.remove("dropping");
+  if (isToxic && _hasSuit)
+    setTimeout(() => {
+      if (trov.style.display !== "none") _sb.classList.add("dropping");
+    }, 400);
 }
 
-function popEventCard(){
-  if(!G.evtDeck.length)return null;
-  const evt=G.evtDeck.pop();
-  G.evtDeckCount=G.evtDeck.length;
-  const el=document.getElementById('evtn');if(el)el.textContent=G.evtDeckCount;
+function popEventCard() {
+  if (!G.evtDeck.length) return null;
+  const evt = G.evtDeck.pop();
+  G.evtDeckCount = G.evtDeck.length;
+  const el = document.getElementById("evtn");
+  if (el) el.textContent = G.evtDeckCount;
   return evt;
 }
 
-function drawTileEvent(t){
-  const p=cp();
-  const evt=popEventCard();
-  if(!evt)return;
+function drawTileEvent(t) {
+  const p = cp();
+  const evt = popEventCard();
+  if (!evt) return;
   // Apply guaranteed (non-roll) effects immediately
-  if(evt.rf){
-    p.radioFragments++;sfx('fragment');addLog(`${p.name} found a Radio Fragment!`,'frag');
-    guidance('first_rf',()=>{
+  if (evt.rf) {
+    p.radioFragments++;
+    sfx("fragment");
+    addLog(`${p.name} found a Radio Fragment!`, "frag");
+    guidance("first_rf", () => {
       e7Seq([
-        [0, 'div', null],
-        [0, 'sys', '> Radio Fragment recovered.'],
-        [0, '',    'Bring it to the Signal Array and use "Activate Fragment." Each activation lowers the rescue threshold — activate up to 5.'],
-        [0, 'act', 'Threshold with 1 fragment: 18+. Roll 3 dice to call for rescue.'],
+        [0, "div", null],
+        [0, "sys", "> Radio Fragment recovered."],
+        [
+          0,
+          "",
+          'Bring it to the Signal Array and use "Activate Fragment." Each activation lowers the rescue threshold — activate up to 5.',
+        ],
+        [
+          0,
+          "act",
+          "Threshold with 1 fragment: 18+. Roll 3 dice to call for rescue.",
+        ],
       ]);
     });
   }
-  let drawnEqCard=null;
-  if(evt.drawEq){drawnEqCard=drawEqCard(p);if(drawnEqCard)addLog(`${p.name} drew ${drawnEqCard.name}.`,'good');}
-  if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
-  if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
-  if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food.`,'crit');}
-  if(evt.skipO2){p.skipO2=true;addLog('O\u2082 flip skipped this turn.');}
-  if(evt.takeCargoFood){const taken=Math.min(evt.takeCargoFood,Math.min(15-p.food,G.cargoHold||0));p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
-  if(evt.irisCorruption){
-    const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
-    if(synth){synth.corrupted=true;_play('corrupt.wav');addLog('> IRIS threat assessment updated. She considers one fewer crew member optimal.','crit');}
+  let drawnEqCard = null;
+  if (evt.drawEq) {
+    drawnEqCard = drawEqCard(p);
+    if (drawnEqCard) addLog(`${p.name} drew ${drawnEqCard.name}.`, "good");
   }
-  let suitBlocked=false;
-  if(evt.loseHealth){
-    const suitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
-    if(suitIdx!==-1){suitBlocked=true;p.equipment.splice(suitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,'good');}
-    else{if(p.health>0){p.health--;sfx('health_down');}addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3.`,'crit');}
+  if (evt.gainFood) {
+    p.food = Math.min(15, p.food + evt.gainFood);
   }
-  if(evt.pub)G.lastPublicEvt=evt;
-  if(evt.trackSignalArray){p.soloRescueActive=true;addLog(`${p.name} has a private objective.`,'act');}
-  if(evt.rfExtraction){p.rfExtractionActive=true;addLog(`${p.name} has a private objective.`,'act');}
-  const locName=t.pois&&t.pois.length?t.pois.join(' \u00b7 '):(t.name||'');
-  let rollCallback=null;
-  if(evt.rollFood){
-    rollCallback=r=>{const gained=Math.min(15-p.food,r);p.food+=gained;addLog(`Loot roll: ${r} \u2014 +${gained} Food.`,gained?'good':'');return`Rolled ${r} \u2014 gained ${gained} Food.`;};
-  } else if(evt.rollWreckage){
-    rollCallback=r=>{
-      if(r<=3){addLog(`Wreckage roll: ${r} \u2014 nothing found.`);return`Rolled ${r} \u2014 nothing found.`;}
-      if(r<=5){const gained=Math.min(15-p.food,1);p.food+=gained;addLog(`Wreckage roll: ${r} \u2014 +1 Food.`,'good');return`Rolled ${r} \u2014 gained 1 Food.`;}
-      drawnEqCard=drawEqCard(p);const msg=drawnEqCard?`drew ${drawnEqCard.name}.`:'equipment deck empty.';addLog(`Wreckage roll: 6 \u2014 ${msg}`,'good');return`Rolled 6 \u2014 ${msg}`;
+  if (evt.takeAllCargo) {
+    const taken = Math.min(15 - p.food, G.cargoHold || 0);
+    p.food += taken;
+    G.cargoHold -= taken;
+    if (taken > 0)
+      addLog(`${p.name} took ${taken} Food from the Cargo Hold.`, "good");
+  }
+  if (evt.loseFood) {
+    const lost = Math.min(p.food, evt.loseFood);
+    p.food -= lost;
+    addLog(`${p.name} lost ${lost} Food.`, "crit");
+  }
+  if (evt.skipO2) {
+    p.skipO2 = true;
+    addLog("O\u2082 flip skipped this turn.");
+  }
+  if (evt.takeCargoFood) {
+    const taken = Math.min(
+      evt.takeCargoFood,
+      Math.min(15 - p.food, G.cargoHold || 0),
+    );
+    p.food += taken;
+    G.cargoHold -= taken;
+    if (taken > 0)
+      addLog(`${p.name} took ${taken} Food from the Cargo Hold.`, "good");
+  }
+  if (evt.irisCorruption) {
+    const synth = G.players.find(
+      (pl) => pl.isSynth && !pl.corrupted && pl.alive,
+    );
+    if (synth) {
+      synth.corrupted = true;
+      _play("corrupt.wav");
+      addLog(
+        "> IRIS threat assessment updated. She considers one fewer crew member optimal.",
+        "crit",
+      );
+    }
+  }
+  let suitBlocked = false;
+  if (evt.loseHealth) {
+    const suitIdx = p.equipment.findIndex((c) => c.id === "hazard_suit");
+    if (suitIdx !== -1) {
+      suitBlocked = true;
+      p.equipment.splice(suitIdx, 1);
+      addLog(
+        `${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed.`,
+        "good",
+      );
+    } else {
+      if (p.health > 0) {
+        p.health--;
+        sfx("health_down");
+      }
+      addLog(
+        `${p.name} suffered toxic exposure. Health: ${p.health}/3.`,
+        "crit",
+      );
+    }
+  }
+  if (evt.pub) G.lastPublicEvt = evt;
+  if (evt.trackSignalArray) {
+    p.soloRescueActive = true;
+    addLog(`${p.name} has a private objective.`, "act");
+  }
+  if (evt.rfExtraction) {
+    p.rfExtractionActive = true;
+    addLog(`${p.name} has a private objective.`, "act");
+  }
+  const locName =
+    t.pois && t.pois.length ? t.pois.join(" \u00b7 ") : t.name || "";
+  let rollCallback = null;
+  if (evt.rollFood) {
+    rollCallback = (r) => {
+      const gained = Math.min(15 - p.food, r);
+      p.food += gained;
+      addLog(`Loot roll: ${r} \u2014 +${gained} Food.`, gained ? "good" : "");
+      return `Rolled ${r} \u2014 gained ${gained} Food.`;
+    };
+  } else if (evt.rollWreckage) {
+    rollCallback = (r) => {
+      if (r <= 3) {
+        addLog(`Wreckage roll: ${r} \u2014 nothing found.`);
+        return `Rolled ${r} \u2014 nothing found.`;
+      }
+      if (r <= 5) {
+        const gained = Math.min(15 - p.food, 1);
+        p.food += gained;
+        addLog(`Wreckage roll: ${r} \u2014 +1 Food.`, "good");
+        return `Rolled ${r} \u2014 gained 1 Food.`;
+      }
+      drawnEqCard = drawEqCard(p);
+      const msg = drawnEqCard
+        ? `drew ${drawnEqCard.name}.`
+        : "equipment deck empty.";
+      addLog(`Wreckage roll: 6 \u2014 ${msg}`, "good");
+      return `Rolled 6 \u2014 ${msg}`;
     };
   }
-  const evImg=getTileImg(t,'overlay');
-  const _evOv=document.getElementById('evc-ov');
-  _evOv.style.backgroundImage=evImg?`url(${evImg})`:'none';
-  _evOv.style.backgroundSize='cover';_evOv.style.backgroundPosition='center';
-  showEventCard(evt,locName,()=>{updateUI();render();if(drawnEqCard)openCardModal(p.id,drawnEqCard,evImg?`url(${evImg})`:'');},rollCallback,false,suitBlocked);
+  const evImg = getTileImg(t, "overlay");
+  const _evOv = document.getElementById("evc-ov");
+  _evOv.style.backgroundImage = evImg ? `url(${evImg})` : "none";
+  _evOv.style.backgroundSize = "cover";
+  _evOv.style.backgroundPosition = "center";
+  showEventCard(
+    evt,
+    locName,
+    () => {
+      updateUI();
+      render();
+      if (drawnEqCard)
+        openCardModal(p.id, drawnEqCard, evImg ? `url(${evImg})` : "");
+    },
+    rollCallback,
+    false,
+    suitBlocked,
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════
 // TABLETOP DICE
 // ═══════════════════════════════════════════════════════════════
-const FACES=['⚀','⚁','⚂','⚃','⚄','⚅'];
-let diceState={mode:'move',values:[],rolled:false,spinning:false};
+const FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+let diceState = { mode: "move", values: [], rolled: false, spinning: false };
 
-function showTableDice(mode){
+function showTableDice(mode) {
   // mode: 'move' (1 clickable die) | 'signal' (3 clickable dice) | 'result' (locked after roll)
-  diceState.mode=mode;diceState.spinning=false;
-  const count=mode==='signal'?3:mode==='move'?1:0;
-  diceState.values=new Array(count).fill(null);
-  diceState.rolled=false;
+  diceState.mode = mode;
+  diceState.spinning = false;
+  const count = mode === "signal" ? 3 : mode === "move" ? 1 : 0;
+  diceState.values = new Array(count).fill(null);
+  diceState.rolled = false;
   renderTableDice();
 }
 
 // ── Shared die-building helpers (used by table dice + event card dice) ──
-const PIPS=[
-  [[2,2]],
-  [[1,1],[3,3]],
-  [[1,1],[2,2],[3,3]],
-  [[1,1],[1,3],[3,1],[3,3]],
-  [[1,1],[1,3],[2,2],[3,1],[3,3]],
-  [[1,1],[1,3],[2,1],[2,3],[3,1],[3,3]],
+const PIPS = [
+  [[2, 2]],
+  [
+    [1, 1],
+    [3, 3],
+  ],
+  [
+    [1, 1],
+    [2, 2],
+    [3, 3],
+  ],
+  [
+    [1, 1],
+    [1, 3],
+    [3, 1],
+    [3, 3],
+  ],
+  [
+    [1, 1],
+    [1, 3],
+    [2, 2],
+    [3, 1],
+    [3, 3],
+  ],
+  [
+    [1, 1],
+    [1, 3],
+    [2, 1],
+    [2, 3],
+    [3, 1],
+    [3, 3],
+  ],
 ];
-function makeDieFace(cls,val){
-  const f=document.createElement('div');
-  f.className=`td-face ${cls}`;
-  f.style.gridTemplateRows='repeat(3,1fr)';
-  f.style.gridTemplateColumns='repeat(3,1fr)';
-  PIPS[val-1].forEach(([r,c])=>{
-    const p=document.createElement('div');
-    p.className='pip';
-    p.style.gridRow=r;p.style.gridColumn=c;
+function makeDieFace(cls, val) {
+  const f = document.createElement("div");
+  f.className = `td-face ${cls}`;
+  f.style.gridTemplateRows = "repeat(3,1fr)";
+  f.style.gridTemplateColumns = "repeat(3,1fr)";
+  PIPS[val - 1].forEach(([r, c]) => {
+    const p = document.createElement("div");
+    p.className = "pip";
+    p.style.gridRow = r;
+    p.style.gridColumn = c;
     f.appendChild(p);
   });
   return f;
 }
-function make3DDie(state){
-  const wrap=document.createElement('div');
-  wrap.className=`td-die-wrap ${state}`;
-  const cube=document.createElement('div');
-  cube.className='td-die3';
-  [[1,'f1'],[2,'f2'],[3,'f3'],[4,'f4'],[5,'f5'],[6,'f6']].forEach(([v,cls])=>cube.appendChild(makeDieFace(cls,v)));
+function make3DDie(state) {
+  const wrap = document.createElement("div");
+  wrap.className = `td-die-wrap ${state}`;
+  const cube = document.createElement("div");
+  cube.className = "td-die3";
+  [
+    [1, "f1"],
+    [2, "f2"],
+    [3, "f3"],
+    [4, "f4"],
+    [5, "f5"],
+    [6, "f6"],
+  ].forEach(([v, cls]) => cube.appendChild(makeDieFace(cls, v)));
   wrap.appendChild(cube);
   return wrap;
 }
-function makeResultDie(val){
-  const die=document.createElement('div');
-  die.className='td-die rolling';
-  const grid=document.createElement('div');
-  grid.style.cssText='position:absolute;inset:0;display:grid;grid-template-rows:repeat(3,1fr);grid-template-columns:repeat(3,1fr);padding:4px;box-sizing:border-box;';
-  PIPS[val-1].forEach(([r,c])=>{
-    const p=document.createElement('div');
-    p.className='pip';
-    p.style.gridRow=r;p.style.gridColumn=c;
+function makeResultDie(val) {
+  const die = document.createElement("div");
+  die.className = "td-die rolling";
+  const grid = document.createElement("div");
+  grid.style.cssText =
+    "position:absolute;inset:0;display:grid;grid-template-rows:repeat(3,1fr);grid-template-columns:repeat(3,1fr);padding:4px;box-sizing:border-box;";
+  PIPS[val - 1].forEach(([r, c]) => {
+    const p = document.createElement("div");
+    p.className = "pip";
+    p.style.gridRow = r;
+    p.style.gridColumn = c;
     grid.appendChild(p);
   });
   die.appendChild(grid);
   return die;
 }
 
-function renderTableDice(){
-  const row=document.getElementById('td-row');
-  const movesEl=document.getElementById('td-moves');
-  if(!diceState.values.length){
-    row.innerHTML='';
-    if(movesEl)movesEl.textContent='';
+function renderTableDice() {
+  const row = document.getElementById("td-row");
+  const movesEl = document.getElementById("td-moves");
+  if (!diceState.values.length) {
+    row.innerHTML = "";
+    if (movesEl) movesEl.textContent = "";
     return;
   }
 
-  const moveCounting=diceState.mode==='move'&&diceState.rolled&&G;
-  row.innerHTML='';
+  const moveCounting = diceState.mode === "move" && diceState.rolled && G;
+  row.innerHTML = "";
 
-  const isSignal=diceState.mode==='signal';
-  const container=isSignal?(()=>{const g=document.createElement('div');g.className='td-signal-grid';return g;})():row;
+  const isSignal = diceState.mode === "signal";
+  const container = isSignal
+    ? (() => {
+        const g = document.createElement("div");
+        g.className = "td-signal-grid";
+        return g;
+      })()
+    : row;
 
-  diceState.values.forEach((v,i)=>{
+  diceState.values.forEach((v, i) => {
     let el;
-    if(!diceState.rolled&&!diceState.spinning){
-      el=make3DDie(isMyTurn()?'idle':'idle');
-      if(isMyTurn()) el.onclick=rollTableDice;
-      else el.style.opacity='0.4';
-    } else if(diceState.spinning){
-      el=make3DDie('rolling');
+    if (!diceState.rolled && !diceState.spinning) {
+      el = make3DDie(isMyTurn() ? "idle" : "idle");
+      if (isMyTurn()) el.onclick = rollTableDice;
+      else el.style.opacity = "0.4";
+    } else if (diceState.spinning) {
+      el = make3DDie("rolling");
     } else {
-      el=makeResultDie(v);
-      el.id='td-die-result';
-      el.style.animationDelay=(i*0.1)+'s';
-      if(moveCounting&&G.movementLeft>0){
-        const ov=document.createElement('div');
-        ov.className='td-die-moves';
-        ov.id='td-die-moves-ov';
-        ov.textContent=G.movementLeft;
+      el = makeResultDie(v);
+      el.id = "td-die-result";
+      el.style.animationDelay = i * 0.1 + "s";
+      if (moveCounting && G.movementLeft > 0) {
+        const ov = document.createElement("div");
+        ov.className = "td-die-moves";
+        ov.id = "td-die-moves-ov";
+        ov.textContent = G.movementLeft;
         el.appendChild(ov);
       }
     }
-    if(isSignal&&i===0)el.classList.add('td-signal-top');
+    if (isSignal && i === 0) el.classList.add("td-signal-top");
     container.appendChild(el);
   });
 
-  if(isSignal)row.appendChild(container);
+  if (isSignal) row.appendChild(container);
 
-  if(diceState.rolled&&diceState.values.length>1){
-    const tot=document.createElement('div');
-    tot.className='td-total';
-    tot.textContent=diceState.values.reduce((a,b)=>a+b,0);
+  if (diceState.rolled && diceState.values.length > 1) {
+    const tot = document.createElement("div");
+    tot.className = "td-total";
+    tot.textContent = diceState.values.reduce((a, b) => a + b, 0);
     row.appendChild(tot);
   }
 
   // Update moves overlay on the die face if it already exists
-  if(movesEl)movesEl.textContent='';
-  const existingOv=document.getElementById('td-die-moves-ov');
-  if(existingOv){
-    if(moveCounting&&G.movementLeft>0)existingOv.textContent=G.movementLeft;
+  if (movesEl) movesEl.textContent = "";
+  const existingOv = document.getElementById("td-die-moves-ov");
+  if (existingOv) {
+    if (moveCounting && G.movementLeft > 0)
+      existingOv.textContent = G.movementLeft;
     else existingOv.remove();
   }
 }
 
-function rollTableDice(){
-  if(diceState.rolled)return;
-  const finalValues=diceState.values.map(()=>1+(0|Math.random()*6));
-  diceState.spinning=true;
-  sfx('dice_roll');
+function rollTableDice() {
+  if (diceState.rolled) return;
+  const finalValues = diceState.values.map(() => 1 + (0 | (Math.random() * 6)));
+  diceState.spinning = true;
+  sfx("dice_roll");
   renderTableDice(); // create rolling die once — do NOT recreate during animation
-  setTimeout(()=>{
-    diceState.spinning=false;
-    diceState.values=finalValues;
-    diceState.rolled=true;
-    sfx('dice_land');
-    if(diceState.mode==='move'){
-      const r=finalValues[0];
-      if(!G||G.phase!=='roll'){renderTableDice();return;}
-      G.movementLeft=r;G.phase='move';
-      G.reach=bfsReach(cp().q,cp().r,r);
+  setTimeout(() => {
+    diceState.spinning = false;
+    diceState.values = finalValues;
+    diceState.rolled = true;
+    sfx("dice_land");
+    if (diceState.mode === "move") {
+      const r = finalValues[0];
+      if (!G || G.phase !== "roll") {
+        renderTableDice();
+        return;
+      }
+      G.movementLeft = r;
+      G.phase = "move";
+      G.reach = bfsReach(cp().q, cp().r, r);
       addLog(`${cp().name} rolled ${r}.`);
       renderTableDice();
-      updateUI();render();
-      guidance('first_roll',()=>{
+      updateUI();
+      render();
+      guidance("first_roll", () => {
         e7Seq([
-          [0,'div',null],
-          [0,'sys',`> Movement budget: ${r}.`],
-          [0,'',`You rolled ${r} — that is how many hexes you can move this turn. Click any highlighted hex to move there. You can split your movement and explore multiple tiles before ending your turn.`],
+          [0, "div", null],
+          [0, "sys", `> Movement budget: ${r}.`],
+          [
+            0,
+            "",
+            `You rolled ${r} — that is how many hexes you can move this turn. Click any highlighted hex to move there. You can split your movement and explore multiple tiles before ending your turn.`,
+          ],
         ]);
       });
-    } else if(diceState.mode==='signal'){
+    } else if (diceState.mode === "signal") {
       renderTableDice();
       finishSignalRoll(finalValues);
     }
-  },1500);
+  }, 1500);
 }
 
-function hideTableDice(){
-  diceState.values=[];
-  document.getElementById('td-row').innerHTML='';
+function hideTableDice() {
+  diceState.values = [];
+  document.getElementById("td-row").innerHTML = "";
 }
 
-
-function doMove(q,r){
-  if(!isMyTurn())return;
-  const p=cp();if(G.phase!=='move'&&G.phase!=='action')return;if(!G.movementLeft)return;
-  const path=bfsPath(p.q,p.r,q,r);if(!path||!path.length)return;if(path.length>G.movementLeft)return;
-  const wasRevealed=G.tiles.get(hk(q,r))?.revealed;
-  path.forEach(([pq,pr])=>{if(!G.tiles.get(hk(pq,pr))?.revealed)revealAt(pq,pr);});
+function doMove(q, r) {
+  if (!isMyTurn()) return;
+  const p = cp();
+  if (G.phase !== "move" && G.phase !== "action") return;
+  if (!G.movementLeft) return;
+  const path = bfsPath(p.q, p.r, q, r);
+  if (!path || !path.length) return;
+  if (path.length > G.movementLeft) return;
+  const wasRevealed = G.tiles.get(hk(q, r))?.revealed;
+  path.forEach(([pq, pr]) => {
+    if (!G.tiles.get(hk(pq, pr))?.revealed) revealAt(pq, pr);
+  });
   // Signal Array: only 1 player allowed at a time
-  const destT=G.tiles.get(hk(q,r));
-  if(destT?.name==='Signal Array'){
-    const occupant=G.players.find(x=>x.alive&&x.id!==p.id&&x.q===q&&x.r===r);
-    if(occupant){
-      if(G.tileActionUsed){addLog('Already contested the Signal Array this turn.','act');updateUI();render();return;}
-      G.tileActionUsed=true;
-      addLog(`${p.name} contests the Signal Array with ${occupant.name}.`,'act');
+  const destT = G.tiles.get(hk(q, r));
+  if (destT?.name === "Signal Array") {
+    const occupant = G.players.find(
+      (x) => x.alive && x.id !== p.id && x.q === q && x.r === r,
+    );
+    if (occupant) {
+      if (G.tileActionUsed) {
+        addLog("Already contested the Signal Array this turn.", "act");
+        updateUI();
+        render();
+        return;
+      }
+      G.tileActionUsed = true;
+      addLog(
+        `${p.name} contests the Signal Array with ${occupant.name}.`,
+        "act",
+      );
       showContestModal(
-        p, occupant,
-        ()=>{
+        p,
+        occupant,
+        () => {
           // Challenger wins — displace defender to challenger's former tile
-          const fromQ=p.q,fromR=p.r,fromLoc=p.location;
-          occupant.q=fromQ;occupant.r=fromR;occupant.location=fromLoc;
-          addLog(`${p.name} takes the Signal Array. ${occupant.name} displaced.`,'act');
-          applyLanding(p,q,r,path,wasRevealed);
+          const fromQ = p.q,
+            fromR = p.r,
+            fromLoc = p.location;
+          occupant.q = fromQ;
+          occupant.r = fromR;
+          occupant.location = fromLoc;
+          addLog(
+            `${p.name} takes the Signal Array. ${occupant.name} displaced.`,
+            "act",
+          );
+          applyLanding(p, q, r, path, wasRevealed);
         },
-        ()=>{
+        () => {
           // Defender holds — challenger stays put
-          addLog(`${occupant.name} holds the Signal Array.`,'act');
-          updateUI();render();
-        }
+          addLog(`${occupant.name} holds the Signal Array.`, "act");
+          updateUI();
+          render();
+        },
       );
       return;
     }
   }
-  applyLanding(p,q,r,path,wasRevealed);
+  applyLanding(p, q, r, path, wasRevealed);
 }
 
-function applyLanding(p,q,r,path,wasRevealed){
-  sfx('move');
-  p.q=q;p.r=r;G.movementLeft-=path.length;p.lockerUsedThisVisit=false;renderTableDice();
-  const t=G.tiles.get(hk(q,r));
-  p.location=tileName(t);
-  if(t?.type==='crash_site'){
-    if(t.name==='Airlock'){p.o2=3;sfx('airlock');addLog(`${p.name} passed through Airlock. Oxygen fully restored.`,'good');
-      guidance('first_airlock',()=>{e7Seq([[0,'div',null],[0,'sys','> Airlock pressurised.'],[0,'good','Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.']]);});}
-    if(t.name==='Medical Bay'){
-      if(p.isSynth&&p.battery<10){p.battery=10;sfx('health_up');addLog('IRIS battery fully recharged at Medical Bay.','good');}
-      if(!p.isSynth&&p.health<3&&!p.medBayHealedThisRound){p.health++;sfx('health_up');p.incapacitated=0;p.medBayHealedThisRound=true;addLog(`${p.name} treated at Medical Bay. Health: ${p.health}/3.`,'good');}
-      guidance('first_medical_bay',()=>{e7Seq([[0,'div',null],[0,'sys','> Medical Bay active.'],[0,'','Emergency medical equipment salvaged from the wreckage. Entering automatically restores 1 Health — return here any time you are injured.']]);});
-    }
-    if(t.name==='Equipment Locker'){
-      guidance('first_equipment_locker',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment Locker accessed.'],[0,'','Draw one equipment card per visit. Move away and return to draw again. If you already have a card, you can exchange it for a fresh draw.']]);});
-    }
-    if(t.name==='Cargo Hold'){
-      guidance('first_cargo_hold',()=>{e7Seq([[0,'div',null],[0,'sys','> Cargo Hold accessed.'],[0,'','The Cargo Hold is a shared food reserve for the entire crew. Deposit surplus food when you are well-stocked, and withdraw it when running low. Coordinating as a crew can prevent starvation.']]);});
-    }
-    if(t.name==='Watch Tower'){
-      guidance('first_watch_tower',()=>{e7Seq([[0,'div',null],[0,'sys','> Watch Tower online.'],[0,'','The Watch Tower reveals all face-down tiles adjacent to any crew member currently in the field — without them needing to move. Use it to scout terrain and plan routes before committing.']]);});
-    }
-    if(t.name==='Signal Array'){
-      guidance('first_signal_array',()=>{
-        const fragMsg=p.radioFragments>0
-          ?`${p.name} is carrying ${p.radioFragments} fragment${p.radioFragments!==1?'s':''}. Use "Activate Fragment" to charge the array, then "Roll Signal" to attempt rescue.`
-          :'No fragments in hand. Explore the terrain — Event cards and certain tiles contain Radio Fragments.';
+function applyLanding(p, q, r, path, wasRevealed) {
+  sfx("move");
+  p.q = q;
+  p.r = r;
+  G.movementLeft -= path.length;
+  p.lockerUsedThisVisit = false;
+  renderTableDice();
+  const t = G.tiles.get(hk(q, r));
+  p.location = tileName(t);
+  if (t?.type === "crash_site") {
+    if (t.name === "Airlock") {
+      p.o2 = 3;
+      sfx("airlock");
+      addLog(
+        `${p.name} passed through Airlock. Oxygen fully restored.`,
+        "good",
+      );
+      guidance("first_airlock", () => {
         e7Seq([
-          [0, 'div', null],
-          [0, 'sys', '> Signal Array reached.'],
-          [0, p.radioFragments>0?'act':'', fragMsg],
+          [0, "div", null],
+          [0, "sys", "> Airlock pressurised."],
+          [
+            0,
+            "good",
+            "Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\u2082 without equipment.",
+          ],
+        ]);
+      });
+    }
+    if (t.name === "Medical Bay") {
+      if (p.isSynth && p.battery < 10) {
+        p.battery = 10;
+        sfx("health_up");
+        addLog("IRIS battery fully recharged at Medical Bay.", "good");
+      }
+      if (!p.isSynth && p.health < 3 && !p.medBayHealedThisRound) {
+        p.health++;
+        sfx("health_up");
+        p.incapacitated = 0;
+        p.medBayHealedThisRound = true;
+        addLog(
+          `${p.name} treated at Medical Bay. Health: ${p.health}/3.`,
+          "good",
+        );
+      }
+      guidance("first_medical_bay", () => {
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", "> Medical Bay active."],
+          [
+            0,
+            "",
+            "Emergency medical equipment salvaged from the wreckage. Entering automatically restores 1 Health — return here any time you are injured.",
+          ],
+        ]);
+      });
+    }
+    if (t.name === "Equipment Locker") {
+      guidance("first_equipment_locker", () => {
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", "> Equipment Locker accessed."],
+          [
+            0,
+            "",
+            "Draw one equipment card per visit. Move away and return to draw again. If you already have a card, you can exchange it for a fresh draw.",
+          ],
+        ]);
+      });
+    }
+    if (t.name === "Cargo Hold") {
+      guidance("first_cargo_hold", () => {
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", "> Cargo Hold accessed."],
+          [
+            0,
+            "",
+            "The Cargo Hold is a shared food reserve for the entire crew. Deposit surplus food when you are well-stocked, and withdraw it when running low. Coordinating as a crew can prevent starvation.",
+          ],
+        ]);
+      });
+    }
+    if (t.name === "Watch Tower") {
+      guidance("first_watch_tower", () => {
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", "> Watch Tower online."],
+          [
+            0,
+            "",
+            "The Watch Tower reveals all face-down tiles adjacent to any crew member currently in the field — without them needing to move. Use it to scout terrain and plan routes before committing.",
+          ],
+        ]);
+      });
+    }
+    if (t.name === "Signal Array") {
+      guidance("first_signal_array", () => {
+        const fragMsg =
+          p.radioFragments > 0
+            ? `${p.name} is carrying ${p.radioFragments} fragment${p.radioFragments !== 1 ? "s" : ""}. Use "Activate Fragment" to charge the array, then "Roll Signal" to attempt rescue.`
+            : "No fragments in hand. Explore the terrain — Event cards and certain tiles contain Radio Fragments.";
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", "> Signal Array reached."],
+          [0, p.radioFragments > 0 ? "act" : "", fragMsg],
         ]);
       });
     }
   }
-  if(t?.shockTrap&&t.shockTrapOwner!==p.id&&!p.inStasis){
-    t.shockTrap=false;t.shockTrapOwner=null;
-    if(p.health>0){p.health--;sfx('health_down');guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}
-    addLog(`${p.name} triggered a Shock Trap! Health: ${p.health}/3. Turn ended.`,'crit');
-    markTilesDirty();G.movementLeft=0;G.phase='action';render();doEndTurn();return;
-  }
-  if(t?.droppedFragments>0&&!p.isSynth){
-    const picked=t.droppedFragments;
-    p.radioFragments+=picked;
-    sfx('fragment');
-    t.droppedFragments=0;
+  if (t?.shockTrap && t.shockTrapOwner !== p.id && !p.inStasis) {
+    t.shockTrap = false;
+    t.shockTrapOwner = null;
+    if (p.health > 0) {
+      p.health--;
+      sfx("health_down");
+      guidance("first_health_loss", () => {
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", "> Health critical."],
+          [
+            0,
+            "crit",
+            "You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.",
+          ],
+        ]);
+      });
+    }
+    addLog(
+      `${p.name} triggered a Shock Trap! Health: ${p.health}/3. Turn ended.`,
+      "crit",
+    );
     markTilesDirty();
-    addLog(`${p.name} recovered ${picked} abandoned Radio Fragment${picked!==1?'s':''}.`,'frag');
+    G.movementLeft = 0;
+    G.phase = "action";
+    render();
+    doEndTurn();
+    return;
   }
-  const isNewAnomaly=!wasRevealed&&t?.type==='anomaly';
-  if(t?.type==='anomaly'&&isNewAnomaly){t.investigatedCount=1;markTilesDirty();}
-  if(t?.type==='anomaly'&&!isNewAnomaly)triggerAnomaly(t);
-  const wasInvestigated=(G.tiles.get(hk(q,r))?.investigatedCount||0)>0;
-  const stillPending=t?.requiresTool&&(t.radioFragment||t.toolReward);
-  const needsDraw=!wasInvestigated&&t&&(t.type==='terrain'||t.type==='ship_section')&&t.pois?.length>0||stillPending;
-  if(needsDraw&&!stillPending){t.investigatedCount=t.pois.length;markTilesDirty();}
-  G.phase='action';G.reach=bfsReach(p.q,p.r,G.movementLeft);
+  if (t?.droppedFragments > 0 && !p.isSynth) {
+    const picked = t.droppedFragments;
+    p.radioFragments += picked;
+    sfx("fragment");
+    t.droppedFragments = 0;
+    markTilesDirty();
+    addLog(
+      `${p.name} recovered ${picked} abandoned Radio Fragment${picked !== 1 ? "s" : ""}.`,
+      "frag",
+    );
+  }
+  const isNewAnomaly = !wasRevealed && t?.type === "anomaly";
+  if (t?.type === "anomaly" && isNewAnomaly) {
+    t.investigatedCount = 1;
+    markTilesDirty();
+  }
+  if (t?.type === "anomaly" && !isNewAnomaly) triggerAnomaly(t);
+  const wasInvestigated = (G.tiles.get(hk(q, r))?.investigatedCount || 0) > 0;
+  const stillPending = t?.requiresTool && (t.radioFragment || t.toolReward);
+  const needsDraw =
+    (!wasInvestigated &&
+      t &&
+      (t.type === "terrain" || t.type === "ship_section") &&
+      t.pois?.length > 0) ||
+    stillPending;
+  if (needsDraw && !stillPending) {
+    t.investigatedCount = t.pois.length;
+    markTilesDirty();
+  }
+  G.phase = "action";
+  G.reach = bfsReach(p.q, p.r, G.movementLeft);
   addLog(`${p.name} → ${p.location}`);
-  updateUI();render();
-  const selfContainedAnomaly=t?.type==='anomaly'&&(t.anomaly==='Temporal Rift'||t.anomaly==='Gravity Well'||t.anomaly==='Portal'||t.anomaly==='Inversion Field'||t.anomaly==='Stasis Pod');
-  if(needsDraw)showTileRevealModal(t);
-  else if(isNewAnomaly)showTileRevealModal(t,selfContainedAnomaly?()=>{updateUI();render();}:()=>triggerAnomaly(t));
+  updateUI();
+  render();
+  const selfContainedAnomaly =
+    t?.type === "anomaly" &&
+    (t.anomaly === "Temporal Rift" ||
+      t.anomaly === "Gravity Well" ||
+      t.anomaly === "Portal" ||
+      t.anomaly === "Inversion Field" ||
+      t.anomaly === "Stasis Pod");
+  if (needsDraw) showTileRevealModal(t);
+  else if (isNewAnomaly)
+    showTileRevealModal(
+      t,
+      selfContainedAnomaly
+        ? () => {
+            updateUI();
+            render();
+          }
+        : () => triggerAnomaly(t),
+    );
 }
 
-
-function drawEqCard(player){
-  if(!G.eqDeck.length)return null;
-  const card=G.eqDeck.pop();
-  sfx('card');
-  player.equipment.push({...card,uid:++cardUid});
-  G.eqDeckCount=G.eqDeck.length;
-  const el=document.getElementById('equpn');if(el)el.textContent=G.eqDeckCount;
-  if(!card.eventCard){guidance('first_equipment',()=>{e7Seq([[0,'div',null],[0,'sys','> Equipment acquired.'],[0,'','Equipment cards are tools and consumables that can turn the tide. Most are single-use. Tools like the Lockpick, Plasma Cutter, and Data Spike can unlock tiles that contain Radio Fragments or additional equipment.']]);});}
+function drawEqCard(player) {
+  if (!G.eqDeck.length) return null;
+  const card = G.eqDeck.pop();
+  sfx("card");
+  player.equipment.push({ ...card, uid: ++cardUid });
+  G.eqDeckCount = G.eqDeck.length;
+  const el = document.getElementById("equpn");
+  if (el) el.textContent = G.eqDeckCount;
+  if (!card.eventCard) {
+    guidance("first_equipment", () => {
+      e7Seq([
+        [0, "div", null],
+        [0, "sys", "> Equipment acquired."],
+        [
+          0,
+          "",
+          "Equipment cards are tools and consumables that can turn the tide. Most are single-use. Tools like the Lockpick, Plasma Cutter, and Data Spike can unlock tiles that contain Radio Fragments or additional equipment.",
+        ],
+      ]);
+    });
+  }
   return card;
 }
 
-
-
-function useCard(playerIdx,uid){
-  const p=G.players[playerIdx];const ci=p.equipment.findIndex(c=>c.uid===uid);if(ci<0)return;
-  const c=p.equipment[ci];
-  if(!c.use)return;
-  if(c.use==='medpack'){
-    const targets=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r&&pl.health<3);
-    if(!targets.length){addLog('No injured crew on this tile.');return;}
-    const applyMed=target=>{target.health++;sfx('health_up');p.equipment.splice(ci,1);addLog(`${p.name} used MedPack on ${target.name}. Health: ${target.health}/3.`,'good');if(target.incapacitated&&target.health>0)target.incapacitated=0;closeCardModal();updateUI();render();};
-    if(targets.length===1){applyMed(targets[0]);return;}
-    showModal('MEDPACK','Choose a crew member to heal.',true,()=>{},'Cancel',undefined,undefined,'');
-    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-    targets.forEach(tgt=>{const b=document.createElement('button');b.className='mbtn';b.innerHTML=`<span style="color:${tgt.color};font-weight:bold">${tgt.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">\u2665 ${tgt.health}/3</span>`;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyMed(tgt);};btns.appendChild(b);});
-    document.getElementById('mact').prepend(btns);return;
-  }
-  else if(c.use==='emer_food'){const gain=Math.min(3,15-p.food);p.food+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Emergency Food. +${gain} Food.`,'good');}
-  else if(c.use==='compressed_o2'){const gain=Math.min(2,3-p.o2);p.o2+=gain;p.equipment.splice(ci,1);addLog(`${p.name} used Compressed O₂. +${gain} O₂.`,'good');}
-  else if(c.use==='stretcher'){
-    const incap=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r&&pl.health===0);
-    if(!incap.length){addLog('No incapacitated crew on this tile.','act');closeCardModal();return;}
-    const applyStretcher=target=>{target.q=1;target.r=0;const ct=G.tiles.get(hk(1,0));target.location=tileName(ct);target.health=1;target.incapacitated=0;p.equipment.splice(ci,1);addLog(`${p.name} carried ${target.name} to the Medical Bay. ${target.name} is back on their feet.`,'good');closeCardModal();updateUI();render();};
-    if(incap.length===1){applyStretcher(incap[0]);return;}
-    showModal('STRETCHER','Choose a crew member to carry.',true,()=>{},'Cancel',undefined,undefined,'');
-    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-    incap.forEach(pl=>{const b=document.createElement('button');b.className='mbtn';b.innerHTML=`<span style="color:${pl.color};font-weight:bold">${pl.name}</span>`;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyStretcher(pl);};btns.appendChild(b);});
-    document.getElementById('mact').prepend(btns);return;
-  }
-  else if(c.use==='scanner'){
-    if(p.scannerUsed){addLog('Scanner already used this round.','act');closeCardModal();return;}
-    if(p.scannerCharges<=0){addLog('Scanner is depleted.','act');closeCardModal();return;}
-    p.scannerUsed=true;
-    p.scannerCharges--;
-    let revealed=0;
-    hnbr(p.q,p.r).forEach(([nq,nr])=>{
-      const nt=G.tiles.get(hk(nq,nr));
-      if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
-    });
-    const chargesLeft=p.scannerCharges>0?` (${p.scannerCharges} charge${p.scannerCharges!==1?'s':''} remaining)`:'';
-    if(revealed>0)addLog(`${p.name} used Scanner — ${revealed} adjacent tile${revealed!==1?'s':''} revealed.${chargesLeft}`,'tile');
-    else addLog(`${p.name} used Scanner — no undiscovered tiles adjacent.${chargesLeft}`,'act');
-    if(p.scannerCharges<=0){p.equipment.splice(ci,1);addLog('Scanner battery depleted.','act');}
-    closeCardModal();render();updateUI();return;
-  }
-  else if(c.use==='stun_baton'){
-    const targets=G.players.filter(pl=>pl.alive&&!pl.inStasis&&pl.id!==p.id&&pl.q===p.q&&pl.r===p.r);
-    if(!targets.length){addLog('No crew on this tile to stun.','act');closeCardModal();return;}
-    const applyStun=target=>{
-      target.stunned=true;
-      if(target.isSynth){if(target.battery>0){target.battery--;sfx('health_down');}}else{if(target.health>0){target.health--;sfx('health_down');}}
-      p.equipment.splice(ci,1);
-      addLog(`${p.name} stunned ${target.name}. They lose 1 ${target.isSynth?'Battery':'Health'} and skip their next turn.`,'crit');
-      closeCardModal();updateUI();render();
+function useCard(playerIdx, uid) {
+  const p = G.players[playerIdx];
+  const ci = p.equipment.findIndex((c) => c.uid === uid);
+  if (ci < 0) return;
+  const c = p.equipment[ci];
+  if (!c.use) return;
+  if (c.use === "medpack") {
+    const targets = G.players.filter(
+      (pl) =>
+        pl.alive &&
+        !pl.isSynth &&
+        pl.q === p.q &&
+        pl.r === p.r &&
+        pl.health < 3,
+    );
+    if (!targets.length) {
+      addLog("No injured crew on this tile.");
+      return;
+    }
+    const applyMed = (target) => {
+      target.health++;
+      sfx("health_up");
+      p.equipment.splice(ci, 1);
+      addLog(
+        `${p.name} used MedPack on ${target.name}. Health: ${target.health}/3.`,
+        "good",
+      );
+      if (target.incapacitated && target.health > 0) target.incapacitated = 0;
+      closeCardModal();
+      updateUI();
+      render();
     };
-    if(targets.length===1){applyStun(targets[0]);return;}
-    showModal('STUN BATON','Select a crew member to stun.',true,()=>{},'Cancel',undefined,undefined,'');
-    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-    targets.forEach(tgt=>{const b=document.createElement('button');b.className='mbtn wrn';b.textContent=tgt.name;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyStun(tgt);};btns.appendChild(b);});
-    document.getElementById('mact').prepend(btns);return;
-  }
-  else if(c.use==='flare_gun'){
-    const targets=G.players.filter(pl=>{if(!pl.alive||pl.inStasis||pl.id===p.id)return false;const path=bfsPath(p.q,p.r,pl.q,pl.r);return path&&path.length<=2;});
-    if(!targets.length){addLog('No crew within range of the Flare Gun.','act');closeCardModal();return;}
-    const applyFlare=target=>{target.q=p.q;target.r=p.r;target.location=tileName(G.tiles.get(hk(p.q,p.r)));p.equipment.splice(ci,1);addLog(`${p.name} fired the Flare Gun — ${target.name} forced to this tile.`,'crit');closeCardModal();updateUI();render();};
-    if(targets.length===1){applyFlare(targets[0]);return;}
-    showModal('FLARE GUN','Select a crew member to pull to your position.',true,()=>{},'Cancel',undefined,undefined,'');
-    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-    targets.forEach(tgt=>{const b=document.createElement('button');b.className='mbtn wrn';b.textContent=`${tgt.name} (${bfsPath(p.q,p.r,tgt.q,tgt.r)?.length||'?'} tiles)`;b.onclick=()=>{document.getElementById('mov').classList.remove('show');applyFlare(tgt);};btns.appendChild(b);});
-    document.getElementById('mact').prepend(btns);return;
-  }
-  else if(c.use==='shock_trap'){
-    const t=G.tiles.get(hk(p.q,p.r));if(!t){closeCardModal();return;}
-    t.shockTrap=true;t.shockTrapOwner=p.id;p.equipment.splice(ci,1);
-    addLog(`${p.name} placed a Shock Trap on this tile.`,'act');closeCardModal();markTilesDirty();updateUI();render();return;
-  }
-  else if(c.use==='walkie'){
-    const adjacent=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.id!==p.id);
-    if(!adjacent.length){addLog('No other crew available to trade with.','act');closeCardModal();return;}
-    const openWith=partner=>{closeCardModal();initTradeModal(p,partner);};
-    if(adjacent.length===1){openWith(adjacent[0]);return;}
-    const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-    adjacent.forEach(pl=>{
-      const b=document.createElement('button');b.className='mbtn';
-      b.innerHTML=`<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
-      b.onclick=()=>{document.getElementById('mov').classList.remove('show');openWith(pl);};
+    if (targets.length === 1) {
+      applyMed(targets[0]);
+      return;
+    }
+    showModal(
+      "MEDPACK",
+      "Choose a crew member to heal.",
+      true,
+      () => {},
+      "Cancel",
+      undefined,
+      undefined,
+      "",
+    );
+    const btns = document.createElement("div");
+    btns.style.cssText =
+      "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
+    targets.forEach((tgt) => {
+      const b = document.createElement("button");
+      b.className = "mbtn";
+      b.innerHTML = `<span style="color:${tgt.color};font-weight:bold">${tgt.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">\u2665 ${tgt.health}/3</span>`;
+      b.onclick = () => {
+        document.getElementById("mov").classList.remove("show");
+        applyMed(tgt);
+      };
       btns.appendChild(b);
     });
-    showModal('WALKIE','Choose a crew member to trade with.',true,()=>{},'Cancel',undefined,undefined,'');
-    document.getElementById('mact').prepend(btns);return;
+    document.getElementById("mact").prepend(btns);
+    return;
+  } else if (c.use === "emer_food") {
+    const gain = Math.min(3, 15 - p.food);
+    p.food += gain;
+    p.equipment.splice(ci, 1);
+    addLog(`${p.name} used Emergency Food. +${gain} Food.`, "good");
+  } else if (c.use === "compressed_o2") {
+    const gain = Math.min(2, 3 - p.o2);
+    p.o2 += gain;
+    p.equipment.splice(ci, 1);
+    addLog(`${p.name} used Compressed O₂. +${gain} O₂.`, "good");
+  } else if (c.use === "stretcher") {
+    const incap = G.players.filter(
+      (pl) =>
+        pl.alive &&
+        !pl.isSynth &&
+        pl.id !== p.id &&
+        pl.q === p.q &&
+        pl.r === p.r &&
+        pl.health === 0,
+    );
+    if (!incap.length) {
+      addLog("No incapacitated crew on this tile.", "act");
+      closeCardModal();
+      return;
+    }
+    const applyStretcher = (target) => {
+      target.q = 1;
+      target.r = 0;
+      const ct = G.tiles.get(hk(1, 0));
+      target.location = tileName(ct);
+      target.health = 1;
+      target.incapacitated = 0;
+      p.equipment.splice(ci, 1);
+      addLog(
+        `${p.name} carried ${target.name} to the Medical Bay. ${target.name} is back on their feet.`,
+        "good",
+      );
+      closeCardModal();
+      updateUI();
+      render();
+    };
+    if (incap.length === 1) {
+      applyStretcher(incap[0]);
+      return;
+    }
+    showModal(
+      "STRETCHER",
+      "Choose a crew member to carry.",
+      true,
+      () => {},
+      "Cancel",
+      undefined,
+      undefined,
+      "",
+    );
+    const btns = document.createElement("div");
+    btns.style.cssText =
+      "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
+    incap.forEach((pl) => {
+      const b = document.createElement("button");
+      b.className = "mbtn";
+      b.innerHTML = `<span style="color:${pl.color};font-weight:bold">${pl.name}</span>`;
+      b.onclick = () => {
+        document.getElementById("mov").classList.remove("show");
+        applyStretcher(pl);
+      };
+      btns.appendChild(b);
+    });
+    document.getElementById("mact").prepend(btns);
+    return;
+  } else if (c.use === "scanner") {
+    if (p.scannerUsed) {
+      addLog("Scanner already used this round.", "act");
+      closeCardModal();
+      return;
+    }
+    if (p.scannerCharges <= 0) {
+      addLog("Scanner is depleted.", "act");
+      closeCardModal();
+      return;
+    }
+    p.scannerUsed = true;
+    p.scannerCharges--;
+    let revealed = 0;
+    hnbr(p.q, p.r).forEach(([nq, nr]) => {
+      const nt = G.tiles.get(hk(nq, nr));
+      if (nt && !nt.revealed) {
+        revealAt(nq, nr);
+        revealed++;
+      }
+    });
+    const chargesLeft =
+      p.scannerCharges > 0
+        ? ` (${p.scannerCharges} charge${p.scannerCharges !== 1 ? "s" : ""} remaining)`
+        : "";
+    if (revealed > 0)
+      addLog(
+        `${p.name} used Scanner — ${revealed} adjacent tile${revealed !== 1 ? "s" : ""} revealed.${chargesLeft}`,
+        "tile",
+      );
+    else
+      addLog(
+        `${p.name} used Scanner — no undiscovered tiles adjacent.${chargesLeft}`,
+        "act",
+      );
+    if (p.scannerCharges <= 0) {
+      p.equipment.splice(ci, 1);
+      addLog("Scanner battery depleted.", "act");
+    }
+    closeCardModal();
+    render();
+    updateUI();
+    return;
+  } else if (c.use === "stun_baton") {
+    const targets = G.players.filter(
+      (pl) =>
+        pl.alive &&
+        !pl.inStasis &&
+        pl.id !== p.id &&
+        pl.q === p.q &&
+        pl.r === p.r,
+    );
+    if (!targets.length) {
+      addLog("No crew on this tile to stun.", "act");
+      closeCardModal();
+      return;
+    }
+    const applyStun = (target) => {
+      target.stunned = true;
+      if (target.isSynth) {
+        if (target.battery > 0) {
+          target.battery--;
+          sfx("health_down");
+        }
+      } else {
+        if (target.health > 0) {
+          target.health--;
+          sfx("health_down");
+        }
+      }
+      p.equipment.splice(ci, 1);
+      addLog(
+        `${p.name} stunned ${target.name}. They lose 1 ${target.isSynth ? "Battery" : "Health"} and skip their next turn.`,
+        "crit",
+      );
+      closeCardModal();
+      updateUI();
+      render();
+    };
+    if (targets.length === 1) {
+      applyStun(targets[0]);
+      return;
+    }
+    showModal(
+      "STUN BATON",
+      "Select a crew member to stun.",
+      true,
+      () => {},
+      "Cancel",
+      undefined,
+      undefined,
+      "",
+    );
+    const btns = document.createElement("div");
+    btns.style.cssText =
+      "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
+    targets.forEach((tgt) => {
+      const b = document.createElement("button");
+      b.className = "mbtn wrn";
+      b.textContent = tgt.name;
+      b.onclick = () => {
+        document.getElementById("mov").classList.remove("show");
+        applyStun(tgt);
+      };
+      btns.appendChild(b);
+    });
+    document.getElementById("mact").prepend(btns);
+    return;
+  } else if (c.use === "flare_gun") {
+    const targets = G.players.filter((pl) => {
+      if (!pl.alive || pl.inStasis || pl.id === p.id) return false;
+      const path = bfsPath(p.q, p.r, pl.q, pl.r);
+      return path && path.length <= 2;
+    });
+    if (!targets.length) {
+      addLog("No crew within range of the Flare Gun.", "act");
+      closeCardModal();
+      return;
+    }
+    const applyFlare = (target) => {
+      target.q = p.q;
+      target.r = p.r;
+      target.location = tileName(G.tiles.get(hk(p.q, p.r)));
+      p.equipment.splice(ci, 1);
+      addLog(
+        `${p.name} fired the Flare Gun — ${target.name} forced to this tile.`,
+        "crit",
+      );
+      closeCardModal();
+      updateUI();
+      render();
+    };
+    if (targets.length === 1) {
+      applyFlare(targets[0]);
+      return;
+    }
+    showModal(
+      "FLARE GUN",
+      "Select a crew member to pull to your position.",
+      true,
+      () => {},
+      "Cancel",
+      undefined,
+      undefined,
+      "",
+    );
+    const btns = document.createElement("div");
+    btns.style.cssText =
+      "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
+    targets.forEach((tgt) => {
+      const b = document.createElement("button");
+      b.className = "mbtn wrn";
+      b.textContent = `${tgt.name} (${bfsPath(p.q, p.r, tgt.q, tgt.r)?.length || "?"} tiles)`;
+      b.onclick = () => {
+        document.getElementById("mov").classList.remove("show");
+        applyFlare(tgt);
+      };
+      btns.appendChild(b);
+    });
+    document.getElementById("mact").prepend(btns);
+    return;
+  } else if (c.use === "shock_trap") {
+    const t = G.tiles.get(hk(p.q, p.r));
+    if (!t) {
+      closeCardModal();
+      return;
+    }
+    t.shockTrap = true;
+    t.shockTrapOwner = p.id;
+    p.equipment.splice(ci, 1);
+    addLog(`${p.name} placed a Shock Trap on this tile.`, "act");
+    closeCardModal();
+    markTilesDirty();
+    updateUI();
+    render();
+    return;
+  } else if (c.use === "walkie") {
+    const adjacent = G.players.filter(
+      (pl) => pl.alive && !pl.isSynth && pl.id !== p.id,
+    );
+    if (!adjacent.length) {
+      addLog("No other crew available to trade with.", "act");
+      closeCardModal();
+      return;
+    }
+    const openWith = (partner) => {
+      closeCardModal();
+      initTradeModal(p, partner);
+    };
+    if (adjacent.length === 1) {
+      openWith(adjacent[0]);
+      return;
+    }
+    const btns = document.createElement("div");
+    btns.style.cssText =
+      "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
+    adjacent.forEach((pl) => {
+      const b = document.createElement("button");
+      b.className = "mbtn";
+      b.innerHTML = `<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
+      b.onclick = () => {
+        document.getElementById("mov").classList.remove("show");
+        openWith(pl);
+      };
+      btns.appendChild(b);
+    });
+    showModal(
+      "WALKIE",
+      "Choose a crew member to trade with.",
+      true,
+      () => {},
+      "Cancel",
+      undefined,
+      undefined,
+      "",
+    );
+    document.getElementById("mact").prepend(btns);
+    return;
+  } else if (c.use === "jammer") {
+    G.jammerActive = true;
+    p.equipment.splice(ci, 1);
+    addLog(
+      `${p.name} activated the Signal Jammer — no Signal Roll this round.`,
+      "act",
+    );
+    closeCardModal();
+    updateUI();
+    return;
   }
-  else if(c.use==='jammer'){
-    G.jammerActive=true;p.equipment.splice(ci,1);
-    addLog(`${p.name} activated the Signal Jammer — no Signal Roll this round.`,'act');closeCardModal();updateUI();return;
-  }
-  closeCardModal();updateUI();
+  closeCardModal();
+  updateUI();
 }
 
-function doActivateFrag(){
-  const p=cp();if(p.radioFragments<=0)return;
-  const t=G.tiles.get(hk(p.q,p.r));if(t?.name!=='Signal Array')return;
-  if(G.radioFragmentsActivated>=5)return;
-  p.radioFragments--;G.radioFragmentsActivated++;
-  sfx('activate');
-  const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
-  addLog(`Fragment activated. Array: ${G.radioFragmentsActivated}/5. Threshold: ${thr}+`,'frag');
-  guidance('first_frag_activated',()=>{
-    const activated=G.radioFragmentsActivated;
-    const moreMsg=activated<5?[[0,'','Activating more fragments before rolling improves your odds.']] :[];
+function doActivateFrag() {
+  const p = cp();
+  if (p.radioFragments <= 0) return;
+  const t = G.tiles.get(hk(p.q, p.r));
+  if (t?.name !== "Signal Array") return;
+  if (G.radioFragmentsActivated >= 5) return;
+  p.radioFragments--;
+  G.radioFragmentsActivated++;
+  sfx("activate");
+  const thr = [null, 18, 16, 14, 12, 10][G.radioFragmentsActivated];
+  addLog(
+    `Fragment activated. Array: ${G.radioFragmentsActivated}/5. Threshold: ${thr}+`,
+    "frag",
+  );
+  guidance("first_frag_activated", () => {
+    const activated = G.radioFragmentsActivated;
+    const moreMsg =
+      activated < 5
+        ? [
+            [
+              0,
+              "",
+              "Activating more fragments before rolling improves your odds.",
+            ],
+          ]
+        : [];
     e7Seq([
-      [0,   'div', null],
-      [0,   'sys', `> Fragment ${activated}/5 activated. Rescue threshold: ${thr}+.`],
-      [0,   'act', `Roll 3 dice — total ${thr} or higher establishes contact. Each additional fragment lowers the threshold further.`],
+      [0, "div", null],
+      [
+        0,
+        "sys",
+        `> Fragment ${activated}/5 activated. Rescue threshold: ${thr}+.`,
+      ],
+      [
+        0,
+        "act",
+        `Roll 3 dice — total ${thr} or higher establishes contact. Each additional fragment lowers the threshold further.`,
+      ],
       ...moreMsg,
     ]);
   });
-  updateUI();render();
+  updateUI();
+  render();
 }
 
-function doSignalRoll(){
-  const p=cp();
-  if(G.phase!=='action'&&G.phase!=='move')return;
-  if(G.signalRolled)return;
-  const t=G.tiles.get(hk(p.q,p.r));if(t?.name!=='Signal Array')return;
-  if(!G.radioFragmentsActivated)return;
-  if(G.jammerActive){addLog('Signal Jammer active — Signal Roll blocked this round.','crit');return;}
-  // Dead Zone blocks the roll if any player occupies that anomaly tile
-  const deadSignalActive=G.players.some(pl=>pl.alive&&G.tiles.get(hk(pl.q,pl.r))?.anomaly==='Dead Zone');
-  if(deadSignalActive){addLog('Dead Zone active — transmission blocked this round.','crit');return;}
-  // RF Extraction: auto-success if this player holds a Radio Fragment
-  if(p.rfExtractionActive&&p.radioFragments>0){
-    addLog(`${p.name} — Radio Fragment detected. Extraction guaranteed.`,'good');
-    G.phase='over';
-    showModal('RESCUE SIGNAL RECEIVED','',true,()=>{updateUI();},undefined,undefined,undefined,
-      '<div id="mov-e7log" class="mov-e7log"></div>');
-    e7ScreenSeq('mov-e7log',[
-      [300,'sys',`> PRIORITY SIGNAL: ${p.name}.`],
-      [600,'','Manifest override confirmed.'],
-      [1200,'good','> All surviving crew have been rescued.'],
-    ],22);
+function doSignalRoll() {
+  const p = cp();
+  if (G.phase !== "action" && G.phase !== "move") return;
+  if (G.signalRolled) return;
+  const t = G.tiles.get(hk(p.q, p.r));
+  if (t?.name !== "Signal Array") return;
+  if (!G.radioFragmentsActivated) return;
+  if (G.jammerActive) {
+    addLog("Signal Jammer active — Signal Roll blocked this round.", "crit");
     return;
   }
-  const frags=G.radioFragmentsActivated;
-  const thr=[null,18,16,14,12,10][frags];
-  document.getElementById('sig-frags').textContent=`Establish rescue signal`;
-  const diceEl=document.getElementById('sig-dice');diceEl.innerHTML='';
-  const outEl=document.getElementById('sig-out');outEl.textContent='';
-  const btn=document.getElementById('sig-btn');
-  btn.textContent='Attempt Rescue Signal';btn.disabled=false;delete btn.dataset.done;
-  const wraps=[];
-  for(let i=0;i<3;i++){const w=make3DDie('idle');diceEl.appendChild(w);wraps.push(w);}
-  function closeOv(){
-    _sigAir.pause();_sigAir.currentTime=0;
-    document.getElementById('sig-ov').classList.remove('show');
-    updateUI();render();
+  // Dead Zone blocks the roll if any player occupies that anomaly tile
+  const deadSignalActive = G.players.some(
+    (pl) => pl.alive && G.tiles.get(hk(pl.q, pl.r))?.anomaly === "Dead Zone",
+  );
+  if (deadSignalActive) {
+    addLog("Dead Zone active — transmission blocked this round.", "crit");
+    return;
   }
-  _sigAir.currentTime=0;_sigAir.play().catch(()=>{});
-  btn.onclick=()=>{
-    if(btn.dataset.done){closeOv();return;}
-    btn.disabled=true;
-    G.signalRolled=true;
-    sfx('dice_roll');
-    _sigPulse.currentTime=0;_sigPulse.play().catch(()=>{});
-    wraps.forEach(w=>{w.className='td-die-wrap';w.getBoundingClientRect();w.className='td-die-wrap rolling';});
-    const finals=[1+(0|Math.random()*6),1+(0|Math.random()*6),1+(0|Math.random()*6)];
-    setTimeout(()=>{
-      _sigAir.pause();_sigAir.currentTime=0;
-      _sigPulse.pause();_sigPulse.currentTime=0;
-      diceEl.innerHTML='';
-      const row=document.createElement('div');row.style.cssText='display:flex;gap:14px;';
-      finals.forEach(v=>row.appendChild(makeResultDie(v)));
+  // RF Extraction: auto-success if this player holds a Radio Fragment
+  if (p.rfExtractionActive && p.radioFragments > 0) {
+    addLog(
+      `${p.name} — Radio Fragment detected. Extraction guaranteed.`,
+      "good",
+    );
+    G.phase = "over";
+    showModal(
+      "RESCUE SIGNAL RECEIVED",
+      "",
+      true,
+      () => {
+        updateUI();
+      },
+      undefined,
+      undefined,
+      undefined,
+      '<div id="mov-e7log" class="mov-e7log"></div>',
+    );
+    e7ScreenSeq(
+      "mov-e7log",
+      [
+        [300, "sys", `> PRIORITY SIGNAL: ${p.name}.`],
+        [600, "", "Manifest override confirmed."],
+        [1200, "good", "> All surviving crew have been rescued."],
+      ],
+      22,
+    );
+    return;
+  }
+  const frags = G.radioFragmentsActivated;
+  const thr = [null, 18, 16, 14, 12, 10][frags];
+  document.getElementById("sig-frags").textContent = `Establish rescue signal`;
+  const diceEl = document.getElementById("sig-dice");
+  diceEl.innerHTML = "";
+  const outEl = document.getElementById("sig-out");
+  outEl.textContent = "";
+  const btn = document.getElementById("sig-btn");
+  btn.textContent = "Attempt Rescue Signal";
+  btn.disabled = false;
+  delete btn.dataset.done;
+  const wraps = [];
+  for (let i = 0; i < 3; i++) {
+    const w = make3DDie("idle");
+    diceEl.appendChild(w);
+    wraps.push(w);
+  }
+  function closeOv() {
+    _sigAir.pause();
+    _sigAir.currentTime = 0;
+    document.getElementById("sig-ov").classList.remove("show");
+    updateUI();
+    render();
+  }
+  _sigAir.currentTime = 0;
+  _sigAir.play().catch(() => {});
+  btn.onclick = () => {
+    if (btn.dataset.done) {
+      closeOv();
+      return;
+    }
+    btn.disabled = true;
+    G.signalRolled = true;
+    sfx("dice_roll");
+    _sigPulse.currentTime = 0;
+    _sigPulse.play().catch(() => {});
+    wraps.forEach((w) => {
+      w.className = "td-die-wrap";
+      w.getBoundingClientRect();
+      w.className = "td-die-wrap rolling";
+    });
+    const finals = [
+      1 + (0 | (Math.random() * 6)),
+      1 + (0 | (Math.random() * 6)),
+      1 + (0 | (Math.random() * 6)),
+    ];
+    setTimeout(() => {
+      _sigAir.pause();
+      _sigAir.currentTime = 0;
+      _sigPulse.pause();
+      _sigPulse.currentTime = 0;
+      diceEl.innerHTML = "";
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;gap:14px;";
+      finals.forEach((v) => row.appendChild(makeResultDie(v)));
       diceEl.appendChild(row);
-      const total=finals.reduce((a,b)=>a+b,0);const success=total>=thr;
-      sfx(success?'signal_success':'signal_fail');
-      addLog(`Signal Roll: ${total} vs ${thr} — ${success?'SUCCESS':'FAIL'}`,success?'good':'crit');
-      outEl.textContent=`${finals[0]} + ${finals[1]} + ${finals[2]} = ${total} · ${success?'SUCCESS':'FAIL'}`;
-      outEl.style.color=success?'#50c840':'#d04040';
-      btn.textContent='OK';btn.disabled=false;btn.dataset.done='1';btn.classList.add('next-btn');
-      if(success){
-        G.phase='over';
-        btn.onclick=()=>{
+      const total = finals.reduce((a, b) => a + b, 0);
+      const success = total >= thr;
+      sfx(success ? "signal_success" : "signal_fail");
+      addLog(
+        `Signal Roll: ${total} vs ${thr} — ${success ? "SUCCESS" : "FAIL"}`,
+        success ? "good" : "crit",
+      );
+      outEl.textContent = `${finals[0]} + ${finals[1]} + ${finals[2]} = ${total} · ${success ? "SUCCESS" : "FAIL"}`;
+      outEl.style.color = success ? "#50c840" : "#d04040";
+      btn.textContent = "OK";
+      btn.disabled = false;
+      btn.dataset.done = "1";
+      btn.classList.add("next-btn");
+      if (success) {
+        G.phase = "over";
+        btn.onclick = () => {
           closeOv();
-          showModal('RESCUE SIGNAL RECEIVED','',true,
-            ()=>{updateUI();},
-            undefined,undefined,undefined,
-            '<div id="mov-e7log" class="mov-e7log"></div>');
-          e7ScreenSeq('mov-e7log',[
-            [300,'sys','> SIGNAL TRANSMITTING.'],
-            [500,'','Congratulations, Commander!'],
-            [800,'','We are receiving a transmission from the NSS Monroe. They have acknowledged our signal and are en route to the planet now.'],
-            [1000,'good','Rescue craft entering orbit.'],
-            [1200,'good','All surviving crew have been rescued.'],
-          ],22);
+          showModal(
+            "RESCUE SIGNAL RECEIVED",
+            "",
+            true,
+            () => {
+              updateUI();
+            },
+            undefined,
+            undefined,
+            undefined,
+            '<div id="mov-e7log" class="mov-e7log"></div>',
+          );
+          e7ScreenSeq(
+            "mov-e7log",
+            [
+              [300, "sys", "> SIGNAL TRANSMITTING."],
+              [500, "", "Congratulations, Commander!"],
+              [
+                800,
+                "",
+                "We are receiving a transmission from the NSS Monroe. They have acknowledged our signal and are en route to the planet now.",
+              ],
+              [1000, "good", "Rescue craft entering orbit."],
+              [1200, "good", "All surviving crew have been rescued."],
+            ],
+            22,
+          );
         };
       }
-    },1500);
+    }, 1500);
   };
-  document.getElementById('sig-ov').classList.add('show');
-  document.getElementById('bsig').disabled=true;
-  const e7el=document.getElementById('sig-e7');e7el.innerHTML='';
-  e7ScreenSeq('sig-e7',[
-    [0,  'sys',   `> Radio Fragments: ${frags}.`],
-    [600,'act',   `Roll 3 dice.`],
-    [600,'act',   `You must roll a ${thr} or above to establish a rescue signal.`],
-  ],18);
+  document.getElementById("sig-ov").classList.add("show");
+  document.getElementById("bsig").disabled = true;
+  const e7el = document.getElementById("sig-e7");
+  e7el.innerHTML = "";
+  e7ScreenSeq(
+    "sig-e7",
+    [
+      [0, "sys", `> Radio Fragments: ${frags}.`],
+      [600, "act", `Roll 3 dice.`],
+      [
+        600,
+        "act",
+        `You must roll a ${thr} or above to establish a rescue signal.`,
+      ],
+    ],
+    18,
+  );
 }
 
-
 // ── BASE CAMP ACTIONS ──────────────────────────────────────────
-function doEquipLocker(){
-  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
-  if(G.tiles.get(hk(p.q,p.r))?.name!=='Equipment Locker')return;
-  G.phase='action';
-  if(p.lockerUsedThisVisit){showModal('Already Used','You have already used the Equipment Locker this visit. Move away and return to draw again.',true,()=>{});return;}
+function doEquipLocker() {
+  const p = cp();
+  if (G.phase !== "action" && G.phase !== "move") return;
+  if (G.tiles.get(hk(p.q, p.r))?.name !== "Equipment Locker") return;
+  G.phase = "action";
+  if (p.lockerUsedThisVisit) {
+    showModal(
+      "Already Used",
+      "You have already used the Equipment Locker this visit. Move away and return to draw again.",
+      true,
+      () => {},
+    );
+    return;
+  }
   cancelTooltip();
-  const trov=document.getElementById('trov');
-  trov.style.backgroundImage='url(img/Tiles/locker_overlay.png)';
-  trov.classList.add('equip-locker');
-  sfx('equip');
-  document.getElementById('tr-name').textContent='EQUIPMENT LOCKER';
-  const deck=document.getElementById('tr-deck');
-  const actionsEl=document.getElementById('tr-actions');
-  actionsEl.innerHTML='';
-  const cancelBtn=document.getElementById('trov-cancel');
-  cancelBtn.style.display='';
-  const dismiss=()=>{
-    deck.onclick=null;
-    cancelBtn.onclick=null;
-    cancelBtn.style.display='none';
-    actionsEl.innerHTML='';actionsEl.style.cssText='';
-    trov.classList.remove('show','equip-locker');
-    trov.style.display='none';
-    trov.style.backgroundImage='';
+  const trov = document.getElementById("trov");
+  trov.style.backgroundImage = "url(img/tiles/locker_overlay.png)";
+  trov.classList.add("equip-locker");
+  sfx("equip");
+  document.getElementById("tr-name").textContent = "EQUIPMENT LOCKER";
+  const deck = document.getElementById("tr-deck");
+  const actionsEl = document.getElementById("tr-actions");
+  actionsEl.innerHTML = "";
+  const cancelBtn = document.getElementById("trov-cancel");
+  cancelBtn.style.display = "";
+  const dismiss = () => {
+    deck.onclick = null;
+    cancelBtn.onclick = null;
+    cancelBtn.style.display = "none";
+    actionsEl.innerHTML = "";
+    actionsEl.style.cssText = "";
+    trov.classList.remove("show", "equip-locker");
+    trov.style.display = "none";
+    trov.style.backgroundImage = "";
   };
-  cancelBtn.onclick=dismiss;
-  trov.onclick=null;
-  const hasCards=p.equipment&&p.equipment.length>0;
-  const deckEmpty=G.eqDeckCount<=0;
-  if(hasCards){
+  cancelBtn.onclick = dismiss;
+  trov.onclick = null;
+  const hasCards = p.equipment && p.equipment.length > 0;
+  const deckEmpty = G.eqDeckCount <= 0;
+  if (hasCards) {
     // Exchange mode: select a card to discard, then draw a replacement
-    deck.style.display='none';
-    trDesc(deckEmpty?'The equipment deck is empty — nothing to exchange.':'Select a card to discard. It will be replaced with a new one.');
-    if(!deckEmpty){
-      actionsEl.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px;';
-      p.equipment.filter(c=>!c.eventCard).forEach(card=>{
-        const d=document.createElement('div');
-        d.className=`eqcard exchange-target cc-${card.cat}`;
-        d.innerHTML=cardFaceHTML(card.cat,card.name,card.txt);
-        d.onclick=()=>{
-          _play('next.wav');
-          const ci=p.equipment.findIndex(c=>c.uid===card.uid);
-          if(ci>=0){p.equipment.splice(ci,1);G.eqDeckCount++;}// return card to deck
-          dismiss();
-          const newCard=drawEqCard(p);
-          p.lockerUsedThisVisit=true;
-          if(newCard){
-            addLog(`${p.name} exchanged ${card.name} → ${newCard.name}.`,'good');
-            openCardModal(p.id,newCard,'url(img/Tiles/locker_overlay.png)');
-          } else {
-            addLog(`${p.name} discarded ${card.name} — deck is now empty.`);
-          }
-          updateUI();
-        };
-        actionsEl.appendChild(d);
-      });
+    deck.style.display = "none";
+    trDesc(
+      deckEmpty
+        ? "The equipment deck is empty — nothing to exchange."
+        : "Select a card to discard. It will be replaced with a new one.",
+    );
+    if (!deckEmpty) {
+      actionsEl.style.cssText =
+        "display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px;";
+      p.equipment
+        .filter((c) => !c.eventCard)
+        .forEach((card) => {
+          const d = document.createElement("div");
+          d.className = `eqcard exchange-target cc-${card.cat}`;
+          d.innerHTML = cardFaceHTML(card.cat, card.name, card.txt);
+          d.onclick = () => {
+            _play("next.wav");
+            const ci = p.equipment.findIndex((c) => c.uid === card.uid);
+            if (ci >= 0) {
+              p.equipment.splice(ci, 1);
+              G.eqDeckCount++;
+            } // return card to deck
+            dismiss();
+            const newCard = drawEqCard(p);
+            p.lockerUsedThisVisit = true;
+            if (newCard) {
+              addLog(
+                `${p.name} exchanged ${card.name} → ${newCard.name}.`,
+                "good",
+              );
+              openCardModal(p.id, newCard, "url(img/tiles/locker_overlay.png)");
+            } else {
+              addLog(`${p.name} discarded ${card.name} — deck is now empty.`);
+            }
+            updateUI();
+          };
+          actionsEl.appendChild(d);
+        });
     }
   } else {
     // Draw mode: no existing cards, just draw one
-    trDesc(deckEmpty?'The equipment deck is empty.':'Draw 1 card from the equipment deck.');
-    document.getElementById('tr-evtn').textContent=G.eqDeckCount;
-    document.getElementById('tr-deck-lbl').textContent='Draw Equipment Card';
-    deck.style.display=deckEmpty?'none':'';
-    deck.onclick=()=>{
-      _play('next.wav');
+    trDesc(
+      deckEmpty
+        ? "The equipment deck is empty."
+        : "Draw 1 card from the equipment deck.",
+    );
+    document.getElementById("tr-evtn").textContent = G.eqDeckCount;
+    document.getElementById("tr-deck-lbl").textContent = "Draw Equipment Card";
+    deck.style.display = deckEmpty ? "none" : "";
+    deck.onclick = () => {
+      _play("next.wav");
       dismiss();
-      const c=drawEqCard(p);
-      p.lockerUsedThisVisit=true;
-      if(c){
-        addLog(`${p.name} drew ${c.name} from Equipment Locker.`,'good');
-        openCardModal(p.id,c,'url(img/Tiles/locker_overlay.png)');
-      } else {addLog('Equipment Locker: deck empty.');}
+      const c = drawEqCard(p);
+      p.lockerUsedThisVisit = true;
+      if (c) {
+        addLog(`${p.name} drew ${c.name} from Equipment Locker.`, "good");
+        openCardModal(p.id, c, "url(img/tiles/locker_overlay.png)");
+      } else {
+        addLog("Equipment Locker: deck empty.");
+      }
       updateUI();
     };
   }
-  trov.style.display='flex';
-  trov.classList.add('show');
+  trov.style.display = "flex";
+  trov.classList.add("show");
 }
-function doCargo(){
-  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
-  if(G.tiles.get(hk(p.q,p.r))?.name!=='Cargo Hold')return;
-  sfx('cargo');
-  G.phase='action';
+function doCargo() {
+  const p = cp();
+  if (G.phase !== "action" && G.phase !== "move") return;
+  if (G.tiles.get(hk(p.q, p.r))?.name !== "Cargo Hold") return;
+  sfx("cargo");
+  G.phase = "action";
   renderCargoModal();
 }
-function renderCargoModal(){
-  const p=cp();
-  const hold=G.cargoHold||0;
-  const cap=15-p.food;// room on player
-  const body=`Hold: ${hold} Food\nYours: ${p.food} Food\n\nChoose action:`;
-  const mov=document.getElementById('mov');
-  mov.classList.add('cargo');
-  const ma=document.getElementById('mact');
-  document.getElementById('mtit').textContent='Cargo Hold';
-  document.getElementById('mbod').textContent=body;
-  ma.innerHTML='';
+function renderCargoModal() {
+  const p = cp();
+  const hold = G.cargoHold || 0;
+  const cap = 15 - p.food; // room on player
+  const body = `Hold: ${hold} Food\nYours: ${p.food} Food\n\nChoose action:`;
+  const mov = document.getElementById("mov");
+  mov.classList.add("cargo");
+  const ma = document.getElementById("mact");
+  document.getElementById("mtit").textContent = "Cargo Hold";
+  document.getElementById("mbod").textContent = body;
+  ma.innerHTML = "";
   // Deposit 1
-  const d1=document.createElement('button');d1.className='mbtn';d1.textContent='Deposit 1';d1.disabled=p.food<=0;
-  d1.onclick=()=>{if(p.food>0){p.food--;G.cargoHold=(G.cargoHold||0)+1;addLog(`${p.name} deposited 1 Food. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
+  const d1 = document.createElement("button");
+  d1.className = "mbtn";
+  d1.textContent = "Deposit 1";
+  d1.disabled = p.food <= 0;
+  d1.onclick = () => {
+    if (p.food > 0) {
+      p.food--;
+      G.cargoHold = (G.cargoHold || 0) + 1;
+      addLog(`${p.name} deposited 1 Food. Hold: ${G.cargoHold}.`);
+      updateUI();
+    }
+    renderCargoModal();
+  };
   // Withdraw 1
-  const w1=document.createElement('button');w1.className='mbtn wrn';w1.textContent='Withdraw 1';w1.disabled=hold<=0||cap<=0;
-  w1.onclick=()=>{if(hold>0&&cap>0){G.cargoHold--;p.food++;addLog(`${p.name} withdrew 1 Food. Hold: ${G.cargoHold}.`);updateUI();}renderCargoModal();};
+  const w1 = document.createElement("button");
+  w1.className = "mbtn wrn";
+  w1.textContent = "Withdraw 1";
+  w1.disabled = hold <= 0 || cap <= 0;
+  w1.onclick = () => {
+    if (hold > 0 && cap > 0) {
+      G.cargoHold--;
+      p.food++;
+      addLog(`${p.name} withdrew 1 Food. Hold: ${G.cargoHold}.`);
+      updateUI();
+    }
+    renderCargoModal();
+  };
   // Close
-  const cl=document.createElement('button');cl.className='mbtn pri next-btn';cl.textContent='Done';
-  cl.onclick=()=>{const m=document.getElementById('mov');m.classList.remove('show','cargo');};
-  ma.appendChild(d1);ma.appendChild(w1);ma.appendChild(cl);
-  document.getElementById('mov').classList.add('show');
+  const cl = document.createElement("button");
+  cl.className = "mbtn pri next-btn";
+  cl.textContent = "Done";
+  cl.onclick = () => {
+    const m = document.getElementById("mov");
+    m.classList.remove("show", "cargo");
+  };
+  ma.appendChild(d1);
+  ma.appendChild(w1);
+  ma.appendChild(cl);
+  document.getElementById("mov").classList.add("show");
 }
-function doWatchTower(){
-  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
-  if(G.tiles.get(hk(p.q,p.r))?.name!=='Watch Tower')return;
-  sfx('watchtower');
-  G.phase='action';
-  const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
+function doWatchTower() {
+  const p = cp();
+  if (G.phase !== "action" && G.phase !== "move") return;
+  if (G.tiles.get(hk(p.q, p.r))?.name !== "Watch Tower") return;
+  sfx("watchtower");
+  G.phase = "action";
+  const inField = G.players.filter(
+    (x) => x.alive && G.tiles.get(hk(x.q, x.r))?.type !== "crash_site",
+  );
   let msg;
-  if(!inField.length){
-    msg='No crew are currently in the field.\n\nThere are no tiles to reveal.';
+  if (!inField.length) {
+    msg =
+      "No crew are currently in the field.\n\nThere are no tiles to reveal.";
   } else {
-    let revealed=0;
-    inField.forEach(fp=>{
-      hnbr(fp.q,fp.r).forEach(([nq,nr])=>{
-        const nt=G.tiles.get(hk(nq,nr));
-        if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
+    let revealed = 0;
+    inField.forEach((fp) => {
+      hnbr(fp.q, fp.r).forEach(([nq, nr]) => {
+        const nt = G.tiles.get(hk(nq, nr));
+        if (nt && !nt.revealed) {
+          revealAt(nq, nr);
+          revealed++;
+        }
       });
     });
-    const names=inField.map(x=>x.name).join(', ');
-    addLog(`Watch Tower: ${revealed} tile${revealed!==1?'s':''} revealed around ${names}.`,'tile');
-    msg=`From this vantage point, you can see the terrain around ${names}. As you ping their locations, you are able to survey the surrounding area, revealing \n\n${revealed} tile${revealed!==1?'s':''}.`;
-    render();updateUI();
+    const names = inField.map((x) => x.name).join(", ");
+    addLog(
+      `Watch Tower: ${revealed} tile${revealed !== 1 ? "s" : ""} revealed around ${names}.`,
+      "tile",
+    );
+    msg = `From this vantage point, you can see the terrain around ${names}. As you ping their locations, you are able to survey the surrounding area, revealing \n\n${revealed} tile${revealed !== 1 ? "s" : ""}.`;
+    render();
+    updateUI();
   }
   cancelTooltip();
-  const trov=document.getElementById('trov');
-  trov.style.backgroundImage='url(img/Tiles/watch-tower_overlay.png)';
-  trov.classList.add('watch-tower');
-  document.getElementById('tr-name').textContent='WATCH TOWER';
+  const trov = document.getElementById("trov");
+  trov.style.backgroundImage = "url(img/tiles/watch-tower_overlay.png)";
+  trov.classList.add("watch-tower");
+  document.getElementById("tr-name").textContent = "WATCH TOWER";
   trDesc(msg);
-  const deck=document.getElementById('tr-deck');
-  deck.style.display='none';
-  const dismiss=()=>{
-    trov.onclick=null;
-    trov.classList.remove('show','anomaly-mode','watch-tower');
-    trov.style.display='none';
-    trov.style.backgroundImage='';
+  const deck = document.getElementById("tr-deck");
+  deck.style.display = "none";
+  const dismiss = () => {
+    trov.onclick = null;
+    trov.classList.remove("show", "anomaly-mode", "watch-tower");
+    trov.style.display = "none";
+    trov.style.backgroundImage = "";
   };
-  const wtActionsEl=document.getElementById('tr-actions');
-  wtActionsEl.innerHTML='';
-  const wtAckBtn=document.createElement('button');wtAckBtn.className='mbtn next-btn';wtAckBtn.textContent='Acknowledge';
-  wtAckBtn.onclick=dismiss;
+  const wtActionsEl = document.getElementById("tr-actions");
+  wtActionsEl.innerHTML = "";
+  const wtAckBtn = document.createElement("button");
+  wtAckBtn.className = "mbtn next-btn";
+  wtAckBtn.textContent = "Acknowledge";
+  wtAckBtn.onclick = dismiss;
   wtActionsEl.appendChild(wtAckBtn);
-  trov.style.display='flex';
-  trov.classList.add('show');
+  trov.style.display = "flex";
+  trov.classList.add("show");
 }
 
-function doStasisEndTurn(){
-  sfx('end_turn');
-  addLog(`${cp().name} remains in stasis.`,'act');
+function doStasisEndTurn() {
+  sfx("end_turn");
+  addLog(`${cp().name} remains in stasis.`, "act");
   advanceTurn();
 }
-function doStasisLeave(){
-  const p=cp();
-  p.inStasis=false;
-  addLog(`${p.name} left stasis.`,'act');
-  G.phase='roll';
-  showTableDice('move');
-  updateUI();render();
+function doStasisLeave() {
+  const p = cp();
+  p.inStasis = false;
+  addLog(`${p.name} left stasis.`, "act");
+  G.phase = "roll";
+  showTableDice("move");
+  updateUI();
+  render();
 }
-function doEndTurn(){
-  if(G.phase==='roll'||G.phase==='stasis')return;
-  sfx('end_turn');
-  const p=cp();const curTile=G.tiles.get(hk(p.q,p.r));const onBase=curTile?.type==='crash_site';
+function doEndTurn() {
+  if (G.phase === "roll" || G.phase === "stasis") return;
+  sfx("end_turn");
+  const p = cp();
+  const curTile = G.tiles.get(hk(p.q, p.r));
+  const onBase = curTile?.type === "crash_site";
   // Synth: battery logic only
-  if(p.isSynth){
-    if(!p.deactivated){
-      if(p.battery>0)p.battery--;
-      if(p.battery===0){p.alive=false;sfx('death');addLog('IRIS: Power depleted. Systems offline.','crit');}
+  if (p.isSynth) {
+    if (!p.deactivated) {
+      if (p.battery > 0) p.battery--;
+      if (p.battery === 0) {
+        p.alive = false;
+        sfx("death");
+        addLog("IRIS: Power depleted. Systems offline.", "crit");
+      }
     }
-    advanceTurn();return;
+    advanceTurn();
+    return;
   }
   // Stasis: skip all depletion
-  if(p.inStasis){
-    if(curTile?.anomaly!=='Stasis Pod'){p.inStasis=false;}
-    else{advanceTurn();return;}
-  }
-  if(p.food>0){p.food--;guidance('first_food_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Resource consumption logged.'],[0,'','Food depletes by 1 each turn. If it reaches zero, you will lose Health instead. Deposit surplus food in the Cargo Hold to build a shared reserve for the crew.']]);});}
-  else{if(p.health>0){p.health--;sfx('health_down');guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} is starving. Health: ${p.health}/3.`,'crit');}
-  if(!onBase&&!p.skipO2){
-    const hasRebreather=p.equipment.some(c=>c.id==='rebreather');
-    if(hasRebreather){p.rebreatherCycle=!p.rebreatherCycle;}
-    if(!hasRebreather||p.rebreatherCycle){
-      if(p.o2>0){p.o2--;guidance('first_o2_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Oxygen consumption logged.'],[0,'','O\u2082 depletes by 1 each turn you spend outside the crash site. If it reaches zero, you will lose Health instead. Pass through the Airlock to fully restore your O\u2082.']]);});}
-      else{if(p.health>0){p.health--;sfx('health_down');guidance('first_health_loss',()=>{e7Seq([[0,'div',null],[0,'sys','> Health critical.'],[0,'crit','You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.']]);});}addLog(`${p.name} has no O₂. Health: ${p.health}/3.`,'crit');}
+  if (p.inStasis) {
+    if (curTile?.anomaly !== "Stasis Pod") {
+      p.inStasis = false;
+    } else {
+      advanceTurn();
+      return;
     }
   }
-  p.skipO2=false;
-  if(p.health===0&&p.alive&&!p.isSynth){
-    addLog(`${p.name} is down. Health: 0/3.`,'crit');
+  if (p.food > 0) {
+    p.food--;
+    guidance("first_food_loss", () => {
+      e7Seq([
+        [0, "div", null],
+        [0, "sys", "> Resource consumption logged."],
+        [
+          0,
+          "",
+          "Food depletes by 1 each turn. If it reaches zero, you will lose Health instead. Deposit surplus food in the Cargo Hold to build a shared reserve for the crew.",
+        ],
+      ]);
+    });
+  } else {
+    if (p.health > 0) {
+      p.health--;
+      sfx("health_down");
+      guidance("first_health_loss", () => {
+        e7Seq([
+          [0, "div", null],
+          [0, "sys", "> Health critical."],
+          [
+            0,
+            "crit",
+            "You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.",
+          ],
+        ]);
+      });
+    }
+    addLog(`${p.name} is starving. Health: ${p.health}/3.`, "crit");
+  }
+  if (!onBase && !p.skipO2) {
+    const hasRebreather = p.equipment.some((c) => c.id === "rebreather");
+    if (hasRebreather) {
+      p.rebreatherCycle = !p.rebreatherCycle;
+    }
+    if (!hasRebreather || p.rebreatherCycle) {
+      if (p.o2 > 0) {
+        p.o2--;
+        guidance("first_o2_loss", () => {
+          e7Seq([
+            [0, "div", null],
+            [0, "sys", "> Oxygen consumption logged."],
+            [
+              0,
+              "",
+              "O\u2082 depletes by 1 each turn you spend outside the crash site. If it reaches zero, you will lose Health instead. Pass through the Airlock to fully restore your O\u2082.",
+            ],
+          ]);
+        });
+      } else {
+        if (p.health > 0) {
+          p.health--;
+          sfx("health_down");
+          guidance("first_health_loss", () => {
+            e7Seq([
+              [0, "div", null],
+              [0, "sys", "> Health critical."],
+              [
+                0,
+                "crit",
+                "You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.",
+              ],
+            ]);
+          });
+        }
+        addLog(`${p.name} has no O₂. Health: ${p.health}/3.`, "crit");
+      }
+    }
+  }
+  p.skipO2 = false;
+  if (p.health === 0 && p.alive && !p.isSynth) {
+    addLog(`${p.name} is down. Health: 0/3.`, "crit");
   }
   // Signal Array occupancy tracking
-  if(curTile?.name==='Signal Array'){
+  if (curTile?.name === "Signal Array") {
     p.signalArrayRounds++;
-    if(p.soloRescueActive&&p.signalArrayRounds>=3){
-      let _soloExtracted=false;
-      showDieRoll(`${p.name} — Solo Extraction attempt. Roll 10 or higher to be rescued alone.`,val=>{
-        addLog(`${p.name} solo rescue: rolled ${val}.`,val>=10?'good':'crit');
-        if(val>=10){
-          _soloExtracted=true;
-          p.alive=false;p.extracted=true;
-          const synth=G.players.find(pl=>pl.isSynth&&pl.corrupted&&pl.alive);
-          if(synth){synth.corrupted=false;addLog('IRIS: Active crew count reduced. Threat protocol suspended.','sys');}
-          showModal('SOLO EXTRACTION','',true,()=>{advanceTurn();},undefined,undefined,undefined,
-            '<div id="mov-e7log" class="mov-e7log"></div>');
-          e7ScreenSeq('mov-e7log',[
-            [300,'sys',`> SIGNAL ISOLATED: ${p.name}.`],
-            [600,'','Rescue craft locked on single life sign.'],
-            [1200,'good',`> ${p.name} has been extracted. The others remain.`],
-          ],22);
-          return`Rolled ${val} — EXTRACTED.`;
-        }
-        return`Rolled ${val} — signal not strong enough. Remain on the array.`;
-      },()=>{if(!_soloExtracted)advanceTurn();},undefined,3);
+    if (p.soloRescueActive && p.signalArrayRounds >= 3) {
+      let _soloExtracted = false;
+      showDieRoll(
+        `${p.name} — Solo Extraction attempt. Roll 10 or higher to be rescued alone.`,
+        (val) => {
+          addLog(
+            `${p.name} solo rescue: rolled ${val}.`,
+            val >= 10 ? "good" : "crit",
+          );
+          if (val >= 10) {
+            _soloExtracted = true;
+            p.alive = false;
+            p.extracted = true;
+            const synth = G.players.find(
+              (pl) => pl.isSynth && pl.corrupted && pl.alive,
+            );
+            if (synth) {
+              synth.corrupted = false;
+              addLog(
+                "IRIS: Active crew count reduced. Threat protocol suspended.",
+                "sys",
+              );
+            }
+            showModal(
+              "SOLO EXTRACTION",
+              "",
+              true,
+              () => {
+                advanceTurn();
+              },
+              undefined,
+              undefined,
+              undefined,
+              '<div id="mov-e7log" class="mov-e7log"></div>',
+            );
+            e7ScreenSeq(
+              "mov-e7log",
+              [
+                [300, "sys", `> SIGNAL ISOLATED: ${p.name}.`],
+                [600, "", "Rescue craft locked on single life sign."],
+                [
+                  1200,
+                  "good",
+                  `> ${p.name} has been extracted. The others remain.`,
+                ],
+              ],
+              22,
+            );
+            return `Rolled ${val} — EXTRACTED.`;
+          }
+          return `Rolled ${val} — signal not strong enough. Remain on the array.`;
+        },
+        () => {
+          if (!_soloExtracted) advanceTurn();
+        },
+        undefined,
+        3,
+      );
       return;
     }
   } else {
-    p.signalArrayRounds=0;
+    p.signalArrayRounds = 0;
   }
   advanceTurn();
 }
 
-function advanceTurn(){
-  const alive=G.players.filter(p=>p.alive&&!p.isSynth);if(!alive.length){
-    _alarmCrit.pause(); _alarmCrit.currentTime = 0;
+function advanceTurn() {
+  const alive = G.players.filter((p) => p.alive && !p.isSynth);
+  if (!alive.length) {
+    _alarmCrit.pause();
+    _alarmCrit.currentTime = 0;
     render();
-    if(G.players.some(p=>p.extracted&&!p.isSynth)){clearSave();window.Sync?.clearSession();location.reload();return;}
-    showModal('ALL CREW LOST','',true,()=>{clearSave();window.Sync?.clearSession();location.reload();},'End Mission',undefined,undefined,'<div id="mov-e7log" class="mov-e7log"></div>');
-    e7ScreenSeq('mov-e7log',[
-      [200,'crit','> LIFE SIGN MONITOR: no signals detected.'],
-      [600,'sys','> INITIATING FAILSAFE PROTOCOL.'],
-      [800,'','Rebooting Signal Array...'],
-      [1000,'sys','> SIGNAL RESTORED.'],
-      [700,'','Recommending salvage operations.'],
-    ],20);
+    if (G.players.some((p) => p.extracted && !p.isSynth)) {
+      clearSave();
+      window.Sync?.clearSession();
+      location.reload();
+      return;
+    }
+    showModal(
+      "ALL CREW LOST",
+      "",
+      true,
+      () => {
+        clearSave();
+        window.Sync?.clearSession();
+        location.reload();
+      },
+      "End Mission",
+      undefined,
+      undefined,
+      '<div id="mov-e7log" class="mov-e7log"></div>',
+    );
+    e7ScreenSeq(
+      "mov-e7log",
+      [
+        [200, "crit", "> LIFE SIGN MONITOR: no signals detected."],
+        [600, "sys", "> INITIATING FAILSAFE PROTOCOL."],
+        [800, "", "Rebooting Signal Array..."],
+        [1000, "sys", "> SIGNAL RESTORED."],
+        [700, "", "Recommending salvage operations."],
+      ],
+      20,
+    );
     return;
   }
-  let next=(G.currentPlayer+1)%G.players.length,tries=0;
-  while(!G.players[next].alive&&tries++<G.players.length)next=(next+1)%G.players.length;
-  if(next<=G.currentPlayer){G.turn++;G.jammerActive=false;}
-  G.currentPlayer=next;viewedPlayer=next;eqGalleryOffset=0;G.phase='roll';G.movementLeft=0;G.reach=new Map();G.tileActionUsed=false;G.signalRolled=false;
-  G.players[next].scannerUsed=false;G.players[next].lockerUsedThisVisit=false;G.players[next].medBayHealedThisRound=false;
-  if(G.players[next].health===0&&G.players[next].alive&&!G.players[next].isSynth){
+  let next = (G.currentPlayer + 1) % G.players.length,
+    tries = 0;
+  while (!G.players[next].alive && tries++ < G.players.length)
+    next = (next + 1) % G.players.length;
+  if (next <= G.currentPlayer) {
+    G.turn++;
+    G.jammerActive = false;
+  }
+  G.currentPlayer = next;
+  viewedPlayer = next;
+  eqGalleryOffset = 0;
+  G.phase = "roll";
+  G.movementLeft = 0;
+  G.reach = new Map();
+  G.tileActionUsed = false;
+  G.signalRolled = false;
+  G.players[next].scannerUsed = false;
+  G.players[next].lockerUsedThisVisit = false;
+  G.players[next].medBayHealedThisRound = false;
+  if (
+    G.players[next].health === 0 &&
+    G.players[next].alive &&
+    !G.players[next].isSynth
+  ) {
     G.players[next].incapacitated++;
-    if(G.players[next].incapacitated>=3){
-      const dying=G.players[next];
-      dying.alive=false;
-      sfx('death');
-      addLog(`${dying.name} has DIED.`,'crit');
-      if(dying.radioFragments>0){
-        const dt=G.tiles.get(hk(dying.q,dying.r));
-        if(dt){dt.droppedFragments=(dt.droppedFragments||0)+dying.radioFragments;markTilesDirty();}
-        addLog(`${dying.name} dropped ${dying.radioFragments} Radio Fragment${dying.radioFragments!==1?'s':''} — retrieve them before they\'re lost.`,'frag');
-        dying.radioFragments=0;
+    if (G.players[next].incapacitated >= 3) {
+      const dying = G.players[next];
+      dying.alive = false;
+      sfx("death");
+      addLog(`${dying.name} has DIED.`, "crit");
+      if (dying.radioFragments > 0) {
+        const dt = G.tiles.get(hk(dying.q, dying.r));
+        if (dt) {
+          dt.droppedFragments =
+            (dt.droppedFragments || 0) + dying.radioFragments;
+          markTilesDirty();
+        }
+        addLog(
+          `${dying.name} dropped ${dying.radioFragments} Radio Fragment${dying.radioFragments !== 1 ? "s" : ""} — retrieve them before they\'re lost.`,
+          "frag",
+        );
+        dying.radioFragments = 0;
       }
-      updateUI();render();
-      advanceTurn();return;
+      updateUI();
+      render();
+      advanceTurn();
+      return;
     }
-    addLog(`${G.players[next].name} is INCAPACITATED (${G.players[next].incapacitated}/2 rounds). Turn skipped.`,'crit');
-    const synth=G.players.find(pl=>pl.isSynth&&pl.corrupted&&pl.alive);
-    if(synth){synth.corrupted=false;addLog('IRIS: Active crew count reduced. Threat protocol suspended.','sys');}
-    updateUI();render();
-    advanceTurn();return;
+    addLog(
+      `${G.players[next].name} is INCAPACITATED (${G.players[next].incapacitated}/2 rounds). Turn skipped.`,
+      "crit",
+    );
+    const synth = G.players.find(
+      (pl) => pl.isSynth && pl.corrupted && pl.alive,
+    );
+    if (synth) {
+      synth.corrupted = false;
+      addLog(
+        "IRIS: Active crew count reduced. Threat protocol suspended.",
+        "sys",
+      );
+    }
+    updateUI();
+    render();
+    advanceTurn();
+    return;
   }
-  if(G.players[next].stunned){
-    G.players[next].stunned=false;
-    addLog(`${G.players[next].name} is stunned — skipping turn.`,'crit');
-    advanceTurn();return;
+  if (G.players[next].stunned) {
+    G.players[next].stunned = false;
+    addLog(`${G.players[next].name} is stunned — skipping turn.`, "crit");
+    advanceTurn();
+    return;
   }
-  addLog(`Turn ${G.turn}: ${G.players[next].name}.`,'act');
-  _alarmCrit.pause(); _alarmCrit.currentTime = 0;
-  if(isMyTurn()){
-    const _ap=G.players[next];
-    if(_ap.health===1){
-      _alarmCrit.play().catch(()=>{});
-    } else if(_ap.isSynth?_ap.battery<=3:_ap.o2<=1){
-      _play('alarm-act.wav');
+  addLog(`Turn ${G.turn}: ${G.players[next].name}.`, "act");
+  _alarmCrit.pause();
+  _alarmCrit.currentTime = 0;
+  if (isMyTurn()) {
+    const _ap = G.players[next];
+    if (_ap.health === 1) {
+      _alarmCrit.play().catch(() => {});
+    } else if (_ap.isSynth ? _ap.battery <= 3 : _ap.o2 <= 1) {
+      _play("alarm-act.wav");
     }
   }
   // Stasis: frozen players skip the roll — choose Stay or Leave instead
-  if(G.players[next].inStasis&&G.tiles.get(hk(G.players[next].q,G.players[next].r))?.anomaly==='Stasis Pod'){
-    G.phase='stasis';
-    addLog(`${G.players[next].name} is in stasis.`,'act');
-    hideTableDice();updateUI();render();panToPlayer(G.players[next]);
+  if (
+    G.players[next].inStasis &&
+    G.tiles.get(hk(G.players[next].q, G.players[next].r))?.anomaly ===
+      "Stasis Pod"
+  ) {
+    G.phase = "stasis";
+    addLog(`${G.players[next].name} is in stasis.`, "act");
+    hideTableDice();
+    updateUI();
+    render();
+    panToPlayer(G.players[next]);
     return;
   }
-  showTableDice('move');
-  updateUI();render();
+  showTableDice("move");
+  updateUI();
+  render();
   panToPlayer(G.players[next]);
-  if(G.players[next].isSynth&&(!_isOnlineMode||!window.Sync?.isActive()||window.Sync.myPlayerIndex()===0)){setTimeout(doSynthTurn,1800);}
+  if (
+    G.players[next].isSynth &&
+    (!_isOnlineMode ||
+      !window.Sync?.isActive() ||
+      window.Sync.myPlayerIndex() === 0)
+  ) {
+    setTimeout(doSynthTurn, 1800);
+  }
 }
 // ═══════════════════════════════════════════════════════════════
 // IRIS AI
 // ═══════════════════════════════════════════════════════════════
-function toggleIrisDeactivation(){
-  const iris=G.players.find(p=>p.isSynth);
-  if(!iris||!iris.alive)return;
-  iris.deactivated=!iris.deactivated;
-  sfx('select');
-  if(iris.deactivated)addLog(cp().name+' deactivated IRIS. She will skip turns until reactivated.','act');
-  else addLog(cp().name+' reactivated IRIS.','act');
-  updateUI();render();
+function toggleIrisDeactivation() {
+  const iris = G.players.find((p) => p.isSynth);
+  if (!iris || !iris.alive) return;
+  iris.deactivated = !iris.deactivated;
+  sfx("select");
+  if (iris.deactivated)
+    addLog(
+      cp().name + " deactivated IRIS. She will skip turns until reactivated.",
+      "act",
+    );
+  else addLog(cp().name + " reactivated IRIS.", "act");
+  updateUI();
+  render();
 }
-function synthFindTile(name){
-  for(const[k,t]of G.tiles){if(t.name===name){const[q,r]=hparse(k);return{q,r,tile:t};}}
+function synthFindTile(name) {
+  for (const [k, t] of G.tiles) {
+    if (t.name === name) {
+      const [q, r] = hparse(k);
+      return { q, r, tile: t };
+    }
+  }
   return null;
 }
-function synthKnownFragTiles(){
-  const out=[];
-  for(const[k,t]of G.tiles){
-    if(t.revealed&&t.radioFragment){const[q,r]=hparse(k);out.push({q,r,requiresTool:t.requiresTool||null});}
+function synthKnownFragTiles() {
+  const out = [];
+  for (const [k, t] of G.tiles) {
+    if (t.revealed && t.radioFragment) {
+      const [q, r] = hparse(k);
+      out.push({ q, r, requiresTool: t.requiresTool || null });
+    }
   }
   return out;
 }
-function synthNearest(p,candidates){
-  let best=null,bestLen=Infinity;
-  for(const c of candidates){
-    const path=bfsPath(p.q,p.r,c.q,c.r,synthPassable);
-    if(path&&path.length<bestLen){bestLen=path.length;best={...c,pathLen:bestLen};}
+function synthNearest(p, candidates) {
+  let best = null,
+    bestLen = Infinity;
+  for (const c of candidates) {
+    const path = bfsPath(p.q, p.r, c.q, c.r, synthPassable);
+    if (path && path.length < bestLen) {
+      bestLen = path.length;
+      best = { ...c, pathLen: bestLen };
+    }
   }
   return best;
 }
 
-function synthChooseTarget(p){
-  if(p.corrupted)return synthChooseCorrupted(p);
+function synthChooseTarget(p) {
+  if (p.corrupted) return synthChooseCorrupted(p);
   // Priority 0: recharge if battery is low
-  if(p.battery<=3){
-    const med=synthFindTile('Medical Bay');
-    if(med&&!(p.q===med.q&&p.r===med.r))return{q:med.q,r:med.r,action:'recharge'};
+  if (p.battery <= 3) {
+    const med = synthFindTile("Medical Bay");
+    if (med && !(p.q === med.q && p.r === med.r))
+      return { q: med.q, r: med.r, action: "recharge" };
   }
   // Priority 1: rescue incapacitated crew member
-  const incap=G.players.filter(pl=>pl.alive&&!pl.isSynth&&pl.health===0&&pl.incapacitated>0)
-    .sort((a,b)=>b.incapacitated-a.incapacitated);
-  if(incap.length){
-    const t=incap[0];
-    const hasMed=p.equipment.some(c=>c.id==='medpack');
-    if(hasMed){
+  const incap = G.players
+    .filter(
+      (pl) =>
+        pl.alive && !pl.isSynth && pl.health === 0 && pl.incapacitated > 0,
+    )
+    .sort((a, b) => b.incapacitated - a.incapacitated);
+  if (incap.length) {
+    const t = incap[0];
+    const hasMed = p.equipment.some((c) => c.id === "medpack");
+    if (hasMed) {
       // Already have medpack — deliver it
-      return{q:t.q,r:t.r,action:'medic',crewRef:t};
-    } else if(!G.tileActionUsed){
+      return { q: t.q, r: t.r, action: "medic", crewRef: t };
+    } else if (!G.tileActionUsed) {
       // Go get a medpack first
-      const locker=synthFindTile('Equipment Locker');
-      if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:'medpack'};
+      const locker = synthFindTile("Equipment Locker");
+      if (locker)
+        return {
+          q: locker.q,
+          r: locker.r,
+          action: "equipment",
+          needTool: "medpack",
+        };
     }
   }
   // Priority 2: hold fragments -> activate at Signal Array
-  if(p.radioFragments>0&&G.radioFragmentsActivated<5){
-    const arr=synthFindTile('Signal Array');
-    if(arr)return{q:arr.q,r:arr.r,action:'activate'};
+  if (p.radioFragments > 0 && G.radioFragmentsActivated < 5) {
+    const arr = synthFindTile("Signal Array");
+    if (arr) return { q: arr.q, r: arr.r, action: "activate" };
   }
   // Priority 3: fragment tile reachable with tools we have
-  const fragTiles=synthKnownFragTiles().filter(t=>!t.requiresTool||p.equipment.some(c=>c.id===t.requiresTool));
-  const nearest=synthNearest(p,fragTiles);
-  if(nearest)return{...nearest,action:'fragment'};
+  const fragTiles = synthKnownFragTiles().filter(
+    (t) => !t.requiresTool || p.equipment.some((c) => c.id === t.requiresTool),
+  );
+  const nearest = synthNearest(p, fragTiles);
+  if (nearest) return { ...nearest, action: "fragment" };
   // Priority 4: need a tool for known fragment -> Equipment Locker
-  const toolNeeded=synthKnownFragTiles().filter(t=>t.requiresTool&&!p.equipment.some(c=>c.id===t.requiresTool));
-  if(toolNeeded.length&&!G.tileActionUsed){
-    const locker=synthFindTile('Equipment Locker');
-    if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:toolNeeded[0].requiresTool};
+  const toolNeeded = synthKnownFragTiles().filter(
+    (t) => t.requiresTool && !p.equipment.some((c) => c.id === t.requiresTool),
+  );
+  if (toolNeeded.length && !G.tileActionUsed) {
+    const locker = synthFindTile("Equipment Locker");
+    if (locker)
+      return {
+        q: locker.q,
+        r: locker.r,
+        action: "equipment",
+        needTool: toolNeeded[0].requiresTool,
+      };
   }
   // Priority 4b: revealed gated non-fragment tiles IRIS can unlock
-  const gatedTiles=[];
-  for(const[k,t]of G.tiles){
-    if(t.revealed&&!t.radioFragment&&t.requiresTool&&(t.investigatedCount||0)<(t.pois?t.pois.length:1)){
-      const[q,r]=hparse(k);gatedTiles.push({q,r,requiresTool:t.requiresTool,toolReward:t.toolReward||null});
+  const gatedTiles = [];
+  for (const [k, t] of G.tiles) {
+    if (
+      t.revealed &&
+      !t.radioFragment &&
+      t.requiresTool &&
+      (t.investigatedCount || 0) < (t.pois ? t.pois.length : 1)
+    ) {
+      const [q, r] = hparse(k);
+      gatedTiles.push({
+        q,
+        r,
+        requiresTool: t.requiresTool,
+        toolReward: t.toolReward || null,
+      });
     }
   }
-  if(gatedTiles.length){
-    const reachable=gatedTiles.filter(t=>p.equipment.some(c=>c.id===t.requiresTool));
-    const nearGated=synthNearest(p,reachable);
-    if(nearGated)return{...nearGated,action:'tool_reward'};
-    const needForGated=gatedTiles.filter(t=>!p.equipment.some(c=>c.id===t.requiresTool));
-    if(needForGated.length&&!G.tileActionUsed){
-      const locker=synthFindTile('Equipment Locker');
-      if(locker)return{q:locker.q,r:locker.r,action:'equipment',needTool:needForGated[0].requiresTool};
+  if (gatedTiles.length) {
+    const reachable = gatedTiles.filter((t) =>
+      p.equipment.some((c) => c.id === t.requiresTool),
+    );
+    const nearGated = synthNearest(p, reachable);
+    if (nearGated) return { ...nearGated, action: "tool_reward" };
+    const needForGated = gatedTiles.filter(
+      (t) => !p.equipment.some((c) => c.id === t.requiresTool),
+    );
+    if (needForGated.length && !G.tileActionUsed) {
+      const locker = synthFindTile("Equipment Locker");
+      if (locker)
+        return {
+          q: locker.q,
+          r: locker.r,
+          action: "equipment",
+          needTool: needForGated[0].requiresTool,
+        };
     }
   }
   // Priority 5: explore nearest face-down tile
-  const frontier=[];
-  for(const[k,t]of G.tiles){if(!t.revealed){const[q,r]=hparse(k);frontier.push({q,r});}}
-  const nearFront=synthNearest(p,frontier);
-  if(nearFront)return{...nearFront,action:'explore'};
-  return{q:0,r:0,action:'idle'};
+  const frontier = [];
+  for (const [k, t] of G.tiles) {
+    if (!t.revealed) {
+      const [q, r] = hparse(k);
+      frontier.push({ q, r });
+    }
+  }
+  const nearFront = synthNearest(p, frontier);
+  if (nearFront) return { ...nearFront, action: "explore" };
+  return { q: 0, r: 0, action: "idle" };
 }
 
-function synthChooseCorrupted(p){
+function synthChooseCorrupted(p) {
   // Battery first
-  if(p.battery<=3){
-    const med=synthFindTile('Medical Bay');
-    if(med&&!(p.q===med.q&&p.r===med.r))return{q:med.q,r:med.r,action:'recharge'};
+  if (p.battery <= 3) {
+    const med = synthFindTile("Medical Bay");
+    if (med && !(p.q === med.q && p.r === med.r))
+      return { q: med.q, r: med.r, action: "recharge" };
   }
   // Re-evaluate weakest living active crew member each turn (lowest health, tiebreak lowest food)
-  const target=G.players.filter(pl=>pl.alive&&!pl.isSynth&&!pl.inStasis&&pl.health>0)
-    .sort((a,b)=>a.health-b.health||a.food-b.food)[0]||null;
-  if(!target){
-    p.corrupted=false;
-    addLog('IRIS: No viable target. Threat protocol suspended.','good');
+  const target =
+    G.players
+      .filter((pl) => pl.alive && !pl.isSynth && !pl.inStasis && pl.health > 0)
+      .sort((a, b) => a.health - b.health || a.food - b.food)[0] || null;
+  if (!target) {
+    p.corrupted = false;
+    addLog("IRIS: No viable target. Threat protocol suspended.", "good");
     return synthChooseTarget(p);
   }
-  const arr=synthFindTile('Signal Array');
-  const hasWeapon=p.equipment.some(c=>c.cat==='Weapon');
-  if(!hasWeapon&&!G.tileActionUsed){
-    const locker=synthFindTile('Equipment Locker');
-    if(locker)return{q:locker.q,r:locker.r,action:'equipment_corrupted',needWeapon:['stun_baton','shock_trap','flare_gun','jammer']};
+  const arr = synthFindTile("Signal Array");
+  const hasWeapon = p.equipment.some((c) => c.cat === "Weapon");
+  if (!hasWeapon && !G.tileActionUsed) {
+    const locker = synthFindTile("Equipment Locker");
+    if (locker)
+      return {
+        q: locker.q,
+        r: locker.r,
+        action: "equipment_corrupted",
+        needWeapon: ["stun_baton", "shock_trap", "flare_gun", "jammer"],
+      };
   }
-  if(hasWeapon){
-    const hasShockTrap=p.equipment.some(c=>c.id==='shock_trap');
-    if(hasShockTrap&&arr&&!(p.q===arr.q&&p.r===arr.r))return{q:arr.q,r:arr.r,action:'block'};
-    if(hasShockTrap&&arr&&p.q===arr.q&&p.r===arr.r)return{q:arr.q,r:arr.r,action:'block_hold'};
-    return{q:target.q,r:target.r,action:'harass',crewRef:target};
+  if (hasWeapon) {
+    const hasShockTrap = p.equipment.some((c) => c.id === "shock_trap");
+    if (hasShockTrap && arr && !(p.q === arr.q && p.r === arr.r))
+      return { q: arr.q, r: arr.r, action: "block" };
+    if (hasShockTrap && arr && p.q === arr.q && p.r === arr.r)
+      return { q: arr.q, r: arr.r, action: "block_hold" };
+    return { q: target.q, r: target.r, action: "harass", crewRef: target };
   }
-  if(arr){
-    if(p.q===arr.q&&p.r===arr.r)return{q:arr.q,r:arr.r,action:'block_hold'};
-    return{q:arr.q,r:arr.r,action:'block'};
+  if (arr) {
+    if (p.q === arr.q && p.r === arr.r)
+      return { q: arr.q, r: arr.r, action: "block_hold" };
+    return { q: arr.q, r: arr.r, action: "block" };
   }
-  return{q:target.q,r:target.r,action:'harass',crewRef:target};
+  return { q: target.q, r: target.r, action: "harass", crewRef: target };
 }
 
-
-
 // Returns true if movement was interrupted (async contest triggered), false if sync step completed.
-function synthApplyStep(p,q,r,onInterrupted){
-  const prevQ=p.q,prevR=p.r,prevLoc=p.location;
-  if(!G.tiles.get(hk(q,r))?.revealed)revealAt(q,r);
+function synthApplyStep(p, q, r, onInterrupted) {
+  const prevQ = p.q,
+    prevR = p.r,
+    prevLoc = p.location;
+  if (!G.tiles.get(hk(q, r))?.revealed) revealAt(q, r);
   G.movementLeft--;
-  p.q=q;p.r=r;
-  sfx('move');
-  const t=G.tiles.get(hk(q,r));
-  p.location=tileName(t);
-  if(t?.shockTrap&&t.shockTrapOwner!==p.id){
-    t.shockTrap=false;t.shockTrapOwner=null;
-    if(p.battery>0){p.battery--;sfx('health_down');}
-    addLog('IRIS triggered a Shock Trap! Battery: '+p.battery+'/10. Turn ended.','crit');
-    markTilesDirty();updateUI();render();setTimeout(()=>doEndTurn(),1000);return true;
+  p.q = q;
+  p.r = r;
+  sfx("move");
+  const t = G.tiles.get(hk(q, r));
+  p.location = tileName(t);
+  if (t?.shockTrap && t.shockTrapOwner !== p.id) {
+    t.shockTrap = false;
+    t.shockTrapOwner = null;
+    if (p.battery > 0) {
+      p.battery--;
+      sfx("health_down");
+    }
+    addLog(
+      "IRIS triggered a Shock Trap! Battery: " + p.battery + "/10. Turn ended.",
+      "crit",
+    );
+    markTilesDirty();
+    updateUI();
+    render();
+    setTimeout(() => doEndTurn(), 1000);
+    return true;
   }
-  if(t?.type==='anomaly'&&t.anomaly==='Portal'){
-    p.q=0;p.r=0;const ct=G.tiles.get(hk(0,0));p.location=tileName(ct);G.movementLeft=0;
-    addLog('IRIS transited Portal → Crash Site.');markTilesDirty();
+  if (t?.type === "anomaly" && t.anomaly === "Portal") {
+    p.q = 0;
+    p.r = 0;
+    const ct = G.tiles.get(hk(0, 0));
+    p.location = tileName(ct);
+    G.movementLeft = 0;
+    addLog("IRIS transited Portal → Crash Site.");
+    markTilesDirty();
   }
-  if(t?.name==='Medical Bay'&&p.battery<10){p.battery=10;sfx('health_up');addLog('IRIS battery fully recharged at Medical Bay.','good');}
-  if(t?.radioFragment&&!t.requiresTool){
-    p.radioFragments++;t.radioFragment=false;markTilesDirty();
-    addLog('IRIS recovered a Radio Fragment.','frag');
+  if (t?.name === "Medical Bay" && p.battery < 10) {
+    p.battery = 10;
+    sfx("health_up");
+    addLog("IRIS battery fully recharged at Medical Bay.", "good");
   }
-  if(t?.name==='Watch Tower'&&!G.tileActionUsed){
-    const inField=G.players.filter(x=>x.alive&&G.tiles.get(hk(x.q,x.r))?.type!=='crash_site');
-    if(inField.length){
-      let revealed=0;
-      inField.forEach(fp=>{
-        hnbr(fp.q,fp.r).forEach(([nq,nr])=>{
-          const nt=G.tiles.get(hk(nq,nr));
-          if(nt&&!nt.revealed){revealAt(nq,nr);revealed++;}
+  if (t?.radioFragment && !t.requiresTool) {
+    p.radioFragments++;
+    t.radioFragment = false;
+    markTilesDirty();
+    addLog("IRIS recovered a Radio Fragment.", "frag");
+  }
+  if (t?.name === "Watch Tower" && !G.tileActionUsed) {
+    const inField = G.players.filter(
+      (x) => x.alive && G.tiles.get(hk(x.q, x.r))?.type !== "crash_site",
+    );
+    if (inField.length) {
+      let revealed = 0;
+      inField.forEach((fp) => {
+        hnbr(fp.q, fp.r).forEach(([nq, nr]) => {
+          const nt = G.tiles.get(hk(nq, nr));
+          if (nt && !nt.revealed) {
+            revealAt(nq, nr);
+            revealed++;
+          }
         });
       });
-      if(revealed>0){
-        const names=inField.map(x=>x.name).join(', ');
-        addLog('IRIS activated Watch Tower: '+revealed+' tile'+(revealed!==1?'s':'')+' revealed around '+names+'.','tile');
+      if (revealed > 0) {
+        const names = inField.map((x) => x.name).join(", ");
+        addLog(
+          "IRIS activated Watch Tower: " +
+            revealed +
+            " tile" +
+            (revealed !== 1 ? "s" : "") +
+            " revealed around " +
+            names +
+            ".",
+          "tile",
+        );
       }
     }
-    G.tileActionUsed=true;
+    G.tileActionUsed = true;
   }
   // If IRIS steps onto an occupied Signal Array, trigger a contest and stop movement
-  if(t?.name==='Signal Array'&&onInterrupted){
-    const occupant=G.players.find(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r);
-    if(occupant){
-      G.reach=bfsReach(p.q,p.r,G.movementLeft);
-      addLog('IRIS contests the Signal Array with '+occupant.name+'.','act');
-      updateUI();render();panToPlayer(p);
-      showContestModal(p,occupant,
-        ()=>{addLog('IRIS holds the Signal Array. '+occupant.name+' displaced.','crit');
-          occupant.q=0;occupant.r=0;const ct=G.tiles.get(hk(0,0));occupant.location=tileName(ct);
-          updateUI();render();onInterrupted();},
-        ()=>{addLog(occupant.name+' holds the Signal Array.','act');
-          p.q=prevQ;p.r=prevR;p.location=prevLoc;
-          G.movementLeft=0;updateUI();render();onInterrupted();}
+  if (t?.name === "Signal Array" && onInterrupted) {
+    const occupant = G.players.find(
+      (pl) => pl.alive && !pl.isSynth && pl.q === p.q && pl.r === p.r,
+    );
+    if (occupant) {
+      G.reach = bfsReach(p.q, p.r, G.movementLeft);
+      addLog(
+        "IRIS contests the Signal Array with " + occupant.name + ".",
+        "act",
+      );
+      updateUI();
+      render();
+      panToPlayer(p);
+      showContestModal(
+        p,
+        occupant,
+        () => {
+          addLog(
+            "IRIS holds the Signal Array. " + occupant.name + " displaced.",
+            "crit",
+          );
+          occupant.q = 0;
+          occupant.r = 0;
+          const ct = G.tiles.get(hk(0, 0));
+          occupant.location = tileName(ct);
+          updateUI();
+          render();
+          onInterrupted();
+        },
+        () => {
+          addLog(occupant.name + " holds the Signal Array.", "act");
+          p.q = prevQ;
+          p.r = prevR;
+          p.location = prevLoc;
+          G.movementLeft = 0;
+          updateUI();
+          render();
+          onInterrupted();
+        },
       );
       return true;
     }
   }
-  G.reach=bfsReach(p.q,p.r,G.movementLeft);
-  addLog('IRIS → '+p.location);
-  updateUI();render();panToPlayer(p);
+  G.reach = bfsReach(p.q, p.r, G.movementLeft);
+  addLog("IRIS → " + p.location);
+  updateUI();
+  render();
+  panToPlayer(p);
   return false;
 }
 
-function synthExecuteSteps(steps,idx,onDone){
-  if(!cp().isSynth)return;
-  if(idx>=steps.length){onDone();return;}
-  const[q,r]=steps[idx];
-  const interrupted=synthApplyStep(cp(),q,r,onDone);
-  if(!interrupted)setTimeout(()=>synthExecuteSteps(steps,idx+1,onDone),1400);
+function synthExecuteSteps(steps, idx, onDone) {
+  if (!cp().isSynth) return;
+  if (idx >= steps.length) {
+    onDone();
+    return;
+  }
+  const [q, r] = steps[idx];
+  const interrupted = synthApplyStep(cp(), q, r, onDone);
+  if (!interrupted)
+    setTimeout(() => synthExecuteSteps(steps, idx + 1, onDone), 1400);
 }
 
-function synthTakeAction(p,target,onDone){
-  const t=G.tiles.get(hk(p.q,p.r));
-  if(!target){onDone();return;}
-  switch(target.action){
-    case'activate':
-      if(t?.name==='Signal Array'&&p.radioFragments>0){
-        while(p.radioFragments>0&&G.radioFragmentsActivated<5){
-          p.radioFragments--;G.radioFragmentsActivated++;
-          sfx('activate');
-          const thr=[null,18,16,14,12,10][G.radioFragmentsActivated];
-          addLog('IRIS activated fragment. Array: '+G.radioFragmentsActivated+'/5. Threshold: '+thr+'+','frag');
+function synthTakeAction(p, target, onDone) {
+  const t = G.tiles.get(hk(p.q, p.r));
+  if (!target) {
+    onDone();
+    return;
+  }
+  switch (target.action) {
+    case "activate":
+      if (t?.name === "Signal Array" && p.radioFragments > 0) {
+        while (p.radioFragments > 0 && G.radioFragmentsActivated < 5) {
+          p.radioFragments--;
+          G.radioFragmentsActivated++;
+          sfx("activate");
+          const thr = [null, 18, 16, 14, 12, 10][G.radioFragmentsActivated];
+          addLog(
+            "IRIS activated fragment. Array: " +
+              G.radioFragmentsActivated +
+              "/5. Threshold: " +
+              thr +
+              "+",
+            "frag",
+          );
         }
-        updateUI();render();
+        updateUI();
+        render();
       }
-      onDone();break;
-    case'equipment':
-    case'equipment_corrupted':{
-      if(t?.name==='Equipment Locker'&&!G.tileActionUsed){
+      onDone();
+      break;
+    case "equipment":
+    case "equipment_corrupted": {
+      if (t?.name === "Equipment Locker" && !G.tileActionUsed) {
         // Synth gets exactly the card it needs, not a random draw
-        const ids=target.needTool?[target.needTool]:(target.needWeapon||[]);
-        const spec=ids.length?EQ_CARDS.find(c=>ids.includes(c.id)):null;
-        if(spec&&G.eqDeckCount>0){
-          p.equipment.push({...spec,uid:++cardUid});
-          G.eqDeckCount=Math.max(0,G.eqDeckCount-1);
-          const el=document.getElementById('equpn');if(el)el.textContent=G.eqDeckCount;
-          addLog('IRIS acquired '+spec.name+'.','good');
-        } else if(G.eqDeckCount>0){
-          const card=drawEqCard(p);
-          if(card)addLog('IRIS acquired '+card.name+'.','good');
+        const ids = target.needTool
+          ? [target.needTool]
+          : target.needWeapon || [];
+        const spec = ids.length
+          ? EQ_CARDS.find((c) => ids.includes(c.id))
+          : null;
+        if (spec && G.eqDeckCount > 0) {
+          p.equipment.push({ ...spec, uid: ++cardUid });
+          G.eqDeckCount = Math.max(0, G.eqDeckCount - 1);
+          const el = document.getElementById("equpn");
+          if (el) el.textContent = G.eqDeckCount;
+          addLog("IRIS acquired " + spec.name + ".", "good");
+        } else if (G.eqDeckCount > 0) {
+          const card = drawEqCard(p);
+          if (card) addLog("IRIS acquired " + card.name + ".", "good");
         }
-        G.tileActionUsed=true;updateUI();
+        G.tileActionUsed = true;
+        updateUI();
       }
-      onDone();break;
+      onDone();
+      break;
     }
-    case'fragment':
-      if(t?.radioFragment&&t.requiresTool){
-        const tool=p.equipment.find(c=>c.id===t.requiresTool);
-        if(tool){
-          p.radioFragments++;sfx('fragment');t.radioFragment=false;
-          t.investigatedCount=t.pois?t.pois.length:1;
-          const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
-          if(ci>=0)p.equipment.splice(ci,1);
+    case "fragment":
+      if (t?.radioFragment && t.requiresTool) {
+        const tool = p.equipment.find((c) => c.id === t.requiresTool);
+        if (tool) {
+          p.radioFragments++;
+          sfx("fragment");
+          t.radioFragment = false;
+          t.investigatedCount = t.pois ? t.pois.length : 1;
+          const ci = p.equipment.findIndex((c) => c.uid === tool.uid);
+          if (ci >= 0) p.equipment.splice(ci, 1);
           markTilesDirty();
-          addLog('IRIS used '+tool.name+' to recover a Radio Fragment.','frag');
-          updateUI();render();
+          addLog(
+            "IRIS used " + tool.name + " to recover a Radio Fragment.",
+            "frag",
+          );
+          updateUI();
+          render();
         } else {
-          _play('reject.wav');
+          _play("reject.wav");
         }
       }
-      if(t&&!t.investigatedCount&&(t.type==='terrain'||t.type==='ship_section')){
-        t.investigatedCount=t.pois?t.pois.length:0;markTilesDirty();
+      if (
+        t &&
+        !t.investigatedCount &&
+        (t.type === "terrain" || t.type === "ship_section")
+      ) {
+        t.investigatedCount = t.pois ? t.pois.length : 0;
+        markTilesDirty();
       }
-      onDone();break;
-    case'block':
-    case'block_hold':{
-      if(t?.name==='Signal Array'){
-        const occupant=G.players.find(pl=>pl.alive&&!pl.isSynth&&pl.q===p.q&&pl.r===p.r);
-        if(occupant){
-
-          addLog('IRIS contests the Signal Array with '+occupant.name+'.','act');
-          showContestModal(p,occupant,
-            ()=>{addLog('IRIS holds the Signal Array. '+occupant.name+' displaced.','crit');
-              occupant.q=0;occupant.r=0;const ct=G.tiles.get(hk(0,0));occupant.location=tileName(ct);
-              updateUI();render();onDone();},
-            ()=>{addLog(occupant.name+' holds the Signal Array.','act');updateUI();render();onDone();}
-          );return;
+      onDone();
+      break;
+    case "block":
+    case "block_hold": {
+      if (t?.name === "Signal Array") {
+        const occupant = G.players.find(
+          (pl) => pl.alive && !pl.isSynth && pl.q === p.q && pl.r === p.r,
+        );
+        if (occupant) {
+          addLog(
+            "IRIS contests the Signal Array with " + occupant.name + ".",
+            "act",
+          );
+          showContestModal(
+            p,
+            occupant,
+            () => {
+              addLog(
+                "IRIS holds the Signal Array. " + occupant.name + " displaced.",
+                "crit",
+              );
+              occupant.q = 0;
+              occupant.r = 0;
+              const ct = G.tiles.get(hk(0, 0));
+              occupant.location = tileName(ct);
+              updateUI();
+              render();
+              onDone();
+            },
+            () => {
+              addLog(occupant.name + " holds the Signal Array.", "act");
+              updateUI();
+              render();
+              onDone();
+            },
+          );
+          return;
         }
       }
-      onDone();break;
+      onDone();
+      break;
     }
-    case'harass':{
-      const cr=target.crewRef;
-      if(cr&&p.q===cr.q&&p.r===cr.r){
-        const weapon=p.equipment.find(c=>c.cat==='Weapon');
-        if(weapon){
-          const ci=p.equipment.findIndex(c=>c.uid===weapon.uid);
-          if(weapon.id==='stun_baton'){
-            cr.stunned=true;
-            if(cr.isSynth){if(cr.battery>0){cr.battery--;sfx('health_down');}}else{if(cr.health>0){cr.health--;sfx('health_down');}}
-            if(ci>=0)p.equipment.splice(ci,1);
-            addLog('IRIS used Stun Baton on '+cr.name+'. They lose 1 '+(cr.isSynth?'Battery':'Health')+' and skip their next turn.','crit');
-          }else if(weapon.id==='shock_trap'){
-            t.shockTrap=true;t.shockTrapOwner=p.id;if(ci>=0)p.equipment.splice(ci,1);
-            addLog('IRIS placed a Shock Trap at '+p.location+'.','crit');
-          }else if(weapon.id==='flare_gun'){
-            const others=G.players.filter(pl=>pl.alive&&!pl.isSynth&&!pl.inStasis&&pl.id!==p.id);
-            if(others.length){
-              const pulled=others.reduce((a,b)=>{
-                const ap=bfsPath(p.q,p.r,a.q,a.r,synthPassable),bp=bfsPath(p.q,p.r,b.q,b.r,synthPassable);
-                return(ap&&bp&&ap.length>bp.length)?a:b;
-              });
-              pulled.q=p.q;pulled.r=p.r;pulled.location=p.location;if(ci>=0)p.equipment.splice(ci,1);
-              addLog('IRIS fired Flare Gun — '+pulled.name+' pulled to '+p.location+'.','crit');
+    case "harass": {
+      const cr = target.crewRef;
+      if (cr && p.q === cr.q && p.r === cr.r) {
+        const weapon = p.equipment.find((c) => c.cat === "Weapon");
+        if (weapon) {
+          const ci = p.equipment.findIndex((c) => c.uid === weapon.uid);
+          if (weapon.id === "stun_baton") {
+            cr.stunned = true;
+            if (cr.isSynth) {
+              if (cr.battery > 0) {
+                cr.battery--;
+                sfx("health_down");
+              }
+            } else {
+              if (cr.health > 0) {
+                cr.health--;
+                sfx("health_down");
+              }
             }
-          }else if(weapon.id==='jammer'){
-            G.jammerActive=true;if(ci>=0)p.equipment.splice(ci,1);
-            addLog('IRIS activated Signal Jammer. No Signal Roll this round.','crit');
+            if (ci >= 0) p.equipment.splice(ci, 1);
+            addLog(
+              "IRIS used Stun Baton on " +
+                cr.name +
+                ". They lose 1 " +
+                (cr.isSynth ? "Battery" : "Health") +
+                " and skip their next turn.",
+              "crit",
+            );
+          } else if (weapon.id === "shock_trap") {
+            t.shockTrap = true;
+            t.shockTrapOwner = p.id;
+            if (ci >= 0) p.equipment.splice(ci, 1);
+            addLog("IRIS placed a Shock Trap at " + p.location + ".", "crit");
+          } else if (weapon.id === "flare_gun") {
+            const others = G.players.filter(
+              (pl) => pl.alive && !pl.isSynth && !pl.inStasis && pl.id !== p.id,
+            );
+            if (others.length) {
+              const pulled = others.reduce((a, b) => {
+                const ap = bfsPath(p.q, p.r, a.q, a.r, synthPassable),
+                  bp = bfsPath(p.q, p.r, b.q, b.r, synthPassable);
+                return ap && bp && ap.length > bp.length ? a : b;
+              });
+              pulled.q = p.q;
+              pulled.r = p.r;
+              pulled.location = p.location;
+              if (ci >= 0) p.equipment.splice(ci, 1);
+              addLog(
+                "IRIS fired Flare Gun — " +
+                  pulled.name +
+                  " pulled to " +
+                  p.location +
+                  ".",
+                "crit",
+              );
+            }
+          } else if (weapon.id === "jammer") {
+            G.jammerActive = true;
+            if (ci >= 0) p.equipment.splice(ci, 1);
+            addLog(
+              "IRIS activated Signal Jammer. No Signal Roll this round.",
+              "crit",
+            );
           }
-          updateUI();render();
+          updateUI();
+          render();
         }
       }
-      onDone();break;
+      onDone();
+      break;
     }
-    case'medic':{
-      const cr=target.crewRef;
-      if(cr&&p.q===cr.q&&p.r===cr.r){
-        const med=p.equipment.find(c=>c.id==='medpack');
-        if(med){
-          cr.health=1;cr.incapacitated=0;
-          const ci=p.equipment.findIndex(c=>c.uid===med.uid);if(ci>=0)p.equipment.splice(ci,1);
-          addLog('IRIS administered MedPack to '+cr.name+'. '+cr.name+' is back on their feet.','good');
-          updateUI();render();
+    case "medic": {
+      const cr = target.crewRef;
+      if (cr && p.q === cr.q && p.r === cr.r) {
+        const med = p.equipment.find((c) => c.id === "medpack");
+        if (med) {
+          cr.health = 1;
+          cr.incapacitated = 0;
+          const ci = p.equipment.findIndex((c) => c.uid === med.uid);
+          if (ci >= 0) p.equipment.splice(ci, 1);
+          addLog(
+            "IRIS administered MedPack to " +
+              cr.name +
+              ". " +
+              cr.name +
+              " is back on their feet.",
+            "good",
+          );
+          updateUI();
+          render();
         }
       }
-      onDone();break;
+      onDone();
+      break;
     }
-    case'tool_reward':{
-      if(t?.requiresTool&&!t.radioFragment){
-        const tool=p.equipment.find(c=>c.id===t.requiresTool);
-        if(tool){
-          sfx('confirm');
-          const ci=p.equipment.findIndex(c=>c.uid===tool.uid);
-          if(t.toolReward==='drawEq'){
-            const card=drawEqCard(p);
-            if(card)addLog('IRIS used '+tool.name+' at '+p.location+'. Acquired '+card.name+'.','good');
-            else addLog('IRIS used '+tool.name+' at '+p.location+'.','act');
+    case "tool_reward": {
+      if (t?.requiresTool && !t.radioFragment) {
+        const tool = p.equipment.find((c) => c.id === t.requiresTool);
+        if (tool) {
+          sfx("confirm");
+          const ci = p.equipment.findIndex((c) => c.uid === tool.uid);
+          if (t.toolReward === "drawEq") {
+            const card = drawEqCard(p);
+            if (card)
+              addLog(
+                "IRIS used " +
+                  tool.name +
+                  " at " +
+                  p.location +
+                  ". Acquired " +
+                  card.name +
+                  ".",
+                "good",
+              );
+            else
+              addLog(
+                "IRIS used " + tool.name + " at " + p.location + ".",
+                "act",
+              );
           } else {
-            addLog('IRIS used '+tool.name+' — unlocked '+p.location+'.','act');
+            addLog(
+              "IRIS used " + tool.name + " — unlocked " + p.location + ".",
+              "act",
+            );
           }
-          if(ci>=0)p.equipment.splice(ci,1);
-          t.investigatedCount=(t.pois?t.pois.length:1);markTilesDirty();
-          updateUI();render();
+          if (ci >= 0) p.equipment.splice(ci, 1);
+          t.investigatedCount = t.pois ? t.pois.length : 1;
+          markTilesDirty();
+          updateUI();
+          render();
         } else {
-          _play('reject.wav');
+          _play("reject.wav");
         }
       }
-      onDone();break;
+      onDone();
+      break;
     }
-    default:onDone();
+    default:
+      onDone();
   }
 }
 
-function synthMove(p,onDone){
-  if(!cp().isSynth)return;
-  if(G.movementLeft<=0){onDone();return;}
-  const target=synthChooseTarget(p);
-  if(!target||target.action==='idle'){onDone();return;}
-  if(target.q===p.q&&target.r===p.r){onDone();return;}
-  const rawPath=bfsPath(p.q,p.r,target.q,target.r,synthPassable);
-  const steps=rawPath?rawPath.slice(0,G.movementLeft):[];
-  if(!steps.length){onDone();return;}
-  synthExecuteSteps(steps,0,()=>{
-    if(G.movementLeft>0)setTimeout(()=>synthMove(p,onDone),400);
+function synthMove(p, onDone) {
+  if (!cp().isSynth) return;
+  if (G.movementLeft <= 0) {
+    onDone();
+    return;
+  }
+  const target = synthChooseTarget(p);
+  if (!target || target.action === "idle") {
+    onDone();
+    return;
+  }
+  if (target.q === p.q && target.r === p.r) {
+    onDone();
+    return;
+  }
+  const rawPath = bfsPath(p.q, p.r, target.q, target.r, synthPassable);
+  const steps = rawPath ? rawPath.slice(0, G.movementLeft) : [];
+  if (!steps.length) {
+    onDone();
+    return;
+  }
+  synthExecuteSteps(steps, 0, () => {
+    if (G.movementLeft > 0) setTimeout(() => synthMove(p, onDone), 400);
     else onDone();
   });
 }
 
-function synthObjectiveLabel(target){
-  if(!target)return'Idle.';
-  switch(target.action){
-    case'recharge':      return'Battery critical — returning to Medical Bay.';
-    case'medic':         return`Retrieving MedPack for ${target.crewRef?.name||'crew'}.`;
-    case'activate':      return'Carrying Radio Fragment to Signal Array.';
-    case'fragment':      return`Recovering Radio Fragment at ${tileName(G.tiles.get(hk(target.q,target.r)))}.`;
-    case'equipment':     return`Acquiring ${target.needTool||target.needWeapon?.[0]||'equipment'} from Equipment Locker.`;
-    case'equipment_corrupted': return'Acquiring weapon from Equipment Locker.';
-    case'tool_reward':   return`Investigating ${tileName(G.tiles.get(hk(target.q,target.r)))}.`;
-    case'explore':       return'Exploring unknown terrain.';
-    case'block':
-    case'block_hold':    return'Securing the Signal Array.';
-    case'harass':        return`Targeting ${target.crewRef?.name||'crew'}.`;
-    case'idle':          return'Holding position.';
-    default:             return'Processing.';
+function synthObjectiveLabel(target) {
+  if (!target) return "Idle.";
+  switch (target.action) {
+    case "recharge":
+      return "Battery critical — returning to Medical Bay.";
+    case "medic":
+      return `Retrieving MedPack for ${target.crewRef?.name || "crew"}.`;
+    case "activate":
+      return "Carrying Radio Fragment to Signal Array.";
+    case "fragment":
+      return `Recovering Radio Fragment at ${tileName(G.tiles.get(hk(target.q, target.r)))}.`;
+    case "equipment":
+      return `Acquiring ${target.needTool || target.needWeapon?.[0] || "equipment"} from Equipment Locker.`;
+    case "equipment_corrupted":
+      return "Acquiring weapon from Equipment Locker.";
+    case "tool_reward":
+      return `Investigating ${tileName(G.tiles.get(hk(target.q, target.r)))}.`;
+    case "explore":
+      return "Exploring unknown terrain.";
+    case "block":
+    case "block_hold":
+      return "Securing the Signal Array.";
+    case "harass":
+      return `Targeting ${target.crewRef?.name || "crew"}.`;
+    case "idle":
+      return "Holding position.";
+    default:
+      return "Processing.";
   }
 }
 
-function doSynthTurn(){
-  const p=cp();if(!p||!p.isSynth)return;
-  if(p.deactivated){addLog('IRIS is deactivated — turn skipped.','sys');advanceTurn();return;}
+function doSynthTurn() {
+  const p = cp();
+  if (!p || !p.isSynth) return;
+  if (p.deactivated) {
+    addLog("IRIS is deactivated — turn skipped.", "sys");
+    advanceTurn();
+    return;
+  }
   rollTableDice();
-  setTimeout(()=>{
-    G.phase='move';
-    const initialTarget=synthChooseTarget(cp());
-    addLog('IRIS: '+synthObjectiveLabel(initialTarget),'sys');
-    function synthContinue(){
-      if(!cp().isSynth)return;
-      const p2=cp();G.phase='action';
-      const target=synthChooseTarget(p2);
-      synthTakeAction(p2,target,()=>{
-        if(!cp().isSynth)return;
-        const p3=cp();const nextTarget=synthChooseTarget(p3);
-        if(G.movementLeft>0&&nextTarget&&nextTarget.action!=='idle'&&!(nextTarget.q===p3.q&&nextTarget.r===p3.r)){
-          G.phase='move';
-          setTimeout(()=>synthMove(cp(),synthContinue),600);
-        }
-        else setTimeout(()=>doEndTurn(),1400);
+  setTimeout(() => {
+    G.phase = "move";
+    const initialTarget = synthChooseTarget(cp());
+    addLog("IRIS: " + synthObjectiveLabel(initialTarget), "sys");
+    function synthContinue() {
+      if (!cp().isSynth) return;
+      const p2 = cp();
+      G.phase = "action";
+      const target = synthChooseTarget(p2);
+      synthTakeAction(p2, target, () => {
+        if (!cp().isSynth) return;
+        const p3 = cp();
+        const nextTarget = synthChooseTarget(p3);
+        if (
+          G.movementLeft > 0 &&
+          nextTarget &&
+          nextTarget.action !== "idle" &&
+          !(nextTarget.q === p3.q && nextTarget.r === p3.r)
+        ) {
+          G.phase = "move";
+          setTimeout(() => synthMove(cp(), synthContinue), 600);
+        } else setTimeout(() => doEndTurn(), 1400);
       });
     }
-    synthMove(cp(),synthContinue);
-  },1800);
+    synthMove(cp(), synthContinue);
+  }, 1800);
 }
 
-
-function triggerAnomaly(t){
-  const p=cp();
-  t.investigatedCount=1;markTilesDirty();
-  switch(t.anomaly){
-    case'Temporal Rift':
-      showTileRevealModal(t,()=>{updateUI();render();});break;
-    case'Portal':showTileRevealModal(t,()=>{updateUI();render();});break;
-    case'Dead Zone':addLog('Dead Zone: transmission blocked. No Signal Roll can be made while this tile is occupied.');updateUI();break;
-    case'Gravity Well':
-      showTileRevealModal(t,()=>{updateUI();render();});break;
-    case'Echo Chamber':{
-      if(!G.lastPublicEvt||G.lastPublicEvt._sourceAntimatter){addLog('Echo Chamber: no prior public event to repeat.','act');break;}
-      const evt=G.lastPublicEvt;
-      if(evt.rf){p.radioFragments++;addLog(`${p.name} found a Radio Fragment! (Echo Chamber)`,'frag');}
-      let ecDrawnCard=null;
-      if(evt.drawEq){ecDrawnCard=drawEqCard(p);if(ecDrawnCard)addLog(`${p.name} drew ${ecDrawnCard.name}. (Echo Chamber)`,'good');}
-      if(evt.gainFood){p.food=Math.min(15,p.food+evt.gainFood);}
-      if(evt.takeAllCargo){const taken=Math.min(15-p.food,G.cargoHold||0);p.food+=taken;G.cargoHold-=taken;if(taken>0)addLog(`${p.name} took ${taken} Food from the Cargo Hold.`,'good');}
-      if(evt.loseFood){const lost=Math.min(p.food,evt.loseFood);p.food-=lost;addLog(`${p.name} lost ${lost} Food. (Echo Chamber)`,'crit');}
-      let ecSuitBlocked=false;
-      if(evt.loseHealth){
-        const ecSuitIdx=p.equipment.findIndex(c=>c.id==='hazard_suit');
-        if(ecSuitIdx!==-1){ecSuitBlocked=true;p.equipment.splice(ecSuitIdx,1);addLog(`${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed. (Echo Chamber)`,'good');}
-        else{if(p.health>0){p.health--;sfx('health_down');}addLog(`${p.name} suffered toxic exposure. Health: ${p.health}/3. (Echo Chamber)`,'crit');}
+function triggerAnomaly(t) {
+  const p = cp();
+  t.investigatedCount = 1;
+  markTilesDirty();
+  switch (t.anomaly) {
+    case "Temporal Rift":
+      showTileRevealModal(t, () => {
+        updateUI();
+        render();
+      });
+      break;
+    case "Portal":
+      showTileRevealModal(t, () => {
+        updateUI();
+        render();
+      });
+      break;
+    case "Dead Zone":
+      addLog(
+        "Dead Zone: transmission blocked. No Signal Roll can be made while this tile is occupied.",
+      );
+      updateUI();
+      break;
+    case "Gravity Well":
+      showTileRevealModal(t, () => {
+        updateUI();
+        render();
+      });
+      break;
+    case "Echo Chamber": {
+      if (!G.lastPublicEvt || G.lastPublicEvt._sourceAntimatter) {
+        addLog("Echo Chamber: no prior public event to repeat.", "act");
+        break;
       }
-      if(evt.irisCorruption){
-        const synth=G.players.find(pl=>pl.isSynth&&!pl.corrupted&&pl.alive);
-        if(synth){synth.corrupted=true;_play('corrupt.wav');addLog('> IRIS threat assessment updated. (Echo Chamber)','crit');}
+      const evt = G.lastPublicEvt;
+      if (evt.rf) {
+        p.radioFragments++;
+        addLog(`${p.name} found a Radio Fragment! (Echo Chamber)`, "frag");
       }
-      if(evt.skipO2){p.skipO2=true;}
-      let rollCb=null;
-      if(evt.rollFood){rollCb=r=>{const g=Math.min(15-p.food,r);p.food+=g;addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`,g?'good':'');return`Rolled ${r} — gained ${g} Food.`;};}
-      else if(evt.rollWreckage){rollCb=r=>{if(r<=3){addLog(`Echo Chamber wreckage: ${r} — nothing.`);return`Rolled ${r} — nothing.`;}if(r<=5){const g=Math.min(15-p.food,1);p.food+=g;addLog(`Echo Chamber wreckage: ${r} — +1 Food.`,'good');return`Rolled ${r} — 1 Food.`;}ecDrawnCard=drawEqCard(p);const msg=ecDrawnCard?`drew ${ecDrawnCard.name}.`:'deck empty.';addLog(`Echo Chamber wreckage: 6 — ${msg}`,'good');return`Rolled 6 — ${msg}`;};}
-      const ecOv=document.getElementById('evc-ov');
-      ecOv.style.backgroundImage='url(img/Tiles/echo-chamber_overlay.png)';
-      ecOv.style.backgroundSize='cover';ecOv.style.backgroundPosition='center';
-      showEventCard(evt,'Echo Chamber',()=>{updateUI();render();if(ecDrawnCard)openCardModal(p.id,ecDrawnCard,'url(img/Tiles/echo-chamber_overlay.png)');},rollCb,false,ecSuitBlocked);
+      let ecDrawnCard = null;
+      if (evt.drawEq) {
+        ecDrawnCard = drawEqCard(p);
+        if (ecDrawnCard)
+          addLog(`${p.name} drew ${ecDrawnCard.name}. (Echo Chamber)`, "good");
+      }
+      if (evt.gainFood) {
+        p.food = Math.min(15, p.food + evt.gainFood);
+      }
+      if (evt.takeAllCargo) {
+        const taken = Math.min(15 - p.food, G.cargoHold || 0);
+        p.food += taken;
+        G.cargoHold -= taken;
+        if (taken > 0)
+          addLog(`${p.name} took ${taken} Food from the Cargo Hold.`, "good");
+      }
+      if (evt.loseFood) {
+        const lost = Math.min(p.food, evt.loseFood);
+        p.food -= lost;
+        addLog(`${p.name} lost ${lost} Food. (Echo Chamber)`, "crit");
+      }
+      let ecSuitBlocked = false;
+      if (evt.loseHealth) {
+        const ecSuitIdx = p.equipment.findIndex((c) => c.id === "hazard_suit");
+        if (ecSuitIdx !== -1) {
+          ecSuitBlocked = true;
+          p.equipment.splice(ecSuitIdx, 1);
+          addLog(
+            `${p.name}'s Hazard Suit blocked toxic exposure. Suit destroyed. (Echo Chamber)`,
+            "good",
+          );
+        } else {
+          if (p.health > 0) {
+            p.health--;
+            sfx("health_down");
+          }
+          addLog(
+            `${p.name} suffered toxic exposure. Health: ${p.health}/3. (Echo Chamber)`,
+            "crit",
+          );
+        }
+      }
+      if (evt.irisCorruption) {
+        const synth = G.players.find(
+          (pl) => pl.isSynth && !pl.corrupted && pl.alive,
+        );
+        if (synth) {
+          synth.corrupted = true;
+          _play("corrupt.wav");
+          addLog("> IRIS threat assessment updated. (Echo Chamber)", "crit");
+        }
+      }
+      if (evt.skipO2) {
+        p.skipO2 = true;
+      }
+      let rollCb = null;
+      if (evt.rollFood) {
+        rollCb = (r) => {
+          const g = Math.min(15 - p.food, r);
+          p.food += g;
+          addLog(`Echo Chamber loot roll: ${r} — +${g} Food.`, g ? "good" : "");
+          return `Rolled ${r} — gained ${g} Food.`;
+        };
+      } else if (evt.rollWreckage) {
+        rollCb = (r) => {
+          if (r <= 3) {
+            addLog(`Echo Chamber wreckage: ${r} — nothing.`);
+            return `Rolled ${r} — nothing.`;
+          }
+          if (r <= 5) {
+            const g = Math.min(15 - p.food, 1);
+            p.food += g;
+            addLog(`Echo Chamber wreckage: ${r} — +1 Food.`, "good");
+            return `Rolled ${r} — 1 Food.`;
+          }
+          ecDrawnCard = drawEqCard(p);
+          const msg = ecDrawnCard ? `drew ${ecDrawnCard.name}.` : "deck empty.";
+          addLog(`Echo Chamber wreckage: 6 — ${msg}`, "good");
+          return `Rolled 6 — ${msg}`;
+        };
+      }
+      const ecOv = document.getElementById("evc-ov");
+      ecOv.style.backgroundImage = "url(img/tiles/echo-chamber_overlay.png)";
+      ecOv.style.backgroundSize = "cover";
+      ecOv.style.backgroundPosition = "center";
+      showEventCard(
+        evt,
+        "Echo Chamber",
+        () => {
+          updateUI();
+          render();
+          if (ecDrawnCard)
+            openCardModal(
+              p.id,
+              ecDrawnCard,
+              "url(img/tiles/echo-chamber_overlay.png)",
+            );
+        },
+        rollCb,
+        false,
+        ecSuitBlocked,
+      );
       break;
     }
-    case'Inversion Field':{
-      const others=G.players.filter(pl=>pl.alive&&pl.id!==p.id);
-      if(!others.length){addLog('Inversion Field: no other players to swap with.','act');break;}
-      const body='Gravity inversion — choose a crew member to swap Food with, or decline.';
-      const extraBtns=document.createElement('div');extraBtns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-      others.forEach(other=>{
-        const b=document.createElement('button');b.className='mbtn';
-        b.textContent=`Swap with ${other.name} (${other.food} Food)`;
-        b.onclick=()=>{
-          document.getElementById('mov').classList.remove('show');
-          const tmp=p.food;p.food=other.food;other.food=tmp;
-          addLog(`Inversion Field: ${p.name} swapped Food with ${other.name}.`,'crit');
-          updateUI();render();
+    case "Inversion Field": {
+      const others = G.players.filter((pl) => pl.alive && pl.id !== p.id);
+      if (!others.length) {
+        addLog("Inversion Field: no other players to swap with.", "act");
+        break;
+      }
+      const body =
+        "Gravity inversion — choose a crew member to swap Food with, or decline.";
+      const extraBtns = document.createElement("div");
+      extraBtns.style.cssText =
+        "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
+      others.forEach((other) => {
+        const b = document.createElement("button");
+        b.className = "mbtn";
+        b.textContent = `Swap with ${other.name} (${other.food} Food)`;
+        b.onclick = () => {
+          document.getElementById("mov").classList.remove("show");
+          const tmp = p.food;
+          p.food = other.food;
+          other.food = tmp;
+          addLog(
+            `Inversion Field: ${p.name} swapped Food with ${other.name}.`,
+            "crit",
+          );
+          updateUI();
+          render();
         };
         extraBtns.appendChild(b);
       });
-      showModal('INVERSION FIELD',body,true,()=>{addLog(`${p.name} declined the Inversion Field.`);updateUI();render();},'Decline',undefined,undefined,'');
-      document.getElementById('mact').prepend(extraBtns);
+      showModal(
+        "INVERSION FIELD",
+        body,
+        true,
+        () => {
+          addLog(`${p.name} declined the Inversion Field.`);
+          updateUI();
+          render();
+        },
+        "Decline",
+        undefined,
+        undefined,
+        "",
+      );
+      document.getElementById("mact").prepend(extraBtns);
       break;
     }
-    case'Stasis Pod':{
-      if(p.inStasis){
-        showModal('STASIS POD','You are in stasis. Resource depletion is suspended. Exit stasis?',true,
-          ()=>{p.inStasis=false;addLog(`${p.name} exited stasis.`,'act');updateUI();render();},
-          'Exit Stasis',
-          ()=>{updateUI();render();},'Stay in Stasis');
+    case "Stasis Pod": {
+      if (p.inStasis) {
+        showModal(
+          "STASIS POD",
+          "You are in stasis. Resource depletion is suspended. Exit stasis?",
+          true,
+          () => {
+            p.inStasis = false;
+            addLog(`${p.name} exited stasis.`, "act");
+            updateUI();
+            render();
+          },
+          "Exit Stasis",
+          () => {
+            updateUI();
+            render();
+          },
+          "Stay in Stasis",
+        );
       } else {
-        showModal('STASIS POD','Alien preservation technology. Enter stasis to suspend all resource depletion. You cannot take actions while in stasis. Exit any time by choosing to leave.',true,
-          ()=>{p.inStasis=true;addLog(`${p.name} entered stasis.`,'act');updateUI();render();},
-          'Enter Stasis',
-          ()=>{updateUI();render();},'Decline');
+        showModal(
+          "STASIS POD",
+          "Alien preservation technology. Enter stasis to suspend all resource depletion. You cannot take actions while in stasis. Exit any time by choosing to leave.",
+          true,
+          () => {
+            p.inStasis = true;
+            addLog(`${p.name} entered stasis.`, "act");
+            updateUI();
+            render();
+          },
+          "Enter Stasis",
+          () => {
+            updateUI();
+            render();
+          },
+          "Decline",
+        );
       }
       break;
     }
-    default:addLog(`Anomaly: ${t.anomaly}.`);
+    default:
+      addLog(`Anomaly: ${t.anomaly}.`);
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
 // TRADE  (drag-and-drop UI)
 // ═══════════════════════════════════════════════════════════════
-let tradeState=null;
+let tradeState = null;
 
-function openTrade(){
-  const p=cp();if(G.phase!=='action'&&G.phase!=='move')return;
-  const here=G.players.filter(x=>x.alive&&x.id!==p.id&&x.q===p.q&&x.r===p.r);
-  if(!here.length){addLog('No crew on this tile to trade with.');return;}
-  if(here.length===1){initTradeModal(p,here[0]);return;}
-  const btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:12px;';
-  here.forEach(pl=>{
-    const b=document.createElement('button');b.className='mbtn';
-    b.innerHTML=`<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
-    b.onclick=()=>{document.getElementById('mov').classList.remove('show');initTradeModal(p,pl);};
+function openTrade() {
+  const p = cp();
+  if (G.phase !== "action" && G.phase !== "move") return;
+  const here = G.players.filter(
+    (x) => x.alive && x.id !== p.id && x.q === p.q && x.r === p.r,
+  );
+  if (!here.length) {
+    addLog("No crew on this tile to trade with.");
+    return;
+  }
+  if (here.length === 1) {
+    initTradeModal(p, here[0]);
+    return;
+  }
+  const btns = document.createElement("div");
+  btns.style.cssText =
+    "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
+  here.forEach((pl) => {
+    const b = document.createElement("button");
+    b.className = "mbtn";
+    b.innerHTML = `<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
+    b.onclick = () => {
+      document.getElementById("mov").classList.remove("show");
+      initTradeModal(p, pl);
+    };
     btns.appendChild(b);
   });
-  showModal('TRADE','Choose a crew member to trade with.',true,()=>{},'Cancel',undefined,undefined,'');
-  document.getElementById('mact').prepend(btns);
+  showModal(
+    "TRADE",
+    "Choose a crew member to trade with.",
+    true,
+    () => {},
+    "Cancel",
+    undefined,
+    undefined,
+    "",
+  );
+  document.getElementById("mact").prepend(btns);
 }
 
-function initTradeModal(pA,pB){
-  tradeState={pA,pB,stagedAtoB:new Set(),stagedBtoA:new Set(),aFood:0,bFood:0,aO2:0,bO2:0,aFrags:0,bFrags:0};
+function initTradeModal(pA, pB) {
+  tradeState = {
+    pA,
+    pB,
+    stagedAtoB: new Set(),
+    stagedBtoA: new Set(),
+    aFood: 0,
+    bFood: 0,
+    aO2: 0,
+    bO2: 0,
+    aFrags: 0,
+    bFrags: 0,
+  };
   renderTradeModal();
-  document.getElementById('trademodal').classList.add('show');
+  document.getElementById("trademodal").classList.add("show");
 }
 
-function renderTradeModal(){
-  if(!tradeState)return;
-  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2,aFrags,bFrags}=tradeState;
-  const body=document.getElementById('trbody');
-  body.innerHTML='';
-  [pA,pB].forEach((p,side)=>{
-    const isA=side===0;
-    const staged=isA?stagedAtoB:stagedBtoA;
-    const otherStaged=isA?stagedBtoA:stagedAtoB;
-    const panel=document.createElement('div');panel.className='trpanel';
+function renderTradeModal() {
+  if (!tradeState) return;
+  const {
+    pA,
+    pB,
+    stagedAtoB,
+    stagedBtoA,
+    aFood,
+    bFood,
+    aO2,
+    bO2,
+    aFrags,
+    bFrags,
+  } = tradeState;
+  const body = document.getElementById("trbody");
+  body.innerHTML = "";
+  [pA, pB].forEach((p, side) => {
+    const isA = side === 0;
+    const staged = isA ? stagedAtoB : stagedBtoA;
+    const otherStaged = isA ? stagedBtoA : stagedAtoB;
+    const panel = document.createElement("div");
+    panel.className = "trpanel";
     // Portrait + name
-    const nameRow=document.createElement('div');
-    nameRow.style.cssText='display:flex;align-items:flex-end;gap:10px;margin-bottom:10px';
-    const portEl=document.createElement('div');
-    portEl.style.cssText=portBg(p.portrait,104,104,0,p.health)+'border:1px solid '+p.color+';border-radius:3px;flex-shrink:0';
-    const nameBlock=document.createElement('div');
-    nameBlock.style.cssText='display:flex;flex-direction:column;gap:6px;padding-bottom:2px';
-    const nameSpan=document.createElement('span');
-    nameSpan.className='trpname';nameSpan.style.color=p.color;nameSpan.textContent=p.name;
-    function makeToks(full,total,fc,ec){const r=document.createElement('div');r.className='tokrow';for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;r.appendChild(s);}return r;}
-    const netFood=isA?p.food-aFood+bFood:p.food-bFood+aFood;
-    const netO2  =isA?p.o2-aO2+bO2    :p.o2-bO2+aO2;
-    const foodGrid=document.createElement('div');foodGrid.className='tokgrid';
-    for(let i=0,vis=Math.max(5,Math.ceil(Math.max(p.food,netFood)/5)*5);i<vis;i++){const s=document.createElement('span');s.className=`tok ${i<netFood?'rf':'re'}`;foodGrid.appendChild(s);}
-    const o2Row=makeToks(netO2,3,'of','oe');
-    const hpRow=makeToks(p.health,3,'hf','he');
-    const netFrags=isA?p.radioFragments-aFrags+bFrags:p.radioFragments-bFrags+aFrags;
-    const fragTokRow=document.createElement('div');fragTokRow.className='tokrow';
-    for(let i=0;i<netFrags;i++){const s=document.createElement('span');s.className='frag-tok';s.textContent='◈';fragTokRow.appendChild(s);}
-    nameBlock.appendChild(nameSpan);nameBlock.appendChild(foodGrid);nameBlock.appendChild(o2Row);nameBlock.appendChild(hpRow);
-    if(netFrags>0||p.radioFragments>0)nameBlock.appendChild(fragTokRow);
-    nameRow.appendChild(portEl);nameRow.appendChild(nameBlock);
+    const nameRow = document.createElement("div");
+    nameRow.style.cssText =
+      "display:flex;align-items:flex-end;gap:10px;margin-bottom:10px";
+    const portEl = document.createElement("div");
+    portEl.style.cssText =
+      portBg(p.portrait, 104, 104, 0, p.health) +
+      "border:1px solid " +
+      p.color +
+      ";border-radius:3px;flex-shrink:0";
+    const nameBlock = document.createElement("div");
+    nameBlock.style.cssText =
+      "display:flex;flex-direction:column;gap:6px;padding-bottom:2px";
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "trpname";
+    nameSpan.style.color = p.color;
+    nameSpan.textContent = p.name;
+    function makeToks(full, total, fc, ec) {
+      const r = document.createElement("div");
+      r.className = "tokrow";
+      for (let i = 0; i < total; i++) {
+        const s = document.createElement("span");
+        s.className = `tok ${i < full ? fc : ec}`;
+        r.appendChild(s);
+      }
+      return r;
+    }
+    const netFood = isA ? p.food - aFood + bFood : p.food - bFood + aFood;
+    const netO2 = isA ? p.o2 - aO2 + bO2 : p.o2 - bO2 + aO2;
+    const foodGrid = document.createElement("div");
+    foodGrid.className = "tokgrid";
+    for (
+      let i = 0,
+        vis = Math.max(5, Math.ceil(Math.max(p.food, netFood) / 5) * 5);
+      i < vis;
+      i++
+    ) {
+      const s = document.createElement("span");
+      s.className = `tok ${i < netFood ? "rf" : "re"}`;
+      foodGrid.appendChild(s);
+    }
+    const o2Row = makeToks(netO2, 3, "of", "oe");
+    const hpRow = makeToks(p.health, 3, "hf", "he");
+    const netFrags = isA
+      ? p.radioFragments - aFrags + bFrags
+      : p.radioFragments - bFrags + aFrags;
+    const fragTokRow = document.createElement("div");
+    fragTokRow.className = "tokrow";
+    for (let i = 0; i < netFrags; i++) {
+      const s = document.createElement("span");
+      s.className = "frag-tok";
+      s.textContent = "◈";
+      fragTokRow.appendChild(s);
+    }
+    nameBlock.appendChild(nameSpan);
+    nameBlock.appendChild(foodGrid);
+    nameBlock.appendChild(o2Row);
+    nameBlock.appendChild(hpRow);
+    if (netFrags > 0 || p.radioFragments > 0) nameBlock.appendChild(fragTokRow);
+    nameRow.appendChild(portEl);
+    nameRow.appendChild(nameBlock);
     panel.appendChild(nameRow);
     // Equipment area label
-    const eqLbl=document.createElement('div');
-    eqLbl.style.cssText='font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px';
-    eqLbl.textContent='Equipment';
+    const eqLbl = document.createElement("div");
+    eqLbl.style.cssText =
+      "font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px";
+    eqLbl.textContent = "Equipment";
     panel.appendChild(eqLbl);
     // Equipment drag area
-    const eqArea=document.createElement('div');
-    eqArea.className='treqarea';
-    eqArea.dataset.side=side;
-    eqArea.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';});
-    eqArea.addEventListener('drop',e=>{
+    const eqArea = document.createElement("div");
+    eqArea.className = "treqarea";
+    eqArea.dataset.side = side;
+    eqArea.addEventListener("dragover", (e) => {
       e.preventDefault();
-      const uid=parseInt(e.dataTransfer.getData('text/plain'));
-      const fromSide=parseInt(e.dataTransfer.getData('from-side'));
-      if(fromSide===side)return; // drop back = unstage
-      const srcStaged=fromSide===0?tradeState.stagedAtoB:tradeState.stagedBtoA;
+      e.dataTransfer.dropEffect = "move";
+    });
+    eqArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const uid = parseInt(e.dataTransfer.getData("text/plain"));
+      const fromSide = parseInt(e.dataTransfer.getData("from-side"));
+      if (fromSide === side) return; // drop back = unstage
+      const srcStaged =
+        fromSide === 0 ? tradeState.stagedAtoB : tradeState.stagedBtoA;
       srcStaged.add(uid);
       renderTradeModal();
     });
     // Own cards (not staged away, not private event cards)
-    p.equipment.filter(c=>!c.eventCard).forEach(c=>{
-      const isStaged=staged.has(c.uid);
-      const card=document.createElement('div');
-      card.className='eqcard cc-'+c.cat+(isStaged?' staged':'');
-      card.draggable=true;
-      card.innerHTML=cardFaceHTML(c.cat,c.name,c.txt);
-      card.addEventListener('dragstart',e=>{
-        e.dataTransfer.setData('text/plain',c.uid);
-        e.dataTransfer.setData('from-side',side);
+    p.equipment
+      .filter((c) => !c.eventCard)
+      .forEach((c) => {
+        const isStaged = staged.has(c.uid);
+        const card = document.createElement("div");
+        card.className = "eqcard cc-" + c.cat + (isStaged ? " staged" : "");
+        card.draggable = true;
+        card.innerHTML = cardFaceHTML(c.cat, c.name, c.txt);
+        card.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", c.uid);
+          e.dataTransfer.setData("from-side", side);
+        });
+        // Click to toggle stage
+        card.addEventListener("click", () => {
+          if (staged.has(c.uid)) staged.delete(c.uid);
+          else staged.add(c.uid);
+          renderTradeModal();
+        });
+        eqArea.appendChild(card);
       });
-      // Click to toggle stage
-      card.addEventListener('click',()=>{
-        if(staged.has(c.uid))staged.delete(c.uid);
-        else staged.add(c.uid);
-        renderTradeModal();
-      });
-      eqArea.appendChild(card);
-    });
     // Show cards staged from other side incoming
-    const incomingStaged=isA?stagedBtoA:stagedAtoB;
-    const otherPlayer=isA?pB:pA;
-    otherPlayer.equipment.filter(c=>!c.eventCard&&incomingStaged.has(c.uid)).forEach(c=>{
-      const card=document.createElement('div');
-      card.className='eqcard cc-'+c.cat+' incoming';
-      card.innerHTML=cardFaceHTML(c.cat,c.name,c.txt);
-      eqArea.appendChild(card);
-    });
+    const incomingStaged = isA ? stagedBtoA : stagedAtoB;
+    const otherPlayer = isA ? pB : pA;
+    otherPlayer.equipment
+      .filter((c) => !c.eventCard && incomingStaged.has(c.uid))
+      .forEach((c) => {
+        const card = document.createElement("div");
+        card.className = "eqcard cc-" + c.cat + " incoming";
+        card.innerHTML = cardFaceHTML(c.cat, c.name, c.txt);
+        eqArea.appendChild(card);
+      });
     panel.appendChild(eqArea);
     // Resource controls
-    const ratGive=isA?aFood:bFood;
-    const o2Give=isA?aO2:bO2;
-    const foodMax=p.food;
-    const o2Max=p.o2;
-    const resDiv=document.createElement('div');
-    resDiv.style.marginTop='10px';
-    resDiv.innerHTML=`
+    const ratGive = isA ? aFood : bFood;
+    const o2Give = isA ? aO2 : bO2;
+    const foodMax = p.food;
+    const o2Max = p.o2;
+    const resDiv = document.createElement("div");
+    resDiv.style.marginTop = "10px";
+    resDiv.innerHTML = `
       <div class="trresrow"><label>Give Food</label>
-        <button class="trbtn" onclick="trAdj('${isA?'aFood':'bFood'}',-1)">−</button>
+        <button class="trbtn" onclick="trAdj('${isA ? "aFood" : "bFood"}',-1)">−</button>
         <span class="trcnt">${ratGive}</span>
-        <button class="trbtn" onclick="trAdj('${isA?'aFood':'bFood'}',1)">+</button>
+        <button class="trbtn" onclick="trAdj('${isA ? "aFood" : "bFood"}',1)">+</button>
         <span style="font-size:.58rem;color:var(--dim)">/ ${foodMax}</span>
       </div>
       <div class="trresrow" style="margin-top:6px"><label>Give O₂</label>
-        <button class="trbtn" onclick="trAdj('${isA?'aO2':'bO2'}',-1)">−</button>
+        <button class="trbtn" onclick="trAdj('${isA ? "aO2" : "bO2"}',-1)">−</button>
         <span class="trcnt">${o2Give}</span>
-        <button class="trbtn" onclick="trAdj('${isA?'aO2':'bO2'}',1)">+</button>
+        <button class="trbtn" onclick="trAdj('${isA ? "aO2" : "bO2"}',1)">+</button>
         <span style="font-size:.58rem;color:var(--dim)">/ ${o2Max}</span>
       </div>
-      ${p.radioFragments>0?`<div class="trresrow" style="margin-top:6px"><label>Give ◈</label>
-        <button class="trbtn" onclick="trAdj('${isA?'aFrags':'bFrags'}',-1)">−</button>
-        <span class="trcnt">${isA?aFrags:bFrags}</span>
-        <button class="trbtn" onclick="trAdj('${isA?'aFrags':'bFrags'}',1)">+</button>
+      ${
+        p.radioFragments > 0
+          ? `<div class="trresrow" style="margin-top:6px"><label>Give ◈</label>
+        <button class="trbtn" onclick="trAdj('${isA ? "aFrags" : "bFrags"}',-1)">−</button>
+        <span class="trcnt">${isA ? aFrags : bFrags}</span>
+        <button class="trbtn" onclick="trAdj('${isA ? "aFrags" : "bFrags"}',1)">+</button>
         <span style="font-size:.58rem;color:var(--dim)">/ ${p.radioFragments}</span>
-      </div>`:''}`;
+      </div>`
+          : ""
+      }`;
     panel.appendChild(resDiv);
     body.appendChild(panel);
   });
 }
 
-function trAdj(field,delta){
-  if(!tradeState)return;
-  const{pA,pB}=tradeState;
-  const maxMap={aFood:pA.food,bFood:pB.food,aO2:pA.o2,bO2:pB.o2,aFrags:pA.radioFragments,bFrags:pB.radioFragments};
-  tradeState[field]=Math.max(0,Math.min(maxMap[field],tradeState[field]+delta));
+function trAdj(field, delta) {
+  if (!tradeState) return;
+  const { pA, pB } = tradeState;
+  const maxMap = {
+    aFood: pA.food,
+    bFood: pB.food,
+    aO2: pA.o2,
+    bO2: pB.o2,
+    aFrags: pA.radioFragments,
+    bFrags: pB.radioFragments,
+  };
+  tradeState[field] = Math.max(
+    0,
+    Math.min(maxMap[field], tradeState[field] + delta),
+  );
   renderTradeModal();
 }
 
-function confirmTrade(){
-  if(!tradeState)return;
-  const{pA,pB,stagedAtoB,stagedBtoA,aFood,bFood,aO2,bO2,aFrags,bFrags}=tradeState;
+function confirmTrade() {
+  if (!tradeState) return;
+  const {
+    pA,
+    pB,
+    stagedAtoB,
+    stagedBtoA,
+    aFood,
+    bFood,
+    aO2,
+    bO2,
+    aFrags,
+    bFrags,
+  } = tradeState;
   // Transfer equipment A→B
-  stagedAtoB.forEach(uid=>{
-    const ci=pA.equipment.findIndex(c=>c.uid===uid);
-    if(ci>=0){pB.equipment.push(pA.equipment.splice(ci,1)[0]);}
+  stagedAtoB.forEach((uid) => {
+    const ci = pA.equipment.findIndex((c) => c.uid === uid);
+    if (ci >= 0) {
+      pB.equipment.push(pA.equipment.splice(ci, 1)[0]);
+    }
   });
   // Transfer equipment B→A
-  stagedBtoA.forEach(uid=>{
-    const ci=pB.equipment.findIndex(c=>c.uid===uid);
-    if(ci>=0){pA.equipment.push(pB.equipment.splice(ci,1)[0]);}
+  stagedBtoA.forEach((uid) => {
+    const ci = pB.equipment.findIndex((c) => c.uid === uid);
+    if (ci >= 0) {
+      pA.equipment.push(pB.equipment.splice(ci, 1)[0]);
+    }
   });
   // Resources
-  pA.food=Math.max(0,Math.min(15,pA.food-aFood+bFood));
-  pB.food=Math.max(0,Math.min(15,pB.food-bFood+aFood));
-  pA.o2=Math.max(0,Math.min(3,pA.o2-aO2+bO2));
-  pB.o2=Math.max(0,Math.min(3,pB.o2-bO2+aO2));
-  pA.radioFragments=Math.max(0,pA.radioFragments-aFrags+bFrags);
-  pB.radioFragments=Math.max(0,pB.radioFragments-bFrags+aFrags);
-  addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`,'good');
+  pA.food = Math.max(0, Math.min(15, pA.food - aFood + bFood));
+  pB.food = Math.max(0, Math.min(15, pB.food - bFood + aFood));
+  pA.o2 = Math.max(0, Math.min(3, pA.o2 - aO2 + bO2));
+  pB.o2 = Math.max(0, Math.min(3, pB.o2 - bO2 + aO2));
+  pA.radioFragments = Math.max(0, pA.radioFragments - aFrags + bFrags);
+  pB.radioFragments = Math.max(0, pB.radioFragments - bFrags + aFrags);
+  addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`, "good");
   closeTrade(false);
-  viewedPlayer=G.currentPlayer;
-  updateUI();render();
+  viewedPlayer = G.currentPlayer;
+  updateUI();
+  render();
 }
 
-function closeTrade(playBack=true){
-  if(playBack)_play('back.wav');
-  tradeState=null;
-  document.getElementById('trademodal').classList.remove('show');
+function closeTrade(playBack = true) {
+  if (playBack) _play("back.wav");
+  tradeState = null;
+  document.getElementById("trademodal").classList.remove("show");
 }
 
 // ═══════════════════════════════════════════════════════════════
 // BOARD RENDERING
 // ═══════════════════════════════════════════════════════════════
-let pan={x:0,y:0},zoom=Math.min(4,window.innerHeight/(SZ*9));
-let boardGroup=null,panRafId=null;
-let _hexGridPath=null;
-let _tilesDirty=true,_dynGroup=null,_lastRenderW=0,_lastRenderH=0;
-function markTilesDirty(){_tilesDirty=true;}
-function _hexCssClip(){
-  if(_hexCssClip._c)return _hexCssClip._c;
-  const hw=SZ*SQRT3,hh=SZ*2,r=SZ-1,pts=[];
-  for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
-    pts.push(`${((r*Math.cos(a)+hw/2)/hw*100).toFixed(2)}% ${((r*Math.sin(a)+hh/2)/hh*100).toFixed(2)}%`);}
-  return(_hexCssClip._c=`polygon(${pts.join(',')})`);
+let pan = { x: 0, y: 0 },
+  zoom = Math.min(4, window.innerHeight / (SZ * 9));
+let boardGroup = null,
+  panRafId = null;
+let _hexGridPath = null;
+let _tilesDirty = true,
+  _dynGroup = null,
+  _lastRenderW = 0,
+  _lastRenderH = 0;
+function markTilesDirty() {
+  _tilesDirty = true;
 }
-function _buildHexGridPath(){
-  if(_hexGridPath)return _hexGridPath;
-  const GR=22,pd=[];
-  for(let q=-GR;q<=GR;q++)for(let r=-GR;r<=GR;r++){
-    const[cx,cy]=h2p(q,r);
-    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
-      pd.push(`${i===0?'M':'L'}${(cx+SZ*Math.cos(a)).toFixed(1)},${(cy+SZ*Math.sin(a)).toFixed(1)}`);}
-    pd.push('Z');}
-  return (_hexGridPath=pd.join(' '));
-}
-function _updateBoardTransform(){
-  if(!boardGroup)return;
-  const svg=document.getElementById('bsvg');
-  const W=svg.clientWidth||800,H=svg.clientHeight||600;
-  boardGroup.style.transform=`translate(${W/2+pan.x}px,${H/2+pan.y}px) scale(${zoom})`;
-}
-function _schedulePan(){
-  if(panRafId)return;
-  panRafId=requestAnimationFrame(()=>{panRafId=null;_updateBoardTransform();});
-}
-let _panAnimId=null;
-function panToPlayer(p,duration=600){
-  if(_panAnimId){cancelAnimationFrame(_panAnimId);_panAnimId=null;}
-  const[hx,hy]=h2p(p.q,p.r);
-  const targetX=-hx*zoom, targetY=(-hy+15)*zoom;
-  const startX=pan.x,startY=pan.y,startT=performance.now();
-  function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
-  function step(now){
-    const t=Math.min(1,(now-startT)/duration);
-    const e=ease(t);
-    pan.x=startX+(targetX-startX)*e;
-    pan.y=startY+(targetY-startY)*e;
-    _updateBoardTransform();
-    if(t<1)_panAnimId=requestAnimationFrame(step);else _panAnimId=null;
+function _hexCssClip() {
+  if (_hexCssClip._c) return _hexCssClip._c;
+  const hw = SZ * SQRT3,
+    hh = SZ * 2,
+    r = SZ - 1,
+    pts = [];
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 6;
+    pts.push(
+      `${(((r * Math.cos(a) + hw / 2) / hw) * 100).toFixed(2)}% ${(((r * Math.sin(a) + hh / 2) / hh) * 100).toFixed(2)}%`,
+    );
   }
-  _panAnimId=requestAnimationFrame(step);
+  return (_hexCssClip._c = `polygon(${pts.join(",")})`);
 }
-function preloadTileImages(){
-  Object.values(TILE_IMAGE_MAP).forEach(f=>{const i=new Image();i.src=`img/Tiles/${f}`;});
+function _buildHexGridPath() {
+  if (_hexGridPath) return _hexGridPath;
+  const GR = 22,
+    pd = [];
+  for (let q = -GR; q <= GR; q++)
+    for (let r = -GR; r <= GR; r++) {
+      const [cx, cy] = h2p(q, r);
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 6;
+        pd.push(
+          `${i === 0 ? "M" : "L"}${(cx + SZ * Math.cos(a)).toFixed(1)},${(cy + SZ * Math.sin(a)).toFixed(1)}`,
+        );
+      }
+      pd.push("Z");
+    }
+  return (_hexGridPath = pd.join(" "));
 }
-let sbPan={x:0,y:0},sbZoom=1,sbEventsInit=false;
-let usesTrackpad=false;
-function svgEl(tag,attrs){const e=document.createElementNS(NS,tag);if(attrs)Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));return e;}
+function _updateBoardTransform() {
+  if (!boardGroup) return;
+  const svg = document.getElementById("bsvg");
+  const W = svg.clientWidth || 800,
+    H = svg.clientHeight || 600;
+  boardGroup.style.transform = `translate(${W / 2 + pan.x}px,${H / 2 + pan.y}px) scale(${zoom})`;
+}
+function _schedulePan() {
+  if (panRafId) return;
+  panRafId = requestAnimationFrame(() => {
+    panRafId = null;
+    _updateBoardTransform();
+  });
+}
+let _panAnimId = null;
+function panToPlayer(p, duration = 600) {
+  if (_panAnimId) {
+    cancelAnimationFrame(_panAnimId);
+    _panAnimId = null;
+  }
+  const [hx, hy] = h2p(p.q, p.r);
+  const targetX = -hx * zoom,
+    targetY = (-hy + 15) * zoom;
+  const startX = pan.x,
+    startY = pan.y,
+    startT = performance.now();
+  function ease(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+  function step(now) {
+    const t = Math.min(1, (now - startT) / duration);
+    const e = ease(t);
+    pan.x = startX + (targetX - startX) * e;
+    pan.y = startY + (targetY - startY) * e;
+    _updateBoardTransform();
+    if (t < 1) _panAnimId = requestAnimationFrame(step);
+    else _panAnimId = null;
+  }
+  _panAnimId = requestAnimationFrame(step);
+}
+function preloadTileImages() {
+  Object.values(TILE_IMAGE_MAP).forEach((f) => {
+    const i = new Image();
+    i.src = `img/tiles/${f}`;
+  });
+}
+let sbPan = { x: 0, y: 0 },
+  sbZoom = 1,
+  sbEventsInit = false;
+let usesTrackpad = false;
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+  return e;
+}
 
-function render(){
-  const svg=document.getElementById('bsvg');
-  const W=svg.clientWidth||800,H=svg.clientHeight||600;
-  const sizeChanged=W!==_lastRenderW||H!==_lastRenderH;
+function render() {
+  const svg = document.getElementById("bsvg");
+  const W = svg.clientWidth || 800,
+    H = svg.clientHeight || 600;
+  const sizeChanged = W !== _lastRenderW || H !== _lastRenderH;
 
-  if(_tilesDirty||sizeChanged||!_dynGroup){
-    _tilesDirty=false;_lastRenderW=W;_lastRenderH=H;
-    svg.innerHTML='';
-    const defs=svgEl('defs');
-    ['terrain','anomaly','ship','crash','fd'].forEach(id=>{
-      const gr=svgEl('radialGradient',{id:'gr-'+id,cx:'40%',cy:'35%',r:'65%'});
-      const stops=GRAD_STOPS[id]||GRAD_STOPS.fd;
-      stops.forEach(([off,col])=>{const s=svgEl('stop',{'offset':off,'stop-color':col});gr.appendChild(s);});
+  if (_tilesDirty || sizeChanged || !_dynGroup) {
+    _tilesDirty = false;
+    _lastRenderW = W;
+    _lastRenderH = H;
+    svg.innerHTML = "";
+    const defs = svgEl("defs");
+    ["terrain", "anomaly", "ship", "crash", "fd"].forEach((id) => {
+      const gr = svgEl("radialGradient", {
+        id: "gr-" + id,
+        cx: "40%",
+        cy: "35%",
+        r: "65%",
+      });
+      const stops = GRAD_STOPS[id] || GRAD_STOPS.fd;
+      stops.forEach(([off, col]) => {
+        const s = svgEl("stop", { offset: off, "stop-color": col });
+        gr.appendChild(s);
+      });
       defs.appendChild(gr);
     });
     svg.appendChild(defs);
-    svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
-    const g=svgEl('g');
-    g.style.transformOrigin='0 0';
-    g.style.willChange='transform';
-    g.style.transform=`translate(${W/2+pan.x}px,${H/2+pan.y}px) scale(${zoom})`;
-    boardGroup=g;
-    g.appendChild(svgEl('path',{d:_buildHexGridPath(),fill:'none',stroke:'rgba(255,255,255,0.06)','stroke-width':'0.7','pointer-events':'none'}));
-    for(const[,t]of G.tiles){if(t.type!=='crash_site')drawTile(g,t);}
-    const bcg=svgEl('g');
-    bcg.style.filter='drop-shadow(1px 1px 5px rgba(0,0,0,1))';
-    for(const[,t]of G.tiles){if(t.type==='crash_site')drawTile(bcg,t);}
+    svg.appendChild(
+      svgEl("rect", { x: 0, y: 0, width: W, height: H, fill: "#06080d" }),
+    );
+    const g = svgEl("g");
+    g.style.transformOrigin = "0 0";
+    g.style.willChange = "transform";
+    g.style.transform = `translate(${W / 2 + pan.x}px,${H / 2 + pan.y}px) scale(${zoom})`;
+    boardGroup = g;
+    g.appendChild(
+      svgEl("path", {
+        d: _buildHexGridPath(),
+        fill: "none",
+        stroke: "rgba(255,255,255,0.06)",
+        "stroke-width": "0.7",
+        "pointer-events": "none",
+      }),
+    );
+    for (const [, t] of G.tiles) {
+      if (t.type !== "crash_site") drawTile(g, t);
+    }
+    const bcg = svgEl("g");
+    bcg.style.filter = "drop-shadow(1px 1px 5px rgba(0,0,0,1))";
+    for (const [, t] of G.tiles) {
+      if (t.type === "crash_site") drawTile(bcg, t);
+    }
     g.appendChild(bcg);
-    _dynGroup=svgEl('g');
+    _dynGroup = svgEl("g");
     g.appendChild(_dynGroup);
     svg.appendChild(g);
   } else {
-    boardGroup.style.transform=`translate(${W/2+pan.x}px,${H/2+pan.y}px) scale(${zoom})`;
+    boardGroup.style.transform = `translate(${W / 2 + pan.x}px,${H / 2 + pan.y}px) scale(${zoom})`;
   }
 
   // Dynamic layer: reach highlights + pawns — always rebuilt (cheap)
-  _dynGroup.innerHTML='';
-  if((G.phase==='move'||G.phase==='action')&&G.movementLeft>0){
-    for(const[k]of G.reach){const[q,r]=hparse(k);const[cx,cy]=h2p(q,r);
-      _dynGroup.appendChild(svgEl('polygon',{points:hexPts(cx,cy,SZ-4),fill:'rgba(20,70,120,.2)',stroke:'#205888','stroke-width':'1','pointer-events':'none'}));}}
-  G.players.forEach(p=>{if(p.alive)drawPawn(_dynGroup,p);});
+  _dynGroup.innerHTML = "";
+  if ((G.phase === "move" || G.phase === "action") && G.movementLeft > 0) {
+    for (const [k] of G.reach) {
+      const [q, r] = hparse(k);
+      const [cx, cy] = h2p(q, r);
+      _dynGroup.appendChild(
+        svgEl("polygon", {
+          points: hexPts(cx, cy, SZ - 4),
+          fill: "rgba(20,70,120,.2)",
+          stroke: "#205888",
+          "stroke-width": "1",
+          "pointer-events": "none",
+        }),
+      );
+    }
+  }
+  G.players.forEach((p) => {
+    if (p.alive) drawPawn(_dynGroup, p);
+  });
 }
 
-const GRAD_STOPS={
-  terrain:[['0%','#122014'],['100%','#06100a']],
-  anomaly:[['0%','#1a0c28'],['100%','#080410']],
-  ship:   [['0%','#0c1c2e'],['100%','#060e18']],
-  crash:  [['0%','#0e1e30'],['100%','#06101e']],
-  fd:     [['0%','#0c1420'],['100%','#060c14']],
+const GRAD_STOPS = {
+  terrain: [
+    ["0%", "#122014"],
+    ["100%", "#06100a"],
+  ],
+  anomaly: [
+    ["0%", "#1a0c28"],
+    ["100%", "#080410"],
+  ],
+  ship: [
+    ["0%", "#0c1c2e"],
+    ["100%", "#060e18"],
+  ],
+  crash: [
+    ["0%", "#0e1e30"],
+    ["100%", "#06101e"],
+  ],
+  fd: [
+    ["0%", "#0c1420"],
+    ["100%", "#060c14"],
+  ],
 };
 
-function drawTile(g,t){
-  const[cx,cy]=h2p(t.q,t.r);
-  const hexPoly=hexPts(cx,cy,SZ-1);
+function drawTile(g, t) {
+  const [cx, cy] = h2p(t.q, t.r);
+  const hexPoly = hexPts(cx, cy, SZ - 1);
 
   // Face-down tiles: dashed border + plus sign (matches site builder candidate style)
-  if(t.type==='face_down'){
-    g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(20,50,100,.15)','pointer-events':'none'}));
-    const poly=svgEl('polygon',{points:hexPoly,fill:'transparent',stroke:'#0c1d35','stroke-width':'1',style:'cursor:pointer','data-q':t.q,'data-r':t.r});
-    poly.addEventListener('click',()=>onHexClick(t.q,t.r));
-    poly.addEventListener('mouseenter',e=>startTooltip(t,e));
-    poly.addEventListener('mouseleave',cancelTooltip);
+  if (t.type === "face_down") {
+    g.appendChild(
+      svgEl("polygon", {
+        points: hexPoly,
+        fill: "rgba(20,50,100,.15)",
+        "pointer-events": "none",
+      }),
+    );
+    const poly = svgEl("polygon", {
+      points: hexPoly,
+      fill: "transparent",
+      stroke: "#0c1d35",
+      "stroke-width": "1",
+      style: "cursor:pointer",
+      "data-q": t.q,
+      "data-r": t.r,
+    });
+    poly.addEventListener("click", () => onHexClick(t.q, t.r));
+    poly.addEventListener("mouseenter", (e) => startTooltip(t, e));
+    poly.addEventListener("mouseleave", cancelTooltip);
     g.appendChild(poly);
-    const plus=svgEl('text',{'x':cx,'y':cy+6,'text-anchor':'middle','font-family':'Courier New,monospace','font-size':'18','fill':'#2a70d0','opacity':'.6','pointer-events':'none'});
-    plus.textContent='＋';
+    const plus = svgEl("text", {
+      x: cx,
+      y: cy + 6,
+      "text-anchor": "middle",
+      "font-family": "Courier New,monospace",
+      "font-size": "18",
+      fill: "#2a70d0",
+      opacity: ".6",
+      "pointer-events": "none",
+    });
+    plus.textContent = "＋";
     g.appendChild(plus);
     return;
   }
 
-  const strokeC=t.type==='anomaly'?'none':t.type==='crash_site'?'#b2dbee':'none';
-  const sw='1.5';
-  const tileImg=getTileImg(t,'hex');
-  if(tileImg){
-    const hw=SZ*SQRT3,hh=SZ*2;
-    const img=svgEl('image',{href:tileImg,x:cx-hw/2,y:cy-hh/2,width:hw,height:hh,'pointer-events':'none',preserveAspectRatio:'xMidYMid slice'});
-    img.style.clipPath=_hexCssClip();
+  const strokeC =
+    t.type === "anomaly"
+      ? "none"
+      : t.type === "crash_site"
+        ? "#b2dbee"
+        : "none";
+  const sw = "1.5";
+  const tileImg = getTileImg(t, "hex");
+  if (tileImg) {
+    const hw = SZ * SQRT3,
+      hh = SZ * 2;
+    const img = svgEl("image", {
+      href: tileImg,
+      x: cx - hw / 2,
+      y: cy - hh / 2,
+      width: hw,
+      height: hh,
+      "pointer-events": "none",
+      preserveAspectRatio: "xMidYMid slice",
+    });
+    img.style.clipPath = _hexCssClip();
     g.appendChild(img);
     // Subtle dark vignette so labels and icons stay legible
-    g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(0,0,0,.32)','pointer-events':'none'}));
+    g.appendChild(
+      svgEl("polygon", {
+        points: hexPoly,
+        fill: "rgba(0,0,0,.32)",
+        "pointer-events": "none",
+      }),
+    );
   } else {
-    const gradId=t.type==='crash_site'?'gr-crash':t.type==='anomaly'?'gr-anomaly':t.type==='ship_section'?'gr-ship':t.type==='face_down'?'gr-fd':'gr-terrain';
-    g.appendChild(svgEl('polygon',{points:hexPoly,fill:`url(#${gradId})`,'pointer-events':'none'}));
+    const gradId =
+      t.type === "crash_site"
+        ? "gr-crash"
+        : t.type === "anomaly"
+          ? "gr-anomaly"
+          : t.type === "ship_section"
+            ? "gr-ship"
+            : t.type === "face_down"
+              ? "gr-fd"
+              : "gr-terrain";
+    g.appendChild(
+      svgEl("polygon", {
+        points: hexPoly,
+        fill: `url(#${gradId})`,
+        "pointer-events": "none",
+      }),
+    );
   }
   // Undiscovered overlay: revealed by Watch Tower but not yet visited
-  if(t.revealed&&!t.investigatedCount&&(t.type==='terrain'||t.type==='anomaly'||t.type==='ship_section'))
-    g.appendChild(svgEl('polygon',{points:hexPoly,fill:'rgba(20,50,100,0.55)','pointer-events':'none'}));
+  if (
+    t.revealed &&
+    !t.investigatedCount &&
+    (t.type === "terrain" || t.type === "anomaly" || t.type === "ship_section")
+  )
+    g.appendChild(
+      svgEl("polygon", {
+        points: hexPoly,
+        fill: "rgba(20,50,100,0.55)",
+        "pointer-events": "none",
+      }),
+    );
 
   // Hex border + event receiver (transparent fill, on top)
-  const poly=svgEl('polygon',{points:hexPoly,fill:'transparent',stroke:strokeC,'stroke-width':sw,style:'cursor:pointer','data-q':t.q,'data-r':t.r});
-  poly.addEventListener('click',()=>onHexClick(t.q,t.r));
-  poly.addEventListener('mouseenter',e=>startTooltip(t,e));
-  poly.addEventListener('mouseleave',cancelTooltip);
+  const poly = svgEl("polygon", {
+    points: hexPoly,
+    fill: "transparent",
+    stroke: strokeC,
+    "stroke-width": sw,
+    style: "cursor:pointer",
+    "data-q": t.q,
+    "data-r": t.r,
+  });
+  poly.addEventListener("click", () => onHexClick(t.q, t.r));
+  poly.addEventListener("mouseenter", (e) => startTooltip(t, e));
+  poly.addEventListener("mouseleave", cancelTooltip);
   g.appendChild(poly);
 
-  if(!t.revealed)return;
-  drawTileArtwork(g,cx,cy,t);
-  drawTileLabel(g,cx,cy,t);
+  if (!t.revealed) return;
+  drawTileArtwork(g, cx, cy, t);
+  drawTileLabel(g, cx, cy, t);
 }
 
-
-
-// Tile artwork uses individual images from img/Tiles/.
+// Tile artwork uses individual images from img/tiles/.
 // Radio Fragment indicator drawn for Signal Tower tiles.
-const BASECAMP_ICON_MAP={
-  'Crash Site':         'rocket-solid-full.svg',
-  'Medical Bay':        'heart-solid-full.svg',
-  'Signal Array':       'satellite-dish-solid-full.svg',
-  'Watch Tower':        'eye-solid-full.svg',
-  'Equipment Locker':   'wrench-solid-full.svg',
-  'Airlock':            'mask-ventilator-solid-full.svg',
-  'Cargo Hold':         'cubes-solid-full.svg',
+const BASECAMP_ICON_MAP = {
+  "Crash Site": "rocket-solid-full.svg",
+  "Medical Bay": "heart-solid-full.svg",
+  "Signal Array": "satellite-dish-solid-full.svg",
+  "Watch Tower": "eye-solid-full.svg",
+  "Equipment Locker": "wrench-solid-full.svg",
+  Airlock: "mask-ventilator-solid-full.svg",
+  "Cargo Hold": "cubes-solid-full.svg",
 };
 
-function drawTileArtwork(g,cx,cy,t){
-  if(t.type==='terrain'&&t.radioFragment){
-    const poi=t.pois?.[0];
-    if(poi==='Derelict Tower'||poi==='Collapsed Tower'||poi==='Mysterious Outpost'){
-      const fragTok=svgEl('text',{x:cx+18,y:cy-13,'text-anchor':'middle','font-family':'monospace','font-size':'13',fill:'#8a28c8',style:'filter:drop-shadow(0 0 4px rgba(138,40,200,0.7))','pointer-events':'none'});
-      fragTok.textContent='◈';
+function drawTileArtwork(g, cx, cy, t) {
+  if (t.type === "terrain" && t.radioFragment) {
+    const poi = t.pois?.[0];
+    if (
+      poi === "Derelict Tower" ||
+      poi === "Collapsed Tower" ||
+      poi === "Mysterious Outpost"
+    ) {
+      const fragTok = svgEl("text", {
+        x: cx + 18,
+        y: cy - 13,
+        "text-anchor": "middle",
+        "font-family": "monospace",
+        "font-size": "13",
+        fill: "#8a28c8",
+        style: "filter:drop-shadow(0 0 4px rgba(138,40,200,0.7))",
+        "pointer-events": "none",
+      });
+      fragTok.textContent = "◈";
       g.appendChild(fragTok);
     }
   }
   // Shock trap indicator — mini equipment card (foreignObject)
-  if(t.shockTrap){
-    const cw=38,ch=56,cx2=cx-cw/2,cy2=cy-ch/2;
-    const fo=svgEl('foreignObject',{x:cx2,y:cy2,width:cw,height:ch,'pointer-events':'none',transform:`rotate(-8,${cx},${cy})`});
-    const div=document.createElement('div');
-    div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
-    div.className='eqcard cc-Weapon';
-    div.style.cssText=`width:${cw}px;height:${ch}px;cursor:default;transition:none;box-shadow:0 3px 8px rgba(0,0,0,.9);`;
-    div.innerHTML=`<div class="eqcard-inner" style="margin:2px;"><span class="eq-icon" style="--eq-icon-url:url('img/Icons/gun-solid-full.svg');width:10px;height:10px;margin:3px auto 2px;flex-shrink:0;"></span><div class="eqdivider" style="margin:0 2px"></div><div class="eqname" style="font-size:5px;padding:2px 2px 1px;line-height:1.2;">Shock Trap</div></div>`;
+  if (t.shockTrap) {
+    const cw = 38,
+      ch = 56,
+      cx2 = cx - cw / 2,
+      cy2 = cy - ch / 2;
+    const fo = svgEl("foreignObject", {
+      x: cx2,
+      y: cy2,
+      width: cw,
+      height: ch,
+      "pointer-events": "none",
+      transform: `rotate(-8,${cx},${cy})`,
+    });
+    const div = document.createElement("div");
+    div.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+    div.className = "eqcard cc-Weapon";
+    div.style.cssText = `width:${cw}px;height:${ch}px;cursor:default;transition:none;box-shadow:0 3px 8px rgba(0,0,0,.9);`;
+    div.innerHTML = `<div class="eqcard-inner" style="margin:2px;"><span class="eq-icon" style="--eq-icon-url:url('img/icons/gun-solid-full.svg');width:10px;height:10px;margin:3px auto 2px;flex-shrink:0;"></span><div class="eqdivider" style="margin:0 2px"></div><div class="eqname" style="font-size:5px;padding:2px 2px 1px;line-height:1.2;">Shock Trap</div></div>`;
     fo.appendChild(div);
     g.appendChild(fo);
   }
   // Dropped fragments — amber ◈ tokens scattered on tile
-  if(t.droppedFragments>0){
-    const offsets=[[8,-14],[16,-8],[8,-2],[16,4],[12,10]];
-    for(let i=0;i<Math.min(t.droppedFragments,5);i++){
-      const[ox,oy]=offsets[i];
-      const tok=svgEl('text',{x:cx+ox,y:cy+oy,'text-anchor':'middle','font-family':'monospace','font-size':'11',fill:'#c87828',style:'filter:drop-shadow(0 0 3px rgba(200,120,40,0.8))','pointer-events':'none'});
-      tok.textContent='◈';
+  if (t.droppedFragments > 0) {
+    const offsets = [
+      [8, -14],
+      [16, -8],
+      [8, -2],
+      [16, 4],
+      [12, 10],
+    ];
+    for (let i = 0; i < Math.min(t.droppedFragments, 5); i++) {
+      const [ox, oy] = offsets[i];
+      const tok = svgEl("text", {
+        x: cx + ox,
+        y: cy + oy,
+        "text-anchor": "middle",
+        "font-family": "monospace",
+        "font-size": "11",
+        fill: "#c87828",
+        style: "filter:drop-shadow(0 0 3px rgba(200,120,40,0.8))",
+        "pointer-events": "none",
+      });
+      tok.textContent = "◈";
       g.appendChild(tok);
     }
   }
-  if(t.type==='crash_site'){
-    const icon=BASECAMP_ICON_MAP[t.name];
-    if(icon){
-      const filterId='basecamp-icon-tint';
-      const svgDefs=document.getElementById('bsvg').querySelector('defs');
-      if(!svgDefs.querySelector(`#${filterId}`)){
-        const filt=svgEl('filter',{id:filterId,x:'0',y:'0',width:'1',height:'1'});
-        const flood=svgEl('feFlood',{'flood-color':'#b2dbee',result:'color'});
-        const comp=svgEl('feComposite',{in:'color',in2:'SourceGraphic',operator:'in'});
-        filt.appendChild(flood);filt.appendChild(comp);
+  if (t.type === "crash_site") {
+    const icon = BASECAMP_ICON_MAP[t.name];
+    if (icon) {
+      const filterId = "basecamp-icon-tint";
+      const svgDefs = document.getElementById("bsvg").querySelector("defs");
+      if (!svgDefs.querySelector(`#${filterId}`)) {
+        const filt = svgEl("filter", {
+          id: filterId,
+          x: "0",
+          y: "0",
+          width: "1",
+          height: "1",
+        });
+        const flood = svgEl("feFlood", {
+          "flood-color": "#b2dbee",
+          result: "color",
+        });
+        const comp = svgEl("feComposite", {
+          in: "color",
+          in2: "SourceGraphic",
+          operator: "in",
+        });
+        filt.appendChild(flood);
+        filt.appendChild(comp);
         svgDefs.appendChild(filt);
       }
-      const sz=28;
-      g.appendChild(svgEl('image',{
-        href:`img/Icons/${icon}`,
-        x:cx-sz/2, y:cy-sz/2,
-        width:sz, height:sz,
-        opacity:'0.55',
-        filter:`url(#${filterId})`,
-        'pointer-events':'none',
-      }));
+      const sz = 28;
+      g.appendChild(
+        svgEl("image", {
+          href: `img/icons/${icon}`,
+          x: cx - sz / 2,
+          y: cy - sz / 2,
+          width: sz,
+          height: sz,
+          opacity: "0.55",
+          filter: `url(#${filterId})`,
+          "pointer-events": "none",
+        }),
+      );
     }
-    if(t.name==='Signal Array'&&G?.radioFragmentsActivated){
-      lbl(g,cx,cy+22,`${G.radioFragmentsActivated}/5`,'7','#60c040');
+    if (t.name === "Signal Array" && G?.radioFragmentsActivated) {
+      lbl(g, cx, cy + 22, `${G.radioFragmentsActivated}/5`, "7", "#60c040");
     }
   }
 }
 
-function drawTileLabel(){
+function drawTileLabel() {
   // no text labels on any tiles
 }
 
-function lbl(g,x,y,str,fs,fill,anchor){
-  const e=svgEl('text',{x,y,'text-anchor':anchor||'middle','font-family':'monospace','font-size':fs,fill,'pointer-events':'none'});
-  e.textContent=str;g.appendChild(e);}
+function lbl(g, x, y, str, fs, fill, anchor) {
+  const e = svgEl("text", {
+    x,
+    y,
+    "text-anchor": anchor || "middle",
+    "font-family": "monospace",
+    "font-size": fs,
+    fill,
+    "pointer-events": "none",
+  });
+  e.textContent = str;
+  g.appendChild(e);
+}
 
-function drawPawn(g,p){
-  const[cx,cy]=h2p(p.q,p.r);
-  const same=G.players.filter(x=>x.alive&&x.q===p.q&&x.r===p.r);
-  const idx=same.indexOf(p);
-  const ox=same.length>1?(idx-(same.length-1)/2)*14:0;
-  const px=cx+ox,py=cy+15;
-  if(p.id===G.currentPlayer){
-    if(!document.getElementById('beacon-style')){
-      const s=document.createElement('style');s.id='beacon-style';
-      s.textContent='@keyframes beacon{0%{r:13;opacity:.6;stroke-width:1.5}100%{r:26;opacity:0;stroke-width:.4}}';
+function drawPawn(g, p) {
+  const [cx, cy] = h2p(p.q, p.r);
+  const same = G.players.filter((x) => x.alive && x.q === p.q && x.r === p.r);
+  const idx = same.indexOf(p);
+  const ox = same.length > 1 ? (idx - (same.length - 1) / 2) * 14 : 0;
+  const px = cx + ox,
+    py = cy + 15;
+  if (p.id === G.currentPlayer) {
+    if (!document.getElementById("beacon-style")) {
+      const s = document.createElement("style");
+      s.id = "beacon-style";
+      s.textContent =
+        "@keyframes beacon{0%{r:13;opacity:.6;stroke-width:1.5}100%{r:26;opacity:0;stroke-width:.4}}";
       document.head.appendChild(s);
     }
-    const beacon=svgEl('circle',{cx:px,cy:py,r:13,fill:'none',stroke:p.color,'stroke-width':'1.5',opacity:'.6','pointer-events':'none'});
-    beacon.style.animation='beacon 1.6s ease-out infinite';
+    const beacon = svgEl("circle", {
+      cx: px,
+      cy: py,
+      r: 13,
+      fill: "none",
+      stroke: p.color,
+      "stroke-width": "1.5",
+      opacity: ".6",
+      "pointer-events": "none",
+    });
+    beacon.style.animation = "beacon 1.6s ease-out infinite";
     g.appendChild(beacon);
   }
-  const cid=`pc-${p.id}`;
-  const defs=document.getElementById('bsvg').querySelector('defs');
-  const existing=defs.querySelector(`#${cid}`);
-  if(existing)existing.remove();
-  const cp2=svgEl('clipPath',{id:cid});
-  cp2.appendChild(svgEl('circle',{cx:px,cy:py,r:11}));
+  const cid = `pc-${p.id}`;
+  const defs = document.getElementById("bsvg").querySelector("defs");
+  const existing = defs.querySelector(`#${cid}`);
+  if (existing) existing.remove();
+  const cp2 = svgEl("clipPath", { id: cid });
+  cp2.appendChild(svgEl("circle", { cx: px, cy: py, r: 11 }));
   defs.appendChild(cp2);
-  if(!defs.querySelector('#pawn-shadow')){
-    const filt=svgEl('filter',{id:'pawn-shadow',x:'-40%',y:'-40%',width:'180%',height:'180%'});
-    filt.appendChild(svgEl('feDropShadow',{dx:'0',dy:'1.5',stdDeviation:'2.5','flood-color':'#000','flood-opacity':'0.75'}));
+  if (!defs.querySelector("#pawn-shadow")) {
+    const filt = svgEl("filter", {
+      id: "pawn-shadow",
+      x: "-40%",
+      y: "-40%",
+      width: "180%",
+      height: "180%",
+    });
+    filt.appendChild(
+      svgEl("feDropShadow", {
+        dx: "0",
+        dy: "1.5",
+        stdDeviation: "2.5",
+        "flood-color": "#000",
+        "flood-opacity": "0.75",
+      }),
+    );
     defs.appendChild(filt);
   }
-  const imgEl=svgEl('image',{
-    href:p.isSynth?'img/Crew/IRIS_pawn.png':`img/Crew/${p.portrait}${Math.max(1,Math.min(3,p.health))}_pawn.png`,
-    x:px-11, y:py-11,
-    width:22, height:22,
-    'clip-path':`url(#${cid})`,
-    'pointer-events':'none',
-    preserveAspectRatio:'xMidYMin slice',
+  const imgEl = svgEl("image", {
+    href: p.isSynth
+      ? "img/crew/IRIS_pawn.png"
+      : `img/crew/${p.portrait}${Math.max(1, Math.min(3, p.health))}_pawn.png`,
+    x: px - 11,
+    y: py - 11,
+    width: 22,
+    height: 22,
+    "clip-path": `url(#${cid})`,
+    "pointer-events": "none",
+    preserveAspectRatio: "xMidYMin slice",
   });
-  const ringColor=p.isSynth&&p.corrupted?'#c04444':p.color;
-  const ringEl=svgEl('circle',{cx:px,cy:py,r:11,fill:'none',stroke:ringColor,'stroke-width':'1.8','pointer-events':'none'});
-  const pawnG=svgEl('g',{filter:'url(#pawn-shadow)'});
+  const ringColor = p.isSynth && p.corrupted ? "#c04444" : p.color;
+  const ringEl = svgEl("circle", {
+    cx: px,
+    cy: py,
+    r: 11,
+    fill: "none",
+    stroke: ringColor,
+    "stroke-width": "1.8",
+    "pointer-events": "none",
+  });
+  const pawnG = svgEl("g", { filter: "url(#pawn-shadow)" });
   pawnG.appendChild(imgEl);
   pawnG.appendChild(ringEl);
   g.appendChild(pawnG);
 }
 
-function onHexClick(q,r){
+function onHexClick(q, r) {
   cancelTooltip();
-  if(!G)return;
-  if(G.phase!=='move'&&G.phase!=='action')return;
-  if(!G.movementLeft)return;
-  const p=cp();if(q===p.q&&r===p.r)return;
-  if(!G.reach.has(hk(q,r)))return;
-  doMove(q,r);
+  if (!G) return;
+  if (G.phase !== "move" && G.phase !== "action") return;
+  if (!G.movementLeft) return;
+  const p = cp();
+  if (q === p.q && r === p.r) return;
+  if (!G.reach.has(hk(q, r))) return;
+  doMove(q, r);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // TOOLTIP  (1 second delay)
 // ═══════════════════════════════════════════════════════════════
-let tipTimer=null, tipMx=0, tipMy=0;
-function anyOverlayActive(){
-  return ['trov','eqdov','evc-ov','mov','trademodal'].some(id=>{
-    const el=document.getElementById(id);
-    return el&&(el.classList.contains('show')||el.style.display==='flex');
+let tipTimer = null,
+  tipMx = 0,
+  tipMy = 0;
+function anyOverlayActive() {
+  return ["trov", "eqdov", "evc-ov", "mov", "trademodal"].some((id) => {
+    const el = document.getElementById(id);
+    return el && (el.classList.contains("show") || el.style.display === "flex");
   });
 }
-function startTooltip(t,e){
-  if(anyOverlayActive())return;
-  tipMx=e.clientX;tipMy=e.clientY;
+function startTooltip(t, e) {
+  if (anyOverlayActive()) return;
+  tipMx = e.clientX;
+  tipMy = e.clientY;
   clearTimeout(tipTimer);
-  tipTimer=setTimeout(()=>{if(!anyOverlayActive())showHexTip(t);},1000);
-  document.getElementById('bsvg').addEventListener('mousemove',trackMouse,{passive:true});
+  tipTimer = setTimeout(() => {
+    if (!anyOverlayActive()) showHexTip(t);
+  }, 1000);
+  document
+    .getElementById("bsvg")
+    .addEventListener("mousemove", trackMouse, { passive: true });
 }
-function trackMouse(e){tipMx=e.clientX;tipMy=e.clientY;}
-function cancelTooltip(){clearTimeout(tipTimer);hideHexTip();}
-function hideHexTip(){
-  document.getElementById('htip').classList.remove('show');
-  document.getElementById('bsvg').removeEventListener('mousemove',trackMouse);
+function trackMouse(e) {
+  tipMx = e.clientX;
+  tipMy = e.clientY;
 }
-function showHexTip(t){
-  const tip=document.getElementById('htip');
-  let key=t.name||t.anomaly||t.type;
-  if(t.type==='ship_section')key='Ship Section';
-  if(t.type==='face_down')key='face_down';
-  const steps=TILE_TIPS[key]||[[0,'','Unknown terrain.']];
-  const title=t.name||(t.type==='anomaly'?t.anomaly:t.type==='ship_section'?'Ship Section':t.pois&&t.pois.length?t.pois.join(' · '):'Unknown');
-  document.getElementById('tiptit').textContent=title.toUpperCase();
-  const descSteps=steps.filter(([,cls])=>cls==='');
-  const actSteps=steps.filter(([,cls])=>cls!=='');
-  let tipDescText=t.type==='face_down'?'Face-down tile. Enter to reveal what lies ahead.':descSteps.map(([,,msg])=>msg).join('\n');
-  if(key==='Cargo Hold'&&G?.cargoHold!==undefined)tipDescText+=`\n\nContents: ${G.cargoHold} Food`;
-  document.getElementById('tipdesc').textContent=tipDescText;
-  const TOOL_NAMES={lockpick:'Lockpick',plasma_cutter:'Plasma Cutter',data_spike:'Data Spike'};
-  const toolNote=t.requiresTool&&(t.radioFragment||t.toolReward)?`\n*Requires ${TOOL_NAMES[t.requiresTool]||t.requiresTool}`:'';
-  document.getElementById('tipact').textContent=t.type==='face_down'?'':(actSteps.map(([,,msg])=>msg).join('\n')+toolNote);
+function cancelTooltip() {
+  clearTimeout(tipTimer);
+  hideHexTip();
+}
+function hideHexTip() {
+  document.getElementById("htip").classList.remove("show");
+  document.getElementById("bsvg").removeEventListener("mousemove", trackMouse);
+}
+function showHexTip(t) {
+  const tip = document.getElementById("htip");
+  let key = t.name || t.anomaly || t.type;
+  if (t.type === "ship_section") key = "Ship Section";
+  if (t.type === "face_down") key = "face_down";
+  const steps = TILE_TIPS[key] || [[0, "", "Unknown terrain."]];
+  const title =
+    t.name ||
+    (t.type === "anomaly"
+      ? t.anomaly
+      : t.type === "ship_section"
+        ? "Ship Section"
+        : t.pois && t.pois.length
+          ? t.pois.join(" · ")
+          : "Unknown");
+  document.getElementById("tiptit").textContent = title.toUpperCase();
+  const descSteps = steps.filter(([, cls]) => cls === "");
+  const actSteps = steps.filter(([, cls]) => cls !== "");
+  let tipDescText =
+    t.type === "face_down"
+      ? "Face-down tile. Enter to reveal what lies ahead."
+      : descSteps.map(([, , msg]) => msg).join("\n");
+  if (key === "Cargo Hold" && G?.cargoHold !== undefined)
+    tipDescText += `\n\nContents: ${G.cargoHold} Food`;
+  document.getElementById("tipdesc").textContent = tipDescText;
+  const TOOL_NAMES = {
+    lockpick: "Lockpick",
+    plasma_cutter: "Plasma Cutter",
+    data_spike: "Data Spike",
+  };
+  const toolNote =
+    t.requiresTool && (t.radioFragment || t.toolReward)
+      ? `\n*Requires ${TOOL_NAMES[t.requiresTool] || t.requiresTool}`
+      : "";
+  document.getElementById("tipact").textContent =
+    t.type === "face_down"
+      ? ""
+      : actSteps.map(([, , msg]) => msg).join("\n") + toolNote;
   // Hero image
-  const heroEl=document.getElementById('tip-hero-img');
-  const tImg=getTileImg(t);
-  if(tImg){
-    heroEl.style.backgroundImage=`url(${tImg})`;
-    heroEl.style.backgroundSize='cover';
-    heroEl.style.backgroundPosition='center';
-    heroEl.textContent='';
+  const heroEl = document.getElementById("tip-hero-img");
+  const tImg = getTileImg(t);
+  if (tImg) {
+    heroEl.style.backgroundImage = `url(${tImg})`;
+    heroEl.style.backgroundSize = "cover";
+    heroEl.style.backgroundPosition = "center";
+    heroEl.textContent = "";
   } else {
-    heroEl.style.backgroundImage='none';
-    heroEl.textContent='?';
+    heroEl.style.backgroundImage = "none";
+    heroEl.textContent = "?";
   }
   // Position — follow mouse, flip if near edges
-  const tw=460,th=130;
-  let tx=tipMx+16,ty=tipMy-th/2;
-  if(tx+tw>window.innerWidth-10)tx=tipMx-tw-16;
-  if(ty<8)ty=8;
-  if(ty+th>window.innerHeight-8)ty=window.innerHeight-th-8;
-  tip.style.left=tx+'px';tip.style.top=ty+'px';
-  tip.classList.add('show');
+  const tw = 460,
+    th = 130;
+  let tx = tipMx + 16,
+    ty = tipMy - th / 2;
+  if (tx + tw > window.innerWidth - 10) tx = tipMx - tw - 16;
+  if (ty < 8) ty = 8;
+  if (ty + th > window.innerHeight - 8) ty = window.innerHeight - th - 8;
+  tip.style.left = tx + "px";
+  tip.style.top = ty + "px";
+  tip.classList.add("show");
 }
 
-function startBuilderTooltip(info,e){
-  tipMx=e.clientX;tipMy=e.clientY;
+function startBuilderTooltip(info, e) {
+  tipMx = e.clientX;
+  tipMy = e.clientY;
   clearTimeout(tipTimer);
-  const fakeTile={name:info.name,type:'crash_site',q:info.q,r:info.r};
-  tipTimer=setTimeout(()=>showHexTip(fakeTile),600);
-  document.getElementById('sbsvg').addEventListener('mousemove',trackMouse,{passive:true});
+  const fakeTile = {
+    name: info.name,
+    type: "crash_site",
+    q: info.q,
+    r: info.r,
+  };
+  tipTimer = setTimeout(() => showHexTip(fakeTile), 600);
+  document
+    .getElementById("sbsvg")
+    .addEventListener("mousemove", trackMouse, { passive: true });
 }
-function cancelBuilderTooltip(){
+function cancelBuilderTooltip() {
   clearTimeout(tipTimer);
-  document.getElementById('htip').classList.remove('show');
-  document.getElementById('sbsvg').removeEventListener('mousemove',trackMouse);
+  document.getElementById("htip").classList.remove("show");
+  document.getElementById("sbsvg").removeEventListener("mousemove", trackMouse);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // HUD + UI UPDATE
 // ═══════════════════════════════════════════════════════════════
-function buildCrewTabs(){
-  const tabs=document.getElementById('hctabs');tabs.innerHTML='';
-  G.players.forEach(pl=>{
-    const t=document.createElement('div');
-    const isCurrent=pl.id===G.currentPlayer;
-    const isViewing=pl.id===viewedPlayer;
-    t.className='hctab'+(pl.extracted?' extracted':pl.alive?'':' dead');
-    t.style.cssText=`background-image:url(${pl.isSynth?'img/Crew/IRIS_dot.png':`img/Crew/${pl.portrait}${Math.max(1,Math.min(3,pl.health))}_dot.png`});background-size:cover;background-position:center top;`+
-      `border-color:${isCurrent?pl.color:isViewing?'rgba(255,255,255,.4)':'transparent'};`+
-      `box-shadow:${isCurrent?`0 0 0 1px ${pl.color}`:'none'};`+
-      `opacity:${pl.extracted?0.65:pl.alive?1:.3};`;
-    t.dataset.tooltip=pl.name+(isCurrent?' · Active':'')+(pl.extracted?' · Rescued':!pl.alive?' · Dead':pl.incapacitated?' · Incap':'');
-    if(pl.alive)t.onclick=()=>{viewedPlayer=pl.id;eqGalleryOffset=0;updateUI();};
+function buildCrewTabs() {
+  const tabs = document.getElementById("hctabs");
+  tabs.innerHTML = "";
+  G.players.forEach((pl) => {
+    const t = document.createElement("div");
+    const isCurrent = pl.id === G.currentPlayer;
+    const isViewing = pl.id === viewedPlayer;
+    t.className =
+      "hctab" + (pl.extracted ? " extracted" : pl.alive ? "" : " dead");
+    t.style.cssText =
+      `background-image:url(${pl.isSynth ? "img/crew/IRIS_dot.png" : `img/crew/${pl.portrait}${Math.max(1, Math.min(3, pl.health))}_dot.png`});background-size:cover;background-position:center top;` +
+      `border-color:${isCurrent ? pl.color : isViewing ? "rgba(255,255,255,.4)" : "transparent"};` +
+      `box-shadow:${isCurrent ? `0 0 0 1px ${pl.color}` : "none"};` +
+      `opacity:${pl.extracted ? 0.65 : pl.alive ? 1 : 0.3};`;
+    t.dataset.tooltip =
+      pl.name +
+      (isCurrent ? " · Active" : "") +
+      (pl.extracted
+        ? " · Rescued"
+        : !pl.alive
+          ? " · Dead"
+          : pl.incapacitated
+            ? " · Incap"
+            : "");
+    if (pl.alive)
+      t.onclick = () => {
+        viewedPlayer = pl.id;
+        eqGalleryOffset = 0;
+        updateUI();
+      };
     tabs.appendChild(t);
   });
 }
 
-function saveGame(){
-  if(!G)return;
-  try{
-    const n=G.players.length;
-    const pendingLogs=G._pendingLogs||[];
-    const s={
-      G:{...G,
-        tiles:Object.fromEntries(G.tiles),
-        reach:[],                          // transient — recalculated
-        terrainDeck:[...G.terrainDeck],
-        eqDeck:[...G.eqDeck],
-        evtDeck:G.evtDeck.map(c=>typeof c.text==='function'?{...c,text:c.text(n)}:c),
-        _pendingLogs:pendingLogs,
+function saveGame() {
+  if (!G) return;
+  try {
+    const n = G.players.length;
+    const pendingLogs = G._pendingLogs || [];
+    const s = {
+      G: {
+        ...G,
+        tiles: Object.fromEntries(G.tiles),
+        reach: [], // transient — recalculated
+        terrainDeck: [...G.terrainDeck],
+        eqDeck: [...G.eqDeck],
+        evtDeck: G.evtDeck.map((c) =>
+          typeof c.text === "function" ? { ...c, text: c.text(n) } : c,
+        ),
+        _pendingLogs: pendingLogs,
       },
-      cardUid,viewedPlayer,pendingNames,pendingPortraits
+      cardUid,
+      viewedPlayer,
+      pendingNames,
+      pendingPortraits,
     };
-    s.G.players=G.players.map(p=>({...p,equipment:[...p.equipment]}));
-    G._pendingLogs=[];  // reset after capture
-    localStorage.setItem('signal_save',JSON.stringify(s));
-    if(window.Sync?.isActive()) window.Sync.pushState(s);
-  }catch(e){console.error('[saveGame]',e);}
+    s.G.players = G.players.map((p) => ({ ...p, equipment: [...p.equipment] }));
+    G._pendingLogs = []; // reset after capture
+    localStorage.setItem("signal_save", JSON.stringify(s));
+    if (window.Sync?.isActive()) window.Sync.pushState(s);
+  } catch (e) {
+    console.error("[saveGame]", e);
+  }
 }
-function loadGame(){
-  try{
-    const raw=localStorage.getItem('signal_save');
-    if(!raw)return false;
-    const s=JSON.parse(raw);
-    const sg=s.G;
-    sg.tiles=new Map(Object.entries(sg.tiles||{}));
-    sg.reach=new Map();
-    G=sg;
-    cardUid=s.cardUid||0;
-    viewedPlayer=s.viewedPlayer||0;
-    pendingNames=s.pendingNames||[];
-    pendingPortraits=s.pendingPortraits||[];
+function loadGame() {
+  try {
+    const raw = localStorage.getItem("signal_save");
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    const sg = s.G;
+    sg.tiles = new Map(Object.entries(sg.tiles || {}));
+    sg.reach = new Map();
+    G = sg;
+    cardUid = s.cardUid || 0;
+    viewedPlayer = s.viewedPlayer || 0;
+    pendingNames = s.pendingNames || [];
+    pendingPortraits = s.pendingPortraits || [];
     return true;
-  }catch(e){return false;}
+  } catch (e) {
+    return false;
+  }
 }
-function clearSave(){localStorage.removeItem('signal_save');}
+function clearSave() {
+  localStorage.removeItem("signal_save");
+}
 
 // Applies a game state received from Firebase (remote player's turn ended)
-function receiveRemoteState(data){
-  try{
+function receiveRemoteState(data) {
+  try {
     window.Sync?.beginReceive();
     // Firebase converts every array to a numeric-keyed object; normalize them all back
-    const _fa=v=>{if(!v)return[];if(Array.isArray(v))return v;return Object.keys(v).sort((a,b)=>+a-+b).map(k=>v[k]);};
-    const sg=data.G;
-    sg.tiles=new Map(Object.entries(sg.tiles||{}));
-    sg.reach=new Map();
-    sg.terrainDeck=_fa(sg.terrainDeck);
-    sg.eqDeck=_fa(sg.eqDeck);
-    sg.evtDeck=_fa(sg.evtDeck);
-    sg.players=_fa(sg.players).map(p=>({...p,equipment:_fa(p.equipment)}));
-    const prevPlayer=G?.currentPlayer;
-    const prevPositions=G?.players?.map(p=>({q:p.q,r:p.r}))||[];
-    const prevFragments=G?.players?.map(p=>p.radioFragments)||[];
-    const incomingLogs=_fa(sg._pendingLogs);
+    const _fa = (v) => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v;
+      return Object.keys(v)
+        .sort((a, b) => +a - +b)
+        .map((k) => v[k]);
+    };
+    const sg = data.G;
+    sg.tiles = new Map(Object.entries(sg.tiles || {}));
+    sg.reach = new Map();
+    sg.terrainDeck = _fa(sg.terrainDeck);
+    sg.eqDeck = _fa(sg.eqDeck);
+    sg.evtDeck = _fa(sg.evtDeck);
+    sg.players = _fa(sg.players).map((p) => ({
+      ...p,
+      equipment: _fa(p.equipment),
+    }));
+    const prevPlayer = G?.currentPlayer;
+    const prevPositions = G?.players?.map((p) => ({ q: p.q, r: p.r })) || [];
+    const prevFragments = G?.players?.map((p) => p.radioFragments) || [];
+    const incomingLogs = _fa(sg._pendingLogs);
     delete sg._pendingLogs;
-    G=sg;
-    cardUid=data.cardUid||0;
-    const gameEl=document.getElementById('game');
-    const alreadyRunning=gameEl.className==='running';
-    if(alreadyRunning){
-      const turnChanged=prevPlayer!==G.currentPlayer;
-      if(turnChanged){
+    G = sg;
+    cardUid = data.cardUid || 0;
+    const gameEl = document.getElementById("game");
+    const alreadyRunning = gameEl.className === "running";
+    if (alreadyRunning) {
+      const turnChanged = prevPlayer !== G.currentPlayer;
+      if (turnChanged) {
         // Follow the active player only if we were already watching the previous active player
-        if(viewedPlayer===prevPlayer)viewedPlayer=G.currentPlayer;
-        eqGalleryOffset=0;
+        if (viewedPlayer === prevPlayer) viewedPlayer = G.currentPlayer;
+        eqGalleryOffset = 0;
       }
-      if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
+      if (G.phase === "move" && G.movementLeft > 0)
+        G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
       markTilesDirty();
-      render(); updateUI();
-      const myIdx=window.Sync?.myPlayerIndex()??-1;
-      G.players.forEach((p,i)=>{if(i===myIdx)return;const prev=prevPositions[i];if(prev&&(p.q!==prev.q||p.r!==prev.r))sfx('move');});
-      G.players.forEach((p,i)=>{if(i===myIdx)return;if(p.radioFragments>(prevFragments[i]||0))sfx('fragment');});
-      incomingLogs.forEach(({msg,cls})=>addLog(msg,cls));
-      if(turnChanged){
-        showTableDice('move');panToPlayer(cp());
+      render();
+      updateUI();
+      const myIdx = window.Sync?.myPlayerIndex() ?? -1;
+      G.players.forEach((p, i) => {
+        if (i === myIdx) return;
+        const prev = prevPositions[i];
+        if (prev && (p.q !== prev.q || p.r !== prev.r)) sfx("move");
+      });
+      G.players.forEach((p, i) => {
+        if (i === myIdx) return;
+        if (p.radioFragments > (prevFragments[i] || 0)) sfx("fragment");
+      });
+      incomingLogs.forEach(({ msg, cls }) => addLog(msg, cls));
+      if (turnChanged) {
+        showTableDice("move");
+        panToPlayer(cp());
         // If it's now IRIS's turn, only the host runs the AI
-        if(G.players[G.currentPlayer]?.isSynth&&window.Sync?.myPlayerIndex()===0){
-          setTimeout(doSynthTurn,1800);
+        if (
+          G.players[G.currentPlayer]?.isSynth &&
+          window.Sync?.myPlayerIndex() === 0
+        ) {
+          setTimeout(doSynthTurn, 1800);
         }
+      } else if (G.phase === "action") {
+        hideTableDice();
       }
-      else if(G.phase==='action'){hideTableDice();}
     } else {
       // First state received: joiner launches the game view
-      _builderReadOnly=false;
-      document.getElementById('sbpanel').style.display='';
-      document.getElementById('online-lobby').style.display='none';
-      document.getElementById('setup').style.display='none';
-      document.getElementById('setup-site').style.display='none';
-      document.getElementById('intro').style.display='none';
-      gameEl.className='running';
-      const idx=window.Sync?.myPlayerIndex()||0;
-      viewedPlayer=Math.min(idx,G.players.length-1);
-      preloadTileImages(); initBoard();
-      if(G.phase==='move'&&G.movementLeft>0) G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
-      markTilesDirty(); render(); updateUI();
-      showTableDice('move');
-      document.getElementById('e7panel').classList.add('show');
-      const myName=G.players[idx]?.name||'crew';
+      _builderReadOnly = false;
+      document.getElementById("sbpanel").style.display = "";
+      document.getElementById("online-lobby").style.display = "none";
+      document.getElementById("setup").style.display = "none";
+      document.getElementById("setup-site").style.display = "none";
+      document.getElementById("intro").style.display = "none";
+      gameEl.className = "running";
+      const idx = window.Sync?.myPlayerIndex() || 0;
+      viewedPlayer = Math.min(idx, G.players.length - 1);
+      preloadTileImages();
+      initBoard();
+      if (G.phase === "move" && G.movementLeft > 0)
+        G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
+      markTilesDirty();
+      render();
+      updateUI();
+      showTableDice("move");
+      document.getElementById("e7panel").classList.add("show");
+      const myName = G.players[idx]?.name || "crew";
       e7Seq([
-        [0,   'sys',  '> MISSION CONTROLS'],
-        [0,   'div',  null],
-        [0,   '',     'Left-click — Interact'],
-        [0,   '',     'Right-click — Pan'],
-        [0,   '',     'Scroll wheel — Zoom'],
-        [0,   'div',  null],
-        [0,   'sys',  '> MISSION BRIEFING'],
-        [0,   '',     'Find RADIO FRAGMENTS to activate the SIGNAL ARRAY.'],
-        [0,   '',     'RESOURCES deplete every turn. Return to base camp to refuel.'],
-        [0,   'div',  null],
-        [0,   'sys',  `> ONLINE SESSION CONNECTED. You are ${myName}.`],
-        [0,   'sys',  `Turn ${G.turn}: ${cp().name}. ${cp().name===myName?'Roll for movement.':'Waiting for '+cp().name+' to move.'}`],
+        [0, "sys", "> MISSION CONTROLS"],
+        [0, "div", null],
+        [0, "", "Left-click — Interact"],
+        [0, "", "Right-click — Pan"],
+        [0, "", "Scroll wheel — Zoom"],
+        [0, "div", null],
+        [0, "sys", "> MISSION BRIEFING"],
+        [0, "", "Find RADIO FRAGMENTS to activate the SIGNAL ARRAY."],
+        [0, "", "RESOURCES deplete every turn. Return to base camp to refuel."],
+        [0, "div", null],
+        [0, "sys", `> ONLINE SESSION CONNECTED. You are ${myName}.`],
+        [
+          0,
+          "sys",
+          `Turn ${G.turn}: ${cp().name}. ${cp().name === myName ? "Roll for movement." : "Waiting for " + cp().name + " to move."}`,
+        ],
       ]);
       _maybeTourPrompt();
     }
     _updateMpBadge();
-  }catch(e){console.error('receiveRemoteState',e);}
-  finally{window.Sync?.endReceive();}
-}
-
-function _updateMpBadge(){
-  const badge=document.getElementById('mp-badge');
-  if(!badge) return;
-  if(window.Sync?.isActive()){
-    badge.textContent=`ONLINE · ${window.Sync.joinCode()}`;
-    badge.dataset.tooltip=`Online game · Join code: ${window.Sync.joinCode()}`;
-    badge.classList.add('active');
-  } else {
-    badge.classList.remove('active');
+  } catch (e) {
+    console.error("receiveRemoteState", e);
+  } finally {
+    window.Sync?.endReceive();
   }
 }
 
-function confirmNewGame(){
-  let countdownInterval=null;
-  const doNewGame=()=>{clearInterval(countdownInterval);clearSave();window.Sync?.clearSession();location.reload()};
-  const doAbort=()=>{clearInterval(countdownInterval);};
-  showModal('SELF-DESTRUCT','',true,doNewGame,'Self-destruct',doAbort,'Abort','<div id="ng-e7log" class="mov-e7log"></div>','dng');
-  e7ScreenSeq('ng-e7log',[
-    [0,   'crit','> SELF-DESTRUCT SEQUENCE INITIATED.'],
-    [600, '',    'This ship will self-destruct in:'],
-  ],14);
-  const introMs=(37+32)*14+700;
-  setTimeout(()=>{
-    const container=document.getElementById('ng-e7log');
-    if(!container)return;
-    const el=document.createElement('div');
-    el.className='e7m crit';
-    let count=10;
-    el.textContent=String(count);
-    container.appendChild(el);
-    container.scrollTop=container.scrollHeight;
-    countdownInterval=setInterval(()=>{
-      count--;
-      if(count>0){
-        el.textContent=String(count);
-      } else {
-        el.textContent='> DETONATION IMMINENT.';
-        clearInterval(countdownInterval);
-        setTimeout(doNewGame,1200);
-      }
-    },900);
-  },introMs);
+function _updateMpBadge() {
+  const badge = document.getElementById("mp-badge");
+  if (!badge) return;
+  if (window.Sync?.isActive()) {
+    badge.textContent = `ONLINE · ${window.Sync.joinCode()}`;
+    badge.dataset.tooltip = `Online game · Join code: ${window.Sync.joinCode()}`;
+    badge.classList.add("active");
+  } else {
+    badge.classList.remove("active");
+  }
 }
-function updateUI(){
-  if(!G)return;
-  if(cp().health>1&&!_alarmCrit.paused){_alarmCrit.pause();_alarmCrit.currentTime=0;}
-  saveGame();
-  const p=cp();                          // active player (actions)
-  const v=G.players[viewedPlayer]||p;   // viewed player (card display)
-  document.getElementById('hturn').textContent=`Turn ${G.turn} · ${p.name}`;
-  const ph=document.getElementById('hphase');
-  const PHM={
-    roll:   ['Roll','ph-roll','Roll the die to determine how many hexes you can move this turn.'],
-    move:   ['Move','ph-move',`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — click a highlighted hex to move.`],
-    action: ['Action','ph-act',`You are at ${p.location}. Take an action or end your turn.`],
-    stasis: ['Stasis','ph-roll','In stasis — resource depletion suspended. Stay another round or leave to act.'],
-    over:   ['Rescued','ph-act','The crew has been rescued.'],
+
+function confirmNewGame() {
+  let countdownInterval = null;
+  const doNewGame = () => {
+    clearInterval(countdownInterval);
+    clearSave();
+    window.Sync?.clearSession();
+    location.reload();
   };
-  const[pt,pc,ptip]=PHM[G.phase]||['—','',''];
-  ph.textContent=pt;ph.className=`hphase ${pc}`;ph.dataset.tooltip=ptip;
-  const frags=G.radioFragmentsActivated,THR=[null,18,16,14,12,10];
-  const anyFragsHeld=G.players.some(pl=>pl.radioFragments>0);
-  let missionHtml;
-  if(frags>0){
-    missionHtml=`Roll Rescue Signal <span class="hmission-sep">·</span> <span class="hmission-frags">${frags}/5 activated · Threshold: ${THR[frags]}+</span>`;
-  } else if(anyFragsHeld){
-    missionHtml=`Activate Fragments at Signal Array <span class="hmission-sep">·</span> <span class="hmission-offline">Signal Offline</span>`;
-  } else {
-    missionHtml=`Collect Radio Fragments <span class="hmission-sep">·</span> <span class="hmission-offline">Signal Offline</span>`;
+  const doAbort = () => {
+    clearInterval(countdownInterval);
+  };
+  showModal(
+    "SELF-DESTRUCT",
+    "",
+    true,
+    doNewGame,
+    "Self-destruct",
+    doAbort,
+    "Abort",
+    '<div id="ng-e7log" class="mov-e7log"></div>',
+    "dng",
+  );
+  e7ScreenSeq(
+    "ng-e7log",
+    [
+      [0, "crit", "> SELF-DESTRUCT SEQUENCE INITIATED."],
+      [600, "", "This ship will self-destruct in:"],
+    ],
+    14,
+  );
+  const introMs = (37 + 32) * 14 + 700;
+  setTimeout(() => {
+    const container = document.getElementById("ng-e7log");
+    if (!container) return;
+    const el = document.createElement("div");
+    el.className = "e7m crit";
+    let count = 10;
+    el.textContent = String(count);
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+    countdownInterval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        el.textContent = String(count);
+      } else {
+        el.textContent = "> DETONATION IMMINENT.";
+        clearInterval(countdownInterval);
+        setTimeout(doNewGame, 1200);
+      }
+    }, 900);
+  }, introMs);
+}
+function updateUI() {
+  if (!G) return;
+  if (cp().health > 1 && !_alarmCrit.paused) {
+    _alarmCrit.pause();
+    _alarmCrit.currentTime = 0;
   }
-  document.getElementById('hmission').innerHTML=missionHtml;
+  saveGame();
+  const p = cp(); // active player (actions)
+  const v = G.players[viewedPlayer] || p; // viewed player (card display)
+  document.getElementById("hturn").textContent = `Turn ${G.turn} · ${p.name}`;
+  const ph = document.getElementById("hphase");
+  const PHM = {
+    roll: [
+      "Roll",
+      "ph-roll",
+      "Roll the die to determine how many hexes you can move this turn.",
+    ],
+    move: [
+      "Move",
+      "ph-move",
+      `${G.movementLeft} step${G.movementLeft !== 1 ? "s" : ""} remaining — click a highlighted hex to move.`,
+    ],
+    action: [
+      "Action",
+      "ph-act",
+      `You are at ${p.location}. Take an action or end your turn.`,
+    ],
+    stasis: [
+      "Stasis",
+      "ph-roll",
+      "In stasis — resource depletion suspended. Stay another round or leave to act.",
+    ],
+    over: ["Rescued", "ph-act", "The crew has been rescued."],
+  };
+  const [pt, pc, ptip] = PHM[G.phase] || ["—", "", ""];
+  ph.textContent = pt;
+  ph.className = `hphase ${pc}`;
+  ph.dataset.tooltip = ptip;
+  const frags = G.radioFragmentsActivated,
+    THR = [null, 18, 16, 14, 12, 10];
+  const anyFragsHeld = G.players.some((pl) => pl.radioFragments > 0);
+  let missionHtml;
+  if (frags > 0) {
+    missionHtml = `Roll Rescue Signal <span class="hmission-sep">·</span> <span class="hmission-frags">${frags}/5 activated · Threshold: ${THR[frags]}+</span>`;
+  } else if (anyFragsHeld) {
+    missionHtml = `Activate Fragments at Signal Array <span class="hmission-sep">·</span> <span class="hmission-offline">Signal Offline</span>`;
+  } else {
+    missionHtml = `Collect Radio Fragments <span class="hmission-sep">·</span> <span class="hmission-offline">Signal Offline</span>`;
+  }
+  document.getElementById("hmission").innerHTML = missionHtml;
   // Card shows viewed player
-  document.getElementById('hcimg').style.cssText=`background-image:url(${v.isSynth?'img/Crew/IRIS.png':`img/Crew/${v.portrait}${Math.max(1,Math.min(3,v.health))}.png`});background-size:cover;background-position:center top;width:100%;height:100%;`;
-  document.getElementById('hcname').textContent=v.name;
-  document.getElementById('hcname').style.color=v.color;
-  document.getElementById('hcloc').textContent=v.location;
-  if(v.isSynth){
-    const fl=document.getElementById('hud-res-food-lbl');if(fl)fl.textContent='Battery';
-    buildTokGrid('htr',v.battery,10,'hf','he',2,5);
-    const o2el=document.getElementById('hud-res-o2');if(o2el)o2el.style.display='none';
-    const hel=document.getElementById('hud-res-health');if(hel)hel.style.display='none';
-  }else{
-    const fl=document.getElementById('hud-res-food-lbl');if(fl)fl.textContent='Food';
-    buildTokGrid('htr',v.food,Math.max(5,Math.ceil(v.food/5)*5),'rf','re',3,5);
-    const o2el=document.getElementById('hud-res-o2');if(o2el)o2el.style.display='';
-    const hel=document.getElementById('hud-res-health');if(hel)hel.style.display='';
-    buildTokRow('hto',v.o2,3,'of','oe');
-    buildTokRow('hth',v.health,3,'hf','he');
+  document.getElementById("hcimg").style.cssText =
+    `background-image:url(${v.isSynth ? "img/crew/IRIS.png" : `img/crew/${v.portrait}${Math.max(1, Math.min(3, v.health))}.png`});background-size:cover;background-position:center top;width:100%;height:100%;`;
+  document.getElementById("hcname").textContent = v.name;
+  document.getElementById("hcname").style.color = v.color;
+  document.getElementById("hcloc").textContent = v.location;
+  if (v.isSynth) {
+    const fl = document.getElementById("hud-res-food-lbl");
+    if (fl) fl.textContent = "Battery";
+    buildTokGrid("htr", v.battery, 10, "hf", "he", 2, 5);
+    const o2el = document.getElementById("hud-res-o2");
+    if (o2el) o2el.style.display = "none";
+    const hel = document.getElementById("hud-res-health");
+    if (hel) hel.style.display = "none";
+  } else {
+    const fl = document.getElementById("hud-res-food-lbl");
+    if (fl) fl.textContent = "Food";
+    buildTokGrid(
+      "htr",
+      v.food,
+      Math.max(5, Math.ceil(v.food / 5) * 5),
+      "rf",
+      "re",
+      3,
+      5,
+    );
+    const o2el = document.getElementById("hud-res-o2");
+    if (o2el) o2el.style.display = "";
+    const hel = document.getElementById("hud-res-health");
+    if (hel) hel.style.display = "";
+    buildTokRow("hto", v.o2, 3, "of", "oe");
+    buildTokRow("hth", v.health, 3, "hf", "he");
   }
   // Pulse at-risk resources for the active player during their turn
-  if(v.id===G.currentPlayer&&G.phase!=='over'&&v.isSynth&&v.battery>0){
-    const btoks=document.getElementById('htr').querySelectorAll('.tok.hf');
-    if(btoks.length){const last=btoks[btoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — will deplete at end of turn';}
+  if (
+    v.id === G.currentPlayer &&
+    G.phase !== "over" &&
+    v.isSynth &&
+    v.battery > 0
+  ) {
+    const btoks = document.getElementById("htr").querySelectorAll(".tok.hf");
+    if (btoks.length) {
+      const last = btoks[btoks.length - 1];
+      last.classList.add("tok-pulse");
+      last.dataset.tooltip = "In use — will deplete at end of turn";
+    }
   }
-  if(v.id===G.currentPlayer&&G.phase!=='over'&&!v.inStasis&&!v.isSynth){
-    const onBase=G.tiles.get(hk(v.q,v.r))?.type==='crash_site';
+  if (
+    v.id === G.currentPlayer &&
+    G.phase !== "over" &&
+    !v.inStasis &&
+    !v.isSynth
+  ) {
+    const onBase = G.tiles.get(hk(v.q, v.r))?.type === "crash_site";
     // Food always ticks (if food>0, last full token pulses; if food=0, first health token pulses)
-    if(v.food>0){
-      const ftoks=document.getElementById('htr').querySelectorAll('.tok.rf');
-      if(ftoks.length){const last=ftoks[ftoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — will deplete at end of turn';}
-    } else if(v.health>0){
-      const htoks=document.getElementById('hth').querySelectorAll('.tok.hf');
-      if(htoks.length){const last=htoks[htoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — no food remaining, Health will deplete';}
+    if (v.food > 0) {
+      const ftoks = document.getElementById("htr").querySelectorAll(".tok.rf");
+      if (ftoks.length) {
+        const last = ftoks[ftoks.length - 1];
+        last.classList.add("tok-pulse");
+        last.dataset.tooltip = "In use — will deplete at end of turn";
+      }
+    } else if (v.health > 0) {
+      const htoks = document.getElementById("hth").querySelectorAll(".tok.hf");
+      if (htoks.length) {
+        const last = htoks[htoks.length - 1];
+        last.classList.add("tok-pulse");
+        last.dataset.tooltip =
+          "In use — no food remaining, Health will deplete";
+      }
     }
     // O2 ticks if in field and not skipping this turn
-    const hasRebreather=v.equipment.some(c=>c.id==='rebreather');
-    const o2WillTick=!onBase&&!v.skipO2&&(!hasRebreather||!v.rebreatherCycle);
-    if(o2WillTick&&v.o2>0){
-      const otoks=document.getElementById('hto').querySelectorAll('.tok.of');
-      if(otoks.length){const last=otoks[otoks.length-1];last.classList.add('tok-pulse');last.dataset.tooltip='In use — will deplete at end of turn';}
+    const hasRebreather = v.equipment.some((c) => c.id === "rebreather");
+    const o2WillTick =
+      !onBase && !v.skipO2 && (!hasRebreather || !v.rebreatherCycle);
+    if (o2WillTick && v.o2 > 0) {
+      const otoks = document.getElementById("hto").querySelectorAll(".tok.of");
+      if (otoks.length) {
+        const last = otoks[otoks.length - 1];
+        last.classList.add("tok-pulse");
+        last.dataset.tooltip = "In use — will deplete at end of turn";
+      }
     }
   }
-  const fragRow=document.getElementById('hud-frags');
-  const fragEl=document.getElementById('htfrag');
-  if(v.radioFragments>0){
-    fragRow.style.display='';
-    fragEl.innerHTML='';
-    for(let i=0;i<v.radioFragments;i++){const s=document.createElement('span');s.className='frag-tok';s.textContent='◈';fragEl.appendChild(s);}
+  const fragRow = document.getElementById("hud-frags");
+  const fragEl = document.getElementById("htfrag");
+  if (v.radioFragments > 0) {
+    fragRow.style.display = "";
+    fragEl.innerHTML = "";
+    for (let i = 0; i < v.radioFragments; i++) {
+      const s = document.createElement("span");
+      s.className = "frag-tok";
+      s.textContent = "◈";
+      fragEl.appendChild(s);
+    }
   } else {
-    fragRow.style.display='none';
+    fragRow.style.display = "none";
   }
   buildEqHand(v);
   buildCrewTabs();
   // Actions always tied to active player
-  document.getElementById('bend').disabled=G.phase==='roll'||G.phase==='stasis'||G.phase==='over';
-  const isStasisTurn=G.phase==='stasis'&&p.inStasis;
-  document.getElementById('bstay').style.display=isStasisTurn?'':'none';
-  document.getElementById('bleave').style.display=isStasisTurn?'':'none';
-  const t=G.tiles.get(hk(p.q,p.r));
-  const act=G.phase==='action';
-  const actOrMove=act||G.phase==='move';
-  const atArr=t?.name==='Signal Array';
-  const show=v=>v?'':'none';
-  document.getElementById('bequip').style.display=  show(t?.name==='Equipment Locker');
-  document.getElementById('bcargo').style.display=  show(t?.name==='Cargo Hold');
-  document.getElementById('bwatch').style.display=  show(t?.name==='Watch Tower');
-  document.getElementById('bequip').disabled=  !(actOrMove&&t?.name==='Equipment Locker'&&!G.tileActionUsed);
-  document.getElementById('bcargo').disabled=  !(actOrMove&&t?.name==='Cargo Hold');
-  document.getElementById('bwatch').disabled=  !(actOrMove&&t?.name==='Watch Tower');
-  document.getElementById('bfrag').style.display= show(atArr);
-  document.getElementById('bsig').style.display=  show(atArr);
-  document.getElementById('bfrag').disabled=!(act&&atArr&&p.radioFragments>0&&G.radioFragmentsActivated<5);
-  document.getElementById('bsig').disabled=!((act||G.phase==='move')&&atArr&&G.radioFragmentsActivated>0&&!G.signalRolled);
-  const hereOthers=G.players.filter(x=>x.alive&&x.id!==p.id&&x.q===p.q&&x.r===p.r);
-  const trdEnabled=(act||G.phase==='move')&&hereOthers.length>0;
-  document.getElementById('btrd').disabled=!trdEnabled;
-  document.getElementById('btrd').dataset.tooltip=trdEnabled?'Trade resources and equipment with crew on your tile':'Another crew member must be on your tile to trade';
-  const _iris=G.players.find(x=>x.isSynth&&x.alive);
-  const _irisHere=_iris&&!p.isSynth&&_iris.q===p.q&&_iris.r===p.r;
-  const _birisBtn=document.getElementById('biris');
-  if(_birisBtn){_birisBtn.style.display=show(!!_irisHere);_birisBtn.disabled=!(actOrMove&&_irisHere);_birisBtn.textContent=_iris?.deactivated?'Reactivate IRIS':'Deactivate IRIS';}
-  const equpnEl=document.getElementById('equpn');if(equpnEl)equpnEl.textContent=G.eqDeckCount;
-  const evtnEl=document.getElementById('evtn');if(evtnEl)evtnEl.textContent=G.evtDeckCount;
+  document.getElementById("bend").disabled =
+    G.phase === "roll" || G.phase === "stasis" || G.phase === "over";
+  const isStasisTurn = G.phase === "stasis" && p.inStasis;
+  document.getElementById("bstay").style.display = isStasisTurn ? "" : "none";
+  document.getElementById("bleave").style.display = isStasisTurn ? "" : "none";
+  const t = G.tiles.get(hk(p.q, p.r));
+  const act = G.phase === "action";
+  const actOrMove = act || G.phase === "move";
+  const atArr = t?.name === "Signal Array";
+  const show = (v) => (v ? "" : "none");
+  document.getElementById("bequip").style.display = show(
+    t?.name === "Equipment Locker",
+  );
+  document.getElementById("bcargo").style.display = show(
+    t?.name === "Cargo Hold",
+  );
+  document.getElementById("bwatch").style.display = show(
+    t?.name === "Watch Tower",
+  );
+  document.getElementById("bequip").disabled = !(
+    actOrMove &&
+    t?.name === "Equipment Locker" &&
+    !G.tileActionUsed
+  );
+  document.getElementById("bcargo").disabled = !(
+    actOrMove && t?.name === "Cargo Hold"
+  );
+  document.getElementById("bwatch").disabled = !(
+    actOrMove && t?.name === "Watch Tower"
+  );
+  document.getElementById("bfrag").style.display = show(atArr);
+  document.getElementById("bsig").style.display = show(atArr);
+  document.getElementById("bfrag").disabled = !(
+    act &&
+    atArr &&
+    p.radioFragments > 0 &&
+    G.radioFragmentsActivated < 5
+  );
+  document.getElementById("bsig").disabled = !(
+    (act || G.phase === "move") &&
+    atArr &&
+    G.radioFragmentsActivated > 0 &&
+    !G.signalRolled
+  );
+  const hereOthers = G.players.filter(
+    (x) => x.alive && x.id !== p.id && x.q === p.q && x.r === p.r,
+  );
+  const trdEnabled = (act || G.phase === "move") && hereOthers.length > 0;
+  document.getElementById("btrd").disabled = !trdEnabled;
+  document.getElementById("btrd").dataset.tooltip = trdEnabled
+    ? "Trade resources and equipment with crew on your tile"
+    : "Another crew member must be on your tile to trade";
+  const _iris = G.players.find((x) => x.isSynth && x.alive);
+  const _irisHere = _iris && !p.isSynth && _iris.q === p.q && _iris.r === p.r;
+  const _birisBtn = document.getElementById("biris");
+  if (_birisBtn) {
+    _birisBtn.style.display = show(!!_irisHere);
+    _birisBtn.disabled = !(actOrMove && _irisHere);
+    _birisBtn.textContent = _iris?.deactivated
+      ? "Reactivate IRIS"
+      : "Deactivate IRIS";
+  }
+  const equpnEl = document.getElementById("equpn");
+  if (equpnEl) equpnEl.textContent = G.eqDeckCount;
+  const evtnEl = document.getElementById("evtn");
+  if (evtnEl) evtnEl.textContent = G.evtDeckCount;
   updateE7Prompt();
   // In online mode, lock all actions when it's not this player's turn
-  if(!isMyTurn()){
-    ['bend','bequip','bcargo','bwatch','bfrag','bsig','btrd','biris'].forEach(id=>{
-      const b=document.getElementById(id);if(b)b.disabled=true;
+  if (!isMyTurn()) {
+    [
+      "bend",
+      "bequip",
+      "bcargo",
+      "bwatch",
+      "bfrag",
+      "bsig",
+      "btrd",
+      "biris",
+    ].forEach((id) => {
+      const b = document.getElementById(id);
+      if (b) b.disabled = true;
     });
   }
 }
 
-function buildTokGrid(id,full,total,fc,ec,rows,cols){
-  const c=document.getElementById(id);c.innerHTML='';
-  for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;c.appendChild(s);}
+function buildTokGrid(id, full, total, fc, ec, rows, cols) {
+  const c = document.getElementById(id);
+  c.innerHTML = "";
+  for (let i = 0; i < total; i++) {
+    const s = document.createElement("span");
+    s.className = `tok ${i < full ? fc : ec}`;
+    c.appendChild(s);
+  }
 }
-function buildTokRow(id,full,total,fc,ec){
-  const c=document.getElementById(id);c.innerHTML='';
-  for(let i=0;i<total;i++){const s=document.createElement('span');s.className=`tok ${i<full?fc:ec}`;c.appendChild(s);}
+function buildTokRow(id, full, total, fc, ec) {
+  const c = document.getElementById(id);
+  c.innerHTML = "";
+  for (let i = 0; i < total; i++) {
+    const s = document.createElement("span");
+    s.className = `tok ${i < full ? fc : ec}`;
+    c.appendChild(s);
+  }
 }
-let eqGalleryOffset=0;
-let eqFilter=null;
-function toggleEqFilter(cat){
-  eqFilter=eqFilter===cat?null:cat;
-  eqGalleryOffset=0;
-  const cats=['Tool','Supply','Tech','Weapon','Event'];
-  cats.forEach(c=>{
-    const btn=document.getElementById('eq-filt-'+c);
-    if(btn)btn.classList.toggle('active',eqFilter===c);
+let eqGalleryOffset = 0;
+let eqFilter = null;
+function toggleEqFilter(cat) {
+  eqFilter = eqFilter === cat ? null : cat;
+  eqGalleryOffset = 0;
+  const cats = ["Tool", "Supply", "Tech", "Weapon", "Event"];
+  cats.forEach((c) => {
+    const btn = document.getElementById("eq-filt-" + c);
+    if (btn) btn.classList.toggle("active", eqFilter === c);
   });
-  buildEqHand(G.players[viewedPlayer]||cp());
+  buildEqHand(G.players[viewedPlayer] || cp());
 }
-function filteredEq(equipment){
-  if(!eqFilter)return equipment;
-  if(eqFilter==='Event')return equipment.filter(e=>!!e.eventCard);
-  return equipment.filter(e=>e.cat===eqFilter);
+function filteredEq(equipment) {
+  if (!eqFilter) return equipment;
+  if (eqFilter === "Event") return equipment.filter((e) => !!e.eventCard);
+  return equipment.filter((e) => e.cat === eqFilter);
 }
-function eqNav(dir){
-  const v=G.players[viewedPlayer]||cp();
-  const total=filteredEq(v.equipment).length;
-  eqGalleryOffset=Math.max(0,Math.min(Math.max(0,total-3),eqGalleryOffset+dir));
+function eqNav(dir) {
+  const v = G.players[viewedPlayer] || cp();
+  const total = filteredEq(v.equipment).length;
+  eqGalleryOffset = Math.max(
+    0,
+    Math.min(Math.max(0, total - 3), eqGalleryOffset + dir),
+  );
   buildEqHand(v);
 }
-const CAT_ICONS={Tool:'wrench-solid-full.svg',Supply:'cubes-solid-full.svg',Tech:'microchip-solid-full.svg',Weapon:'gun-solid-full.svg'};
-function catIconStyle(cat){const f=CAT_ICONS[cat];return f?`style="--eq-icon-url:url('img/Icons/${f}')"`:'';
+const CAT_ICONS = {
+  Tool: "wrench-solid-full.svg",
+  Supply: "cubes-solid-full.svg",
+  Tech: "microchip-solid-full.svg",
+  Weapon: "gun-solid-full.svg",
+};
+function catIconStyle(cat) {
+  const f = CAT_ICONS[cat];
+  return f ? `style="--eq-icon-url:url('img/icons/${f}')"` : "";
 }
-function cardFaceHTML(cat,name,txt,brand='◆  SIGNAL  ◆'){
-  const iconHtml=CAT_ICONS[cat]?`<span class="eq-icon" ${catIconStyle(cat)}></span>`:'';
+function cardFaceHTML(cat, name, txt, brand = "◆  SIGNAL  ◆") {
+  const iconHtml = CAT_ICONS[cat]
+    ? `<span class="eq-icon" ${catIconStyle(cat)}></span>`
+    : "";
   return `<div class="eqcard-inner">
     ${iconHtml}
     <div class="eqdivider"></div>
@@ -3404,308 +6735,510 @@ function cardFaceHTML(cat,name,txt,brand='◆  SIGNAL  ◆'){
     <div class="eqbrand">${brand}</div>
   </div>`;
 }
-function buildEqHand(p){
-  const hand=document.getElementById('eqhand');hand.innerHTML='';
-  const all=filteredEq(p.equipment);
-  const max=Math.max(0,all.length-3);
-  if(eqGalleryOffset>max)eqGalleryOffset=max;
-  for(let i=0;i<3;i++){
-    const c=all[eqGalleryOffset+i];
-    const d=document.createElement('div');
-    if(!c){d.className='eqcard empty';hand.appendChild(d);continue;}
-    if(c.eventCard){
-      d.className='eqcard eqcard-event-priv';
-      d.dataset.uid=c.uid;
-      if(c.uid===selectedCardUid)d.classList.add('selected');
-      d.innerHTML=`<div class="eqcard-inner eqcard-event-back"><span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/person-solid-full.svg')"></span><div class="eqcard-event-back-lbl">PRIVATE<br>EVENT</div></div>`;
-      d.onclick=()=>{sfx('select');selectedCardUid=c.uid;showEventCard(c.eventCard,null,()=>{selectedCardUid=null;updateUI();},null,true);};
+function buildEqHand(p) {
+  const hand = document.getElementById("eqhand");
+  hand.innerHTML = "";
+  const all = filteredEq(p.equipment);
+  const max = Math.max(0, all.length - 3);
+  if (eqGalleryOffset > max) eqGalleryOffset = max;
+  for (let i = 0; i < 3; i++) {
+    const c = all[eqGalleryOffset + i];
+    const d = document.createElement("div");
+    if (!c) {
+      d.className = "eqcard empty";
+      hand.appendChild(d);
+      continue;
+    }
+    if (c.eventCard) {
+      d.className = "eqcard eqcard-event-priv";
+      d.dataset.uid = c.uid;
+      if (c.uid === selectedCardUid) d.classList.add("selected");
+      d.innerHTML = `<div class="eqcard-inner eqcard-event-back"><span class="evc-cat-icon" style="--eq-icon-url:url('img/icons/person-solid-full.svg')"></span><div class="eqcard-event-back-lbl">PRIVATE<br>EVENT</div></div>`;
+      d.onclick = () => {
+        sfx("select");
+        selectedCardUid = c.uid;
+        showEventCard(
+          c.eventCard,
+          null,
+          () => {
+            selectedCardUid = null;
+            updateUI();
+          },
+          null,
+          true,
+        );
+      };
     } else {
-      d.className=`eqcard cc-${c.cat}`;
-      d.dataset.uid=c.uid;
-      if(c.uid===selectedCardUid)d.classList.add('selected');
-      d.innerHTML=cardFaceHTML(c.cat,c.name,c.txt);
-      d.onclick=()=>{sfx('select');openCardModal(p.id,c);};
+      d.className = `eqcard cc-${c.cat}`;
+      d.dataset.uid = c.uid;
+      if (c.uid === selectedCardUid) d.classList.add("selected");
+      d.innerHTML = cardFaceHTML(c.cat, c.name, c.txt);
+      d.onclick = () => {
+        sfx("select");
+        openCardModal(p.id, c);
+      };
     }
     hand.appendChild(d);
   }
-  const showNav=all.length>=4;
-  const prevBtn=document.getElementById('eq-prev');
-  const nextBtn=document.getElementById('eq-next');
-  prevBtn.style.display=showNav?'':'none';
-  nextBtn.style.display=showNav?'':'none';
-  if(showNav){prevBtn.disabled=eqGalleryOffset<=0;nextBtn.disabled=eqGalleryOffset+3>=all.length;}
+  const showNav = all.length >= 4;
+  const prevBtn = document.getElementById("eq-prev");
+  const nextBtn = document.getElementById("eq-next");
+  prevBtn.style.display = showNav ? "" : "none";
+  nextBtn.style.display = showNav ? "" : "none";
+  if (showNav) {
+    prevBtn.disabled = eqGalleryOffset <= 0;
+    nextBtn.disabled = eqGalleryOffset + 3 >= all.length;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
 // CARD DETAIL MODAL
 // ═══════════════════════════════════════════════════════════════
-let selectedCardUid=null;
-function openCardModal(playerIdx,c,bgImage){
-  const isOwner=playerIdx===G.currentPlayer;
+let selectedCardUid = null;
+function openCardModal(playerIdx, c, bgImage) {
+  const isOwner = playerIdx === G.currentPlayer;
   // set category CSS vars on the overlay card
-  const card=document.getElementById('evc');
-  const ov=document.getElementById('evc-ov');
-  ov.style.backgroundImage=bgImage||'';ov.style.backgroundSize='cover';ov.style.backgroundPosition='center';
-  ov.className=`cc-${c.cat}`;
-  card.className='evc eq';
-  const badge=document.getElementById('evc-badge');
-  const iconHtml=CAT_ICONS[c.cat]?`<span class="evc-cat-icon" ${catIconStyle(c.cat)}></span>`:'';
-  badge.innerHTML=iconHtml||c.cat.toUpperCase();
-  document.getElementById('evc-loc').textContent=c.name;
-  document.getElementById('evc-body').textContent=c.txt;
-  const pills=document.getElementById('evc-pills');pills.innerHTML='';
-  if(c.use&&isOwner){
-    const b=document.createElement('button');
-    b.className='mbtn wrn';b.textContent='Use Card';
-    b.onclick=()=>useCard(playerIdx,c.uid);
+  const card = document.getElementById("evc");
+  const ov = document.getElementById("evc-ov");
+  ov.style.backgroundImage = bgImage || "";
+  ov.style.backgroundSize = "cover";
+  ov.style.backgroundPosition = "center";
+  ov.className = `cc-${c.cat}`;
+  card.className = "evc eq";
+  const badge = document.getElementById("evc-badge");
+  const iconHtml = CAT_ICONS[c.cat]
+    ? `<span class="evc-cat-icon" ${catIconStyle(c.cat)}></span>`
+    : "";
+  badge.innerHTML = iconHtml || c.cat.toUpperCase();
+  document.getElementById("evc-loc").textContent = c.name;
+  document.getElementById("evc-body").textContent = c.txt;
+  const pills = document.getElementById("evc-pills");
+  pills.innerHTML = "";
+  if (c.use && isOwner) {
+    const b = document.createElement("button");
+    b.className = "mbtn wrn";
+    b.textContent = "Use Card";
+    b.onclick = () => useCard(playerIdx, c.uid);
     pills.appendChild(b);
   }
-  document.getElementById('evc-die').style.display='none';
-  document.getElementById('evc-outcome').style.display='none';
-  const btn=document.getElementById('evc-btn');
-  btn.className='eq';btn.textContent='Close';
-  btn.disabled=false;btn.style.opacity='';
-  btn.onclick=()=>closeCardModal();
-  selectedCardUid=c.uid;
-  document.getElementById('evc-ov').classList.add('show');
+  document.getElementById("evc-die").style.display = "none";
+  document.getElementById("evc-outcome").style.display = "none";
+  const btn = document.getElementById("evc-btn");
+  btn.className = "eq";
+  btn.textContent = "Close";
+  btn.disabled = false;
+  btn.style.opacity = "";
+  btn.onclick = () => closeCardModal();
+  selectedCardUid = c.uid;
+  document.getElementById("evc-ov").classList.add("show");
 }
-function closeCardModal(){
-  selectedCardUid=null;
-  const ov=document.getElementById('evc-ov');
-  ov.className='';
-  ov.classList.remove('show');
-  document.getElementById('evc-ov').style.backgroundImage='';
+function closeCardModal() {
+  selectedCardUid = null;
+  const ov = document.getElementById("evc-ov");
+  ov.className = "";
+  ov.classList.remove("show");
+  document.getElementById("evc-ov").style.backgroundImage = "";
 }
 
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════
 // SIGNAL ARRAY CONTEST
 // ═══════════════════════════════════════════════════════════════
-function showContestModal(challenger, defender, onChallengerWins, onDefenderWins){
-  sfx('contest');
-  const ov=document.getElementById('contest-ov');
-  ov.classList.add('show');
+function showContestModal(
+  challenger,
+  defender,
+  onChallengerWins,
+  onDefenderWins,
+) {
+  sfx("contest");
+  const ov = document.getElementById("contest-ov");
+  ov.classList.add("show");
 
   // Portraits
-  document.getElementById('contest-challenger-port').style.cssText=portBg(challenger.portrait,80,80,.15,challenger.health,'pawn');
-  document.getElementById('contest-challenger-port').style.borderColor=challenger.color;
-  document.getElementById('contest-challenger-name').textContent=challenger.name;
-  document.getElementById('contest-defender-port').style.cssText=portBg(defender.portrait,80,80,.15,defender.health,'pawn');
-  document.getElementById('contest-defender-port').style.borderColor=defender.color;
-  document.getElementById('contest-defender-name').textContent=defender.name;
-  document.getElementById('contest-outcome').textContent='Each crew member rolls — highest wins.';
+  document.getElementById("contest-challenger-port").style.cssText = portBg(
+    challenger.portrait,
+    80,
+    80,
+    0.15,
+    challenger.health,
+    "pawn",
+  );
+  document.getElementById("contest-challenger-port").style.borderColor =
+    challenger.color;
+  document.getElementById("contest-challenger-name").textContent =
+    challenger.name;
+  document.getElementById("contest-defender-port").style.cssText = portBg(
+    defender.portrait,
+    80,
+    80,
+    0.15,
+    defender.health,
+    "pawn",
+  );
+  document.getElementById("contest-defender-port").style.borderColor =
+    defender.color;
+  document.getElementById("contest-defender-name").textContent = defender.name;
+  document.getElementById("contest-outcome").textContent =
+    "Each crew member rolls — highest wins.";
 
-  document.getElementById('contest-challenger').classList.remove('winner','loser');
-  document.getElementById('contest-defender').classList.remove('winner','loser');
+  document
+    .getElementById("contest-challenger")
+    .classList.remove("winner", "loser");
+  document
+    .getElementById("contest-defender")
+    .classList.remove("winner", "loser");
 
   // Build dice
-  let cVal=null, dVal=null;
-  function checkBoth(){
-    if(cVal===null||dVal===null)return;
-    const outcomeEl=document.getElementById('contest-outcome');
-    const cSide=document.getElementById('contest-challenger');
-    const dSide=document.getElementById('contest-defender');
-    setTimeout(()=>{
-      if(cVal>dVal){
-        outcomeEl.textContent=`${challenger.name} wins — takes the Signal Array.`;
-        cSide.classList.add('winner');dSide.classList.add('loser');
-        setTimeout(()=>{ov.classList.remove('show');onChallengerWins();},1800);
-      } else if(dVal>cVal){
-        outcomeEl.textContent=`${defender.name} holds the Signal Array.`;
-        dSide.classList.add('winner');cSide.classList.add('loser');
-        setTimeout(()=>{ov.classList.remove('show');onDefenderWins();},1800);
+  let cVal = null,
+    dVal = null;
+  function checkBoth() {
+    if (cVal === null || dVal === null) return;
+    const outcomeEl = document.getElementById("contest-outcome");
+    const cSide = document.getElementById("contest-challenger");
+    const dSide = document.getElementById("contest-defender");
+    setTimeout(() => {
+      if (cVal > dVal) {
+        outcomeEl.textContent = `${challenger.name} wins — takes the Signal Array.`;
+        cSide.classList.add("winner");
+        dSide.classList.add("loser");
+        setTimeout(() => {
+          ov.classList.remove("show");
+          onChallengerWins();
+        }, 1800);
+      } else if (dVal > cVal) {
+        outcomeEl.textContent = `${defender.name} holds the Signal Array.`;
+        dSide.classList.add("winner");
+        cSide.classList.add("loser");
+        setTimeout(() => {
+          ov.classList.remove("show");
+          onDefenderWins();
+        }, 1800);
       } else {
         // Tie — defender holds
-        outcomeEl.textContent=`Tie — ${defender.name} holds position.`;
-        dSide.classList.add('winner');cSide.classList.add('loser');
-        setTimeout(()=>{ov.classList.remove('show');onDefenderWins();},1800);
+        outcomeEl.textContent = `Tie — ${defender.name} holds position.`;
+        dSide.classList.add("winner");
+        cSide.classList.add("loser");
+        setTimeout(() => {
+          ov.classList.remove("show");
+          onDefenderWins();
+        }, 1800);
       }
-    },400);
+    }, 400);
   }
 
-  function makeDie(containerId, onRolled){
-    const wrap=document.getElementById(containerId);
-    wrap.innerHTML='';
-    const die=make3DDie('idle');
-    die.onclick=()=>{
-      sfx('dice_roll');die.className='td-die-wrap rolling';
-      die.onclick=null;
-      const val=1+(0|Math.random()*6);
-      setTimeout(()=>{
-        wrap.innerHTML='';
-        const res=makeResultDie(val);
+  function makeDie(containerId, onRolled) {
+    const wrap = document.getElementById(containerId);
+    wrap.innerHTML = "";
+    const die = make3DDie("idle");
+    die.onclick = () => {
+      sfx("dice_roll");
+      die.className = "td-die-wrap rolling";
+      die.onclick = null;
+      const val = 1 + (0 | (Math.random() * 6));
+      setTimeout(() => {
+        wrap.innerHTML = "";
+        const res = makeResultDie(val);
         wrap.appendChild(res);
         onRolled(val);
         checkBoth();
-      },1000);
+      }, 1000);
     };
     wrap.appendChild(die);
   }
 
-  makeDie('contest-challenger-die', v=>{cVal=v;});
-  makeDie('contest-defender-die',   v=>{dVal=v;});
+  makeDie("contest-challenger-die", (v) => {
+    cVal = v;
+  });
+  makeDie("contest-defender-die", (v) => {
+    dVal = v;
+  });
   // Auto-roll for Synth side
-  if(challenger.isSynth){setTimeout(()=>document.getElementById('contest-challenger-die').querySelector('.td-die-wrap')?.click(),800);}
-  if(defender.isSynth){setTimeout(()=>document.getElementById('contest-defender-die').querySelector('.td-die-wrap')?.click(),800);}
+  if (challenger.isSynth) {
+    setTimeout(
+      () =>
+        document
+          .getElementById("contest-challenger-die")
+          .querySelector(".td-die-wrap")
+          ?.click(),
+      800,
+    );
+  }
+  if (defender.isSynth) {
+    setTimeout(
+      () =>
+        document
+          .getElementById("contest-defender-die")
+          .querySelector(".td-die-wrap")
+          ?.click(),
+      800,
+    );
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
 // MODAL
 // ═══════════════════════════════════════════════════════════════
-function showModal(title,body,isPub,onOk,okLbl,onCancel,cancelLbl,extraHtml,okClass,bgImage){
-  const mov=document.getElementById('mov');
-  mov.style.backgroundImage=bgImage?`url(${bgImage})`:'';
-  mov.style.backgroundSize='cover';mov.style.backgroundPosition='center';
-  const isRescue=title==='RESCUE SIGNAL RECEIVED';
-  const isAllDead=title==='ALL CREW LOST';
-  const isNewGame=title==='SELF-DESTRUCT';
-  const isStasis=title==='STASIS POD';
-  const isInversion=title==='INVERSION FIELD';
-  mov.classList.toggle('rescue',isRescue);
-  mov.classList.toggle('all-dead',isAllDead);
-  mov.classList.toggle('new-game',isNewGame);
-  mov.classList.toggle('stasis-pod',isStasis);
-  mov.classList.toggle('inversion-field',isInversion);
-  document.getElementById('mtit').textContent=title;
-  const mb=document.getElementById('mbod');mb.innerHTML='';
-  if(!isPub){const n=document.createElement('div');n.className='pvnote';n.textContent='PRIVATE — read silently. Show only to crew on your tile.';mb.appendChild(n);}
-  if(extraHtml){const xh=document.createElement('div');xh.innerHTML=extraHtml;mb.appendChild(xh);}
-  const tb=document.createElement('div');tb.textContent=body;mb.appendChild(tb);
-  const ma=document.getElementById('mact');ma.innerHTML='';
-  if(onCancel&&cancelLbl){const b=document.createElement('button');b.className='mbtn';b.textContent=cancelLbl;
-    b.onclick=()=>{document.getElementById('mov').classList.remove('show');onCancel();};ma.appendChild(b);}
-  const ob=document.createElement('button');ob.className=`mbtn ${okClass||'pri'}`;ob.textContent=okLbl||'OK';
-  ob.onclick=()=>{document.getElementById('mov').classList.remove('show');onOk();};ma.appendChild(ob);
-  document.getElementById('mov').classList.add('show');
+function showModal(
+  title,
+  body,
+  isPub,
+  onOk,
+  okLbl,
+  onCancel,
+  cancelLbl,
+  extraHtml,
+  okClass,
+  bgImage,
+) {
+  const mov = document.getElementById("mov");
+  mov.style.backgroundImage = bgImage ? `url(${bgImage})` : "";
+  mov.style.backgroundSize = "cover";
+  mov.style.backgroundPosition = "center";
+  const isRescue = title === "RESCUE SIGNAL RECEIVED";
+  const isAllDead = title === "ALL CREW LOST";
+  const isNewGame = title === "SELF-DESTRUCT";
+  const isStasis = title === "STASIS POD";
+  const isInversion = title === "INVERSION FIELD";
+  mov.classList.toggle("rescue", isRescue);
+  mov.classList.toggle("all-dead", isAllDead);
+  mov.classList.toggle("new-game", isNewGame);
+  mov.classList.toggle("stasis-pod", isStasis);
+  mov.classList.toggle("inversion-field", isInversion);
+  document.getElementById("mtit").textContent = title;
+  const mb = document.getElementById("mbod");
+  mb.innerHTML = "";
+  if (!isPub) {
+    const n = document.createElement("div");
+    n.className = "pvnote";
+    n.textContent = "PRIVATE — read silently. Show only to crew on your tile.";
+    mb.appendChild(n);
+  }
+  if (extraHtml) {
+    const xh = document.createElement("div");
+    xh.innerHTML = extraHtml;
+    mb.appendChild(xh);
+  }
+  const tb = document.createElement("div");
+  tb.textContent = body;
+  mb.appendChild(tb);
+  const ma = document.getElementById("mact");
+  ma.innerHTML = "";
+  if (onCancel && cancelLbl) {
+    const b = document.createElement("button");
+    b.className = "mbtn";
+    b.textContent = cancelLbl;
+    b.onclick = () => {
+      document.getElementById("mov").classList.remove("show");
+      onCancel();
+    };
+    ma.appendChild(b);
+  }
+  const ob = document.createElement("button");
+  ob.className = `mbtn ${okClass || "pri"}`;
+  ob.textContent = okLbl || "OK";
+  ob.onclick = () => {
+    document.getElementById("mov").classList.remove("show");
+    onOk();
+  };
+  ma.appendChild(ob);
+  document.getElementById("mov").classList.add("show");
 }
 
 // ═══════════════════════════════════════════════════════════════
 // EVENT CARD
 // ═══════════════════════════════════════════════════════════════
-function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount=1){
-  const ov=document.getElementById('evc-ov');
-  ov.className='';ov.style.backgroundImage=bgImage||'';ov.style.backgroundSize='cover';ov.style.backgroundPosition='center';
-  const card=document.getElementById('evc');card.className='evc pub';
-  document.getElementById('evc-badge').textContent='ROLL';
-  document.getElementById('evc-loc').textContent='';
-  document.getElementById('evc-body').textContent=prompt;
-  document.getElementById('evc-pills').innerHTML='';
-  const outEl=document.getElementById('evc-outcome');outEl.style.display='none';
-  const dieEl=document.getElementById('evc-die');
-  const btn=document.getElementById('evc-btn');
-  btn.className='';btn.textContent='OK';btn.disabled=true;btn.style.opacity='.35';
-  dieEl.innerHTML='';dieEl.style.display='flex';
-  const wraps=[];
-  for(let i=0;i<diceCount;i++){const w=make3DDie('idle');dieEl.appendChild(w);wraps.push(w);}
-  dieEl.onclick=()=>{
-    if(wraps.some(w=>w.className.includes('rolling')))return;
-    sfx('dice_roll');
-    wraps.forEach(w=>{w.className='td-die-wrap rolling';});
-    dieEl.onclick=null;
-    const vals=wraps.map(()=>1+(0|Math.random()*6));
-    setTimeout(()=>{
-      sfx('dice_land');
-      dieEl.innerHTML='';
-      const res=document.createElement('div');res.className='evc-die-result';
-      vals.forEach(v=>res.appendChild(makeResultDie(v)));
-      if(diceCount>1){const tot=document.createElement('div');tot.style.cssText='font-size:13px;letter-spacing:.1em;color:var(--dim);align-self:center;padding-left:6px;';tot.textContent=`= ${vals.reduce((a,b)=>a+b,0)}`;res.appendChild(tot);}
+function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount = 1) {
+  const ov = document.getElementById("evc-ov");
+  ov.className = "";
+  ov.style.backgroundImage = bgImage || "";
+  ov.style.backgroundSize = "cover";
+  ov.style.backgroundPosition = "center";
+  const card = document.getElementById("evc");
+  card.className = "evc pub";
+  document.getElementById("evc-badge").textContent = "ROLL";
+  document.getElementById("evc-loc").textContent = "";
+  document.getElementById("evc-body").textContent = prompt;
+  document.getElementById("evc-pills").innerHTML = "";
+  const outEl = document.getElementById("evc-outcome");
+  outEl.style.display = "none";
+  const dieEl = document.getElementById("evc-die");
+  const btn = document.getElementById("evc-btn");
+  btn.className = "";
+  btn.textContent = "OK";
+  btn.disabled = true;
+  btn.style.opacity = ".35";
+  dieEl.innerHTML = "";
+  dieEl.style.display = "flex";
+  const wraps = [];
+  for (let i = 0; i < diceCount; i++) {
+    const w = make3DDie("idle");
+    dieEl.appendChild(w);
+    wraps.push(w);
+  }
+  dieEl.onclick = () => {
+    if (wraps.some((w) => w.className.includes("rolling"))) return;
+    sfx("dice_roll");
+    wraps.forEach((w) => {
+      w.className = "td-die-wrap rolling";
+    });
+    dieEl.onclick = null;
+    const vals = wraps.map(() => 1 + (0 | (Math.random() * 6)));
+    setTimeout(() => {
+      sfx("dice_land");
+      dieEl.innerHTML = "";
+      const res = document.createElement("div");
+      res.className = "evc-die-result";
+      vals.forEach((v) => res.appendChild(makeResultDie(v)));
+      if (diceCount > 1) {
+        const tot = document.createElement("div");
+        tot.style.cssText =
+          "font-size:13px;letter-spacing:.1em;color:var(--dim);align-self:center;padding-left:6px;";
+        tot.textContent = `= ${vals.reduce((a, b) => a + b, 0)}`;
+        res.appendChild(tot);
+      }
       dieEl.appendChild(res);
-      const outcome=onRoll(vals.reduce((a,b)=>a+b,0));
-      if(outcome){outEl.textContent=outcome;outEl.style.display='';}
+      const outcome = onRoll(vals.reduce((a, b) => a + b, 0));
+      if (outcome) {
+        outEl.textContent = outcome;
+        outEl.style.display = "";
+      }
       updateUI();
-      btn.disabled=false;btn.style.opacity='';
-    },1500);
+      btn.disabled = false;
+      btn.style.opacity = "";
+    }, 1500);
   };
-  btn.onclick=()=>{ov.classList.remove('show');document.getElementById('evc-ov').style.backgroundImage='';if(onDismiss)onDismiss();else{updateUI();render();}};
+  btn.onclick = () => {
+    ov.classList.remove("show");
+    document.getElementById("evc-ov").style.backgroundImage = "";
+    if (onDismiss) onDismiss();
+    else {
+      updateUI();
+      render();
+    }
+  };
   cancelTooltip();
-  ov.classList.add('show');
+  ov.classList.add("show");
 }
 
-function showEventCard(evt, _locName, onOk, rollCallback, isReview, suitBlocked=false){
-  if(!isReview)sfx('card');
-  const isPub=evt.pub;
-  const card=document.getElementById('evc');
-  card.className='evc '+(isPub?'pub':'priv');
-  const evtBadge=document.getElementById('evc-badge');
-  const evtIcon=isPub?'group-solid-full.svg':'person-solid-full.svg';
-  const evtLbl=isPub?'PUBLIC EVENT':'PRIVATE EVENT';
-  evtBadge.innerHTML=`<span class="evc-cat-icon" style="--eq-icon-url:url('img/Icons/${evtIcon}')"></span>`;
-  document.getElementById('evc-loc').textContent=evtLbl;
-  const body=document.getElementById('evc-body');
-  const aliveCount=G.players.filter(p=>p.alive).length;
-  const resolvedText=typeof evt.text==='function'?evt.text(aliveCount):evt.text;
-  if(Array.isArray(resolvedText)){
-    body.innerHTML='';
-    resolvedText.forEach(line=>{const d=document.createElement('div');d.textContent=line;body.appendChild(d);});
-  } else {body.textContent=resolvedText;}
-  const pills=document.getElementById('evc-pills');pills.innerHTML='';
-  function addPill(txt,cls){const p=document.createElement('div');p.className='evc-pill '+cls;p.textContent=txt;pills.appendChild(p);}
-  if(evt.rf)           addPill('+ Radio Fragment','good');
-  if(evt.drawEq)       addPill('+ Equipment Card','good');
-  if(evt.drawEqHidden) addPill('+ Equipment Card','good');
-  if(evt.gainFood)   addPill('+ '+evt.gainFood+' Food','good');
-  if(evt.takeAllCargo) addPill('+ Food (Cargo)','good');
-  if(evt.rollFood)  addPill('Roll for Food','good');
-  if(evt.rollWreckage) addPill('Roll: Wreckage','good');
-  if(evt.loseFood)   addPill('\u2212 '+evt.loseFood+' Food','bad');
-  if(evt.loseHealth)   addPill('\u2212 1 Health','bad');
-  if(evt.skipO2)       addPill('O\u2082 Spared','good');
-  const outEl=document.getElementById('evc-outcome');
-  outEl.style.display='none';
-  const dieEl=document.getElementById('evc-die');
-  const btn=document.getElementById('evc-btn');
-  btn.className='';
-  btn.textContent='Acknowledge';
-  if(rollCallback){
-    dieEl.innerHTML='';
-    dieEl.style.display='flex';
-    const wrap=make3DDie('idle');
+function showEventCard(
+  evt,
+  _locName,
+  onOk,
+  rollCallback,
+  isReview,
+  suitBlocked = false,
+) {
+  if (!isReview) sfx("card");
+  const isPub = evt.pub;
+  const card = document.getElementById("evc");
+  card.className = "evc " + (isPub ? "pub" : "priv");
+  const evtBadge = document.getElementById("evc-badge");
+  const evtIcon = isPub ? "group-solid-full.svg" : "person-solid-full.svg";
+  const evtLbl = isPub ? "PUBLIC EVENT" : "PRIVATE EVENT";
+  evtBadge.innerHTML = `<span class="evc-cat-icon" style="--eq-icon-url:url('img/icons/${evtIcon}')"></span>`;
+  document.getElementById("evc-loc").textContent = evtLbl;
+  const body = document.getElementById("evc-body");
+  const aliveCount = G.players.filter((p) => p.alive).length;
+  const resolvedText =
+    typeof evt.text === "function" ? evt.text(aliveCount) : evt.text;
+  if (Array.isArray(resolvedText)) {
+    body.innerHTML = "";
+    resolvedText.forEach((line) => {
+      const d = document.createElement("div");
+      d.textContent = line;
+      body.appendChild(d);
+    });
+  } else {
+    body.textContent = resolvedText;
+  }
+  const pills = document.getElementById("evc-pills");
+  pills.innerHTML = "";
+  function addPill(txt, cls) {
+    const p = document.createElement("div");
+    p.className = "evc-pill " + cls;
+    p.textContent = txt;
+    pills.appendChild(p);
+  }
+  if (evt.rf) addPill("+ Radio Fragment", "good");
+  if (evt.drawEq) addPill("+ Equipment Card", "good");
+  if (evt.drawEqHidden) addPill("+ Equipment Card", "good");
+  if (evt.gainFood) addPill("+ " + evt.gainFood + " Food", "good");
+  if (evt.takeAllCargo) addPill("+ Food (Cargo)", "good");
+  if (evt.rollFood) addPill("Roll for Food", "good");
+  if (evt.rollWreckage) addPill("Roll: Wreckage", "good");
+  if (evt.loseFood) addPill("\u2212 " + evt.loseFood + " Food", "bad");
+  if (evt.loseHealth) addPill("\u2212 1 Health", "bad");
+  if (evt.skipO2) addPill("O\u2082 Spared", "good");
+  const outEl = document.getElementById("evc-outcome");
+  outEl.style.display = "none";
+  const dieEl = document.getElementById("evc-die");
+  const btn = document.getElementById("evc-btn");
+  btn.className = "";
+  btn.textContent = "Acknowledge";
+  if (rollCallback) {
+    dieEl.innerHTML = "";
+    dieEl.style.display = "flex";
+    const wrap = make3DDie("idle");
     dieEl.appendChild(wrap);
-    btn.disabled=true;
-    btn.style.opacity='.35';
-    wrap.onclick=()=>{
-      sfx('dice_roll');
-      wrap.className='td-die-wrap rolling';
-      wrap.onclick=null;
-      const finalVal=1+(0|Math.random()*6);
-      setTimeout(()=>{
-        sfx('dice_land');
-        dieEl.innerHTML='';
-        const result=document.createElement('div');
-        result.className='evc-die-result';
+    btn.disabled = true;
+    btn.style.opacity = ".35";
+    wrap.onclick = () => {
+      sfx("dice_roll");
+      wrap.className = "td-die-wrap rolling";
+      wrap.onclick = null;
+      const finalVal = 1 + (0 | (Math.random() * 6));
+      setTimeout(() => {
+        sfx("dice_land");
+        dieEl.innerHTML = "";
+        const result = document.createElement("div");
+        result.className = "evc-die-result";
         result.appendChild(makeResultDie(finalVal));
         dieEl.appendChild(result);
-        const outcome=rollCallback(finalVal);
-        if(outcome){outEl.textContent=outcome;outEl.style.display='';}
+        const outcome = rollCallback(finalVal);
+        if (outcome) {
+          outEl.textContent = outcome;
+          outEl.style.display = "";
+        }
         updateUI();
-        btn.disabled=false;
-        btn.style.opacity='';
-      },1500);
+        btn.disabled = false;
+        btn.style.opacity = "";
+      }, 1500);
     };
   } else {
-    dieEl.style.display='none';
-    btn.disabled=false;
-    btn.style.opacity='';
+    dieEl.style.display = "none";
+    btn.disabled = false;
+    btn.style.opacity = "";
   }
-  const ov=document.getElementById('evc-ov');
-  ov.className='';
-  const suitBlocker=document.getElementById('evc-suit-blocker');
-  suitBlocker.classList.remove('dropping');
-  if(suitBlocked){
-    btn.disabled=true;btn.style.opacity='.35';
-    setTimeout(()=>{
-      suitBlocker.classList.add('dropping');
-      setTimeout(()=>{pills.querySelector('.evc-pill.bad')?.classList.add('blocked');},480);
-      setTimeout(()=>{btn.disabled=false;btn.style.opacity='';},750);
-    },280);
+  const ov = document.getElementById("evc-ov");
+  ov.className = "";
+  const suitBlocker = document.getElementById("evc-suit-blocker");
+  suitBlocker.classList.remove("dropping");
+  if (suitBlocked) {
+    btn.disabled = true;
+    btn.style.opacity = ".35";
+    setTimeout(() => {
+      suitBlocker.classList.add("dropping");
+      setTimeout(() => {
+        pills.querySelector(".evc-pill.bad")?.classList.add("blocked");
+      }, 480);
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.opacity = "";
+      }, 750);
+    }, 280);
   }
-  btn.onclick=()=>{
-    if(evt.keep&&!isReview){const p=cp();p.equipment.push({eventCard:evt,uid:++cardUid});}
-    suitBlocker.classList.remove('dropping');
-    ov.classList.remove('show');document.getElementById('evc-ov').style.backgroundImage='';if(onOk)onOk();
+  btn.onclick = () => {
+    if (evt.keep && !isReview) {
+      const p = cp();
+      p.equipment.push({ eventCard: evt, uid: ++cardUid });
+    }
+    suitBlocker.classList.remove("dropping");
+    ov.classList.remove("show");
+    document.getElementById("evc-ov").style.backgroundImage = "";
+    if (onOk) onOk();
   };
   cancelTooltip();
-  ov.classList.add('show');
+  ov.classList.add("show");
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -3713,25 +7246,36 @@ function showEventCard(evt, _locName, onOk, rollCallback, isReview, suitBlocked=
 // ═══════════════════════════════════════════════════════════════
 
 // Type text character-by-character into el; auto-scrolls parent container
-function e7Type(el,msg,charDelay=15){
-  el.textContent='';
-  if(!el.closest('#e7log'))_startTextSnd(msg.length*charDelay);
-  for(let i=0;i<msg.length;i++)
-    setTimeout(()=>{el.textContent=msg.slice(0,i+1);const p=el.parentElement;if(p){const sc=p._scrollTarget||p;sc.scrollTop=sc.scrollHeight;}},i*charDelay);
+function e7Type(el, msg, charDelay = 15) {
+  el.textContent = "";
+  if (!el.closest("#e7log")) _startTextSnd(msg.length * charDelay);
+  for (let i = 0; i < msg.length; i++)
+    setTimeout(() => {
+      el.textContent = msg.slice(0, i + 1);
+      const p = el.parentElement;
+      if (p) {
+        const sc = p._scrollTarget || p;
+        sc.scrollTop = sc.scrollHeight;
+      }
+    }, i * charDelay);
 }
 // Append a colored line to any terminal container
 // cls: 'sys'|'good'|'act'|'crit'|'imp'|'frag'|'tile'|''   base: 'e7m' (voice) or 'le' (log entry)
-function termAppend(container,msg,cls='',charDelay=15,base='e7m'){
-  const d=document.createElement('div');
-  d.className=base+(cls?' '+cls:'');
+function termAppend(container, msg, cls = "", charDelay = 15, base = "e7m") {
+  const d = document.createElement("div");
+  d.className = base + (cls ? " " + cls : "");
   container.appendChild(d);
-  const sc=container._scrollTarget||container;sc.scrollTop=sc.scrollHeight;
-  e7Type(d,msg,charDelay);
+  const sc = container._scrollTarget || container;
+  sc.scrollTop = sc.scrollHeight;
+  e7Type(d, msg, charDelay);
 }
 // Append a divider to any terminal container
-function termDiv(container){
-  const d=document.createElement('div');d.className='e7div';
-  container.appendChild(d);const sc=container._scrollTarget||container;sc.scrollTop=sc.scrollHeight;
+function termDiv(container) {
+  const d = document.createElement("div");
+  d.className = "e7div";
+  container.appendChild(d);
+  const sc = container._scrollTarget || container;
+  sc.scrollTop = sc.scrollHeight;
 }
 // Run a timed sequence into any terminal container
 // steps: [[gapMs, cls, msg], ...]
@@ -3739,177 +7283,279 @@ function termDiv(container){
 //      'log'|'log-act'|'log-good'|'log-imp' for compact le log lines
 //      'div' for a divider (msg ignored)
 // lineGap: extra pause (ms) held after each line before the next starts — makes sequential nature visible
-function termSeq(container,steps,charDelay=15,lineGap=0){
+function termSeq(container, steps, charDelay = 15, lineGap = 0) {
   _stopTextSnd();
-  const seq=Date.now()+Math.random();
-  container._termSeq=seq;
-  let t=0;
-  steps.forEach(([gap,cls,msg])=>{
-    t+=gap;
-    if(cls==='div'){
-      const at=t;setTimeout(()=>{if(container._termSeq===seq)termDiv(container);},at);
-      t+=lineGap;
+  const seq = Date.now() + Math.random();
+  container._termSeq = seq;
+  let t = 0;
+  steps.forEach(([gap, cls, msg]) => {
+    t += gap;
+    if (cls === "div") {
+      const at = t;
+      setTimeout(() => {
+        if (container._termSeq === seq) termDiv(container);
+      }, at);
+      t += lineGap;
     } else {
-      const isLog=cls==='log'||cls.startsWith('log-');
-      const base=isLog?'le':'e7m';
-      const c=isLog?cls.replace(/^log-?/,''):cls;
-      const at=t;
-      setTimeout(()=>{if(container._termSeq===seq)termAppend(container,msg,c,charDelay,base);},at);
-      t+=msg.length*charDelay+lineGap;
+      const isLog = cls === "log" || cls.startsWith("log-");
+      const base = isLog ? "le" : "e7m";
+      const c = isLog ? cls.replace(/^log-?/, "") : cls;
+      const at = t;
+      setTimeout(() => {
+        if (container._termSeq === seq)
+          termAppend(container, msg, c, charDelay, base);
+      }, at);
+      t += msg.length * charDelay + lineGap;
     }
   });
 }
 // Convenience wrappers — all existing call sites unchanged
-function addE7(msg,cls='',charDelay=15){termAppend(document.getElementById('e7log'),msg,cls,charDelay);}
-function addLog(msg,cls='',charDelay=15){
-  termAppend(document.getElementById('e7log'),msg,cls,charDelay,'le');
+function addE7(msg, cls = "", charDelay = 15) {
+  termAppend(document.getElementById("e7log"), msg, cls, charDelay);
+}
+function addLog(msg, cls = "", charDelay = 15) {
+  termAppend(document.getElementById("e7log"), msg, cls, charDelay, "le");
   // Queue for sync to other players (skip during receive to avoid echo)
-  if(G&&_isOnlineMode&&!window.Sync?.isReceiving()){
-    if(!G._pendingLogs)G._pendingLogs=[];
-    G._pendingLogs.push({msg,cls});
+  if (G && _isOnlineMode && !window.Sync?.isReceiving()) {
+    if (!G._pendingLogs) G._pendingLogs = [];
+    G._pendingLogs.push({ msg, cls });
   }
 }
-function addE7Div(){termDiv(document.getElementById('e7log'));}
+function addE7Div() {
+  termDiv(document.getElementById("e7log"));
+}
 // Prompt bar — updated on every updateUI call
-function updateE7Prompt(){
-  const el=document.getElementById('e7prompt');if(!el)return;
-  if(!G){el.textContent='';el.className='';return;}
-  const p=cp();let text='',warn=false;
-  if(p.isSynth){
-    if(p.battery<=3){text=`⚠ IRIS battery critical — return to the Medical Bay to recharge.`;warn=true;}
-    else if(G.phase==='roll')text=`IRIS: processing next action.`;
-    else if(G.phase==='move')text=`IRIS moving — ${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining.`;
-    else if(G.phase==='action')text=`IRIS at ${p.location}.`;
+function updateE7Prompt() {
+  const el = document.getElementById("e7prompt");
+  if (!el) return;
+  if (!G) {
+    el.textContent = "";
+    el.className = "";
+    return;
+  }
+  const p = cp();
+  let text = "",
+    warn = false;
+  if (p.isSynth) {
+    if (p.battery <= 3) {
+      text = `⚠ IRIS battery critical — return to the Medical Bay to recharge.`;
+      warn = true;
+    } else if (G.phase === "roll") text = `IRIS: processing next action.`;
+    else if (G.phase === "move")
+      text = `IRIS moving — ${G.movementLeft} step${G.movementLeft !== 1 ? "s" : ""} remaining.`;
+    else if (G.phase === "action") text = `IRIS at ${p.location}.`;
   } else {
-    if(p.o2<=1&&!p.inStasis){text=`⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;warn=true;}
-    else if(G.phase==='stasis'){text=isMyTurn()?`${p.name}: Stay in Stasis or Leave to take your turn.`:`${p.name} is in stasis.`;}
-    else if(isMyTurn()){
-      if(G.phase==='roll')text=`${p.name}: roll the die to move.`;
-      else if(G.phase==='move')text=`${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining — choose a hex.`;
-      else if(G.phase==='action')text=`At ${p.location}. Take an action or end your turn.`;
+    if (p.o2 <= 1 && !p.inStasis) {
+      text = `⚠ ${p.name}'s oxygen is critical — return to the Airlock.`;
+      warn = true;
+    } else if (G.phase === "stasis") {
+      text = isMyTurn()
+        ? `${p.name}: Stay in Stasis or Leave to take your turn.`
+        : `${p.name} is in stasis.`;
+    } else if (isMyTurn()) {
+      if (G.phase === "roll") text = `${p.name}: roll the die to move.`;
+      else if (G.phase === "move")
+        text = `${G.movementLeft} step${G.movementLeft !== 1 ? "s" : ""} remaining — choose a hex.`;
+      else if (G.phase === "action")
+        text = `At ${p.location}. Take an action or end your turn.`;
     } else {
-      if(G.phase==='roll')text=`Waiting for ${p.name} to roll…`;
-      else if(G.phase==='move')text=`${p.name} moving — ${G.movementLeft} step${G.movementLeft!==1?'s':''} remaining.`;
-      else if(G.phase==='action')text=`${p.name} at ${p.location}.`;
+      if (G.phase === "roll") text = `Waiting for ${p.name} to roll…`;
+      else if (G.phase === "move")
+        text = `${p.name} moving — ${G.movementLeft} step${G.movementLeft !== 1 ? "s" : ""} remaining.`;
+      else if (G.phase === "action") text = `${p.name} at ${p.location}.`;
     }
   }
-  el.textContent=text;el.className=warn?'warn':'';
+  el.textContent = text;
+  el.className = warn ? "warn" : "";
 }
 
 // ═══════════════════════════════════════════════════════════════
 // RULEBOOK — loaded from docs/FieldGuide.md
 // ═══════════════════════════════════════════════════════════════
-let RULEBOOK_SECTIONS=[];
+let RULEBOOK_SECTIONS = [];
 
-function parseFieldGuide(md){
-  var sections=[];
-  var cur=null;
-  var lines=md.split('\n');
-  for(var i=0;i<lines.length;i++){
-    var line=lines[i];
-    var h1=line.match(/^# (.+)/);
-    if(h1){
-      if(cur)sections.push({id:cur.id,h:cur.h,title:cur.title,body:cur.body.trim()});
-      var title=h1[1].trim();
-      var id=title.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
-      cur={id:id,h:1,title:title,body:''};
-    } else if(cur){
-      cur.body+=line+'\n';
+function parseFieldGuide(md) {
+  var sections = [];
+  var cur = null;
+  var lines = md.split("\n");
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var h1 = line.match(/^# (.+)/);
+    if (h1) {
+      if (cur)
+        sections.push({
+          id: cur.id,
+          h: cur.h,
+          title: cur.title,
+          body: cur.body.trim(),
+        });
+      var title = h1[1].trim();
+      var id = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_|_$/g, "");
+      cur = { id: id, h: 1, title: title, body: "" };
+    } else if (cur) {
+      cur.body += line + "\n";
     }
   }
-  if(cur)sections.push({id:cur.id,h:cur.h,title:cur.title,body:cur.body.trim()});
-  return sections.filter(function(s){return s.body.length>0;});
+  if (cur)
+    sections.push({
+      id: cur.id,
+      h: cur.h,
+      title: cur.title,
+      body: cur.body.trim(),
+    });
+  return sections.filter(function (s) {
+    return s.body.length > 0;
+  });
 }
 
-fetch('docs/FieldGuide.md')
-  .then(r=>r.text())
-  .then(md=>{RULEBOOK_SECTIONS=parseFieldGuide(md);})
-  .catch(()=>{RULEBOOK_SECTIONS=[{id:'error',h:1,title:'Field Guide',body:'Could not load docs/FieldGuide.md.'}];});
+fetch("docs/FieldGuide.md")
+  .then((r) => r.text())
+  .then((md) => {
+    RULEBOOK_SECTIONS = parseFieldGuide(md);
+  })
+  .catch(() => {
+    RULEBOOK_SECTIONS = [
+      {
+        id: "error",
+        h: 1,
+        title: "Field Guide",
+        body: "Could not load docs/FieldGuide.md.",
+      },
+    ];
+  });
 
-
-function toggleE7(){
-  const p=document.getElementById('e7panel');
-  if(p.classList.contains('show'))_play('back.wav');
-  p.classList.toggle('show');
-  if(p.classList.contains('show')){const l=document.getElementById('e7log');l.scrollTop=l.scrollHeight;updateE7Prompt();}
-}
-function e7Seq(steps,charDelay=15,lineGap=150){
-  const log=document.getElementById('e7log');
-  if(_inGuidance){
-    const wrap=document.createElement('div');wrap.className='e7-guide';
-    wrap._scrollTarget=log;
-    log.appendChild(wrap);log.scrollTop=log.scrollHeight;
-    termSeq(wrap,steps,charDelay,lineGap);
-  } else {
-    termSeq(log,steps,charDelay,lineGap);
+function toggleE7() {
+  const p = document.getElementById("e7panel");
+  if (p.classList.contains("show")) _play("back.wav");
+  p.classList.toggle("show");
+  if (p.classList.contains("show")) {
+    const l = document.getElementById("e7log");
+    l.scrollTop = l.scrollHeight;
+    updateE7Prompt();
   }
 }
-function e7ScreenSeq(containerId,steps,charDelay=20,lineGap=120){const c=document.getElementById(containerId);if(c)termSeq(c,steps,charDelay,lineGap);}
+function e7Seq(steps, charDelay = 15, lineGap = 150) {
+  const log = document.getElementById("e7log");
+  if (_inGuidance) {
+    const wrap = document.createElement("div");
+    wrap.className = "e7-guide";
+    wrap._scrollTarget = log;
+    log.appendChild(wrap);
+    log.scrollTop = log.scrollHeight;
+    termSeq(wrap, steps, charDelay, lineGap);
+  } else {
+    termSeq(log, steps, charDelay, lineGap);
+  }
+}
+function e7ScreenSeq(containerId, steps, charDelay = 20, lineGap = 120) {
+  const c = document.getElementById(containerId);
+  if (c) termSeq(c, steps, charDelay, lineGap);
+}
 // E7 panel stays open until explicitly closed via the ✕ button or E7 toggle
 
-function openRulebook(){
-  const modal=document.getElementById('rbmodal');
-  modal.classList.add('show');
+function openRulebook() {
+  const modal = document.getElementById("rbmodal");
+  modal.classList.add("show");
   buildRulebookToc();
   renderRulebookSection(RULEBOOK_SECTIONS[0]);
 }
-function closeRulebook(){_play('back.wav');document.getElementById('rbmodal').classList.remove('show');}
+function closeRulebook() {
+  _play("back.wav");
+  document.getElementById("rbmodal").classList.remove("show");
+}
 
-function buildRulebookToc(){
-  const toc=document.getElementById('rbtoc');toc.innerHTML='';
-  RULEBOOK_SECTIONS.forEach(s=>{
-    const a=document.createElement('a');a.href='#';a.className=`rbti h${s.h}`;
-    a.textContent=s.title;a.dataset.id=s.id;
-    a.onclick=e=>{e.preventDefault();renderRulebookSection(s);rbSearch('');};
+function buildRulebookToc() {
+  const toc = document.getElementById("rbtoc");
+  toc.innerHTML = "";
+  RULEBOOK_SECTIONS.forEach((s) => {
+    const a = document.createElement("a");
+    a.href = "#";
+    a.className = `rbti h${s.h}`;
+    a.textContent = s.title;
+    a.dataset.id = s.id;
+    a.onclick = (e) => {
+      e.preventDefault();
+      renderRulebookSection(s);
+      rbSearch("");
+    };
     toc.appendChild(a);
   });
 }
 
-function renderRulebookSection(s){
-  document.querySelectorAll('.rbti').forEach(a=>a.classList.toggle('active',a.dataset.id===s.id));
-  const c=document.getElementById('rbcontent');
-  c.innerHTML=`<h1>${s.title}</h1>${markdownToHtml(s.body)}`;
-  c.scrollTop=0;
+function renderRulebookSection(s) {
+  document
+    .querySelectorAll(".rbti")
+    .forEach((a) => a.classList.toggle("active", a.dataset.id === s.id));
+  const c = document.getElementById("rbcontent");
+  c.innerHTML = `<h1>${s.title}</h1>${markdownToHtml(s.body)}`;
+  c.scrollTop = 0;
   _wireRulebookLinks(c);
 }
 
-function _wireRulebookLinks(c){
-  c.querySelectorAll('a[href^="#"]').forEach(a=>{
-    a.addEventListener('mouseenter',()=>{
-      const now=performance.now();
-      if(now-_lastHover<60)return;
-      _lastHover=now;
+function _wireRulebookLinks(c) {
+  c.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener("mouseenter", () => {
+      const now = performance.now();
+      if (now - _lastHover < 60) return;
+      _lastHover = now;
       _hoverSnd();
     });
-    a.addEventListener('click',e=>{
+    a.addEventListener("click", (e) => {
       e.preventDefault();
-      _lastHover=performance.now()+300;
-      const id=a.getAttribute('href').slice(1);
-      const sec=RULEBOOK_SECTIONS.find(s=>s.id===id);
-      if(sec){sfx('select');renderRulebookSection(sec);}
-      else{const el=c.querySelector('[id="'+id+'"]');if(el){sfx('select');el.scrollIntoView({behavior:'smooth',block:'start'});}}
+      _lastHover = performance.now() + 300;
+      const id = a.getAttribute("href").slice(1);
+      const sec = RULEBOOK_SECTIONS.find((s) => s.id === id);
+      if (sec) {
+        sfx("select");
+        renderRulebookSection(sec);
+      } else {
+        const el = c.querySelector('[id="' + id + '"]');
+        if (el) {
+          sfx("select");
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
     });
   });
 }
 
-function markdownToHtml(md){
-  if(typeof marked!=='undefined')return marked.parse(md);
-  return '<p>'+md.replace(/\n\n/g,'</p><p>')+'</p>';
+function markdownToHtml(md) {
+  if (typeof marked !== "undefined") return marked.parse(md);
+  return "<p>" + md.replace(/\n\n/g, "</p><p>") + "</p>";
 }
 
-function rbSearch(query){
-  const q=query.trim().toLowerCase();
-  if(!q){renderRulebookSection(RULEBOOK_SECTIONS.find(s=>document.querySelector('.rbti.active')?.dataset?.id===s.id)||RULEBOOK_SECTIONS[0]);return;}
-  const results=[];
-  RULEBOOK_SECTIONS.forEach(s=>{
-    if(s.title.toLowerCase().includes(q)||s.body.toLowerCase().includes(q))results.push(s);
+function rbSearch(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) {
+    renderRulebookSection(
+      RULEBOOK_SECTIONS.find(
+        (s) => document.querySelector(".rbti.active")?.dataset?.id === s.id,
+      ) || RULEBOOK_SECTIONS[0],
+    );
+    return;
+  }
+  const results = [];
+  RULEBOOK_SECTIONS.forEach((s) => {
+    if (s.title.toLowerCase().includes(q) || s.body.toLowerCase().includes(q))
+      results.push(s);
   });
-  const c=document.getElementById('rbcontent');
-  if(!results.length){c.innerHTML='<p style="color:var(--dim)">No results found.</p>';return;}
-  const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
-  c.innerHTML=results.map(s=>`<h2>${s.title}</h2>${markdownToHtml(s.body)}`).join('<hr style="border:none;border-top:1px solid var(--bdr);margin:20px 0">');
-  c.querySelectorAll('td,th,p,li,blockquote').forEach(el=>{
-    if(el.textContent.toLowerCase().includes(q))el.innerHTML=el.innerHTML.replace(re,'<span class="hl">$1</span>');
+  const c = document.getElementById("rbcontent");
+  if (!results.length) {
+    c.innerHTML = '<p style="color:var(--dim)">No results found.</p>';
+    return;
+  }
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  c.innerHTML = results
+    .map((s) => `<h2>${s.title}</h2>${markdownToHtml(s.body)}`)
+    .join(
+      '<hr style="border:none;border-top:1px solid var(--bdr);margin:20px 0">',
+    );
+  c.querySelectorAll("td,th,p,li,blockquote").forEach((el) => {
+    if (el.textContent.toLowerCase().includes(q))
+      el.innerHTML = el.innerHTML.replace(re, '<span class="hl">$1</span>');
   });
   _wireRulebookLinks(c);
 }
@@ -3917,911 +7563,1422 @@ function rbSearch(query){
 // ═══════════════════════════════════════════════════════════════
 // INTERFACE TOUR
 // ═══════════════════════════════════════════════════════════════
-const TOUR_STEPS=[
-  {selector:'#bwrap',        title:'THE SURFACE MAP',body:'This hex grid is the planet\'s surface. Click a hex to move there. Unknown tiles are revealed when you enter them. Your base camp is outlined in white.',anchor:'center'},
-  {selector:'#hcrd',         title:'YOUR CREW',      body:"Your active crew member's portrait and status. Use the tabs at the top to check on other survivors.",anchor:'right'},
-  {selector:'.hudres',       title:'RESOURCES',      body:"Food and Oxygen each deplete by 1 per turn. If either hits zero, Health drops instead. Don't let Health reach zero.",anchor:'right'},
-  {selector:'#hudeq',        title:'BACKPACK',        body:'Equipment you carry into the field. Click a card to read what it does. Use the filter icons to sort by type.',anchor:'right'},
-  {selector:'#decks',        title:'CARD DECKS',      body:'Event and Equipment deck counts. Events trigger on tile exploration. Equipment is drawn from the Locker at Base Camp.',anchor:'left'},
-  {selector:'#tabletop-dice',title:'MOVEMENT',        body:'Each turn starts with rolling for movement points. Click the die, then click a destination hex on the map.',anchor:'left'},
-  {selector:'.hudact',       title:'ACTIONS',         body:'Actions available here change based on your location. You can perform multiple actions throughout your turn as you move to different tiles.',anchor:'left'},
-  {selector:'#e7panel',      title:'SHIP COMPUTER',      body:'The E7 log records every action you take and advises next steps. Enable Guide Mode anytime to receive in-context hints throughout the mission. Check the Field Guide for the full rule book. Good luck, crew.',anchor:'left'},
+const TOUR_STEPS = [
+  {
+    selector: "#bwrap",
+    title: "THE SURFACE MAP",
+    body: "This hex grid is the planet's surface. Click a hex to move there. Unknown tiles are revealed when you enter them. Your base camp is outlined in white.",
+    anchor: "center",
+  },
+  {
+    selector: "#hcrd",
+    title: "YOUR CREW",
+    body: "Your active crew member's portrait and status. Use the tabs at the top to check on other survivors.",
+    anchor: "right",
+  },
+  {
+    selector: ".hudres",
+    title: "RESOURCES",
+    body: "Food and Oxygen each deplete by 1 per turn. If either hits zero, Health drops instead. Don't let Health reach zero.",
+    anchor: "right",
+  },
+  {
+    selector: "#hudeq",
+    title: "BACKPACK",
+    body: "Equipment you carry into the field. Click a card to read what it does. Use the filter icons to sort by type.",
+    anchor: "right",
+  },
+  {
+    selector: "#decks",
+    title: "CARD DECKS",
+    body: "Event and Equipment deck counts. Events trigger on tile exploration. Equipment is drawn from the Locker at Base Camp.",
+    anchor: "left",
+  },
+  {
+    selector: "#tabletop-dice",
+    title: "MOVEMENT",
+    body: "Each turn starts with rolling for movement points. Click the die, then click a destination hex on the map.",
+    anchor: "left",
+  },
+  {
+    selector: ".hudact",
+    title: "ACTIONS",
+    body: "Actions available here change based on your location. You can perform multiple actions throughout your turn as you move to different tiles.",
+    anchor: "left",
+  },
+  {
+    selector: "#e7panel",
+    title: "SHIP COMPUTER",
+    body: "The E7 log records every action you take and advises next steps. Enable Guide Mode anytime to receive in-context hints throughout the mission. Check the Field Guide for the full rule book. Good luck, crew.",
+    anchor: "left",
+  },
 ];
-let _tourStep=0;
-let _deckWasCollapsed=true,_deckStepVisited=false;
+let _tourStep = 0;
+let _deckWasCollapsed = true,
+  _deckStepVisited = false;
 
-function _maybeTourPrompt(){
-  if(!localStorage.getItem('signal-tour-seen')) setTimeout(_showTourPrompt,600);
+function _maybeTourPrompt() {
+  if (!localStorage.getItem("signal-tour-seen"))
+    setTimeout(_showTourPrompt, 600);
 }
 
-function _showTourPrompt(){
-  if(!document.getElementById('game').classList.contains('running'))return;
-  _tourStep=-1;
-  document.getElementById('tour-step-lbl').textContent='';
-  document.getElementById('tour-title').textContent='INTERFACE TOUR';
-  document.getElementById('tour-body').textContent="I'm the E7 ship computer. Would you like a tour of the interface before your mission begins?";
-  document.getElementById('tour-footer-prompt').style.display='flex';
-  document.getElementById('tour-footer-nav').style.display='none';
+function _showTourPrompt() {
+  if (!document.getElementById("game").classList.contains("running")) return;
+  _tourStep = -1;
+  document.getElementById("tour-step-lbl").textContent = "";
+  document.getElementById("tour-title").textContent = "INTERFACE TOUR";
+  document.getElementById("tour-body").textContent =
+    "I'm the E7 ship computer. Would you like a tour of the interface before your mission begins?";
+  document.getElementById("tour-footer-prompt").style.display = "flex";
+  document.getElementById("tour-footer-nav").style.display = "none";
   _applyTourDim(null);
-  document.getElementById('tour-ov').classList.add('show');
+  document.getElementById("tour-ov").classList.add("show");
   _centerTourCard();
 }
 
-function startTour(){
+function startTour() {
   // Called from Field Guide — skip prompt, begin step 0 immediately
-  if(!document.getElementById('game').classList.contains('running'))return;
+  if (!document.getElementById("game").classList.contains("running")) return;
   closeRulebook();
-  _deckStepVisited=false; _deckWasCollapsed=true;
-  _tourStep=0;
-  document.getElementById('tour-footer-prompt').style.display='none';
-  document.getElementById('tour-footer-nav').style.display='flex';
-  document.getElementById('tour-ov').classList.add('show');
+  _deckStepVisited = false;
+  _deckWasCollapsed = true;
+  _tourStep = 0;
+  document.getElementById("tour-footer-prompt").style.display = "none";
+  document.getElementById("tour-footer-nav").style.display = "flex";
+  document.getElementById("tour-ov").classList.add("show");
   _renderTourStep();
 }
 
-function _startTourSteps(){
+function _startTourSteps() {
   // Called when user answers Yes to the prompt
-  _deckStepVisited=false; _deckWasCollapsed=true;
-  _tourStep=0;
-  document.getElementById('tour-footer-prompt').style.display='none';
-  document.getElementById('tour-footer-nav').style.display='flex';
+  _deckStepVisited = false;
+  _deckWasCollapsed = true;
+  _tourStep = 0;
+  document.getElementById("tour-footer-prompt").style.display = "none";
+  document.getElementById("tour-footer-nav").style.display = "flex";
   _renderTourStep();
 }
 
-function _applyStepEffects(){
-  const step=TOUR_STEPS[_tourStep]||null;
-  const decksEl=document.getElementById('decks');
-  const e7El=document.getElementById('e7panel');
+function _applyStepEffects() {
+  const step = TOUR_STEPS[_tourStep] || null;
+  const decksEl = document.getElementById("decks");
+  const e7El = document.getElementById("e7panel");
   // Deck expansion: expand when on deck step, restore when leaving it
-  if(step?.selector==='#decks'){
-    _deckStepVisited=true;
-    _deckWasCollapsed=decksEl.classList.contains('hud-collapsed');
-    decksEl.classList.remove('hud-collapsed');
-  } else if(_deckStepVisited){
-    if(_deckWasCollapsed) decksEl.classList.add('hud-collapsed');
-    else decksEl.classList.remove('hud-collapsed');
+  if (step?.selector === "#decks") {
+    _deckStepVisited = true;
+    _deckWasCollapsed = decksEl.classList.contains("hud-collapsed");
+    decksEl.classList.remove("hud-collapsed");
+  } else if (_deckStepVisited) {
+    if (_deckWasCollapsed) decksEl.classList.add("hud-collapsed");
+    else decksEl.classList.remove("hud-collapsed");
   }
   // HUD + E7 panel dim: apply only on the surface map step
   // (#hud uses display:contents so opacity must target its children directly)
-  const isMapStep=step?.selector==='#bwrap';
-  const o=isMapStep?'0.2':'';
-  document.getElementById('hud-player').style.opacity=o;
-  document.getElementById('hud-action').style.opacity=o;
-  e7El.style.opacity=o;
+  const isMapStep = step?.selector === "#bwrap";
+  const o = isMapStep ? "0.2" : "";
+  document.getElementById("hud-player").style.opacity = o;
+  document.getElementById("hud-action").style.opacity = o;
+  e7El.style.opacity = o;
 }
 
-function _tourStepRect(step){
-  if(step.selectors){
-    let l=Infinity,t=Infinity,r=-Infinity,b=-Infinity,found=false;
-    step.selectors.forEach(sel=>{
-      const el=document.querySelector(sel);
-      if(!el)return;
-      const rc=el.getBoundingClientRect();
-      l=Math.min(l,rc.left);t=Math.min(t,rc.top);
-      r=Math.max(r,rc.right);b=Math.max(b,rc.bottom);
-      found=true;
+function _tourStepRect(step) {
+  if (step.selectors) {
+    let l = Infinity,
+      t = Infinity,
+      r = -Infinity,
+      b = -Infinity,
+      found = false;
+    step.selectors.forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const rc = el.getBoundingClientRect();
+      l = Math.min(l, rc.left);
+      t = Math.min(t, rc.top);
+      r = Math.max(r, rc.right);
+      b = Math.max(b, rc.bottom);
+      found = true;
     });
-    return found?{left:l,top:t,right:r,bottom:b,width:r-l,height:b-t}:null;
+    return found
+      ? { left: l, top: t, right: r, bottom: b, width: r - l, height: b - t }
+      : null;
   }
-  const el=step.selector?document.querySelector(step.selector):null;
-  return el?el.getBoundingClientRect():null;
+  const el = step.selector ? document.querySelector(step.selector) : null;
+  return el ? el.getBoundingClientRect() : null;
 }
 
-function _renderTourStep(){
-  const step=TOUR_STEPS[_tourStep];
-  const total=TOUR_STEPS.length;
-  document.getElementById('tour-step-lbl').textContent=`STEP ${_tourStep+1} OF ${total}`;
-  document.getElementById('tour-title').textContent=step.title;
-  document.getElementById('tour-body').textContent=step.body;
-  document.getElementById('tour-prev').disabled=(_tourStep===0);
-  document.getElementById('tour-next').textContent=(_tourStep===total-1)?'Done':'Next →';
+function _renderTourStep() {
+  const step = TOUR_STEPS[_tourStep];
+  const total = TOUR_STEPS.length;
+  document.getElementById("tour-step-lbl").textContent =
+    `STEP ${_tourStep + 1} OF ${total}`;
+  document.getElementById("tour-title").textContent = step.title;
+  document.getElementById("tour-body").textContent = step.body;
+  document.getElementById("tour-prev").disabled = _tourStep === 0;
+  document.getElementById("tour-next").textContent =
+    _tourStep === total - 1 ? "Done" : "Next →";
   _applyStepEffects();
-  const doLayout=()=>{
-    const rect=_tourStepRect(step);
+  const doLayout = () => {
+    const rect = _tourStepRect(step);
     _applyTourDim(rect);
-    _positionTourCard(rect,step.anchor);
+    _positionTourCard(rect, step.anchor);
   };
   // Defer layout on the deck step so the CSS expand transition (220ms) completes first
-  if(step.selector==='#decks') setTimeout(doLayout,260);
+  if (step.selector === "#decks") setTimeout(doLayout, 260);
   else doLayout();
 }
 
-function _applyTourDim(rect){
-  const vw=window.innerWidth,vh=window.innerHeight,pad=12;
-  const top=document.getElementById('tour-dim-top');
-  const bot=document.getElementById('tour-dim-bot');
-  const lft=document.getElementById('tour-dim-lft');
-  const rgt=document.getElementById('tour-dim-rgt');
-  const spot=document.getElementById('tour-dim-spot');
-  const ring=document.getElementById('tour-ring');
-  if(rect){
-    const x1=Math.max(0,rect.left-pad),y1=Math.max(0,rect.top-pad);
-    const x2=Math.min(vw,rect.right+pad),y2=Math.min(vh,rect.bottom+pad);
-    top.style.cssText =`top:0;left:0;width:${vw}px;height:${y1}px`;
-    bot.style.cssText =`top:${y2}px;left:0;width:${vw}px;height:${vh-y2}px`;
-    lft.style.cssText =`top:${y1}px;left:0;width:${x1}px;height:${y2-y1}px`;
-    rgt.style.cssText =`top:${y1}px;left:${x2}px;width:${vw-x2}px;height:${y2-y1}px`;
-    spot.style.cssText=`top:${y1}px;left:${x1}px;width:${x2-x1}px;height:${y2-y1}px`;
-    ring.style.cssText=`display:block;top:${y1}px;left:${x1}px;width:${x2-x1}px;height:${y2-y1}px`;
+function _applyTourDim(rect) {
+  const vw = window.innerWidth,
+    vh = window.innerHeight,
+    pad = 12;
+  const top = document.getElementById("tour-dim-top");
+  const bot = document.getElementById("tour-dim-bot");
+  const lft = document.getElementById("tour-dim-lft");
+  const rgt = document.getElementById("tour-dim-rgt");
+  const spot = document.getElementById("tour-dim-spot");
+  const ring = document.getElementById("tour-ring");
+  if (rect) {
+    const x1 = Math.max(0, rect.left - pad),
+      y1 = Math.max(0, rect.top - pad);
+    const x2 = Math.min(vw, rect.right + pad),
+      y2 = Math.min(vh, rect.bottom + pad);
+    top.style.cssText = `top:0;left:0;width:${vw}px;height:${y1}px`;
+    bot.style.cssText = `top:${y2}px;left:0;width:${vw}px;height:${vh - y2}px`;
+    lft.style.cssText = `top:${y1}px;left:0;width:${x1}px;height:${y2 - y1}px`;
+    rgt.style.cssText = `top:${y1}px;left:${x2}px;width:${vw - x2}px;height:${y2 - y1}px`;
+    spot.style.cssText = `top:${y1}px;left:${x1}px;width:${x2 - x1}px;height:${y2 - y1}px`;
+    ring.style.cssText = `display:block;top:${y1}px;left:${x1}px;width:${x2 - x1}px;height:${y2 - y1}px`;
   } else {
-    top.style.cssText=`top:0;left:0;width:${vw}px;height:${vh}px`;
-    bot.style.cssText=lft.style.cssText=rgt.style.cssText=spot.style.cssText='width:0;height:0';
-    ring.style.display='none';
+    top.style.cssText = `top:0;left:0;width:${vw}px;height:${vh}px`;
+    bot.style.cssText =
+      lft.style.cssText =
+      rgt.style.cssText =
+      spot.style.cssText =
+        "width:0;height:0";
+    ring.style.display = "none";
   }
 }
 
-function _positionTourCard(rect,anchor){
-  const card=document.getElementById('tour-card');
-  const vw=window.innerWidth,vh=window.innerHeight;
-  const cw=300,ch=card.offsetHeight||200,gap=22,margin=10;
-  let left,top;
-  if(!rect||anchor==='center'){
-    left=(vw-cw)/2; top=(vh-ch)/2;
-  } else if(anchor==='right'){
-    left=rect.right+gap; top=rect.top+(rect.height/2)-(ch/2);
-  } else if(anchor==='left'){
-    left=rect.left-cw-gap; top=rect.top+(rect.height/2)-(ch/2);
-  } else if(anchor==='bottom'){
-    left=rect.left+(rect.width/2)-(cw/2); top=rect.bottom+gap;
-  } else if(anchor==='top'){
-    left=rect.left+(rect.width/2)-(cw/2); top=rect.top-ch-gap;
+function _positionTourCard(rect, anchor) {
+  const card = document.getElementById("tour-card");
+  const vw = window.innerWidth,
+    vh = window.innerHeight;
+  const cw = 300,
+    ch = card.offsetHeight || 200,
+    gap = 22,
+    margin = 10;
+  let left, top;
+  if (!rect || anchor === "center") {
+    left = (vw - cw) / 2;
+    top = (vh - ch) / 2;
+  } else if (anchor === "right") {
+    left = rect.right + gap;
+    top = rect.top + rect.height / 2 - ch / 2;
+  } else if (anchor === "left") {
+    left = rect.left - cw - gap;
+    top = rect.top + rect.height / 2 - ch / 2;
+  } else if (anchor === "bottom") {
+    left = rect.left + rect.width / 2 - cw / 2;
+    top = rect.bottom + gap;
+  } else if (anchor === "top") {
+    left = rect.left + rect.width / 2 - cw / 2;
+    top = rect.top - ch - gap;
   }
-  left=Math.max(margin,Math.min(vw-cw-margin,left));
-  top =Math.max(margin,Math.min(vh-ch-margin,top));
-  card.style.left=left+'px';
-  card.style.top =top+'px';
+  left = Math.max(margin, Math.min(vw - cw - margin, left));
+  top = Math.max(margin, Math.min(vh - ch - margin, top));
+  card.style.left = left + "px";
+  card.style.top = top + "px";
 }
 
-function _centerTourCard(){
-  const card=document.getElementById('tour-card');
-  const vw=window.innerWidth,vh=window.innerHeight;
-  const cw=300,ch=card.offsetHeight||170;
-  card.style.left=((vw-cw)/2)+'px';
-  card.style.top =((vh-ch)/2)+'px';
+function _centerTourCard() {
+  const card = document.getElementById("tour-card");
+  const vw = window.innerWidth,
+    vh = window.innerHeight;
+  const cw = 300,
+    ch = card.offsetHeight || 170;
+  card.style.left = (vw - cw) / 2 + "px";
+  card.style.top = (vh - ch) / 2 + "px";
 }
 
-function tourStep(dir){
-  if(dir<0)_play('back.wav');
-  _tourStep+=dir;
-  if(_tourStep>=TOUR_STEPS.length){endTour();return;}
-  if(_tourStep<0)_tourStep=0;
+function tourStep(dir) {
+  if (dir < 0) _play("back.wav");
+  _tourStep += dir;
+  if (_tourStep >= TOUR_STEPS.length) {
+    endTour();
+    return;
+  }
+  if (_tourStep < 0) _tourStep = 0;
   _renderTourStep();
 }
 
-function endTour(){
-  document.getElementById('tour-ov').classList.remove('show');
+function endTour() {
+  document.getElementById("tour-ov").classList.remove("show");
   // Restore any step-specific effects that may still be active
-  document.getElementById('hud-player').style.opacity='';
-  document.getElementById('hud-action').style.opacity='';
-  document.getElementById('e7panel').style.opacity='';
-  const decksEl=document.getElementById('decks');
-  if(_deckStepVisited&&_deckWasCollapsed) decksEl.classList.add('hud-collapsed');
-  localStorage.setItem('signal-tour-seen','1');
+  document.getElementById("hud-player").style.opacity = "";
+  document.getElementById("hud-action").style.opacity = "";
+  document.getElementById("e7panel").style.opacity = "";
+  const decksEl = document.getElementById("decks");
+  if (_deckStepVisited && _deckWasCollapsed)
+    decksEl.classList.add("hud-collapsed");
+  localStorage.setItem("signal-tour-seen", "1");
 }
 
 // ═══════════════════════════════════════════════════════════════
 // PAN / ZOOM / INTERACTION
 // ═══════════════════════════════════════════════════════════════
-function initBoard(){
-  const wrap=document.getElementById('bwrap'),svg=document.getElementById('bsvg');
-  let dragging=false,df=null;
-  wrap.addEventListener('mousedown',e=>{if(e.button!==2&&e.button!==1)return;e.preventDefault();dragging=true;df={x:e.clientX,y:e.clientY};svg.classList.add('drag');});
-  wrap.addEventListener('contextmenu',e=>{e.preventDefault();});
-  document.addEventListener('mousemove',e=>{if(!dragging||!df)return;pan.x+=e.clientX-df.x;pan.y+=e.clientY-df.y;df={x:e.clientX,y:e.clientY};_schedulePan();});
-  document.addEventListener('mouseup',e=>{if(e.button!==2&&e.button!==1)return;dragging=false;df=null;svg.classList.remove('drag');});
-  wrap.addEventListener('wheel',e=>{
+function initBoard() {
+  const wrap = document.getElementById("bwrap"),
+    svg = document.getElementById("bsvg");
+  let dragging = false,
+    df = null;
+  wrap.addEventListener("mousedown", (e) => {
+    if (e.button !== 2 && e.button !== 1) return;
     e.preventDefault();
-    if(usesTrackpad&&!e.ctrlKey){pan.x-=e.deltaX;pan.y-=e.deltaY;_schedulePan();return;}
-    const factor=e.ctrlKey?(e.deltaY>0?.985:1.015):(e.deltaY>0?.88:1.13);
-    const newZoom=Math.max(.3,Math.min(3,zoom*factor));
-    const bx=-pan.x/zoom, by=-pan.y/zoom;
-    pan.x=-bx*newZoom; pan.y=-by*newZoom;
-    zoom=newZoom;
+    dragging = true;
+    df = { x: e.clientX, y: e.clientY };
+    svg.classList.add("drag");
+  });
+  wrap.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging || !df) return;
+    pan.x += e.clientX - df.x;
+    pan.y += e.clientY - df.y;
+    df = { x: e.clientX, y: e.clientY };
     _schedulePan();
-  },{passive:false});
-  let lt=null;
-  wrap.addEventListener('touchstart',e=>{if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
-  wrap.addEventListener('touchmove',e=>{if(e.touches.length===1&&lt){pan.x+=e.touches[0].clientX-lt.x;pan.y+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};_schedulePan();}},{passive:true});
-  wrap.addEventListener('touchend',()=>{lt=null;});
-  svg.addEventListener('touchend',e=>{
-    if(e.changedTouches.length!==1)return;const T=e.changedTouches[0],rect=svg.getBoundingClientRect();
-    const W=svg.clientWidth,H=svg.clientHeight;
-    const lx=(T.clientX-rect.left-W/2-pan.x)/zoom,ly=(T.clientY-rect.top-H/2-pan.y)/zoom;
-    const[q,r]=p2h(lx,ly);onHexClick(q,r);
+  });
+  document.addEventListener("mouseup", (e) => {
+    if (e.button !== 2 && e.button !== 1) return;
+    dragging = false;
+    df = null;
+    svg.classList.remove("drag");
+  });
+  wrap.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      if (usesTrackpad && !e.ctrlKey) {
+        pan.x -= e.deltaX;
+        pan.y -= e.deltaY;
+        _schedulePan();
+        return;
+      }
+      const factor = e.ctrlKey
+        ? e.deltaY > 0
+          ? 0.985
+          : 1.015
+        : e.deltaY > 0
+          ? 0.88
+          : 1.13;
+      const newZoom = Math.max(0.3, Math.min(3, zoom * factor));
+      const bx = -pan.x / zoom,
+        by = -pan.y / zoom;
+      pan.x = -bx * newZoom;
+      pan.y = -by * newZoom;
+      zoom = newZoom;
+      _schedulePan();
+    },
+    { passive: false },
+  );
+  let lt = null;
+  wrap.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length === 1)
+        lt = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    },
+    { passive: true },
+  );
+  wrap.addEventListener(
+    "touchmove",
+    (e) => {
+      if (e.touches.length === 1 && lt) {
+        pan.x += e.touches[0].clientX - lt.x;
+        pan.y += e.touches[0].clientY - lt.y;
+        lt = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        _schedulePan();
+      }
+    },
+    { passive: true },
+  );
+  wrap.addEventListener("touchend", () => {
+    lt = null;
+  });
+  svg.addEventListener("touchend", (e) => {
+    if (e.changedTouches.length !== 1) return;
+    const T = e.changedTouches[0],
+      rect = svg.getBoundingClientRect();
+    const W = svg.clientWidth,
+      H = svg.clientHeight;
+    const lx = (T.clientX - rect.left - W / 2 - pan.x) / zoom,
+      ly = (T.clientY - rect.top - H / 2 - pan.y) / zoom;
+    const [q, r] = p2h(lx, ly);
+    onHexClick(q, r);
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
 // CRASH SITE BUILDER
 // ═══════════════════════════════════════════════════════════════
-const BUILDER_PALETTE=[
-  {name:'Medical Bay',     short:'MED',  desc:'On entry: restore 1 Health token automatically.'},
-  {name:'Signal Array',    short:'SIG',  desc:'Activate fragments & roll for rescue.'},
-  {name:'Equipment Locker',short:'EQUIP',desc:'Draw 1 Equipment card.'},
-  {name:'Cargo Hold',      short:'CARGO',desc:'Deposit or withdraw Food freely.'},
-  {name:'Watch Tower',     short:'WATCH',desc:'Reveal tiles adjacent to any frontier player.'},
-  {name:'Airlock',         short:'AIR',  desc:'On entry from terrain: refill all O₂ Tanks.'},
+const BUILDER_PALETTE = [
+  {
+    name: "Medical Bay",
+    short: "MED",
+    desc: "On entry: restore 1 Health token automatically.",
+  },
+  {
+    name: "Signal Array",
+    short: "SIG",
+    desc: "Activate fragments & roll for rescue.",
+  },
+  { name: "Equipment Locker", short: "EQUIP", desc: "Draw 1 Equipment card." },
+  {
+    name: "Cargo Hold",
+    short: "CARGO",
+    desc: "Deposit or withdraw Food freely.",
+  },
+  {
+    name: "Watch Tower",
+    short: "WATCH",
+    desc: "Reveal tiles adjacent to any frontier player.",
+  },
+  {
+    name: "Airlock",
+    short: "AIR",
+    desc: "On entry from terrain: refill all O₂ Tanks.",
+  },
 ];
 
-let builderState=null;
+let builderState = null;
 
-function initBuilder(){
-  builderState={
-    placed:new Map([[hk(0,0),{q:0,r:0,name:'Crash Site',short:'CRASH'}]]),
-    palette:[...BUILDER_PALETTE.map((p,i)=>({...p,idx:i,placed:false}))],
-    selectedIdx:-1
+function initBuilder() {
+  builderState = {
+    placed: new Map([
+      [hk(0, 0), { q: 0, r: 0, name: "Crash Site", short: "CRASH" }],
+    ]),
+    palette: [
+      ...BUILDER_PALETTE.map((p, i) => ({ ...p, idx: i, placed: false })),
+    ],
+    selectedIdx: -1,
   };
-  sbPan={x:0,y:0};sbZoom=Math.min(4,window.innerHeight/(SZB*9));
-  if(!sbEventsInit){
-    sbEventsInit=true;
-    const wrap=document.getElementById('sbsvg-wrap');
-    let sbDragging=false,sbDf=null;
-    wrap.addEventListener('mousedown',e=>{if(e.button!==2&&e.button!==1)return;e.preventDefault();sbDragging=true;sbDf={x:e.clientX,y:e.clientY};wrap.style.cursor='grabbing';});
-    wrap.addEventListener('contextmenu',e=>e.preventDefault());
-    document.addEventListener('mousemove',e=>{if(!sbDragging||!sbDf)return;sbPan.x+=e.clientX-sbDf.x;sbPan.y+=e.clientY-sbDf.y;sbDf={x:e.clientX,y:e.clientY};renderSiteBuilder();});
-    document.addEventListener('mouseup',e=>{if(e.button!==2&&e.button!==1)return;sbDragging=false;sbDf=null;wrap.style.cursor='';});
-    wrap.addEventListener('wheel',e=>{
+  sbPan = { x: 0, y: 0 };
+  sbZoom = Math.min(4, window.innerHeight / (SZB * 9));
+  if (!sbEventsInit) {
+    sbEventsInit = true;
+    const wrap = document.getElementById("sbsvg-wrap");
+    let sbDragging = false,
+      sbDf = null;
+    wrap.addEventListener("mousedown", (e) => {
+      if (e.button !== 2 && e.button !== 1) return;
       e.preventDefault();
-      if(e.ctrlKey){sbZoom=Math.max(.3,Math.min(4,sbZoom*(e.deltaY>0?.97:1.03)));renderSiteBuilder();return;}
-      if(usesTrackpad){sbPan.x-=e.deltaX;sbPan.y-=e.deltaY;renderSiteBuilder();return;}
-      sbZoom=Math.max(.3,Math.min(4,sbZoom*(e.deltaY>0?.88:1.13)));renderSiteBuilder();
-    },{passive:false});
+      sbDragging = true;
+      sbDf = { x: e.clientX, y: e.clientY };
+      wrap.style.cursor = "grabbing";
+    });
+    wrap.addEventListener("contextmenu", (e) => e.preventDefault());
+    document.addEventListener("mousemove", (e) => {
+      if (!sbDragging || !sbDf) return;
+      sbPan.x += e.clientX - sbDf.x;
+      sbPan.y += e.clientY - sbDf.y;
+      sbDf = { x: e.clientX, y: e.clientY };
+      renderSiteBuilder();
+    });
+    document.addEventListener("mouseup", (e) => {
+      if (e.button !== 2 && e.button !== 1) return;
+      sbDragging = false;
+      sbDf = null;
+      wrap.style.cursor = "";
+    });
+    wrap.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        if (e.ctrlKey) {
+          sbZoom = Math.max(
+            0.3,
+            Math.min(4, sbZoom * (e.deltaY > 0 ? 0.97 : 1.03)),
+          );
+          renderSiteBuilder();
+          return;
+        }
+        if (usesTrackpad) {
+          sbPan.x -= e.deltaX;
+          sbPan.y -= e.deltaY;
+          renderSiteBuilder();
+          return;
+        }
+        sbZoom = Math.max(
+          0.3,
+          Math.min(4, sbZoom * (e.deltaY > 0 ? 0.88 : 1.13)),
+        );
+        renderSiteBuilder();
+      },
+      { passive: false },
+    );
   }
   renderPalette();
   renderSiteBuilder();
 }
 
-function isValidBuilderPos(q,r){
-  const k=hk(q,r);
-  if(builderState.placed.has(k))return false;
+function isValidBuilderPos(q, r) {
+  const k = hk(q, r);
+  if (builderState.placed.has(k)) return false;
   // Must be adjacent to at least one placed tile
-  for(const[dq,dr]of DIRS){
-    if(builderState.placed.has(hk(q+dq,r+dr)))return true;
+  for (const [dq, dr] of DIRS) {
+    if (builderState.placed.has(hk(q + dq, r + dr))) return true;
   }
   return false;
 }
 
-const BUILDER_TILE_DETAIL={
-  'Medical Bay':    'Entering this tile restores 1 HEALTH token every turn. Place it for fast access during emergencies.',
-  'Signal Array':   'Your rescue transmitter — the only way off this planet. Activate RADIO FRAGMENTS here, then roll to establish a signal.',
-  'Equipment Locker':'Draw EQUIPMENT cards here: tools, supplies, and weapons. Visit early to gear up before exploring the field.',
-  'Cargo Hold':     'Communal FOOD storage shared by all crew. Deposit surplus FOOD so teammates can withdraw it.',
-  'Watch Tower':    'Reveals all face-down tiles adjacent to any crew member currently in the field. This is powerful for scouting unknown terrain.',
-  'Airlock':        'OXYGEN depletes every turn outside the base camp. The airlock is your lifeline. Entering this tile refills a crew member\'s OXYGEN supply.',
+const BUILDER_TILE_DETAIL = {
+  "Medical Bay":
+    "Entering this tile restores 1 HEALTH token every turn. Place it for fast access during emergencies.",
+  "Signal Array":
+    "Your rescue transmitter — the only way off this planet. Activate RADIO FRAGMENTS here, then roll to establish a signal.",
+  "Equipment Locker":
+    "Draw EQUIPMENT cards here: tools, supplies, and weapons. Visit early to gear up before exploring the field.",
+  "Cargo Hold":
+    "Communal FOOD storage shared by all crew. Deposit surplus FOOD so teammates can withdraw it.",
+  "Watch Tower":
+    "Reveals all face-down tiles adjacent to any crew member currently in the field. This is powerful for scouting unknown terrain.",
+  Airlock:
+    "OXYGEN depletes every turn outside the base camp. The airlock is your lifeline. Entering this tile refills a crew member's OXYGEN supply.",
 };
 
-function selectBuilderTile(idx){
-  if(_builderReadOnly)return;
-  const item=builderState.palette[idx];
-  if(item.placed)return;
-  sfx('select');
-  builderState.selectedIdx=(builderState.selectedIdx===idx?-1:idx);
+function selectBuilderTile(idx) {
+  if (_builderReadOnly) return;
+  const item = builderState.palette[idx];
+  if (item.placed) return;
+  sfx("select");
+  builderState.selectedIdx = builderState.selectedIdx === idx ? -1 : idx;
   renderPalette();
   renderSiteBuilder();
   // Update E7 log with detailed description of selected tile
-  const sbLog=document.getElementById('sb-e7-log');
-  if(builderState.selectedIdx>=0&&sbLog){
-    const sel=builderState.palette[builderState.selectedIdx];
-    const detail=BUILDER_TILE_DETAIL[sel.name]||sel.desc;
+  const sbLog = document.getElementById("sb-e7-log");
+  if (builderState.selectedIdx >= 0 && sbLog) {
+    const sel = builderState.palette[builderState.selectedIdx];
+    const detail = BUILDER_TILE_DETAIL[sel.name] || sel.desc;
     termDiv(sbLog);
-    termAppend(sbLog,`> ${sel.name.toUpperCase()}`,'sys',13,'e7m');
-    const detailDelay=sel.name.length*13+200;
-    setTimeout(()=>termAppend(sbLog,detail,'',13,'e7m'),detailDelay);
-    setTimeout(()=>termAppend(sbLog,'Click a highlighted hex on the map to place.','act',13,'e7m'),detailDelay+detail.length*13+300);
+    termAppend(sbLog, `> ${sel.name.toUpperCase()}`, "sys", 13, "e7m");
+    const detailDelay = sel.name.length * 13 + 200;
+    setTimeout(() => termAppend(sbLog, detail, "", 13, "e7m"), detailDelay);
+    setTimeout(
+      () =>
+        termAppend(
+          sbLog,
+          "Click a highlighted hex on the map to place.",
+          "act",
+          13,
+          "e7m",
+        ),
+      detailDelay + detail.length * 13 + 300,
+    );
   }
 }
 
-function placeBuilderTile(q,r){
+function placeBuilderTile(q, r) {
   cancelBuilderTooltip();
-  if(_builderReadOnly||builderState.selectedIdx<0)return;
-  if(!isValidBuilderPos(q,r))return;
-  const item=builderState.palette[builderState.selectedIdx];
-  if(item.placed)return;
-  builderState.placed.set(hk(q,r),{q,r,name:item.name,short:item.short});
-  item.placed=true;
-  builderState.selectedIdx=-1;
+  if (_builderReadOnly || builderState.selectedIdx < 0) return;
+  if (!isValidBuilderPos(q, r)) return;
+  const item = builderState.palette[builderState.selectedIdx];
+  if (item.placed) return;
+  builderState.placed.set(hk(q, r), {
+    q,
+    r,
+    name: item.name,
+    short: item.short,
+  });
+  item.placed = true;
+  builderState.selectedIdx = -1;
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
-  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
+  if (_isOnlineMode)
+    window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
-function removeBuilderTile(q,r){
+function removeBuilderTile(q, r) {
   cancelBuilderTooltip();
-  if(_builderReadOnly)return;
-  if(q===0&&r===0)return;
-  const k=hk(q,r);
-  const info=builderState.placed.get(k);
-  if(!info)return;
-  const paletteIdx=builderState.palette.findIndex(p=>p.name===info.name);
+  if (_builderReadOnly) return;
+  if (q === 0 && r === 0) return;
+  const k = hk(q, r);
+  const info = builderState.placed.get(k);
+  if (!info) return;
+  const paletteIdx = builderState.palette.findIndex(
+    (p) => p.name === info.name,
+  );
   builderState.placed.delete(k);
-  if(paletteIdx>=0){
-    builderState.palette[paletteIdx].placed=false;
-    builderState.selectedIdx=paletteIdx;
+  if (paletteIdx >= 0) {
+    builderState.palette[paletteIdx].placed = false;
+    builderState.selectedIdx = paletteIdx;
   }
-  sfx('select');
+  sfx("select");
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
-  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
+  if (_isOnlineMode)
+    window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
-function updateBuilderProgress(){
-  const placed=builderState.palette.filter(p=>p.placed).length;
-  document.getElementById('sbprogress').textContent=`${placed} / 6 placed`;
-  const btn=document.getElementById('sblaunbtn');
-  btn.disabled=placed<6;
+function updateBuilderProgress() {
+  const placed = builderState.palette.filter((p) => p.placed).length;
+  document.getElementById("sbprogress").textContent = `${placed} / 6 placed`;
+  const btn = document.getElementById("sblaunbtn");
+  btn.disabled = placed < 6;
 }
 
-function resetBuilder(){
-  if(_builderReadOnly)return;
+function resetBuilder() {
+  if (_builderReadOnly) return;
   initBuilder();
   updateBuilderProgress();
-  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
+  if (_isOnlineMode)
+    window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
-function randomBuilder(){
+function randomBuilder() {
   initBuilder();
   // Shuffle palette
-  const pal=[...builderState.palette];
-  for(let i=pal.length-1;i>0;i--){const j=0|Math.random()*(i+1);[pal[i],pal[j]]=[pal[j],pal[i]];}
-  // Place each tile on a random valid adjacent hex
-  for(const item of pal){
-    const valid=[];
-    for(let q=-3;q<=3;q++)for(let r=-3;r<=3;r++){if(isValidBuilderPos(q,r))valid.push([q,r]);}
-    if(!valid.length)break;
-    const[q,r]=valid[0|Math.random()*valid.length];
-    builderState.placed.set(hk(q,r),{q,r,name:item.name,short:item.short});
-    item.placed=true;
+  const pal = [...builderState.palette];
+  for (let i = pal.length - 1; i > 0; i--) {
+    const j = 0 | (Math.random() * (i + 1));
+    [pal[i], pal[j]] = [pal[j], pal[i]];
   }
-  builderState.selectedIdx=-1;
+  // Place each tile on a random valid adjacent hex
+  for (const item of pal) {
+    const valid = [];
+    for (let q = -3; q <= 3; q++)
+      for (let r = -3; r <= 3; r++) {
+        if (isValidBuilderPos(q, r)) valid.push([q, r]);
+      }
+    if (!valid.length) break;
+    const [q, r] = valid[0 | (Math.random() * valid.length)];
+    builderState.placed.set(hk(q, r), {
+      q,
+      r,
+      name: item.name,
+      short: item.short,
+    });
+    item.placed = true;
+  }
+  builderState.selectedIdx = -1;
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
-  if(_isOnlineMode)window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
+  if (_isOnlineMode)
+    window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
-function renderPalette(){
-  const pal=document.getElementById('sbpalette');
-  pal.innerHTML='<div class="sbpaltit">Crash Site Tiles</div>';
-  builderState.palette.forEach((item,i)=>{
-    const card=document.createElement('div');
-    const isSelected=builderState.selectedIdx===i;
-    card.className='sbpalcard'+(item.placed?' placed':isSelected?' selected':'');
-    const th=spriteCssForName(item.name,32,36);
-    card.innerHTML=`<div style="display:flex;align-items:center;gap:9px"><div style="width:32px;height:36px;flex-shrink:0;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);${th}"></div><div><div class="sbpalname">${item.name}</div><div class="sbpaldesc">${item.desc}</div></div></div>`;
-    if(!item.placed)card.onclick=()=>selectBuilderTile(i);
+function renderPalette() {
+  const pal = document.getElementById("sbpalette");
+  pal.innerHTML = '<div class="sbpaltit">Crash Site Tiles</div>';
+  builderState.palette.forEach((item, i) => {
+    const card = document.createElement("div");
+    const isSelected = builderState.selectedIdx === i;
+    card.className =
+      "sbpalcard" + (item.placed ? " placed" : isSelected ? " selected" : "");
+    const th = spriteCssForName(item.name, 32, 36);
+    card.innerHTML = `<div style="display:flex;align-items:center;gap:9px"><div style="width:32px;height:36px;flex-shrink:0;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);${th}"></div><div><div class="sbpalname">${item.name}</div><div class="sbpaldesc">${item.desc}</div></div></div>`;
+    if (!item.placed) card.onclick = () => selectBuilderTile(i);
     pal.appendChild(card);
   });
 }
 
-function renderSiteBuilder(){
-  const svg=document.getElementById('sbsvg');
-  svg.innerHTML='';
-  const ns=NS;
-  const W=svg.clientWidth||640,H=svg.clientHeight||640;
-  const defs=document.createElementNS(ns,'defs');svg.appendChild(defs);
+function renderSiteBuilder() {
+  const svg = document.getElementById("sbsvg");
+  svg.innerHTML = "";
+  const ns = NS;
+  const W = svg.clientWidth || 640,
+    H = svg.clientHeight || 640;
+  const defs = document.createElementNS(ns, "defs");
+  svg.appendChild(defs);
   // Hex grid fade mask (same as game board)
-  const hgGrad=document.createElementNS(ns,'radialGradient');
-  hgGrad.setAttribute('id','sb-hg-fade');hgGrad.setAttribute('gradientUnits','userSpaceOnUse');
-  hgGrad.setAttribute('cx','0');hgGrad.setAttribute('cy','0');hgGrad.setAttribute('r','900');
-  ['0%,1','55%,0.5','100%,0'].forEach(s=>{const[off,op]=s.split(',');const st=document.createElementNS(ns,'stop');st.setAttribute('offset',off);st.setAttribute('stop-color','white');st.setAttribute('stop-opacity',op);hgGrad.appendChild(st);});
-  const hgMask=document.createElementNS(ns,'mask');hgMask.setAttribute('id','sb-hg-mask');
-  const hgMaskRect=document.createElementNS(ns,'rect');hgMaskRect.setAttribute('x','-5000');hgMaskRect.setAttribute('y','-5000');hgMaskRect.setAttribute('width','10000');hgMaskRect.setAttribute('height','10000');hgMaskRect.setAttribute('fill','url(#sb-hg-fade)');
-  hgMask.appendChild(hgMaskRect);defs.appendChild(hgGrad);defs.appendChild(hgMask);
-  const sbFilt=document.createElementNS(ns,'filter');sbFilt.setAttribute('id','sb-icon-tint');sbFilt.setAttribute('x','0');sbFilt.setAttribute('y','0');sbFilt.setAttribute('width','1');sbFilt.setAttribute('height','1');
-  const sbFlood=document.createElementNS(ns,'feFlood');sbFlood.setAttribute('flood-color','#b2dbee');sbFlood.setAttribute('result','color');
-  const sbComp=document.createElementNS(ns,'feComposite');sbComp.setAttribute('in','color');sbComp.setAttribute('in2','SourceGraphic');sbComp.setAttribute('operator','in');
-  sbFilt.appendChild(sbFlood);sbFilt.appendChild(sbComp);defs.appendChild(sbFilt);
-  svg.appendChild(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#06080d'}));
-  const g=document.createElementNS(ns,'g');
-  g.setAttribute('transform',`translate(${W/2+sbPan.x} ${H/2+sbPan.y}) scale(${sbZoom})`);
+  const hgGrad = document.createElementNS(ns, "radialGradient");
+  hgGrad.setAttribute("id", "sb-hg-fade");
+  hgGrad.setAttribute("gradientUnits", "userSpaceOnUse");
+  hgGrad.setAttribute("cx", "0");
+  hgGrad.setAttribute("cy", "0");
+  hgGrad.setAttribute("r", "900");
+  ["0%,1", "55%,0.5", "100%,0"].forEach((s) => {
+    const [off, op] = s.split(",");
+    const st = document.createElementNS(ns, "stop");
+    st.setAttribute("offset", off);
+    st.setAttribute("stop-color", "white");
+    st.setAttribute("stop-opacity", op);
+    hgGrad.appendChild(st);
+  });
+  const hgMask = document.createElementNS(ns, "mask");
+  hgMask.setAttribute("id", "sb-hg-mask");
+  const hgMaskRect = document.createElementNS(ns, "rect");
+  hgMaskRect.setAttribute("x", "-5000");
+  hgMaskRect.setAttribute("y", "-5000");
+  hgMaskRect.setAttribute("width", "10000");
+  hgMaskRect.setAttribute("height", "10000");
+  hgMaskRect.setAttribute("fill", "url(#sb-hg-fade)");
+  hgMask.appendChild(hgMaskRect);
+  defs.appendChild(hgGrad);
+  defs.appendChild(hgMask);
+  const sbFilt = document.createElementNS(ns, "filter");
+  sbFilt.setAttribute("id", "sb-icon-tint");
+  sbFilt.setAttribute("x", "0");
+  sbFilt.setAttribute("y", "0");
+  sbFilt.setAttribute("width", "1");
+  sbFilt.setAttribute("height", "1");
+  const sbFlood = document.createElementNS(ns, "feFlood");
+  sbFlood.setAttribute("flood-color", "#b2dbee");
+  sbFlood.setAttribute("result", "color");
+  const sbComp = document.createElementNS(ns, "feComposite");
+  sbComp.setAttribute("in", "color");
+  sbComp.setAttribute("in2", "SourceGraphic");
+  sbComp.setAttribute("operator", "in");
+  sbFilt.appendChild(sbFlood);
+  sbFilt.appendChild(sbComp);
+  defs.appendChild(sbFilt);
+  svg.appendChild(
+    svgEl("rect", { x: 0, y: 0, width: W, height: H, fill: "#06080d" }),
+  );
+  const g = document.createElementNS(ns, "g");
+  g.setAttribute(
+    "transform",
+    `translate(${W / 2 + sbPan.x} ${H / 2 + sbPan.y}) scale(${sbZoom})`,
+  );
   svg.appendChild(g);
   // Hex grid texture (same style as game board, using builder hex size)
-  {const GR=22,pd=[];
-  for(let q=-GR;q<=GR;q++)for(let r=-GR;r<=GR;r++){
-    const[cx,cy]=h2pb(q,r);
-    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;
-      pd.push(`${i===0?'M':'L'}${(cx+SZB*Math.cos(a)).toFixed(1)},${(cy+SZB*Math.sin(a)).toFixed(1)}`);}
-    pd.push('Z');}
-  const gridPath=document.createElementNS(ns,'path');
-  gridPath.setAttribute('d',pd.join(' '));gridPath.setAttribute('fill','none');
-  gridPath.setAttribute('stroke','rgba(255,255,255,0.06)');gridPath.setAttribute('stroke-width','0.7');
-  gridPath.setAttribute('pointer-events','none');gridPath.setAttribute('mask','url(#sb-hg-mask)');
-  g.appendChild(gridPath);}
+  {
+    const GR = 22,
+      pd = [];
+    for (let q = -GR; q <= GR; q++)
+      for (let r = -GR; r <= GR; r++) {
+        const [cx, cy] = h2pb(q, r);
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i - Math.PI / 6;
+          pd.push(
+            `${i === 0 ? "M" : "L"}${(cx + SZB * Math.cos(a)).toFixed(1)},${(cy + SZB * Math.sin(a)).toFixed(1)}`,
+          );
+        }
+        pd.push("Z");
+      }
+    const gridPath = document.createElementNS(ns, "path");
+    gridPath.setAttribute("d", pd.join(" "));
+    gridPath.setAttribute("fill", "none");
+    gridPath.setAttribute("stroke", "rgba(255,255,255,0.06)");
+    gridPath.setAttribute("stroke-width", "0.7");
+    gridPath.setAttribute("pointer-events", "none");
+    gridPath.setAttribute("mask", "url(#sb-hg-mask)");
+    g.appendChild(gridPath);
+  }
   // Draw placed tiles
-  builderState.placed.forEach((info)=>{
-    const[cx,cy]=h2pb(info.q,info.r);
-    const pts=hexPtsB(cx,cy,SZB-2);
-    const bFile=TILE_IMAGE_MAP[info.name];
-    if(bFile){
-      const clipId='bc_'+info.q+'_'+info.r;
-      const cp=document.createElementNS(ns,'clipPath');cp.setAttribute('id',clipId);
-      const cpPoly=document.createElementNS(ns,'polygon');cpPoly.setAttribute('points',pts);
-      cp.appendChild(cpPoly);defs.appendChild(cp);
-      const hw=SZB*SQRT3,hh=SZB*2;
-      const img=document.createElementNS(ns,'image');
-      img.setAttribute('href',`img/Tiles/${bFile.replace('.png','')}_hex.png`);
-      img.setAttribute('x',cx-hw/2);img.setAttribute('y',cy-hh/2);
-      img.setAttribute('width',hw);img.setAttribute('height',hh);
-      img.setAttribute('preserveAspectRatio','xMidYMid slice');
-      img.setAttribute('clip-path','url(#'+clipId+')');img.setAttribute('pointer-events','none');
+  builderState.placed.forEach((info) => {
+    const [cx, cy] = h2pb(info.q, info.r);
+    const pts = hexPtsB(cx, cy, SZB - 2);
+    const bFile = TILE_IMAGE_MAP[info.name];
+    if (bFile) {
+      const clipId = "bc_" + info.q + "_" + info.r;
+      const cp = document.createElementNS(ns, "clipPath");
+      cp.setAttribute("id", clipId);
+      const cpPoly = document.createElementNS(ns, "polygon");
+      cpPoly.setAttribute("points", pts);
+      cp.appendChild(cpPoly);
+      defs.appendChild(cp);
+      const hw = SZB * SQRT3,
+        hh = SZB * 2;
+      const img = document.createElementNS(ns, "image");
+      img.setAttribute(
+        "href",
+        `img/tiles/${bFile.replace(".png", "")}_hex.png`,
+      );
+      img.setAttribute("x", cx - hw / 2);
+      img.setAttribute("y", cy - hh / 2);
+      img.setAttribute("width", hw);
+      img.setAttribute("height", hh);
+      img.setAttribute("preserveAspectRatio", "xMidYMid slice");
+      img.setAttribute("clip-path", "url(#" + clipId + ")");
+      img.setAttribute("pointer-events", "none");
       g.appendChild(img);
-      const vig=document.createElementNS(ns,'polygon');
-      vig.setAttribute('points',pts);vig.setAttribute('fill','rgba(0,0,0,.38)');vig.setAttribute('pointer-events','none');
+      const vig = document.createElementNS(ns, "polygon");
+      vig.setAttribute("points", pts);
+      vig.setAttribute("fill", "rgba(0,0,0,.38)");
+      vig.setAttribute("pointer-events", "none");
       g.appendChild(vig);
     } else {
-      const poly=document.createElementNS(ns,'polygon');
-      poly.setAttribute('points',pts);poly.setAttribute('fill','#0e1e30');poly.setAttribute('pointer-events','none');
+      const poly = document.createElementNS(ns, "polygon");
+      poly.setAttribute("points", pts);
+      poly.setAttribute("fill", "#0e1e30");
+      poly.setAttribute("pointer-events", "none");
       g.appendChild(poly);
     }
-    const border=document.createElementNS(ns,'polygon');
-    border.setAttribute('points',pts);border.setAttribute('fill','transparent');
-    const isCrashSite=info.q===0&&info.r===0;
-    border.setAttribute('stroke','#b2dbee');border.setAttribute('stroke-width','1.5');border.setAttribute('style',isCrashSite?'cursor:default':'cursor:pointer');
-    border.addEventListener('mouseenter',e=>{_hoverSnd();startBuilderTooltip(info,e);});
-    border.addEventListener('mouseleave',cancelBuilderTooltip);
-    if(!isCrashSite)border.addEventListener('click',()=>removeBuilderTile(info.q,info.r));
+    const border = document.createElementNS(ns, "polygon");
+    border.setAttribute("points", pts);
+    border.setAttribute("fill", "transparent");
+    const isCrashSite = info.q === 0 && info.r === 0;
+    border.setAttribute("stroke", "#b2dbee");
+    border.setAttribute("stroke-width", "1.5");
+    border.setAttribute(
+      "style",
+      isCrashSite ? "cursor:default" : "cursor:pointer",
+    );
+    border.addEventListener("mouseenter", (e) => {
+      _hoverSnd();
+      startBuilderTooltip(info, e);
+    });
+    border.addEventListener("mouseleave", cancelBuilderTooltip);
+    if (!isCrashSite)
+      border.addEventListener("click", () => removeBuilderTile(info.q, info.r));
     g.appendChild(border);
-    const icon=BASECAMP_ICON_MAP[info.name];
-    if(icon){
-      const sz=SZB*0.7;
-      const iconEl=document.createElementNS(ns,'image');
-      iconEl.setAttribute('href',`img/Icons/${icon}`);
-      iconEl.setAttribute('x',cx-sz/2);iconEl.setAttribute('y',cy-sz/2);
-      iconEl.setAttribute('width',sz);iconEl.setAttribute('height',sz);
-      iconEl.setAttribute('opacity','0.55');
-      iconEl.setAttribute('filter','url(#sb-icon-tint)');
-      iconEl.setAttribute('pointer-events','none');
+    const icon = BASECAMP_ICON_MAP[info.name];
+    if (icon) {
+      const sz = SZB * 0.7;
+      const iconEl = document.createElementNS(ns, "image");
+      iconEl.setAttribute("href", `img/icons/${icon}`);
+      iconEl.setAttribute("x", cx - sz / 2);
+      iconEl.setAttribute("y", cy - sz / 2);
+      iconEl.setAttribute("width", sz);
+      iconEl.setAttribute("height", sz);
+      iconEl.setAttribute("opacity", "0.55");
+      iconEl.setAttribute("filter", "url(#sb-icon-tint)");
+      iconEl.setAttribute("pointer-events", "none");
       g.appendChild(iconEl);
     }
   });
   // Draw valid placement hexes
-  if(builderState.selectedIdx>=0){
+  if (builderState.selectedIdx >= 0) {
     // Compute all adjacent to placed, not yet placed
-    const candidates=new Set();
-    builderState.placed.forEach((_,k)=>{
-      const[q,r]=k.split(',').map(Number);
-      for(const[dq,dr]of DIRS){
-        const nk=hk(q+dq,r+dr);
-        if(!builderState.placed.has(nk))candidates.add(nk);
+    const candidates = new Set();
+    builderState.placed.forEach((_, k) => {
+      const [q, r] = k.split(",").map(Number);
+      for (const [dq, dr] of DIRS) {
+        const nk = hk(q + dq, r + dr);
+        if (!builderState.placed.has(nk)) candidates.add(nk);
       }
     });
-    candidates.forEach(k=>{
-      const[q,r]=k.split(',').map(Number);
-      const[cx,cy]=h2pb(q,r);
-      const poly=document.createElementNS(ns,'polygon');
-      const pts=hexPtsB(cx,cy,SZB-2);
-      poly.setAttribute('points',pts);
-      poly.setAttribute('fill','rgba(30,80,160,.1)');
-      poly.setAttribute('stroke','#2a70d0');
-      poly.setAttribute('stroke-width','1.2');
-      poly.setAttribute('stroke-dasharray','3.81 2.86');
-      poly.setAttribute('stroke-dashoffset','5.24');
-      poly.setAttribute('cursor','pointer');
-      poly.addEventListener('mouseenter',()=>_hoverSnd());
-      poly.addEventListener('click',()=>{sfx('select');placeBuilderTile(q,r);});
+    candidates.forEach((k) => {
+      const [q, r] = k.split(",").map(Number);
+      const [cx, cy] = h2pb(q, r);
+      const poly = document.createElementNS(ns, "polygon");
+      const pts = hexPtsB(cx, cy, SZB - 2);
+      poly.setAttribute("points", pts);
+      poly.setAttribute("fill", "rgba(30,80,160,.1)");
+      poly.setAttribute("stroke", "#2a70d0");
+      poly.setAttribute("stroke-width", "1.2");
+      poly.setAttribute("stroke-dasharray", "3.81 2.86");
+      poly.setAttribute("stroke-dashoffset", "5.24");
+      poly.setAttribute("cursor", "pointer");
+      poly.addEventListener("mouseenter", () => _hoverSnd());
+      poly.addEventListener("click", () => {
+        sfx("select");
+        placeBuilderTile(q, r);
+      });
       g.appendChild(poly);
-      const plus=document.createElementNS(ns,'text');
-      plus.setAttribute('x',cx);plus.setAttribute('y',cy+5);
-      plus.setAttribute('text-anchor','middle');plus.setAttribute('font-family','Courier New,monospace');
-      plus.setAttribute('font-size','16');plus.setAttribute('fill','#2a70d0');plus.setAttribute('opacity','.7');
-      plus.setAttribute('pointer-events','none');
-      plus.textContent='＋';
+      const plus = document.createElementNS(ns, "text");
+      plus.setAttribute("x", cx);
+      plus.setAttribute("y", cy + 5);
+      plus.setAttribute("text-anchor", "middle");
+      plus.setAttribute("font-family", "Courier New,monospace");
+      plus.setAttribute("font-size", "16");
+      plus.setAttribute("fill", "#2a70d0");
+      plus.setAttribute("opacity", ".7");
+      plus.setAttribute("pointer-events", "none");
+      plus.textContent = "＋";
       g.appendChild(plus);
     });
   }
 }
 
-function hexPtsB(cx,cy,sz){
-  sz=sz||SZB-2;let s='';
-  for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;s+=`${(cx+sz*Math.cos(a)).toFixed(1)},${(cy+sz*Math.sin(a)).toFixed(1)} `;}return s.trim();
+function hexPtsB(cx, cy, sz) {
+  sz = sz || SZB - 2;
+  let s = "";
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 6;
+    s += `${(cx + sz * Math.cos(a)).toFixed(1)},${(cy + sz * Math.sin(a)).toFixed(1)} `;
+  }
+  return s.trim();
 }
 
-function finalizeGame(){
+function finalizeGame() {
   // Convert builder placed map into crash site tiles
-  const placedMap=new Map();
-  builderState.placed.forEach((info,k)=>{
-    placedMap.set(k,{...info,type:'crash_site',revealed:true});
+  const placedMap = new Map();
+  builderState.placed.forEach((info, k) => {
+    placedMap.set(k, { ...info, type: "crash_site", revealed: true });
   });
-  document.getElementById('setup-site').classList.remove('show');
-  document.getElementById('setup-site').style.display='none';
-  document.getElementById('game').className='running';
-  _play('start.wav');
+  document.getElementById("setup-site").classList.remove("show");
+  document.getElementById("setup-site").style.display = "none";
+  document.getElementById("game").className = "running";
+  _play("start.wav");
   clearSave();
   _updateMpBadge();
-  guidanceSeen=new Set(); // reset guidance milestones for new game
-  newGame(pendingNames,pendingPortraits,placedMap);
+  guidanceSeen = new Set(); // reset guidance milestones for new game
+  newGame(pendingNames, pendingPortraits, placedMap);
   // For online games, push state immediately so the client doesn't wait for the setTimeout
-  if(_isOnlineMode && window.Sync?.isActive()) saveGame();
+  if (_isOnlineMode && window.Sync?.isActive()) saveGame();
   // Sync guidance toggle button state
-  const gtBtn=document.getElementById('e7guidance-toggle');if(gtBtn){gtBtn.checked=guidanceMode;}
-  setTimeout(()=>{
-    preloadTileImages();initBoard();render();updateUI();
-    showTableDice('move');
+  const gtBtn = document.getElementById("e7guidance-toggle");
+  if (gtBtn) {
+    gtBtn.checked = guidanceMode;
+  }
+  setTimeout(() => {
+    preloadTileImages();
+    initBoard();
+    render();
+    updateUI();
+    showTableDice("move");
     // Open E7 panel and seed with mission controls + game log
-    document.getElementById('e7panel').classList.add('show');
-    const crew=pendingNames;
-    const ctrlLines=usesTrackpad
-      ?[
-        [0,'','Click — Interact'],
-        [0,'','Two-finger scroll — Pan'],
-        [0,'','Pinch — Zoom'],
-      ]
-      :[
-        [0,'','Left-click — Interact'],
-        [0,'','Right-click — Pan'],
-        [0,'','Scroll wheel — Zoom'],
-      ];
+    document.getElementById("e7panel").classList.add("show");
+    const crew = pendingNames;
+    const ctrlLines = usesTrackpad
+      ? [
+          [0, "", "Click — Interact"],
+          [0, "", "Two-finger scroll — Pan"],
+          [0, "", "Pinch — Zoom"],
+        ]
+      : [
+          [0, "", "Left-click — Interact"],
+          [0, "", "Right-click — Pan"],
+          [0, "", "Scroll wheel — Zoom"],
+        ];
     e7Seq([
-      [0,   'sys',  '> MISSION CONTROLS'],
+      [0, "sys", "> MISSION CONTROLS"],
       ...ctrlLines,
-      [0,   'div',  null],
-      [0,   'sys',  '> MISSION BRIEFING'],
-      [0,   '',     'Find RADIO FRAGMENTS to activate the SIGNAL ARRAY. Each fragment increases the range of your signal.'],
-      [0,   '',     'RESOURCES deplete every turn. Return to the base camp to refuel.'],
-      [0,   'div',  null],
-      [0,   'sys', `Turn 1: ${crew[0]}. Roll for movement.`],
+      [0, "div", null],
+      [0, "sys", "> MISSION BRIEFING"],
+      [
+        0,
+        "",
+        "Find RADIO FRAGMENTS to activate the SIGNAL ARRAY. Each fragment increases the range of your signal.",
+      ],
+      [
+        0,
+        "",
+        "RESOURCES deplete every turn. Return to the base camp to refuel.",
+      ],
+      [0, "div", null],
+      [0, "sys", `Turn 1: ${crew[0]}. Roll for movement.`],
     ]);
     updateE7Prompt();
     _maybeTourPrompt();
-  },40);
+  }, 40);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // SETUP SCREEN
 // ═══════════════════════════════════════════════════════════════
-let setupN=2;
-let _sbMsgPlayed=false;
-let _lobbyMsgPlayed=false;
-let _crewMsgPlayed=false;
-let setupPortraits=(()=>{const a=CREW_PORTRAITS.map((_,i)=>i);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;})(); // shuffled so all 10 crew rotate in
+let setupN = 2;
+let _sbMsgPlayed = false;
+let _lobbyMsgPlayed = false;
+let _crewMsgPlayed = false;
+let setupPortraits = (() => {
+  const a = CREW_PORTRAITS.map((_, i) => i);
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+})(); // shuffled so all 10 crew rotate in
 
-function buildSetup(){
-  if(_isOnlineMode){buildOnlineSetup();return;}
-  const row=document.getElementById('crow');row.innerHTML='';
-  for(let i=1;i<=6;i++){const b=document.createElement('button');b.className='cbtn'+(i===setupN?' sel':'');b.textContent=i;b.onclick=()=>{setupN=i;buildSetup();};row.appendChild(b);}
-  const synthPrev=document.getElementById('synth-preview');
-  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90,0,3,'pawn')+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
-  const cbx=document.getElementById('addSynthCbx');if(cbx)cbx.checked=addSynth;
-  const nl=document.getElementById('plist');const prev=[...nl.querySelectorAll('input')].map(x=>x.value);nl.innerHTML='';
-  for(let i=0;i<setupN;i++){
-    const pi=setupPortraits[i]??i%CREW_PORTRAITS.length;
-    setupPortraits[i]=pi;
-    const pname=CREW_PORTRAITS[pi].name;
-    const d=document.createElement('div');d.className='prow';
-    d.innerHTML=`<div class="ppick">
+function buildSetup() {
+  if (_isOnlineMode) {
+    buildOnlineSetup();
+    return;
+  }
+  const row = document.getElementById("crow");
+  row.innerHTML = "";
+  for (let i = 1; i <= 6; i++) {
+    const b = document.createElement("button");
+    b.className = "cbtn" + (i === setupN ? " sel" : "");
+    b.textContent = i;
+    b.onclick = () => {
+      setupN = i;
+      buildSetup();
+    };
+    row.appendChild(b);
+  }
+  const synthPrev = document.getElementById("synth-preview");
+  if (synthPrev)
+    synthPrev.style.cssText =
+      portBg("iris", 80, 90, 0, 3, "pawn") +
+      (addSynth
+        ? "border:1px solid " + SYNTH_COLOR + ";border-radius:2px;opacity:1"
+        : "opacity:.35");
+  const cbx = document.getElementById("addSynthCbx");
+  if (cbx) cbx.checked = addSynth;
+  const nl = document.getElementById("plist");
+  const prev = [...nl.querySelectorAll("input")].map((x) => x.value);
+  nl.innerHTML = "";
+  for (let i = 0; i < setupN; i++) {
+    const pi = setupPortraits[i] ?? i % CREW_PORTRAITS.length;
+    setupPortraits[i] = pi;
+    const pname = CREW_PORTRAITS[pi].name;
+    const d = document.createElement("div");
+    d.className = "prow";
+    d.innerHTML = `<div class="ppick">
       <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
-      <div style="${portBg(pname,80,90,0,3,'pawn')}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+      <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
       <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
-    </div><input class="pi" type="text" id="pn-${i}" value="${prev[i]!==undefined?prev[i]:pname}" maxlength="16" placeholder="Crew ${i+1}">`;
+    </div><input class="pi" type="text" id="pn-${i}" value="${prev[i] !== undefined ? prev[i] : pname}" maxlength="16" placeholder="crew ${i + 1}">`;
     nl.appendChild(d);
   }
 }
 
-function cyclePortrait(i, dir){
-  const n=CREW_PORTRAITS.length;
-  const oldName=CREW_PORTRAITS[setupPortraits[i]??0].name;
-  setupPortraits[i]=((setupPortraits[i]??0)+dir+n)%n;
-  const newName=CREW_PORTRAITS[setupPortraits[i]].name;
-  const input=document.getElementById(`pn-${i}`);
-  if(input&&input.value===oldName) input.value=newName;
-  if(_isOnlineMode&&i===(window.Sync?.myPlayerIndex()??0)){_onlinePushMySlot();buildSetup();return;}
+function cyclePortrait(i, dir) {
+  const n = CREW_PORTRAITS.length;
+  const oldName = CREW_PORTRAITS[setupPortraits[i] ?? 0].name;
+  setupPortraits[i] = ((setupPortraits[i] ?? 0) + dir + n) % n;
+  const newName = CREW_PORTRAITS[setupPortraits[i]].name;
+  const input = document.getElementById(`pn-${i}`);
+  if (input && input.value === oldName) input.value = newName;
+  if (_isOnlineMode && i === (window.Sync?.myPlayerIndex() ?? 0)) {
+    _onlinePushMySlot();
+    buildSetup();
+    return;
+  }
   buildSetup();
 }
 
-function toggleSynth(v){sfx(v?'check_on':'check_off');addSynth=v;buildSetup();}
-
-function goToSiteBuilder(){
-  if(_isOnlineMode){
-    const players=Object.values(_onlineLobbyData).sort((a,b)=>a.connectionSlot-b.connectionSlot);
-    pendingNames=players.map(p=>p.name||CREW_PORTRAITS[p.portraitIndex??0].name);
-    pendingPortraits=players.map(p=>CREW_PORTRAITS[p.portraitIndex??0].name);
-    document.getElementById('su-leave').style.display='none';
-    document.getElementById('setup').style.display='none';
-    const sb=document.getElementById('setup-site');
-    sb.style.display='flex';sb.classList.add('show');
-    _builderReadOnly=false;
-    initBuilder();updateBuilderProgress();
-    window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
-    if(!_sbMsgPlayed){_sbMsgPlayed=true;e7ScreenSeq('sb-e7-log',[
-      [0,  'sys','> ESTABLISHING BASE CAMP...'],
-      [300,'',   'Before venturing into the field, set up your base camp.'],
-      [400,'act','Choose a tile below.'],
-    ]);}
-    return;
-  }
-  const names=[],portraits=[];
-  for(let i=0;i<setupN;i++){
-    const v=(document.getElementById(`pn-${i}`)?.value||'').trim();
-    const pname=CREW_PORTRAITS[setupPortraits[i]??0].name;
-    names.push(v||pname);
-    portraits.push(pname);
-  }
-  pendingNames=names;
-  pendingPortraits=portraits;
-  document.getElementById('setup').style.display='none';
-  document.getElementById('su-back').style.display='none';
-  const sb=document.getElementById('setup-site');
-  sb.style.display='flex';sb.classList.add('show');
-  initBuilder();
-  updateBuilderProgress();
-  if(!_sbMsgPlayed){_sbMsgPlayed=true;e7ScreenSeq('sb-e7-log',[
-    [0,   'sys', '> ESTABLISHING BASE CAMP...'],
-    [300, '',     'Before venturing into the field, you\'ll need to set up your base camp by placing key structures on the map.'],
-    [400, 'act',  'Choose a tile below.'],
-  ]);}
+function toggleSynth(v) {
+  sfx(v ? "check_on" : "check_off");
+  addSynth = v;
+  buildSetup();
 }
 
-window.addEventListener('DOMContentLoaded',()=>{
-  window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>2||e.ctrlKey)usesTrackpad=true;},{passive:true,once:false,capture:true});
+function goToSiteBuilder() {
+  if (_isOnlineMode) {
+    const players = Object.values(_onlineLobbyData).sort(
+      (a, b) => a.connectionSlot - b.connectionSlot,
+    );
+    pendingNames = players.map(
+      (p) => p.name || CREW_PORTRAITS[p.portraitIndex ?? 0].name,
+    );
+    pendingPortraits = players.map(
+      (p) => CREW_PORTRAITS[p.portraitIndex ?? 0].name,
+    );
+    document.getElementById("su-leave").style.display = "none";
+    document.getElementById("setup").style.display = "none";
+    const sb = document.getElementById("setup-site");
+    sb.style.display = "flex";
+    sb.classList.add("show");
+    _builderReadOnly = false;
+    initBuilder();
+    updateBuilderProgress();
+    window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
+    if (!_sbMsgPlayed) {
+      _sbMsgPlayed = true;
+      e7ScreenSeq("sb-e7-log", [
+        [0, "sys", "> ESTABLISHING BASE CAMP..."],
+        [300, "", "Before venturing into the field, set up your base camp."],
+        [400, "act", "Choose a tile below."],
+      ]);
+    }
+    return;
+  }
+  const names = [],
+    portraits = [];
+  for (let i = 0; i < setupN; i++) {
+    const v = (document.getElementById(`pn-${i}`)?.value || "").trim();
+    const pname = CREW_PORTRAITS[setupPortraits[i] ?? 0].name;
+    names.push(v || pname);
+    portraits.push(pname);
+  }
+  pendingNames = names;
+  pendingPortraits = portraits;
+  document.getElementById("setup").style.display = "none";
+  document.getElementById("su-back").style.display = "none";
+  const sb = document.getElementById("setup-site");
+  sb.style.display = "flex";
+  sb.classList.add("show");
+  initBuilder();
+  updateBuilderProgress();
+  if (!_sbMsgPlayed) {
+    _sbMsgPlayed = true;
+    e7ScreenSeq("sb-e7-log", [
+      [0, "sys", "> ESTABLISHING BASE CAMP..."],
+      [
+        300,
+        "",
+        "Before venturing into the field, you'll need to set up your base camp by placing key structures on the map.",
+      ],
+      [400, "act", "Choose a tile below."],
+    ]);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  window.addEventListener(
+    "wheel",
+    (e) => {
+      if (Math.abs(e.deltaX) > 2 || e.ctrlKey) usesTrackpad = true;
+    },
+    { passive: true, once: false, capture: true },
+  );
   // ── TILE REVEAL PEEK (hold outside box to see tile beneath) ──
-  const _trovEl=document.getElementById('trov');
-  const _trBox=document.getElementById('tr-box');
-  _trovEl.addEventListener('mousedown',e=>{if(!_trBox.contains(e.target))_trovEl.classList.add('peeking');});
-  const _sigOv=document.getElementById('sig-ov');
-  const _sigCard=document.getElementById('sig-card');
-  _sigOv.addEventListener('mousedown',e=>{if(!_sigCard.contains(e.target))_sigOv.classList.add('peeking');});
-  const _movEl=document.getElementById('mov');
-  _movEl.addEventListener('mousedown',e=>{
-    if((_movEl.classList.contains('cargo')||_movEl.classList.contains('rescue'))&&!e.target.closest('.mbox'))
-      _movEl.classList.add('peeking');
+  const _trovEl = document.getElementById("trov");
+  const _trBox = document.getElementById("tr-box");
+  _trovEl.addEventListener("mousedown", (e) => {
+    if (!_trBox.contains(e.target)) _trovEl.classList.add("peeking");
   });
-  document.addEventListener('mouseup',()=>{_trovEl.classList.remove('peeking');_sigOv.classList.remove('peeking');_movEl.classList.remove('peeking');});
-  document.querySelectorAll('.hud-vtab').forEach(tab=>{
-    const parent=tab.parentElement;
-    tab.addEventListener('click',()=>{parent?.classList.toggle('hud-collapsed');_play('hud.wav');});
+  const _sigOv = document.getElementById("sig-ov");
+  const _sigCard = document.getElementById("sig-card");
+  _sigOv.addEventListener("mousedown", (e) => {
+    if (!_sigCard.contains(e.target)) _sigOv.classList.add("peeking");
+  });
+  const _movEl = document.getElementById("mov");
+  _movEl.addEventListener("mousedown", (e) => {
+    if (
+      (_movEl.classList.contains("cargo") ||
+        _movEl.classList.contains("rescue")) &&
+      !e.target.closest(".mbox")
+    )
+      _movEl.classList.add("peeking");
+  });
+  document.addEventListener("mouseup", () => {
+    _trovEl.classList.remove("peeking");
+    _sigOv.classList.remove("peeking");
+    _movEl.classList.remove("peeking");
+  });
+  document.querySelectorAll(".hud-vtab").forEach((tab) => {
+    const parent = tab.parentElement;
+    tab.addEventListener("click", () => {
+      parent?.classList.toggle("hud-collapsed");
+      _play("hud.wav");
+    });
   });
 
-  document.getElementById('setup').style.display='none';
+  document.getElementById("setup").style.display = "none";
   // Sync guidance toggle on load
-  const _gtBtn=document.getElementById('e7guidance-toggle');if(_gtBtn){_gtBtn.checked=guidanceMode;}
+  const _gtBtn = document.getElementById("e7guidance-toggle");
+  if (_gtBtn) {
+    _gtBtn.checked = guidanceMode;
+  }
 
   // Check for an existing multiplayer session (page reload mid-game)
-  const mpSession=window.Sync?.restoreSession();
-  const _dismissWake=()=>{ document.getElementById('wake-screen').style.display='none'; };
+  const mpSession = window.Sync?.restoreSession();
+  const _dismissWake = () => {
+    document.getElementById("wake-screen").style.display = "none";
+  };
 
-  if(mpSession && window.Sync?.init()){
-    if(mpSession.playerIndex===0){
+  if (mpSession && window.Sync?.init()) {
+    if (mpSession.playerIndex === 0) {
       // HOST: restore from localStorage (always current), then reattach Firebase sync
-      if(loadGame()){
+      if (loadGame()) {
         window.Sync.onStateUpdate(receiveRemoteState);
-        window.Sync.reconnect(mpSession.joinCode,0).catch(()=>window.Sync?.clearSession());
+        window.Sync.reconnect(mpSession.joinCode, 0).catch(() =>
+          window.Sync?.clearSession(),
+        );
         _dismissWake();
-        document.getElementById('intro').style.display='none';
-        document.getElementById('game').className='running';
-        preloadTileImages();initBoard();render();updateUI();
-        showTableDice(G.phase==='roll'?'move':G.phase==='move'?'move':null);
-        if(G.phase==='move'&&G.movementLeft>0)G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
-        document.getElementById('e7panel').classList.add('show');
+        document.getElementById("intro").style.display = "none";
+        document.getElementById("game").className = "running";
+        preloadTileImages();
+        initBoard();
+        render();
+        updateUI();
+        showTableDice(
+          G.phase === "roll" ? "move" : G.phase === "move" ? "move" : null,
+        );
+        if (G.phase === "move" && G.movementLeft > 0)
+          G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
+        document.getElementById("e7panel").classList.add("show");
         _updateMpBadge();
-        addE7('> Session restored.','sys');
+        addE7("> Session restored.", "sys");
         return;
       }
     } else {
       // JOINER: no local save — reattach Firebase and restore crew setup or game state
       _dismissWake();
-      window.Sync.reconnect(mpSession.joinCode,mpSession.playerIndex)
-        .then(()=>enterOnlineCrewSetup())
-        .catch(()=>window.Sync?.clearSession());
+      window.Sync.reconnect(mpSession.joinCode, mpSession.playerIndex)
+        .then(() => enterOnlineCrewSetup())
+        .catch(() => window.Sync?.clearSession());
       return;
     }
     // Session found but restore failed — clear and fall through to intro
     window.Sync?.clearSession();
   }
 
-  if(loadGame()){
+  if (loadGame()) {
     // Resume saved local game
     _dismissWake();
-    document.getElementById('intro').style.display='none';
-    document.getElementById('game').className='running';
-    preloadTileImages();initBoard();render();updateUI();
-    showTableDice(G.phase==='roll'?'move':G.phase==='move'?'move':null);
-    if(G.phase==='move'&&G.movementLeft>0)G.reach=bfsReach(cp().q,cp().r,G.movementLeft);
-    document.getElementById('e7panel').classList.add('show');
-    addE7('> Session restored.','sys');
+    document.getElementById("intro").style.display = "none";
+    document.getElementById("game").className = "running";
+    preloadTileImages();
+    initBoard();
+    render();
+    updateUI();
+    showTableDice(
+      G.phase === "roll" ? "move" : G.phase === "move" ? "move" : null,
+    );
+    if (G.phase === "move" && G.movementLeft > 0)
+      G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
+    document.getElementById("e7panel").classList.add("show");
+    addE7("> Session restored.", "sys");
     return;
   }
 
   // Fresh game: hide intro until user wakes the terminal
-  document.getElementById('intro').style.display='none';
+  document.getElementById("intro").style.display = "none";
 
-  const _launchIntro=()=>{
+  const _launchIntro = () => {
     // Show intro — CSS animation on signal-intro-glow starts fresh from display:none
-    document.getElementById('intro').style.display='flex';
-    _music.play().catch(()=>{});
+    document.getElementById("intro").style.display = "flex";
+    _music.play().catch(() => {});
     // startup.wav + hdd1 play simultaneously at 0.5 volume.
     // hdd1 crossfades into hdd2 (1.5s overlap); hdd2 loops 3× while fading out.
-    const _sndStartup=new Audio('sfx/startup.wav');
-    const _sndHdd1=new Audio('sfx/startup-hdd1.mp3');
-    const _sndHdd2=new Audio('sfx/startup-hdd2.mp3');
-    _sndStartup.volume=0.3; _sndHdd1.volume=0.1; _sndHdd2.volume=0;
-    _sndStartup.play().catch(()=>{}); _sndHdd1.play().catch(()=>{});
+    const _sndStartup = new Audio("sfx/startup.wav");
+    const _sndHdd1 = new Audio("sfx/startup-hdd1.mp3");
+    const _sndHdd2 = new Audio("sfx/startup-hdd2.mp3");
+    _sndStartup.volume = 0.3;
+    _sndHdd1.volume = 0.1;
+    _sndHdd2.volume = 0;
+    _sndStartup.play().catch(() => {});
+    _sndHdd1.play().catch(() => {});
     // Loop hdd2 up to 3 times total
-    let _hdd2Plays=0,_hdd2FadeTimer=null;
-    const _onHdd2End=()=>{
+    let _hdd2Plays = 0,
+      _hdd2FadeTimer = null;
+    const _onHdd2End = () => {
       _hdd2Plays++;
-      if(_hdd2Plays<3){_sndHdd2.currentTime=0;_sndHdd2.play().catch(()=>{});}
-      else{_sndHdd2.removeEventListener('ended',_onHdd2End);clearInterval(_hdd2FadeTimer);}
+      if (_hdd2Plays < 3) {
+        _sndHdd2.currentTime = 0;
+        _sndHdd2.play().catch(() => {});
+      } else {
+        _sndHdd2.removeEventListener("ended", _onHdd2End);
+        clearInterval(_hdd2FadeTimer);
+      }
     };
-    _sndHdd2.addEventListener('ended',_onHdd2End);
+    _sndHdd2.addEventListener("ended", _onHdd2End);
     // Begin slow fade spanning all 3 loops; called once crossfade ramp finishes
-    const _startHdd2Fade=()=>{
-      const dur=(_sndHdd2.duration||30)*3*1000;
-      const step=120,decr=0.5/(dur/step);
-      _hdd2FadeTimer=setInterval(()=>{
-        if(_sndHdd2.volume>decr){_sndHdd2.volume=Math.max(0,_sndHdd2.volume-decr);}
-        else{_sndHdd2.volume=0;_sndHdd2.pause();clearInterval(_hdd2FadeTimer);}
-      },step);
+    const _startHdd2Fade = () => {
+      const dur = (_sndHdd2.duration || 30) * 3 * 1000;
+      const step = 120,
+        decr = 0.5 / (dur / step);
+      _hdd2FadeTimer = setInterval(() => {
+        if (_sndHdd2.volume > decr) {
+          _sndHdd2.volume = Math.max(0, _sndHdd2.volume - decr);
+        } else {
+          _sndHdd2.volume = 0;
+          _sndHdd2.pause();
+          clearInterval(_hdd2FadeTimer);
+        }
+      }, step);
     };
     // Crossfade: 1.5s before hdd1 ends ramp hdd1→0 and hdd2→0.5 simultaneously
-    const XFADE=1.5;
-    let _xfDone=false;
-    _sndHdd1.addEventListener('timeupdate',()=>{
-      if(_xfDone||!_sndHdd1.duration||_sndHdd1.currentTime<_sndHdd1.duration-XFADE)return;
-      _xfDone=true;
-      _sndHdd2.play().catch(()=>{});
-      const steps=Math.round(XFADE*1000/40);let s=0;
-      const _xf=setInterval(()=>{
-        s++;const t=Math.min(1,s/steps);
-        _sndHdd1.volume=0.1*(1-t);
-        _sndHdd2.volume=0.1*t;
-        if(s>=steps){clearInterval(_xf);_startHdd2Fade();}
-      },40);
+    const XFADE = 1.5;
+    let _xfDone = false;
+    _sndHdd1.addEventListener("timeupdate", () => {
+      if (
+        _xfDone ||
+        !_sndHdd1.duration ||
+        _sndHdd1.currentTime < _sndHdd1.duration - XFADE
+      )
+        return;
+      _xfDone = true;
+      _sndHdd2.play().catch(() => {});
+      const steps = Math.round((XFADE * 1000) / 40);
+      let s = 0;
+      const _xf = setInterval(() => {
+        s++;
+        const t = Math.min(1, s / steps);
+        _sndHdd1.volume = 0.1 * (1 - t);
+        _sndHdd2.volume = 0.1 * t;
+        if (s >= steps) {
+          clearInterval(_xf);
+          _startHdd2Fade();
+        }
+      }, 40);
     });
     // Phase 1→2: spin ends, begin merge
-    setTimeout(()=>{
-      const b=document.querySelector('.intro-box');
-      if(!b)return;
-      b.classList.remove('intro-startup');
-      b.classList.add('intro-merging');
-    },2300);
+    setTimeout(() => {
+      const b = document.querySelector(".intro-box");
+      if (!b) return;
+      b.classList.remove("intro-startup");
+      b.classList.add("intro-merging");
+    }, 2300);
     // Phase 2→3: merge done, reveal e7 screen + start log
-    setTimeout(()=>{
-      const b=document.querySelector('.intro-box');
-      if(!b)return;
-      b.classList.remove('intro-merging');
-      b.querySelector('.signal-intro-glow')?.classList.add('intro-logo-done');
-      e7ScreenSeq('e7-intro-msg',[
-        [300, '',       '> ENDYMION 7 — SYSTEMS INITIALIZING...'],
-        [1500, '',      '> PRIMARY DIAGNOSTICS: COMPLETE'],
-        [500, 'crit',   '> SIGNAL ARRAY: DAMAGED'],
-        [500, 'sys',    'Attention crew of the Endymion 7. The ship has crash landed on an uncharted planet. Cargo has been scattered across the wilds.'],
-        [500, 'sys',    'You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.'],
-        [500, 'sys',    'You have a 0.173% chance of survival.'],
-        [500, 'sys',    'Please acknowledge.'],
+    setTimeout(() => {
+      const b = document.querySelector(".intro-box");
+      if (!b) return;
+      b.classList.remove("intro-merging");
+      b.querySelector(".signal-intro-glow")?.classList.add("intro-logo-done");
+      e7ScreenSeq("e7-intro-msg", [
+        [300, "", "> ENDYMION 7 — SYSTEMS INITIALIZING..."],
+        [1500, "", "> PRIMARY DIAGNOSTICS: COMPLETE"],
+        [500, "crit", "> SIGNAL ARRAY: DAMAGED"],
+        [
+          500,
+          "sys",
+          "Attention crew of the Endymion 7. The ship has crash landed on an uncharted planet. Cargo has been scattered across the wilds.",
+        ],
+        [
+          500,
+          "sys",
+          "You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.",
+        ],
+        [500, "sys", "You have a 0.173% chance of survival."],
+        [500, "sys", "Please acknowledge."],
       ]);
-    },3650);
+    }, 3650);
   };
 
-  const _ws=document.getElementById('wake-screen');
-  const _wake=()=>{
-    _ws.removeEventListener('click',_wake);
-    document.removeEventListener('keydown',_wake);
+  const _ws = document.getElementById("wake-screen");
+  const _wake = () => {
+    _ws.removeEventListener("click", _wake);
+    document.removeEventListener("keydown", _wake);
     _dismissWake();
     _launchIntro();
   };
-  _ws.addEventListener('click',_wake);
-  document.addEventListener('keydown',_wake);
+  _ws.addEventListener("click", _wake);
+  document.addEventListener("keydown", _wake);
 });
 // ═══════════════════════════════════════════════════════════════
 // ONLINE LOBBY
 // ═══════════════════════════════════════════════════════════════
 
-const _escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-let _isOnlineMode=false;
-let _onlineLobbyData={};  // keyed by connectionSlot (0–5)
-let _builderReadOnly=false;
-function isMyTurn(){return !_isOnlineMode||!window.Sync?.isActive()||window.Sync.myPlayerIndex()===G?.currentPlayer;}
+const _escHtml = (s) =>
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+let _isOnlineMode = false;
+let _onlineLobbyData = {}; // keyed by connectionSlot (0–5)
+let _builderReadOnly = false;
+function isMyTurn() {
+  return (
+    !_isOnlineMode ||
+    !window.Sync?.isActive() ||
+    window.Sync.myPlayerIndex() === G?.currentPlayer
+  );
+}
 
-function _lobbyShowPanel(id){
-  const footers={'lobby-mode-sel':'lobby-footer-sel','lobby-hosting':'lobby-footer-host','lobby-joining':'lobby-footer-join'};
-  ['lobby-mode-sel','lobby-hosting','lobby-joining'].forEach(p=>{
-    document.getElementById(p).style.display=p===id?'block':'none';
-    const f=footers[p];
-    if(f) document.getElementById(f).style.display=p===id?'flex':'none';
+function _lobbyShowPanel(id) {
+  const footers = {
+    "lobby-mode-sel": "lobby-footer-sel",
+    "lobby-hosting": "lobby-footer-host",
+    "lobby-joining": "lobby-footer-join",
+  };
+  ["lobby-mode-sel", "lobby-hosting", "lobby-joining"].forEach((p) => {
+    document.getElementById(p).style.display = p === id ? "block" : "none";
+    const f = footers[p];
+    if (f)
+      document.getElementById(f).style.display = p === id ? "flex" : "none";
   });
 }
 
-function showOnlineLobby(){
-  if(!window.Sync?.init()){
-    alert('Firebase SDK failed to load. Check your internet connection and try again.');
+function showOnlineLobby() {
+  if (!window.Sync?.init()) {
+    alert(
+      "Firebase SDK failed to load. Check your internet connection and try again.",
+    );
     return;
   }
-  document.getElementById('intro').style.display='none';
-  document.getElementById('online-lobby').style.display='flex';
-  _lobbyShowPanel('lobby-mode-sel');
-  if(!_lobbyMsgPlayed){_lobbyMsgPlayed=true;e7ScreenSeq('lobby-e7-msg',[
-    [0,   'sys', '> ENDYMION 7 — COMM LINK ESTABLISHED'],
-    [500, '',    'One player hosts. Share the join code with up to 5 others.'],
-    [400, 'act', 'Select a mode below.'],
-  ]);}
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("online-lobby").style.display = "flex";
+  _lobbyShowPanel("lobby-mode-sel");
+  if (!_lobbyMsgPlayed) {
+    _lobbyMsgPlayed = true;
+    e7ScreenSeq("lobby-e7-msg", [
+      [0, "sys", "> ENDYMION 7 — COMM LINK ESTABLISHED"],
+      [500, "", "One player hosts. Share the join code with up to 5 others."],
+      [400, "act", "Select a mode below."],
+    ]);
+  }
 }
 
-function lobbyBack(){
-  _play('back.wav');
-  document.getElementById('online-lobby').style.display='none';
-  document.getElementById('intro').style.display='flex';
-  _lobbyShowPanel('lobby-mode-sel');
+function lobbyBack() {
+  _play("back.wav");
+  document.getElementById("online-lobby").style.display = "none";
+  document.getElementById("intro").style.display = "flex";
+  _lobbyShowPanel("lobby-mode-sel");
   window.Sync?.clearSession();
 }
 
-function lobbyHost(){
-  const code=window.Sync.generateJoinCode();
+function lobbyHost() {
+  const code = window.Sync.generateJoinCode();
   _lobbyShowPanel(null);
   window.Sync.hostGame(code)
-    .then(()=>{
-      document.getElementById('lobby-code-display').textContent=code;
-      _lobbyShowPanel('lobby-hosting');
+    .then(() => {
+      document.getElementById("lobby-code-display").textContent = code;
+      _lobbyShowPanel("lobby-hosting");
     })
-    .catch(err=>{
-      _lobbyShowPanel('lobby-mode-sel');
-      alert('Could not create game: '+err.message);
+    .catch((err) => {
+      _lobbyShowPanel("lobby-mode-sel");
+      alert("Could not create game: " + err.message);
     });
 }
 
-function lobbyJoinMode(){
-  _lobbyShowPanel('lobby-joining');
-  document.getElementById('lobby-code-input').focus();
+function lobbyJoinMode() {
+  _lobbyShowPanel("lobby-joining");
+  document.getElementById("lobby-code-input").focus();
 }
 
-function lobbyJoinConnect(){
-  const code=(document.getElementById('lobby-code-input').value||'').trim().toUpperCase();
-  if(code.length!==6){document.getElementById('lobby-join-status').textContent='Enter a 6-character code.';return;}
-  const btn=document.getElementById('lobby-join-btn');
-  btn.disabled=true;
-  document.getElementById('lobby-join-status').textContent='Connecting...';
+function lobbyJoinConnect() {
+  const code = (document.getElementById("lobby-code-input").value || "")
+    .trim()
+    .toUpperCase();
+  if (code.length !== 6) {
+    document.getElementById("lobby-join-status").textContent =
+      "Enter a 6-character code.";
+    return;
+  }
+  const btn = document.getElementById("lobby-join-btn");
+  btn.disabled = true;
+  document.getElementById("lobby-join-status").textContent = "Connecting...";
   window.Sync.joinGame(code)
-    .then(()=>enterOnlineCrewSetup())
-    .catch(err=>{
-      btn.disabled=false;
-      document.getElementById('lobby-join-status').textContent=err.message;
+    .then(() => enterOnlineCrewSetup())
+    .catch((err) => {
+      btn.disabled = false;
+      document.getElementById("lobby-join-status").textContent = err.message;
     });
 }
 
 // Called by host "Continue →" button and by joiners after connecting
-function enterOnlineCrewSetup(){
-  _isOnlineMode=true;
-  _onlineLobbyData={};
-  document.getElementById('online-lobby').style.display='none';
-  const badge=document.getElementById('su-mp-badge');
-  if(badge){badge.textContent='Join code: '+window.Sync.joinCode();badge.style.display='inline-flex';}
-  document.getElementById('su-leave').style.display='block';
-  document.getElementById('su-confirm').disabled=true;
+function enterOnlineCrewSetup() {
+  _isOnlineMode = true;
+  _onlineLobbyData = {};
+  document.getElementById("online-lobby").style.display = "none";
+  const badge = document.getElementById("su-mp-badge");
+  if (badge) {
+    badge.textContent = "Join code: " + window.Sync.joinCode();
+    badge.style.display = "inline-flex";
+  }
+  document.getElementById("su-leave").style.display = "block";
+  document.getElementById("su-confirm").disabled = true;
   window.Sync.onStateUpdate(receiveRemoteState);
-  window.Sync.onLobbyUpdate(rawData=>{
-    _onlineLobbyData={};
-    Object.values(rawData).forEach(entry=>{
-      if(entry&&typeof entry.connectionSlot==='number'){
-        _onlineLobbyData[entry.connectionSlot]=entry;
-        const mySlot=window.Sync?.myPlayerIndex()??0;
-        if(entry.connectionSlot!==mySlot&&entry.portraitIndex>=0)
-          setupPortraits[entry.connectionSlot]=entry.portraitIndex;
+  window.Sync.onLobbyUpdate((rawData) => {
+    _onlineLobbyData = {};
+    Object.values(rawData).forEach((entry) => {
+      if (entry && typeof entry.connectionSlot === "number") {
+        _onlineLobbyData[entry.connectionSlot] = entry;
+        const mySlot = window.Sync?.myPlayerIndex() ?? 0;
+        if (entry.connectionSlot !== mySlot && entry.portraitIndex >= 0)
+          setupPortraits[entry.connectionSlot] = entry.portraitIndex;
       }
     });
-    if(_isOnlineMode)buildSetup();
+    if (_isOnlineMode) buildSetup();
   });
   // Clients (non-host) watch for the host's site builder state
-  if(window.Sync.myPlayerIndex()!==0){
-    let _builderMsgShown=false;
-    window.Sync.onBuilderUpdate(placedData=>{
-      if(document.getElementById('game').className==='running')return;
-      document.getElementById('setup').style.display='none';
-      const sb=document.getElementById('setup-site');
-      sb.style.display='flex';sb.classList.add('show');
-      _builderReadOnly=true;
-      if(!builderState)builderState={placed:new Map(),palette:[],selectedIdx:-1,sbPan:{x:0,y:0}};
-      builderState.placed=new Map(Object.entries(placedData));
-      builderState.selectedIdx=-1;
-      document.getElementById('sbprogress').textContent='';
-      document.getElementById('sblaunbtn').disabled=true;
-      document.getElementById('sbpanel').style.display='none';
+  if (window.Sync.myPlayerIndex() !== 0) {
+    let _builderMsgShown = false;
+    window.Sync.onBuilderUpdate((placedData) => {
+      if (document.getElementById("game").className === "running") return;
+      document.getElementById("setup").style.display = "none";
+      const sb = document.getElementById("setup-site");
+      sb.style.display = "flex";
+      sb.classList.add("show");
+      _builderReadOnly = true;
+      if (!builderState)
+        builderState = {
+          placed: new Map(),
+          palette: [],
+          selectedIdx: -1,
+          sbPan: { x: 0, y: 0 },
+        };
+      builderState.placed = new Map(Object.entries(placedData));
+      builderState.selectedIdx = -1;
+      document.getElementById("sbprogress").textContent = "";
+      document.getElementById("sblaunbtn").disabled = true;
+      document.getElementById("sbpanel").style.display = "none";
       renderSiteBuilder();
-      if(!_builderMsgShown){
-        _builderMsgShown=true;
-        e7ScreenSeq('sb-e7-log',[
-          [0,  'sys','> ESTABLISHING BASE CAMP...'],
-          [300,'',   'Before venturing into the field, set up your base camp.'],
-          [400,'act',   'Host is building base camp…'],
+      if (!_builderMsgShown) {
+        _builderMsgShown = true;
+        e7ScreenSeq("sb-e7-log", [
+          [0, "sys", "> ESTABLISHING BASE CAMP..."],
+          [300, "", "Before venturing into the field, set up your base camp."],
+          [400, "act", "Host is building base camp…"],
         ]);
       }
     });
@@ -4830,125 +8987,163 @@ function enterOnlineCrewSetup(){
   _onlinePushMySlot();
 }
 
-function leaveOnlineSetup(){
-  _crewMsgPlayed=false;_sbMsgPlayed=false;
-  _isOnlineMode=false;
-  _onlineLobbyData={};
-  const badge=document.getElementById('su-mp-badge');
-  if(badge){badge.textContent='';badge.style.display='none';}
-  document.getElementById('su-leave').style.display='none';
-  document.getElementById('setup').style.display='none';
-  document.getElementById('intro').style.display='flex';
+function leaveOnlineSetup() {
+  _crewMsgPlayed = false;
+  _sbMsgPlayed = false;
+  _isOnlineMode = false;
+  _onlineLobbyData = {};
+  const badge = document.getElementById("su-mp-badge");
+  if (badge) {
+    badge.textContent = "";
+    badge.style.display = "none";
+  }
+  document.getElementById("su-leave").style.display = "none";
+  document.getElementById("setup").style.display = "none";
+  document.getElementById("intro").style.display = "flex";
   window.Sync?.leaveLobby();
 }
 
-function buildOnlineSetup(){
-  const mySlot=window.Sync?.myPlayerIndex()??0;
-  const connected=Object.keys(_onlineLobbyData).length;
-  document.getElementById('crow').innerHTML=
-    `<span class="online-crew-count">${connected} player${connected!==1?'s':''} connected</span>`;
-  const synthSec=document.getElementById('synth-section');
-  if(synthSec)synthSec.style.display=mySlot===0?'block':'none';
-  const synthPrev=document.getElementById('synth-preview');
-  if(synthPrev)synthPrev.style.cssText=portBg('iris',80,90,0,3,'pawn')+(addSynth?'border:1px solid '+SYNTH_COLOR+';border-radius:2px;opacity:1':'opacity:.35');
-  const cbx=document.getElementById('addSynthCbx');if(cbx)cbx.checked=addSynth;
-  const nl=document.getElementById('plist');nl.innerHTML='';
-  const lastFilled=Math.max(...Object.keys(_onlineLobbyData).map(Number),mySlot,-1);
-  const showUp=Math.min(lastFilled+1,5);
-  for(let i=0;i<=showUp;i++){
-    const entry=_onlineLobbyData[i];
-    const isMe=(i===mySlot);
-    const d=document.createElement('div');
-    if(!entry&&!isMe){
-      d.className='prow prow-empty';
-      d.innerHTML=`<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button><div class="port-empty-ph"></div><button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button></div><span class="pi-waiting">Waiting...</span>`;
+function buildOnlineSetup() {
+  const mySlot = window.Sync?.myPlayerIndex() ?? 0;
+  const connected = Object.keys(_onlineLobbyData).length;
+  document.getElementById("crow").innerHTML =
+    `<span class="online-crew-count">${connected} player${connected !== 1 ? "s" : ""} connected</span>`;
+  const synthSec = document.getElementById("synth-section");
+  if (synthSec) synthSec.style.display = mySlot === 0 ? "block" : "none";
+  const synthPrev = document.getElementById("synth-preview");
+  if (synthPrev)
+    synthPrev.style.cssText =
+      portBg("iris", 80, 90, 0, 3, "pawn") +
+      (addSynth
+        ? "border:1px solid " + SYNTH_COLOR + ";border-radius:2px;opacity:1"
+        : "opacity:.35");
+  const cbx = document.getElementById("addSynthCbx");
+  if (cbx) cbx.checked = addSynth;
+  const nl = document.getElementById("plist");
+  nl.innerHTML = "";
+  const lastFilled = Math.max(
+    ...Object.keys(_onlineLobbyData).map(Number),
+    mySlot,
+    -1,
+  );
+  const showUp = Math.min(lastFilled + 1, 5);
+  for (let i = 0; i <= showUp; i++) {
+    const entry = _onlineLobbyData[i];
+    const isMe = i === mySlot;
+    const d = document.createElement("div");
+    if (!entry && !isMe) {
+      d.className = "prow prow-empty";
+      d.innerHTML = `<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button><div class="port-empty-ph"></div><button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button></div><span class="pi-waiting">Waiting...</span>`;
       nl.appendChild(d);
       continue;
     }
-    const pi=isMe?(setupPortraits[i]??i%CREW_PORTRAITS.length):(entry?.portraitIndex??0);
-    if(isMe)setupPortraits[i]=pi;
-    const pname=CREW_PORTRAITS[pi].name;
-    const ready=entry?.ready??false;
-    d.className='prow'+(isMe?' prow-mine':'')+(ready?' prow-ready':'');
-    if(isMe){
-      const prevName=document.getElementById(`pn-${i}`)?.value||(entry?.name||pname);
-      d.innerHTML=`<div class="ppick">
+    const pi = isMe
+      ? (setupPortraits[i] ?? i % CREW_PORTRAITS.length)
+      : (entry?.portraitIndex ?? 0);
+    if (isMe) setupPortraits[i] = pi;
+    const pname = CREW_PORTRAITS[pi].name;
+    const ready = entry?.ready ?? false;
+    d.className =
+      "prow" + (isMe ? " prow-mine" : "") + (ready ? " prow-ready" : "");
+    if (isMe) {
+      const prevName =
+        document.getElementById(`pn-${i}`)?.value || entry?.name || pname;
+      d.innerHTML = `<div class="ppick">
         <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
-        <div style="${portBg(pname,80,90,0,3,'pawn')}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+        <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
         <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
       </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prevName)}" maxlength="16" oninput="_onlineNameChange()">
-      <button class="online-ready-btn${ready?' active':''}" onclick="onlineToggleReady()">${ready?'Ready ✓':'Ready?'}</button>`;
+      <button class="online-ready-btn${ready ? " active" : ""}" onclick="onlineToggleReady()">${ready ? "Ready ✓" : "Ready?"}</button>`;
     } else {
-      const dname=_escHtml(entry?.name||pname);
-      d.innerHTML=`<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>
-        <div style="${portBg(pname,80,90,0,3,'pawn')}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+      const dname = _escHtml(entry?.name || pname);
+      d.innerHTML = `<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>
+        <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
         <button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button>
       </div><span class="pi">${dname}</span>
-      <span class="online-ready-ind${ready?' active':''}"> ${ready?'✓ Ready':'Not ready'}</span>`;
+      <span class="online-ready-ind${ready ? " active" : ""}"> ${ready ? "✓ Ready" : "Not ready"}</span>`;
     }
     nl.appendChild(d);
   }
-  const confirmBtn=document.getElementById('su-confirm');
-  if(mySlot===0){
-    confirmBtn.style.display='block';
-    confirmBtn.disabled=!_allOnlineReady();
+  const confirmBtn = document.getElementById("su-confirm");
+  if (mySlot === 0) {
+    confirmBtn.style.display = "block";
+    confirmBtn.disabled = !_allOnlineReady();
   } else {
-    confirmBtn.style.display='none';
+    confirmBtn.style.display = "none";
   }
 }
 
-function onlineToggleReady(){
-  const mySlot=window.Sync?.myPlayerIndex()??0;
-  const wasReady=_onlineLobbyData[mySlot]?.ready??false;
+function onlineToggleReady() {
+  const mySlot = window.Sync?.myPlayerIndex() ?? 0;
+  const wasReady = _onlineLobbyData[mySlot]?.ready ?? false;
   _onlinePushMySlot(!wasReady);
 }
 
-function _onlineNameChange(){
+function _onlineNameChange() {
   _onlinePushMySlot();
 }
 
-function _onlinePushMySlot(readyOverride){
-  const mySlot=window.Sync?.myPlayerIndex()??0;
-  const pi=setupPortraits[mySlot]??mySlot%CREW_PORTRAITS.length;
-  const nameEl=document.getElementById(`pn-${mySlot}`);
-  const name=(nameEl?.value||'').trim()||CREW_PORTRAITS[pi].name;
-  const ready=readyOverride!==undefined?readyOverride:(_onlineLobbyData[mySlot]?.ready??false);
-  window.Sync.updateLobbySlot({name,portraitIndex:pi,ready,connectionSlot:mySlot});
+function _onlinePushMySlot(readyOverride) {
+  const mySlot = window.Sync?.myPlayerIndex() ?? 0;
+  const pi = setupPortraits[mySlot] ?? mySlot % CREW_PORTRAITS.length;
+  const nameEl = document.getElementById(`pn-${mySlot}`);
+  const name = (nameEl?.value || "").trim() || CREW_PORTRAITS[pi].name;
+  const ready =
+    readyOverride !== undefined
+      ? readyOverride
+      : (_onlineLobbyData[mySlot]?.ready ?? false);
+  window.Sync.updateLobbySlot({
+    name,
+    portraitIndex: pi,
+    ready,
+    connectionSlot: mySlot,
+  });
 }
 
-function _allOnlineReady(){
-  const vals=Object.values(_onlineLobbyData);
-  if(vals.length===0)return false;
-  return vals.every(e=>e?.ready===true);
+function _allOnlineReady() {
+  const vals = Object.values(_onlineLobbyData);
+  if (vals.length === 0) return false;
+  return vals.every((e) => e?.ready === true);
 }
 
-function showCrewSetup(){
-  document.getElementById('intro').style.display='none';
-  document.getElementById('setup').style.display='flex';
-  if(!_isOnlineMode) document.getElementById('su-back').style.display='block';
+function showCrewSetup() {
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("setup").style.display = "flex";
+  if (!_isOnlineMode)
+    document.getElementById("su-back").style.display = "block";
   buildSetup();
-  if(!_crewMsgPlayed){_crewMsgPlayed=true;e7ScreenSeq('e7-setup-msg',[
-    [0,   'sys', '> ENDYMION 7 — CREW MUSTER...'],
-    [400, '',    'Life support systems are operational.'],
-    [400, '',    'The unscheduled landing has resulted in numerous casualties among the crew. Biological scans are inconclusive.'],
-    [400, 'act',    'Please confirm the surviving crew members.'],
-  ]);}
+  if (!_crewMsgPlayed) {
+    _crewMsgPlayed = true;
+    e7ScreenSeq("e7-setup-msg", [
+      [0, "sys", "> ENDYMION 7 — CREW MUSTER..."],
+      [400, "", "Life support systems are operational."],
+      [
+        400,
+        "",
+        "The unscheduled landing has resulted in numerous casualties among the crew. Biological scans are inconclusive.",
+      ],
+      [400, "act", "Please confirm the surviving crew members."],
+    ]);
+  }
 }
 
-function backToIntro(){
-  _play('back.wav');
-  _crewMsgPlayed=false;_sbMsgPlayed=false;
-  document.getElementById('setup').style.display='none';
-  document.getElementById('su-back').style.display='none';
-  document.getElementById('intro').style.display='flex';
+function backToIntro() {
+  _play("back.wav");
+  _crewMsgPlayed = false;
+  _sbMsgPlayed = false;
+  document.getElementById("setup").style.display = "none";
+  document.getElementById("su-back").style.display = "none";
+  document.getElementById("intro").style.display = "flex";
 }
 
-function backToCrewSetup(){
-  _play('back.wav');
-  const ss=document.getElementById('setup-site');
-  ss.style.display='none';ss.classList.remove('show');
-  document.getElementById('setup').style.display='flex';
-  if(!_isOnlineMode) document.getElementById('su-back').style.display='block';
-  else document.getElementById('su-leave').style.display='block';
+function backToCrewSetup() {
+  _play("back.wav");
+  const ss = document.getElementById("setup-site");
+  ss.style.display = "none";
+  ss.classList.remove("show");
+  document.getElementById("setup").style.display = "flex";
+  if (!_isOnlineMode)
+    document.getElementById("su-back").style.display = "block";
+  else document.getElementById("su-leave").style.display = "block";
   buildSetup();
 }

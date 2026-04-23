@@ -1,524 +1,827 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>SIGNAL</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-</head>
-<body>
-
-<!-- ── E7 SHIP COMPUTER (global — visible across all screens) ── -->
-<div id="e7panel">
-  <div id="e7hdr">
-    <div class="e7title">
-      <span class="e7logo">ENDYMION 7</span>
-      <label class="e7guidance-toggle" for="e7guidance-toggle" data-tooltip="Guide Mode: E7 can explain rules and mechanics from the Field Guide as you play.">
-        <input type="checkbox" id="e7guidance-toggle" onchange="toggleGuidance()">
-        <span class="e7toggle-track"><span class="e7toggle-thumb"></span></span>
-        <span class="e7toggle-lbl">GUIDE</span>
-      </label>
-    </div>
-    <div class="e7sub">SHIP COMPUTER</div>
-    <button class="e7close back-btn" onclick="toggleE7()">✕</button>
-  </div>
-  <div id="e7log"></div>
-  <div id="e7prompt"></div>
-</div>
-
-<!-- ── WAKE SCREEN ── -->
-<div id="wake-screen">
-  <div class="sbox wake-splash">
-    <div class="wake-logo-wrap">
-      <div class="signal-intro-icon wake-icon"></div>
-    </div>
-    <div class="wake-hint">
-      <div class="ssub wake-sub">Hibernation Mode<br>Awaiting user input to reactivate system functions</div>
-      <div>PRESS ANY KEY<span class="wake-cursor">▌</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── INTRO ── -->
-<div id="intro">
-  <div class="sbox intro-box intro-startup">
-    <div class="intro-lockup">
-      <div class="signal-intro-glow"><div class="signal-intro-icon"></div></div>
-      <div class="intro-lockup-text">
-        <h1>SIGNAL</h1>
-        <p class="ssub">1–6 Players · 30+ Minutes · Ages 14+</p>
-      </div>
-    </div>
-    <div id="e7-intro-msg" class="e7-screen-msg"></div>
-    <div class="sbox-footer">
-      <button class="sbtn secondary next-btn" onclick="showCrewSetup()">Local Game</button>
-      <button class="sbtn next-btn" onclick="showOnlineLobby()">Online Game</button>
-    </div>
-  </div>
-  <div class="version-label">v1.1.19</div>
-</div>
-
-<!-- ── ONLINE LOBBY ── -->
-<div id="online-lobby" style="display:none">
-  <div class="sbox lobby-box">
-    <div class="intro-lockup">
-      <div class="signal-intro-glow"><div class="signal-intro-icon"></div></div>
-      <div class="intro-lockup-text">
-        <h1>SIGNAL</h1>
-        <p class="ssub">ONLINE MULTIPLAYER</p>
-      </div>
-    </div>
-
-    <div id="lobby-e7-msg" class="e7-screen-msg"></div>
-
-    <!-- Mode selection -->
-    <div id="lobby-mode-sel" style="display:none"></div>
-
-    <!-- Host: show join code -->
-    <div id="lobby-hosting" style="display:none">
-      <div class="lobby-code-label">Your join code</div>
-      <div class="lobby-code" id="lobby-code-display">------</div>
-      <div class="lobby-code-hint">Share this with up to 5 other players.</div>
-    </div>
-
-    <!-- Joiner: enter code -->
-    <div id="lobby-joining" style="display:none">
-      <div class="lobby-code-label">Enter join code</div>
-      <input id="lobby-code-input" class="lobby-input" maxlength="6" placeholder="ABC123"
-             oninput="this.value=this.value.toUpperCase()"
-             onkeydown="if(event.key==='Enter')lobbyJoinConnect()">
-      <div id="lobby-join-status" class="lobby-status"></div>
-    </div>
-
-    <!-- Footers: one per panel, pinned to bottom of card -->
-    <div id="lobby-footer-sel" class="sbox-footer" style="display:none">
-      <button class="sbtn next-btn" onclick="lobbyHost()">Host a Game</button>
-      <button class="sbtn next-btn" onclick="lobbyJoinMode()">Join a Game</button>
-    </div>
-    <div id="lobby-footer-host" class="sbox-footer" style="display:none">
-      <button class="sbtn secondary back-btn" onclick="lobbyBack()">← Back</button>
-      <button class="sbtn next-btn" onclick="enterOnlineCrewSetup()">Continue →</button>
-    </div>
-    <div id="lobby-footer-join" class="sbox-footer" style="display:none">
-      <button class="sbtn secondary back-btn" onclick="lobbyBack()">← Back</button>
-      <button class="sbtn next-btn" id="lobby-join-btn" onclick="lobbyJoinConnect()">Connect</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── SETUP: player names ── -->
-<div id="setup">
-  <div id="suhdr">
-    <div class="signal-hdr-icon"></div>
-    <h1>SIGNAL · CREW INITIALIZATION</h1>
-    <span id="su-mp-badge" class="su-mp-badge" style="display:none"></span>
-  </div>
-  <div id="sumain">
-    <div id="su-left">
-      <div class="ssec">
-        <div class="slbl">Crew Size</div>
-        <div class="crow" id="crow"></div>
-      </div>
-      <div class="ssec">
-        <div class="slbl">Crew Manifest</div>
-        <div id="plist"></div>
-      </div>
-      <div class="ssec" id="synth-section">
-        <div class="slbl">Synthetic Crew</div>
-        <div id="plist-synth">
-          <div class="prow">
-            <div class="ppick">
-              <button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>
-              <div id="synth-preview"></div>
-              <button class="parr" style="visibility:hidden" tabindex="-1">&#8250;</button>
-            </div>
-            <label class="synth-toggle-lbl">
-              <input type="checkbox" id="addSynthCbx" onchange="toggleSynth(this.checked)">
-              <span>Add IRIS to crew<span class="synth-subtext">The Integrated Robotic Intelligence System is programmed to assist.</span></span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="su-right">
-      <div id="su-e7-hdr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>SIGNAL</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    <!-- ── E7 SHIP COMPUTER (global — visible across all screens) ── -->
+    <div id="e7panel">
+      <div id="e7hdr">
         <div class="e7title">
           <span class="e7logo">ENDYMION 7</span>
-          <span class="e7status">● ONLINE</span>
+          <label
+            class="e7guidance-toggle"
+            for="e7guidance-toggle"
+            data-tooltip="Guide Mode: E7 can explain rules and mechanics from the Field Guide as you play."
+          >
+            <input
+              type="checkbox"
+              id="e7guidance-toggle"
+              onchange="toggleGuidance()"
+            />
+            <span class="e7toggle-track"
+              ><span class="e7toggle-thumb"></span
+            ></span>
+            <span class="e7toggle-lbl">GUIDE</span>
+          </label>
         </div>
         <div class="e7sub">SHIP COMPUTER</div>
+        <button class="e7close back-btn" onclick="toggleE7()">✕</button>
       </div>
-      <div id="e7-setup-msg"></div>
+      <div id="e7log"></div>
+      <div id="e7prompt"></div>
     </div>
-  </div>
-  <div id="sufooter">
-    <button id="su-back" class="mbtn back-btn" onclick="backToIntro()">← Back</button>
-    <button id="su-leave" class="mbtn" onclick="leaveOnlineSetup()">← Leave Game</button>
-    <button id="su-confirm" class="mbtn pri next-btn" onclick="goToSiteBuilder()">Confirm Crew</button>
-  </div>
-</div>
 
-<!-- ── BASE CAMP BUILDER ── -->
-<div id="setup-site">
-  <div id="sbhdr">
-    <div class="signal-hdr-icon"></div>
-    <h1>SIGNAL · ESTABLISH BASE CAMP</h1>
-    <span id="sbprogress">0 / 6 placed</span>
-    <span class="sbreset" onclick="resetBuilder()">Reset</span>
-  </div>
-  <div id="sbmain">
-    <div id="sbsvg-wrap">
-      <svg id="sbsvg"></svg>
-    </div>
-    <div id="sb-right">
-      <div id="sb-e7">
-        <div id="sb-e7-hdr">
-          <div class="e7title">
-            <span class="e7logo">ENDYMION 7</span>
-            <span class="e7status">● ONLINE</span>
+    <!-- ── WAKE SCREEN ── -->
+    <div id="wake-screen">
+      <div class="sbox wake-splash">
+        <div class="wake-logo-wrap">
+          <div class="signal-intro-icon wake-icon"></div>
+        </div>
+        <div class="wake-hint">
+          <div class="ssub wake-sub">
+            Hibernation Mode<br />Awaiting user input to reactivate system
+            functions
           </div>
-          <div class="e7sub">SHIP COMPUTER</div>
-        </div>
-        <div id="sb-e7-log"></div>
-      </div>
-      <div id="sbpanel">
-        <div id="sbpalette">
-          <!-- filled by renderPalette() -->
-        </div>
-        <div id="sbpanel-foot">
-          <button class="sbtn" style="padding:12px 18px;font-size:.72rem;" onclick="randomBuilder()">Random Layout</button>
+          <div>PRESS ANY KEY<span class="wake-cursor">▌</span></div>
         </div>
       </div>
     </div>
-  </div>
-  <div id="sbfooter">
-    <button class="mbtn back-btn" style="max-width:180px;flex-shrink:0;" onclick="backToCrewSetup()">← Back</button>
-    <button id="sblaunbtn" class="mbtn dng next-btn" disabled onclick="finalizeGame()" style="flex:1;">Launch Mission</button>
-  </div>
-</div>
 
-<!-- ── GAME ── -->
-<div id="game">
-  <!-- Header -->
-  <div id="hdr">
-    <div class="signal-hdr-icon"></div>
-    <h1 class="hlogo">SIGNAL</h1>
-    <span class="hsep">|</span>
-    <span id="hmission">Collect Radio Fragments · Signal Offline</span>
-    <div class="hdr-center"><span id="mp-badge" class="mp-badge"></span></div>
-    <div class="hdr-right">
-      <span id="hturn">Turn 1</span>
-      <span class="hsep">|</span>
-      <span id="hphase" class="ph-roll" data-tooltip="Roll the die to determine how many hexes you can move this turn.">Roll</span>
-      <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
-      <button class="hbtn" onclick="openRulebook()">Field Guide</button>
-<button class="hbtn" onclick="confirmNewGame()">New Game</button>
+    <!-- ── INTRO ── -->
+    <div id="intro">
+      <div class="sbox intro-box intro-startup">
+        <div class="intro-lockup">
+          <div class="signal-intro-glow">
+            <div class="signal-intro-icon"></div>
+          </div>
+          <div class="intro-lockup-text">
+            <h1>SIGNAL</h1>
+            <p class="ssub">1–6 Players · 30+ Minutes · Ages 14+</p>
+          </div>
+        </div>
+        <div id="e7-intro-msg" class="e7-screen-msg"></div>
+        <div class="sbox-footer">
+          <button class="sbtn secondary next-btn" onclick="showCrewSetup()">
+            Local Game
+          </button>
+          <button class="sbtn next-btn" onclick="showOnlineLobby()">
+            Online Game
+          </button>
+        </div>
+      </div>
+      <div class="version-label">v1.1.20</div>
     </div>
-  </div>
 
-  <!-- Board -->
-  <div id="bwrap">
-    <svg id="bsvg"></svg>
-  </div>
+    <!-- ── ONLINE LOBBY ── -->
+    <div id="online-lobby" style="display: none">
+      <div class="sbox lobby-box">
+        <div class="intro-lockup">
+          <div class="signal-intro-glow">
+            <div class="signal-intro-icon"></div>
+          </div>
+          <div class="intro-lockup-text">
+            <h1>SIGNAL</h1>
+            <p class="ssub">ONLINE MULTIPLAYER</p>
+          </div>
+        </div>
 
-  <!-- HUD: active player -->
-  <div id="hud">
-    <!-- LEFT: Player HUD -->
-    <div id="hud-player">
-      <!-- Player card with crew tabs -->
-      <div class="hudcard" id="hcrd">
-        <div id="hctabs"></div>
-        <div id="hcbody">
-          <div class="hcport" id="hcport">
-            <div id="hcimg" style="width:100%;height:100%;"></div>
-          </div>
-          <div class="hcoverlay">
-            <div class="hcname" id="hcname">—</div>
-            <div class="hcloc" id="hcloc">—</div>
+        <div id="lobby-e7-msg" class="e7-screen-msg"></div>
+
+        <!-- Mode selection -->
+        <div id="lobby-mode-sel" style="display: none"></div>
+
+        <!-- Host: show join code -->
+        <div id="lobby-hosting" style="display: none">
+          <div class="lobby-code-label">Your join code</div>
+          <div class="lobby-code" id="lobby-code-display">------</div>
+          <div class="lobby-code-hint">
+            Share this with up to 5 other players.
           </div>
         </div>
-      </div>
-      <!-- Resources -->
-      <div class="hudres">
-        <div class="shd" id="hud-res-lbl" data-tooltip="Food and Oxygen each deplete 1 per turn. If either hits zero, Health depletes instead.">Resources</div>
-        <div id="hud-res-food">
-          <div class="rlbl" id="hud-res-food-lbl">Food</div>
-          <div class="tokgrid" id="htr"></div>
+
+        <!-- Joiner: enter code -->
+        <div id="lobby-joining" style="display: none">
+          <div class="lobby-code-label">Enter join code</div>
+          <input
+            id="lobby-code-input"
+            class="lobby-input"
+            maxlength="6"
+            placeholder="ABC123"
+            oninput="this.value = this.value.toUpperCase()"
+            onkeydown="if (event.key === 'Enter') lobbyJoinConnect();"
+          />
+          <div id="lobby-join-status" class="lobby-status"></div>
         </div>
-        <div id="hud-res-o2">
-          <div class="rlbl">Oxygen</div>
-          <div class="tokrow" id="hto"></div>
+
+        <!-- Footers: one per panel, pinned to bottom of card -->
+        <div id="lobby-footer-sel" class="sbox-footer" style="display: none">
+          <button class="sbtn next-btn" onclick="lobbyHost()">
+            Host a Game
+          </button>
+          <button class="sbtn next-btn" onclick="lobbyJoinMode()">
+            Join a Game
+          </button>
         </div>
-        <div id="hud-res-health">
-          <div class="rlbl">Health</div>
-          <div class="tokrow" id="hth"></div>
+        <div id="lobby-footer-host" class="sbox-footer" style="display: none">
+          <button class="sbtn secondary back-btn" onclick="lobbyBack()">
+            ← Back
+          </button>
+          <button class="sbtn next-btn" onclick="enterOnlineCrewSetup()">
+            Continue →
+          </button>
         </div>
-        <div id="hud-frags" style="display:none">
-          <div class="rlbl">Fragments</div>
-          <div class="tokrow" id="htfrag"></div>
-        </div>
-      </div>
-      <!-- Equipment gallery -->
-      <div class="hudeq" id="hudeq">
-        <div class="hud-tab-body">
-          <div class="shd eq-shd-row">
-            <span data-tooltip="Your backpack holds tools, supplies, weapons, and certain event cards. Click a card to view more details.">Backpack</span>
-            <span class="eq-filters" id="eq-filters">
-              <button type="button" class="eq-filt" id="eq-filt-Tool"   onclick="toggleEqFilter('Tool')"   data-tooltip="Filter: Tools"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/wrench-solid-full.svg')"></span></button>
-              <button type="button" class="eq-filt" id="eq-filt-Supply" onclick="toggleEqFilter('Supply')" data-tooltip="Filter: Supplies"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/cubes-solid-full.svg')"></span></button>
-              <button type="button" class="eq-filt" id="eq-filt-Tech"   onclick="toggleEqFilter('Tech')"   data-tooltip="Filter: Tech"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/microchip-solid-full.svg')"></span></button>
-              <button type="button" class="eq-filt" id="eq-filt-Weapon" onclick="toggleEqFilter('Weapon')" data-tooltip="Filter: Weapons"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/gun-solid-full.svg')"></span></button>
-              <button type="button" class="eq-filt" id="eq-filt-Event"  onclick="toggleEqFilter('Event')"  data-tooltip="Filter: Private Events"><span class="eq-filt-icon" style="--eq-icon-url:url('img/Icons/person-solid-full.svg')"></span></button>
-            </span>
-          </div>
-          <div class="eq-gallery">
-            <button type="button" class="eq-nav" id="eq-prev" onclick="eqNav(-1)" disabled>&#9664;</button>
-            <div class="eq-viewport" id="eqhand"></div>
-            <button type="button" class="eq-nav" id="eq-next" onclick="eqNav(1)" disabled>&#9654;</button>
-          </div>
-        </div>
-        <div class="hud-vtab">
-          <span class="hud-vtab-caret">&#9660;</span>
-          <span class="hud-vtab-lbl">Backpack</span>
+        <div id="lobby-footer-join" class="sbox-footer" style="display: none">
+          <button class="sbtn secondary back-btn" onclick="lobbyBack()">
+            ← Back
+          </button>
+          <button
+            class="sbtn next-btn"
+            id="lobby-join-btn"
+            onclick="lobbyJoinConnect()"
+          >
+            Connect
+          </button>
         </div>
       </div>
     </div>
-    <!-- RIGHT: Action HUD -->
-    <div id="hud-action">
-      <div id="decks" class="hud-collapsed">
-        <div class="hud-vtab">
-          <span class="hud-vtab-caret">&#9660;</span>
-          <span class="hud-vtab-lbl">Decks</span>
+
+    <!-- ── SETUP: player names ── -->
+    <div id="setup">
+      <div id="suhdr">
+        <div class="signal-hdr-icon"></div>
+        <h1 class="hlogo">SIGNAL · CREW INITIALIZATION</h1>
+        <span id="su-mp-badge" class="su-mp-badge" style="display: none"></span>
+      </div>
+      <div id="sumain">
+        <div id="su-left">
+          <div class="ssec">
+            <div class="slbl">Crew Size</div>
+            <div class="crow" id="crow"></div>
+          </div>
+          <div class="ssec">
+            <div class="slbl">Crew Manifest</div>
+            <div id="plist"></div>
+          </div>
+          <div class="ssec" id="synth-section">
+            <div class="slbl">Synthetic Crew</div>
+            <div id="plist-synth">
+              <div class="prow">
+                <div class="ppick">
+                  <button class="parr" style="visibility: hidden" tabindex="-1">
+                    &#8249;
+                  </button>
+                  <div id="synth-preview"></div>
+                  <button class="parr" style="visibility: hidden" tabindex="-1">
+                    &#8250;
+                  </button>
+                </div>
+                <label class="synth-toggle-lbl">
+                  <input
+                    type="checkbox"
+                    id="addSynthCbx"
+                    onchange="toggleSynth(this.checked)"
+                  />
+                  <span
+                    >Add IRIS to crew<span class="synth-subtext"
+                      >The Integrated Robotic Intelligence System is programmed
+                      to assist.</span
+                    ></span
+                  >
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="hud-tab-body">
-          <div class="deckpile" id="evtdeck" data-tooltip="Event cards trigger encounters and discoveries when you explore new tiles.">
+        <div id="su-right">
+          <div id="su-e7-hdr">
+            <div class="e7title">
+              <span class="e7logo">ENDYMION 7</span>
+              <span class="e7status">● ONLINE</span>
+            </div>
+            <div class="e7sub">SHIP COMPUTER</div>
+          </div>
+          <div id="e7-setup-msg"></div>
+        </div>
+      </div>
+      <div id="sufooter">
+        <button id="su-back" class="mbtn back-btn" onclick="backToIntro()">
+          ← Back
+        </button>
+        <button id="su-leave" class="mbtn" onclick="leaveOnlineSetup()">
+          ← Leave Game
+        </button>
+        <button
+          id="su-confirm"
+          class="mbtn pri next-btn"
+          onclick="goToSiteBuilder()"
+        >
+          Confirm Crew
+        </button>
+      </div>
+    </div>
+
+    <!-- ── BASE CAMP BUILDER ── -->
+    <div id="setup-site">
+      <div id="sbhdr">
+        <div class="signal-hdr-icon"></div>
+        <h1 class="hlogo">SIGNAL · ESTABLISH BASE CAMP</h1>
+        <span id="sbprogress">0 / 6 placed</span>
+        <span class="sbreset" onclick="resetBuilder()">Reset</span>
+      </div>
+      <div id="sbmain">
+        <div id="sbsvg-wrap">
+          <svg id="sbsvg"></svg>
+        </div>
+        <div id="sb-right">
+          <div id="sb-e7">
+            <div id="sb-e7-hdr">
+              <div class="e7title">
+                <span class="e7logo">ENDYMION 7</span>
+                <span class="e7status">● ONLINE</span>
+              </div>
+              <div class="e7sub">SHIP COMPUTER</div>
+            </div>
+            <div id="sb-e7-log"></div>
+          </div>
+          <div id="sbpanel">
+            <div id="sbpalette">
+              <!-- filled by renderPalette() -->
+            </div>
+            <div id="sbpanel-foot">
+              <button
+                class="sbtn"
+                style="padding: 12px 18px; font-size: 0.72rem"
+                onclick="randomBuilder()"
+              >
+                Random Layout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="sbfooter">
+        <button
+          class="mbtn back-btn"
+          style="max-width: 180px; flex-shrink: 0"
+          onclick="backToCrewSetup()"
+        >
+          ← Back
+        </button>
+        <button
+          id="sblaunbtn"
+          class="mbtn dng next-btn"
+          disabled
+          onclick="finalizeGame()"
+          style="flex: 1"
+        >
+          Launch Mission
+        </button>
+      </div>
+    </div>
+
+    <!-- ── GAME ── -->
+    <div id="game">
+      <!-- Header -->
+      <div id="hdr">
+        <div class="signal-hdr-icon"></div>
+        <h1 class="hlogo">SIGNAL</h1>
+        <span class="hsep">|</span>
+        <span id="hmission">Collect Radio Fragments · Signal Offline</span>
+        <div class="hdr-center">
+          <span id="mp-badge" class="mp-badge"></span>
+        </div>
+        <div class="hdr-right">
+          <span id="hturn">Turn 1</span>
+          <span class="hsep">|</span>
+          <span
+            id="hphase"
+            class="ph-roll"
+            data-tooltip="Roll the die to determine how many hexes you can move this turn."
+            >Roll</span
+          >
+          <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
+          <button class="hbtn" onclick="openRulebook()">Field Guide</button>
+          <button class="hbtn" onclick="confirmNewGame()">New Game</button>
+        </div>
+      </div>
+
+      <!-- Board -->
+      <div id="bwrap">
+        <svg id="bsvg"></svg>
+      </div>
+
+      <!-- HUD: active player -->
+      <div id="hud">
+        <!-- LEFT: Player HUD -->
+        <div id="hud-player">
+          <!-- Player card with crew tabs -->
+          <div class="hudcard" id="hcrd">
+            <div id="hctabs"></div>
+            <div id="hcbody">
+              <div class="hcport" id="hcport">
+                <div id="hcimg" style="width: 100%; height: 100%"></div>
+              </div>
+              <div class="hcoverlay">
+                <div class="hcname" id="hcname">—</div>
+                <div class="hcloc" id="hcloc">—</div>
+              </div>
+            </div>
+          </div>
+          <!-- Resources -->
+          <div class="hudres">
+            <div
+              class="shd"
+              id="hud-res-lbl"
+              data-tooltip="Food and Oxygen each deplete 1 per turn. If either hits zero, Health depletes instead."
+            >
+              Resources
+            </div>
+            <div id="hud-res-food">
+              <div class="rlbl" id="hud-res-food-lbl">Food</div>
+              <div class="tokgrid" id="htr"></div>
+            </div>
+            <div id="hud-res-o2">
+              <div class="rlbl">Oxygen</div>
+              <div class="tokrow" id="hto"></div>
+            </div>
+            <div id="hud-res-health">
+              <div class="rlbl">Health</div>
+              <div class="tokrow" id="hth"></div>
+            </div>
+            <div id="hud-frags" style="display: none">
+              <div class="rlbl">Fragments</div>
+              <div class="tokrow" id="htfrag"></div>
+            </div>
+          </div>
+          <!-- Equipment gallery -->
+          <div class="hudeq" id="hudeq">
+            <div class="hud-tab-body">
+              <div class="shd eq-shd-row">
+                <span
+                  data-tooltip="Your backpack holds tools, supplies, weapons, and certain event cards. Click a card to view more details."
+                  >Backpack</span
+                >
+                <span class="eq-filters" id="eq-filters">
+                  <button
+                    type="button"
+                    class="eq-filt"
+                    id="eq-filt-Tool"
+                    onclick="toggleEqFilter('Tool')"
+                    data-tooltip="Filter: Tools"
+                  >
+                    <span
+                      class="eq-filt-icon"
+                      style="
+                        --eq-icon-url: url(&quot;img/icons/wrench-solid-full.svg&quot;);
+                      "
+                    ></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="eq-filt"
+                    id="eq-filt-Supply"
+                    onclick="toggleEqFilter('Supply')"
+                    data-tooltip="Filter: Supplies"
+                  >
+                    <span
+                      class="eq-filt-icon"
+                      style="
+                        --eq-icon-url: url(&quot;img/icons/cubes-solid-full.svg&quot;);
+                      "
+                    ></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="eq-filt"
+                    id="eq-filt-Tech"
+                    onclick="toggleEqFilter('Tech')"
+                    data-tooltip="Filter: Tech"
+                  >
+                    <span
+                      class="eq-filt-icon"
+                      style="
+                        --eq-icon-url: url(&quot;img/icons/microchip-solid-full.svg&quot;);
+                      "
+                    ></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="eq-filt"
+                    id="eq-filt-Weapon"
+                    onclick="toggleEqFilter('Weapon')"
+                    data-tooltip="Filter: Weapons"
+                  >
+                    <span
+                      class="eq-filt-icon"
+                      style="
+                        --eq-icon-url: url(&quot;img/icons/gun-solid-full.svg&quot;);
+                      "
+                    ></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="eq-filt"
+                    id="eq-filt-Event"
+                    onclick="toggleEqFilter('Event')"
+                    data-tooltip="Filter: Private Events"
+                  >
+                    <span
+                      class="eq-filt-icon"
+                      style="
+                        --eq-icon-url: url(&quot;img/icons/person-solid-full.svg&quot;);
+                      "
+                    ></span>
+                  </button>
+                </span>
+              </div>
+              <div class="eq-gallery">
+                <button
+                  type="button"
+                  class="eq-nav"
+                  id="eq-prev"
+                  onclick="eqNav(-1)"
+                  disabled
+                >
+                  &#9664;
+                </button>
+                <div class="eq-viewport" id="eqhand"></div>
+                <button
+                  type="button"
+                  class="eq-nav"
+                  id="eq-next"
+                  onclick="eqNav(1)"
+                  disabled
+                >
+                  &#9654;
+                </button>
+              </div>
+            </div>
+            <div class="hud-vtab">
+              <span class="hud-vtab-caret">&#9660;</span>
+              <span class="hud-vtab-lbl">Backpack</span>
+            </div>
+          </div>
+        </div>
+        <!-- RIGHT: Action HUD -->
+        <div id="hud-action">
+          <div id="decks" class="hud-collapsed">
+            <div class="hud-vtab">
+              <span class="hud-vtab-caret">&#9660;</span>
+              <span class="hud-vtab-lbl">Decks</span>
+            </div>
+            <div class="hud-tab-body">
+              <div
+                class="deckpile"
+                id="evtdeck"
+                data-tooltip="Event cards trigger encounters and discoveries when you explore new tiles."
+              >
+                <div class="signal-card-icon"></div>
+                <div class="dklbl">Event</div>
+                <div class="dkn" id="evtn">80</div>
+                <div class="dksub">cards</div>
+              </div>
+              <div
+                class="deckpile"
+                id="equpdeck"
+                data-tooltip="Equipment cards are drawn from the locker at base camp and carried into the field."
+              >
+                <div class="signal-card-icon"></div>
+                <div class="dklbl">Equip</div>
+                <div class="dkn" id="equpn">30</div>
+                <div class="dksub">cards</div>
+              </div>
+            </div>
+          </div>
+          <div id="tabletop-dice">
+            <div
+              class="shd"
+              data-tooltip="Roll the die to get movement points, then click a hex to move there."
+            >
+              Move
+            </div>
+            <div class="td-row" id="td-row"></div>
+            <div id="td-moves"></div>
+          </div>
+          <div class="hudact">
+            <div
+              class="shd"
+              data-tooltip="Perform tile actions based on your current location."
+            >
+              Actions
+            </div>
+            <button class="btn" id="bequip" onclick="doEquipLocker()" disabled>
+              Open Locker
+            </button>
+            <button class="btn" id="bcargo" onclick="doCargo()" disabled>
+              Cargo Hold
+            </button>
+            <button class="btn" id="bwatch" onclick="doWatchTower()" disabled>
+              Watch Tower
+            </button>
+            <button class="btn trd" id="btrd" onclick="openTrade()" disabled>
+              Trade
+            </button>
+            <button
+              class="btn"
+              id="biris"
+              onclick="toggleIrisDeactivation()"
+              style="display: none"
+            >
+              Deactivate IRIS
+            </button>
+            <button
+              class="btn wrn"
+              id="bfrag"
+              onclick="doActivateFrag()"
+              disabled
+            >
+              Activate Fragment
+            </button>
+            <button class="btn wrn" id="bsig" onclick="doSignalRoll()" disabled>
+              Roll Signal
+            </button>
+            <button
+              class="btn"
+              id="bstay"
+              onclick="doStasisEndTurn()"
+              style="display: none"
+            >
+              Stay in Stasis
+            </button>
+            <button
+              class="btn pri"
+              id="bleave"
+              onclick="doStasisLeave()"
+              style="display: none"
+            >
+              Leave Stasis
+            </button>
+            <button class="btn" id="bend" onclick="doEndTurn()" disabled>
+              End Turn
+            </button>
+            <div class="hud-media">
+              <button
+                class="hud-media-btn"
+                id="btn-music"
+                onclick="toggleMusic()"
+              >
+                <span class="hud-media-icon vol-on" id="icon-music"></span>Music
+              </button>
+              <button class="hud-media-btn" id="btn-sfx" onclick="toggleSfx()">
+                <span class="hud-media-icon vol-on" id="icon-sfx"></span>SFX
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TILE REVEAL OVERLAY ── -->
+    <div id="trov" style="display: none">
+      <div id="tr-box">
+        <div id="tr-name"></div>
+        <div id="tr-desc"></div>
+        <div id="tr-actions"></div>
+        <div id="tr-deck">
+          <div id="tr-deck-pile">
             <div class="signal-card-icon"></div>
-            <div class="dklbl">Event</div>
-            <div class="dkn" id="evtn">80</div>
+            <div class="dkn" id="tr-evtn">—</div>
             <div class="dksub">cards</div>
           </div>
-          <div class="deckpile" id="equpdeck" data-tooltip="Equipment cards are drawn from the locker at base camp and carried into the field.">
-            <div class="signal-card-icon"></div>
-            <div class="dklbl">Equip</div>
-            <div class="dkn" id="equpn">30</div>
-            <div class="dksub">cards</div>
+          <div id="tr-deck-lbl">Draw Event</div>
+        </div>
+        <button id="trov-cancel" class="back-btn" style="display: none">
+          Cancel
+        </button>
+      </div>
+      <div id="trov-suit-blocker" class="cc-Tech">
+        <div class="evc-suit-inner">
+          <span
+            class="eq-icon"
+            style="
+              --eq-icon-url: url(&quot;img/icons/microchip-solid-full.svg&quot;);
+            "
+          ></span>
+          <div class="evc-suit-divider"></div>
+          <div class="evc-suit-name">HAZARD SUIT</div>
+          <div class="evc-suit-divider"></div>
+          <div class="evc-suit-status">DEPLOYED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EQUIP DRAW OVERLAY ── -->
+    <div id="eqdov" style="display: none">
+      <div id="eqd-title">Equipment Locker</div>
+      <div id="eqd-desc">Draw 1 card from the equipment deck.</div>
+      <div
+        id="eqd-deck"
+        data-tooltip="Click to draw an Equipment Card from the locker."
+      >
+        <div id="eqd-deck-pile">
+          <div class="signal-card-icon"></div>
+          <div class="dkn" id="eqd-equpn">—</div>
+          <div class="dksub">cards</div>
+        </div>
+        <div id="eqd-deck-lbl">Draw Equipment</div>
+      </div>
+    </div>
+
+    <!-- ── RULEBOOK MODAL ── -->
+    <div id="rbmodal">
+      <div id="rbhdr">
+        <div class="signal-hdr-icon"></div>
+        <h1 class="hlogo">SIGNAL · FIELD GUIDE</h1>
+        <input
+          id="rbsearch"
+          type="text"
+          placeholder="Search guide..."
+          oninput="rbSearch(this.value)"
+        />
+        <button id="rbtour" onclick="startTour()">Interface Tour</button>
+        <button id="rbclose" class="back-btn" onclick="closeRulebook()">
+          ✕
+        </button>
+      </div>
+      <div id="rbbody">
+        <nav id="rbtoc"></nav>
+        <div id="rbcontent"></div>
+      </div>
+    </div>
+
+    <!-- ── INTERFACE TOUR ── -->
+    <div id="tour-ov">
+      <div class="tour-dim" id="tour-dim-top"></div>
+      <div class="tour-dim" id="tour-dim-bot"></div>
+      <div class="tour-dim" id="tour-dim-lft"></div>
+      <div class="tour-dim" id="tour-dim-rgt"></div>
+      <div class="tour-dim" id="tour-dim-spot"></div>
+      <div id="tour-ring"></div>
+      <div id="tour-card">
+        <div class="tour-e7-lbl">ENDYMION 7</div>
+        <div id="tour-step-lbl" class="tour-step-lbl"></div>
+        <div id="tour-title" class="tour-title"></div>
+        <div id="tour-body" class="tour-body"></div>
+        <div class="tour-footer" id="tour-footer-prompt">
+          <button type="button" class="tour-skip next-btn" onclick="endTour()">
+            Skip
+          </button>
+          <button
+            type="button"
+            class="tour-btn tour-btn-primary next-btn"
+            onclick="_startTourSteps()"
+          >
+            Yes, show me →
+          </button>
+        </div>
+        <div class="tour-footer" id="tour-footer-nav">
+          <button type="button" class="tour-skip next-btn" onclick="endTour()">
+            Skip Tour
+          </button>
+          <div class="tour-nav">
+            <button
+              type="button"
+              class="tour-btn back-btn"
+              id="tour-prev"
+              onclick="tourStep(-1)"
+            >
+              ← Back
+            </button>
+            <button
+              type="button"
+              class="tour-btn tour-btn-primary next-btn"
+              id="tour-next"
+              onclick="tourStep(1)"
+            >
+              Next →
+            </button>
           </div>
         </div>
       </div>
-      <div id="tabletop-dice">
-        <div class="shd" data-tooltip="Roll the die to get movement points, then click a hex to move there.">Move</div>
-        <div class="td-row" id="td-row"></div>
-        <div id="td-moves"></div>
+    </div>
+
+    <!-- ── EVENT / GENERAL MODAL ── -->
+    <div id="mov" class="moverlay">
+      <div class="mbox">
+        <h2 class="mtit" id="mtit"></h2>
+        <div class="mbod" id="mbod"></div>
+        <div class="mact" id="mact"></div>
       </div>
-      <div class="hudact">
-        <div class="shd" data-tooltip="Perform tile actions based on your current location.">Actions</div>
-        <button class="btn"     id="bequip" onclick="doEquipLocker()" disabled>Open Locker</button>
-        <button class="btn"     id="bcargo" onclick="doCargo()" disabled>Cargo Hold</button>
-        <button class="btn"     id="bwatch" onclick="doWatchTower()" disabled>Watch Tower</button>
-        <button class="btn trd" id="btrd"   onclick="openTrade()" disabled>Trade</button>
-        <button class="btn" id="biris" onclick="toggleIrisDeactivation()" style="display:none">Deactivate IRIS</button>
-        <button class="btn wrn" id="bfrag"  onclick="doActivateFrag()" disabled>Activate Fragment</button>
-        <button class="btn wrn" id="bsig"   onclick="doSignalRoll()" disabled>Roll Signal</button>
-        <button class="btn" id="bstay"  onclick="doStasisEndTurn()" style="display:none">Stay in Stasis</button>
-        <button class="btn pri" id="bleave" onclick="doStasisLeave()" style="display:none">Leave Stasis</button>
-        <button class="btn" id="bend"   onclick="doEndTurn()" disabled>End Turn</button>
-        <div class="hud-media">
-          <button class="hud-media-btn" id="btn-music" onclick="toggleMusic()"><span class="hud-media-icon vol-on" id="icon-music"></span>Music</button>
-          <button class="hud-media-btn" id="btn-sfx"   onclick="toggleSfx()"><span class="hud-media-icon vol-on" id="icon-sfx"></span>SFX</button>
+    </div>
+
+    <!-- ── CONTEST MODAL ── -->
+    <div id="contest-ov" class="moverlay">
+      <div id="contest-box">
+        <div id="contest-title">SIGNAL ARRAY — CONTEST</div>
+        <div id="contest-arena">
+          <div class="contest-side" id="contest-challenger">
+            <div class="contest-portrait" id="contest-challenger-port"></div>
+            <div class="contest-name" id="contest-challenger-name"></div>
+            <div class="contest-label">CHALLENGER</div>
+            <div class="contest-die-wrap" id="contest-challenger-die"></div>
+          </div>
+          <div id="contest-vs">VS</div>
+          <div class="contest-side" id="contest-defender">
+            <div class="contest-portrait" id="contest-defender-port"></div>
+            <div class="contest-name" id="contest-defender-name"></div>
+            <div class="contest-label">DEFENDER</div>
+            <div class="contest-die-wrap" id="contest-defender-die"></div>
+          </div>
+        </div>
+        <div id="contest-outcome"></div>
+      </div>
+    </div>
+
+    <!-- ── EVENT CARD ── -->
+    <div id="evc-ov">
+      <div class="evc" id="evc">
+        <div class="evc-inner">
+          <div class="evc-corners"><span>◈</span><span>◈</span></div>
+          <div class="evc-badge" id="evc-badge"></div>
+          <h3 class="evc-loc" id="evc-loc"></h3>
+          <div class="evc-rule"></div>
+          <div class="evc-body" id="evc-body"></div>
+          <div class="evc-pills" id="evc-pills"></div>
+          <div class="evc-outcome" id="evc-outcome" style="display: none"></div>
+          <div class="evc-bot-corners">
+            <span>◈</span><span class="evc-brand">SIGNAL</span><span>◈</span>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── TILE REVEAL OVERLAY ── -->
-<div id="trov" style="display:none">
-  <div id="tr-box">
-    <div id="tr-name"></div>
-    <div id="tr-desc"></div>
-    <div id="tr-actions"></div>
-    <div id="tr-deck">
-      <div id="tr-deck-pile">
-        <div class="signal-card-icon"></div>
-        <div class="dkn" id="tr-evtn">—</div>
-        <div class="dksub">cards</div>
+      <div id="evc-suit-blocker" class="cc-Tech">
+        <div class="evc-suit-inner">
+          <span
+            class="eq-icon"
+            style="
+              --eq-icon-url: url(&quot;img/icons/microchip-solid-full.svg&quot;);
+            "
+          ></span>
+          <div class="evc-suit-divider"></div>
+          <div class="evc-suit-name">HAZARD SUIT</div>
+          <div class="evc-suit-divider"></div>
+          <div class="evc-suit-status">DEPLOYED</div>
+        </div>
       </div>
-      <div id="tr-deck-lbl">Draw Event</div>
+      <div id="evc-die" style="display: none"></div>
+      <button id="evc-btn">Acknowledge</button>
     </div>
-    <button id="trov-cancel" class="back-btn" style="display:none">Cancel</button>
-  </div>
-  <div id="trov-suit-blocker" class="cc-Tech">
-    <div class="evc-suit-inner">
-      <span class="eq-icon" style="--eq-icon-url:url('img/Icons/microchip-solid-full.svg')"></span>
-      <div class="evc-suit-divider"></div>
-      <div class="evc-suit-name">HAZARD SUIT</div>
-      <div class="evc-suit-divider"></div>
-      <div class="evc-suit-status">DEPLOYED</div>
-    </div>
-  </div>
-</div>
 
-<!-- ── EQUIP DRAW OVERLAY ── -->
-<div id="eqdov" style="display:none">
-  <div id="eqd-title">Equipment Locker</div>
-  <div id="eqd-desc">Draw 1 card from the equipment deck.</div>
-  <div id="eqd-deck" data-tooltip="Click to draw an Equipment Card from the locker.">
-    <div id="eqd-deck-pile">
-      <div class="signal-card-icon"></div>
-      <div class="dkn" id="eqd-equpn">—</div>
-      <div class="dksub">cards</div>
-    </div>
-    <div id="eqd-deck-lbl">Draw Equipment</div>
-  </div>
-</div>
-
-<!-- ── RULEBOOK MODAL ── -->
-<div id="rbmodal">
-  <div id="rbhdr">
-    <h2>SIGNAL · FIELD GUIDE</h2>
-    <input id="rbsearch" type="text" placeholder="Search guide..." oninput="rbSearch(this.value)">
-    <button id="rbtour" onclick="startTour()">Interface Tour</button>
-    <button id="rbclose" class="back-btn" onclick="closeRulebook()">✕</button>
-  </div>
-  <div id="rbbody">
-    <nav id="rbtoc"></nav>
-    <div id="rbcontent"></div>
-  </div>
-</div>
-
-<!-- ── INTERFACE TOUR ── -->
-<div id="tour-ov">
-  <div class="tour-dim" id="tour-dim-top"></div>
-  <div class="tour-dim" id="tour-dim-bot"></div>
-  <div class="tour-dim" id="tour-dim-lft"></div>
-  <div class="tour-dim" id="tour-dim-rgt"></div>
-  <div class="tour-dim" id="tour-dim-spot"></div>
-  <div id="tour-ring"></div>
-  <div id="tour-card">
-    <div class="tour-e7-lbl">ENDYMION 7</div>
-    <div id="tour-step-lbl" class="tour-step-lbl"></div>
-    <div id="tour-title" class="tour-title"></div>
-    <div id="tour-body" class="tour-body"></div>
-    <div class="tour-footer" id="tour-footer-prompt">
-      <button type="button" class="tour-skip next-btn" onclick="endTour()">Skip</button>
-      <button type="button" class="tour-btn tour-btn-primary next-btn" onclick="_startTourSteps()">Yes, show me →</button>
-    </div>
-    <div class="tour-footer" id="tour-footer-nav">
-      <button type="button" class="tour-skip next-btn" onclick="endTour()">Skip Tour</button>
-      <div class="tour-nav">
-        <button type="button" class="tour-btn back-btn" id="tour-prev" onclick="tourStep(-1)">← Back</button>
-        <button type="button" class="tour-btn tour-btn-primary next-btn" id="tour-next" onclick="tourStep(1)">Next →</button>
+    <!-- ── SIGNAL ROLL OVERLAY ── -->
+    <div id="sig-ov">
+      <div id="sig-card">
+        <div id="sig-head">SIGNAL ROLL</div>
+        <div id="sig-frags"></div>
+        <div id="sig-e7"></div>
+        <div id="sig-dice"></div>
+        <div id="sig-out"></div>
+        <button id="sig-btn">Roll Dice</button>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ── EVENT / GENERAL MODAL ── -->
-<div id="mov" class="moverlay">
-  <div class="mbox">
-    <h2 class="mtit" id="mtit"></h2>
-    <div class="mbod" id="mbod"></div>
-    <div class="mact" id="mact"></div>
-  </div>
-</div>
-
-<!-- ── CONTEST MODAL ── -->
-<div id="contest-ov" class="moverlay">
-  <div id="contest-box">
-    <div id="contest-title">SIGNAL ARRAY — CONTEST</div>
-    <div id="contest-arena">
-      <div class="contest-side" id="contest-challenger">
-        <div class="contest-portrait" id="contest-challenger-port"></div>
-        <div class="contest-name" id="contest-challenger-name"></div>
-        <div class="contest-label">CHALLENGER</div>
-        <div class="contest-die-wrap" id="contest-challenger-die"></div>
+    <!-- ── TRADE MODAL ── -->
+    <div id="trademodal">
+      <div id="trhdr">
+        <h2>TRADE</h2>
+        <button id="trclose" class="back-btn" onclick="closeTrade()">✕</button>
       </div>
-      <div id="contest-vs">VS</div>
-      <div class="contest-side" id="contest-defender">
-        <div class="contest-portrait" id="contest-defender-port"></div>
-        <div class="contest-name" id="contest-defender-name"></div>
-        <div class="contest-label">DEFENDER</div>
-        <div class="contest-die-wrap" id="contest-defender-die"></div>
+      <div id="trbody"><!-- built by renderTradeModal() --></div>
+      <div id="trfooter">
+        <button class="mbtn pri next-btn" onclick="confirmTrade()">
+          Confirm Trade
+        </button>
+        <button class="mbtn back-btn" onclick="closeTrade()">Cancel</button>
       </div>
     </div>
-    <div id="contest-outcome"></div>
-  </div>
-</div>
 
-<!-- ── EVENT CARD ── -->
-<div id="evc-ov">
-  <div class="evc" id="evc">
-    <div class="evc-inner">
-      <div class="evc-corners"><span>◈</span><span>◈</span></div>
-      <div class="evc-badge" id="evc-badge"></div>
-      <h3 class="evc-loc" id="evc-loc"></h3>
-      <div class="evc-rule"></div>
-      <div class="evc-body" id="evc-body"></div>
-      <div class="evc-pills" id="evc-pills"></div>
-      <div class="evc-outcome" id="evc-outcome" style="display:none"></div>
-      <div class="evc-bot-corners"><span>◈</span><span class="evc-brand">SIGNAL</span><span>◈</span></div>
+    <!-- ── HEX TOOLTIP (global — used on game board and builder) ── -->
+    <div id="htip">
+      <div class="tip-hero">
+        <div class="tip-hero-img" id="tip-hero-img"></div>
+      </div>
+      <div class="tip-body">
+        <div class="tiptit" id="tiptit"></div>
+        <div class="tip-rule"></div>
+        <div class="tipdesc" id="tipdesc"></div>
+        <div class="tipact" id="tipact"></div>
+      </div>
     </div>
-  </div>
-  <div id="evc-suit-blocker" class="cc-Tech">
-    <div class="evc-suit-inner">
-      <span class="eq-icon" style="--eq-icon-url:url('img/Icons/microchip-solid-full.svg')"></span>
-      <div class="evc-suit-divider"></div>
-      <div class="evc-suit-name">HAZARD SUIT</div>
-      <div class="evc-suit-divider"></div>
-      <div class="evc-suit-status">DEPLOYED</div>
-    </div>
-  </div>
-  <div id="evc-die" style="display:none"></div>
-  <button id="evc-btn">Acknowledge</button>
-</div>
 
-<!-- ── SIGNAL ROLL OVERLAY ── -->
-<div id="sig-ov">
-  <div id="sig-card">
-    <div id="sig-head">SIGNAL ROLL</div>
-    <div id="sig-frags"></div>
-    <div id="sig-e7"></div>
-    <div id="sig-dice"></div>
-    <div id="sig-out"></div>
-    <button id="sig-btn">Roll Dice</button>
-  </div>
-</div>
+    <!-- ── CUSTOM TOOLTIP ── -->
+    <div id="tip-custom"></div>
 
-<!-- ── TRADE MODAL ── -->
-<div id="trademodal">
-  <div id="trhdr">
-    <h2>TRADE</h2>
-    <button id="trclose" class="back-btn" onclick="closeTrade()">✕</button>
-  </div>
-  <div id="trbody"><!-- built by renderTradeModal() --></div>
-  <div id="trfooter">
-    <button class="mbtn pri next-btn" onclick="confirmTrade()">Confirm Trade</button>
-    <button class="mbtn back-btn" onclick="closeTrade()">Cancel</button>
-  </div>
-</div>
-
-
-
-<!-- ── HEX TOOLTIP (global — used on game board and builder) ── -->
-<div id="htip">
-  <div class="tip-hero"><div class="tip-hero-img" id="tip-hero-img"></div></div>
-  <div class="tip-body">
-    <div class="tiptit" id="tiptit"></div>
-    <div class="tip-rule"></div>
-    <div class="tipdesc" id="tipdesc"></div>
-    <div class="tipact" id="tipact"></div>
-  </div>
-</div>
-
-<!-- ── CUSTOM TOOLTIP ── -->
-<div id="tip-custom"></div>
-
-<!-- Firebase Realtime Database (compat SDK — no bundler needed) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="sync.js"></script>
-<script src="game.js"></script>
-</body>
+    <!-- Firebase Realtime Database (compat SDK — no bundler needed) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="sync.js"></script>
+    <script src="game.js"></script>
+  </body>
 </html>

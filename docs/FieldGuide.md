@@ -2,7 +2,7 @@
 
 You are the crew of the Endymion 7, a deep-range mining vessel. Your ship has crash-landed on an uncharted alien planet. You don't know what brought you down. You don't know what's out there. You have what survived the crash, and each other — for now.
 
-Somewhere out there, scattered across the terrain, are pieces of your radio. Find them to repair your distress signal. Rescue is possible but not guaranteed. And the longer you're stranded, the more the planet corrupts you.
+Somewhere scattered across the terrain are pieces of your radio. Find them to repair your distress signal. Rescue is possible but not guaranteed. And the longer you're stranded, the more the planet corrupts you.
 
 <img src="img/Tiles/planet.png" class="fg-card">
 
