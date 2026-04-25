@@ -3692,12 +3692,16 @@ body {
   bottom: 16px;
   left: 0;
   right: 0;
+  padding-top: 30px;
   text-align: center;
   font-size: 13px;
   letter-spacing: 0.12em;
   color: var(--dim);
-  opacity: 0.35;
-  pointer-events: none;
+  opacity: 0.1;
+  transition: opacity 0.2s;
+}
+.version-label:hover {
+  opacity: 0.4;
 }
 #intro {
   isolation: isolate;
