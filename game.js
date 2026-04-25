@@ -56,6 +56,8 @@ function toggleMusic() {
   _musicEnabled = !_musicEnabled;
   if (_musicEnabled) _music.play().catch(() => {});
   else _music.pause();
+  if (_musicEnabled && _gameoverSnd._active) _gameoverSnd.play().catch(() => {});
+  else _gameoverSnd.pause();
   const btn = document.getElementById("btn-music");
   if (btn) {
     btn.classList.toggle("media-off", !_musicEnabled);
@@ -85,6 +87,9 @@ _sigPulse.volume = 0.7;
 const _textSnd = new Audio("sfx/text.wav");
 _textSnd.loop = true;
 _textSnd.volume = 0.3;
+const _gameoverSnd = new Audio("sfx/gameover.wav");
+_gameoverSnd.loop = true;
+_gameoverSnd.volume = 0.1;
 let _textSndTimer = null;
 function _startTextSnd(ms) {
   if (!_sfxEnabled) return;
@@ -7058,6 +7063,12 @@ function showModal(
   mov.classList.toggle("new-game", isNewGame);
   mov.classList.toggle("stasis-pod", isStasis);
   mov.classList.toggle("inversion-field", isInversion);
+  const isEndGame = isRescue || isAllDead || isNewGame;
+  _gameoverSnd._active = isEndGame;
+  if (isEndGame && _musicEnabled) {
+    _gameoverSnd.currentTime = 0;
+    _gameoverSnd.play().catch(() => {});
+  }
   document.getElementById("mtit").textContent = title;
   const mb = document.getElementById("mbod");
   mb.innerHTML = "";
@@ -7083,6 +7094,8 @@ function showModal(
     b.textContent = cancelLbl;
     b.onclick = () => {
       document.getElementById("mov").classList.remove("show");
+      _gameoverSnd._active = false;
+      _gameoverSnd.pause();
       onCancel();
     };
     ma.appendChild(b);
@@ -7092,6 +7105,8 @@ function showModal(
   ob.textContent = okLbl || "OK";
   ob.onclick = () => {
     document.getElementById("mov").classList.remove("show");
+    _gameoverSnd._active = false;
+    _gameoverSnd.pause();
     onOk();
   };
   ma.appendChild(ob);
@@ -8678,7 +8693,8 @@ window.addEventListener("DOMContentLoaded", () => {
   _movEl.addEventListener("mousedown", (e) => {
     if (
       (_movEl.classList.contains("cargo") ||
-        _movEl.classList.contains("rescue")) &&
+        _movEl.classList.contains("rescue") ||
+        _movEl.classList.contains("new-game")) &&
       !e.target.closest(".mbox")
     )
       _movEl.classList.add("peeking");

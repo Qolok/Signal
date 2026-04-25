@@ -2552,10 +2552,10 @@ body {
   -webkit-backdrop-filter: none;
 }
 #mov.new-game {
-  background: url(img/tiles/all-dead_overlay_blur.png) center/cover no-repeat;
+  background: url(img/tiles/all-dead_overlay.png) center/cover no-repeat;
 }
 #mov.new-game::before {
-  background: rgba(2, 5, 10, 0.2);
+  background: rgba(2, 5, 10, 0.2) url(img/tiles/all-dead_overlay_blur.png) center/cover no-repeat;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -2593,11 +2593,13 @@ body {
   -webkit-backdrop-filter: none;
 }
 #mov.cargo.peeking::before,
-#mov.rescue.peeking::before {
+#mov.rescue.peeking::before,
+#mov.new-game.peeking::before {
   opacity: 0;
 }
 #mov.cargo.peeking .mbox,
-#mov.rescue.peeking .mbox {
+#mov.rescue.peeking .mbox,
+#mov.new-game.peeking .mbox {
   opacity: 0;
 }
 #trov.peeking #trov-cancel {
