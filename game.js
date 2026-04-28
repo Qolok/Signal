@@ -1,4 +1,7 @@
 "use strict";
+const VERSION = "v1.1.26";
+document.querySelectorAll(".version-label").forEach((el) => (el.textContent = VERSION));
+
 // ── SFX ──────────────────────────────────────────────────────────
 const _sfxCache = {};
 const _sfxOffsets = { "dice.wav": 0.83 };
