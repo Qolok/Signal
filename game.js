@@ -86,10 +86,10 @@ _sigPulse.loop = true;
 _sigPulse.volume = 0.7;
 const _textSnd = new Audio("sfx/text.wav");
 _textSnd.loop = true;
-_textSnd.volume = 0.3;
+_textSnd.volume = 0.5;
 const _gameoverSnd = new Audio("sfx/gameover.wav");
 _gameoverSnd.loop = true;
-_gameoverSnd.volume = 0.1;
+_gameoverSnd.volume = 0.3;
 let _textSndTimer = null;
 function _startTextSnd(ms) {
   if (!_sfxEnabled) return;
@@ -114,7 +114,7 @@ let _lastHover = 0;
 document.addEventListener(
   "mouseenter",
   (e) => {
-    if (!e.target.matches(_clickableSelector)) return;
+    if (!e.target.matches?.(_clickableSelector)) return;
     const now = performance.now();
     if (now - _lastHover < 60) return;
     _lastHover = now;
@@ -125,7 +125,7 @@ document.addEventListener(
 document.addEventListener(
   "mousedown",
   (e) => {
-    if (!e.target.matches(_clickableSelector)) return;
+    if (!e.target.matches?.(_clickableSelector)) return;
     _lastHover = performance.now() + 300; // suppress hover re-trigger after click
     if (e.target.classList.contains("next-btn")) _play("next.wav");
     else sfx("select");
@@ -8670,6 +8670,12 @@ function goToSiteBuilder() {
   }
 }
 
+function _startMusicOnInteraction() {
+  if (_musicEnabled) _music.play().catch(() => {});
+  document.removeEventListener("click", _startMusicOnInteraction);
+  document.removeEventListener("keydown", _startMusicOnInteraction);
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener(
     "wheel",
@@ -8748,6 +8754,8 @@ window.addEventListener("DOMContentLoaded", () => {
         document.getElementById("e7panel").classList.add("show");
         _updateMpBadge();
         addE7("> Session restored.", "sys");
+        document.addEventListener("click", _startMusicOnInteraction);
+        document.addEventListener("keydown", _startMusicOnInteraction);
         return;
       }
     } else {
@@ -8778,6 +8786,8 @@ window.addEventListener("DOMContentLoaded", () => {
       G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
     document.getElementById("e7panel").classList.add("show");
     addE7("> Session restored.", "sys");
+    document.addEventListener("click", _startMusicOnInteraction);
+    document.addEventListener("keydown", _startMusicOnInteraction);
     return;
   }
 
