@@ -4,8 +4,8 @@ document.querySelectorAll(".version-label").forEach((el) => (el.textContent = VE
 
 // ── SFX ──────────────────────────────────────────────────────────
 const _sfxCache = {};
-const _sfxOffsets = { "dice.wav": 0.83 };
-const _sfxVolumes = { "dice.wav": 0.5, "phase.wav": 0.6, "start.wav": 1 };
+const _sfxOffsets = { "dice.mp3": 0.83 };
+const _sfxVolumes = { "dice.mp3": 0.5, "phase.mp3": 0.6, "start.mp3": 1 };
 function _snd(path) {
   if (!_sfxCache[path]) {
     _sfxCache[path] = new Audio("sfx/" + path);
@@ -21,28 +21,29 @@ function _play(path) {
 }
 function sfx(name) {
   const picks = {
-    dice_roll: "dice.wav",
-    move: "pop.wav",
-    card: ["card1.wav", "card2.wav", "card3.wav", "card4.wav"],
-    equip: "base-equip.wav",
-    damage: "shock.wav",
-    heal: "base-medbay.wav",
-    signal_success: "signal-yes.wav",
-    signal_fail: "signal-no.wav",
-    fragment: "radio-fragment.wav",
-    activate: "activate.wav",
-    end_turn: "phase.wav",
-    contest: "alarm-act.wav",
-    airlock: "base-airlock.wav",
-    cargo: "base-cargo.wav",
-    watchtower: "base-watch.wav",
-    confirm: "success.wav",
-    check_on: "check-on.wav",
-    check_off: "check-off.wav",
-    select: "select.wav",
-    health_up: "health-up.wav",
-    health_down: "health-down.wav",
-    death: "death.wav",
+    dice_roll: "dice.mp3",
+    dice_land: "plink.mp3",
+    move: "pop.mp3",
+    card: ["card1.mp3", "card2.mp3", "card3.mp3", "card4.mp3"],
+    equip: "base-equip.mp3",
+    damage: "shock.mp3",
+    heal: "health-up.mp3",
+    signal_success: "signal-yes.mp3",
+    signal_fail: "signal-no.mp3",
+    fragment: "radio-fragment.mp3",
+    activate: "activate.mp3",
+    end_turn: "phase.mp3",
+    contest: "alarm-act.mp3",
+    airlock: "base-airlock.mp3",
+    cargo: "base-cargo.mp3",
+    watchtower: "base-watch.mp3",
+    confirm: "success.mp3",
+    check_on: "check-on.mp3",
+    check_off: "check-off.mp3",
+    select: "select.mp3",
+    health_up: "health-up.mp3",
+    health_down: "health-down.mp3",
+    death: "death.mp3",
   };
   const v = picks[name];
   if (!v) return;
@@ -50,7 +51,7 @@ function sfx(name) {
   _play(path);
 }
 
-const _music = new Audio("sfx/music.wav");
+const _music = new Audio("sfx/music.mp3");
 _music.loop = true;
 _music.volume = 0.5;
 let _musicEnabled = true;
@@ -78,19 +79,19 @@ function toggleSfx() {
   }
 }
 
-const _alarmCrit = new Audio("sfx/alarm-crit.wav");
+const _alarmCrit = new Audio("sfx/alarm-crit.mp3");
 _alarmCrit.loop = true;
 _alarmCrit.volume = 0.7;
-const _sigAir = new Audio("sfx/signal-air.wav");
+const _sigAir = new Audio("sfx/signal-air.mp3");
 _sigAir.loop = true;
 _sigAir.volume = 0.7;
-const _sigPulse = new Audio("sfx/signal-pulse.wav");
+const _sigPulse = new Audio("sfx/signal-pulse.mp3");
 _sigPulse.loop = true;
 _sigPulse.volume = 0.7;
-const _textSnd = new Audio("sfx/text.wav");
+const _textSnd = new Audio("sfx/text.mp3");
 _textSnd.loop = true;
 _textSnd.volume = 0.5;
-const _gameoverSnd = new Audio("sfx/gameover.wav");
+const _gameoverSnd = new Audio("sfx/gameover.mp3");
 _gameoverSnd.loop = true;
 _gameoverSnd.volume = 0.3;
 let _textSndTimer = null;
@@ -112,7 +113,7 @@ function _stopTextSnd() {
 // Hover + click sounds on interactive UI elements
 const _clickableSelector =
   "button:not(:disabled):not(#bend):not(.back-btn), .parr, .eq-nav:not(:disabled), .deckpile, .eqcard, .hud-vtab, .eq-filt:not(:disabled), .sbreset, .sbpalcard:not(.placed), .rbti, [data-tooltip]";
-const _hoverSnd = () => _play("hover.wav");
+const _hoverSnd = () => _play("hover.mp3");
 let _lastHover = 0;
 document.addEventListener(
   "mouseenter",
@@ -130,18 +131,18 @@ document.addEventListener(
   (e) => {
     if (!e.target.matches?.(_clickableSelector)) return;
     _lastHover = performance.now() + 300; // suppress hover re-trigger after click
-    if (e.target.classList.contains("next-btn")) _play("next.wav");
+    if (e.target.classList.contains("next-btn")) _play("next.mp3");
     else sfx("select");
   },
   true,
 );
 const _tileGeneric = [
-  "tile1.wav",
-  "tile2.wav",
-  "tile3.wav",
-  "tile4.wav",
-  "tile5.wav",
-  "tile6.wav",
+  "tile1.mp3",
+  "tile2.mp3",
+  "tile3.mp3",
+  "tile4.mp3",
+  "tile5.mp3",
+  "tile6.mp3",
 ];
 function sfxTile(t) {
   if (t?.type !== "anomaly") return;
@@ -442,9 +443,9 @@ function buildTerrainDeck() {
   const deck = [];
   // 3 Ship Sections — alternate image variants
   const shipImgs = [
-    "ship-section1.png",
-    "ship-section2.png",
-    "ship-section1.png",
+    "ship-section1.webp",
+    "ship-section2.webp",
+    "ship-section1.webp",
   ];
   for (let i = 0; i < 3; i++)
     deck.push({
@@ -532,10 +533,10 @@ function buildTerrainDeck() {
         investigatedCount: 0,
       };
       if (spec.pois[0] === "Abandoned Outpost") {
-        tile.imgOverride = "outpost1.png";
+        tile.imgOverride = "outpost1.webp";
       }
       if (spec.pois[0] === "Mysterious Outpost") {
-        tile.imgOverride = "outpost2.png";
+        tile.imgOverride = "outpost2.webp";
       }
       deck.push(tile);
     }
@@ -569,40 +570,40 @@ const POI_COLOR = {
 };
 
 // ── TILE IMAGES ───────────────────────────────────────────────
-// Individual PNG files in img/tiles/ — one per tile/POI name
+// Logical source names for tile/POI art; getTileImg resolves WebP assets.
 const TILE_IMAGE_MAP = {
-  "Crash Site": "crash-site.png",
-  Cave: "cave.png",
-  "Equipment Locker": "locker.png",
-  "Signal Array": "signal-array.png",
-  "Watch Tower": "watch-tower.png",
-  "Medical Bay": "medbay.png",
-  "Cargo Hold": "cargo.png",
-  Airlock: "airlock.png",
-  "Derelict Tower": "signal-tower.png",
-  "Collapsed Tower": "signal-tower.png",
-  "Abandoned Outpost": "outpost1.png",
-  "Mysterious Outpost": "outpost2.png",
-  Fuselage: "fuselage.png",
-  "Wreckage Field": "wreckage.png",
-  "Recovered Terminal": "terminal.png",
-  Cache: "cache.png",
-  Passage: "passage.png",
-  "Bloody Passage": "passage-bloody.png",
-  "Spore Bog": "spore-bog.png",
-  "Bioluminescent Fen": "bioluminescent-fen.png",
-  "Nest Site": "nest-site.png",
-  "Hive Mound": "hive-mound.png",
-  "Thermal Vent": "thermal-vent.png",
-  "Antimatter Chamber": "antimatter-chamber.png",
-  "Stasis Pod": "stasis.png",
-  "Temporal Rift": "temporal-distortion.png",
-  "Gravity Well": "gravity-well.png",
-  "Echo Chamber": "echo-chamber.png",
-  "Dead Zone": "dead-zone.png",
-  Portal: "portal.png",
-  "Inversion Field": "inversion-field.png",
-  "Ship Section": "ship-section1.png",
+  "Crash Site": "crash-site.webp",
+  Cave: "cave.webp",
+  "Equipment Locker": "locker.webp",
+  "Signal Array": "signal-array.webp",
+  "Watch Tower": "watch-tower.webp",
+  "Medical Bay": "medbay.webp",
+  "Cargo Hold": "cargo.webp",
+  Airlock: "airlock.webp",
+  "Derelict Tower": "signal-tower.webp",
+  "Collapsed Tower": "signal-tower.webp",
+  "Abandoned Outpost": "outpost1.webp",
+  "Mysterious Outpost": "outpost2.webp",
+  Fuselage: "fuselage.webp",
+  "Wreckage Field": "wreckage.webp",
+  "Recovered Terminal": "terminal.webp",
+  Cache: "cache.webp",
+  Passage: "passage.webp",
+  "Bloody Passage": "passage-bloody.webp",
+  "Spore Bog": "spore-bog.webp",
+  "Bioluminescent Fen": "bioluminescent-fen.webp",
+  "Nest Site": "nest-site.webp",
+  "Hive Mound": "hive-mound.webp",
+  "Thermal Vent": "thermal-vent.webp",
+  "Antimatter Chamber": "antimatter-chamber.webp",
+  "Stasis Pod": "stasis.webp",
+  "Temporal Rift": "temporal-distortion.webp",
+  "Gravity Well": "gravity-well.webp",
+  "Echo Chamber": "echo-chamber.webp",
+  "Dead Zone": "dead-zone.webp",
+  Portal: "portal.webp",
+  "Inversion Field": "inversion-field.webp",
+  "Ship Section": "ship-section1.webp",
 };
 
 const _BLUR_TILES = new Set([
@@ -643,13 +644,14 @@ const _BLUR_TILES = new Set([
   "watch-tower",
   "wreckage",
 ]);
+function tileAssetBase(file) {
+  return file.replace(/\.(?:png|webp)$/, "");
+}
 function getTileImg(t, variant = "") {
   if (t.imgOverride) {
-    const base = t.imgOverride.replace(".png", "");
+    const base = tileAssetBase(t.imgOverride);
     if (variant === "overlay_blur" && !_BLUR_TILES.has(base)) return null;
-    return variant
-      ? `img/tiles/${base}_${variant}.png`
-      : `img/tiles/${t.imgOverride}`;
+    return `img/tiles/${base}${variant ? `_${variant}` : ""}.webp`;
   }
   let key;
   if (t.type === "crash_site") key = t.name;
@@ -658,14 +660,14 @@ function getTileImg(t, variant = "") {
   else if (t.type === "ship_section") key = "Ship Section";
   const file = TILE_IMAGE_MAP[key];
   if (!file) return null;
-  const base = file.replace(".png", "");
+  const base = tileAssetBase(file);
   if (variant === "overlay_blur" && !_BLUR_TILES.has(base)) return null;
-  return variant ? `img/tiles/${base}_${variant}.png` : `img/tiles/${file}`;
+  return `img/tiles/${base}${variant ? `_${variant}` : ""}.webp`;
 }
 function spriteCssForName(name) {
   const file = TILE_IMAGE_MAP[name];
   if (!file) return "background-color:#0e1e30";
-  return `background:#0e1e30 url(img/tiles/${file}) center/cover no-repeat`;
+  return `background:#0e1e30 url(img/tiles/${tileAssetBase(file)}.webp) center/cover no-repeat`;
 }
 
 const EQ_CARDS = [
@@ -777,9 +779,13 @@ const EQ_CARDS = [
   },
 ];
 
-function buildEventDeck() {
+function buildEventDeck(humanPlayerCount) {
+  // Solo Play (Field Guide): a single human player removes all Private
+  // Event cards from the deck before the game begins.
+  const solo = humanPlayerCount === 1;
   const deck = [];
   function add(n, card) {
+    if (solo && card.pub === false) return;
     for (let i = 0; i < n; i++) deck.push(card);
   }
   // Public — yield
@@ -918,6 +924,13 @@ function buildEventDeck() {
     pub: false,
     keep: true,
   });
+  const composition = SignalGameLogic.eventDeckComposition(deck);
+  const expected = SignalGameLogic.expectedEventDeckComposition(
+    addSynth,
+    humanPlayerCount,
+  );
+  if (JSON.stringify(composition) !== JSON.stringify(expected))
+    console.warn("[buildEventDeck] Unexpected deck composition", composition);
   // shuffle
   for (let i = deck.length - 1; i > 0; i--) {
     const j = 0 | (Math.random() * (i + 1));
@@ -1320,7 +1333,6 @@ function toggleGuidance() {
 function guidance(key, fn) {
   if (!guidanceMode || guidanceSeen.has(key)) return;
   guidanceSeen.add(key);
-  //_play('hint.wav');
   _inGuidance = true;
   fn();
   _inGuidance = false;
@@ -1387,6 +1399,20 @@ function cp() {
   return G.players[G.currentPlayer];
 }
 
+function appendPlayerChoiceContent(button, player, detail = "") {
+  const name = document.createElement("span");
+  name.style.cssText = `color:${player.color};font-weight:bold`;
+  name.textContent = player.name;
+  button.appendChild(name);
+  if (detail) {
+    const status = document.createElement("span");
+    status.style.cssText =
+      "color:var(--dim);font-size:.75em;margin-left:10px";
+    status.textContent = detail;
+    button.appendChild(status);
+  }
+}
+
 function dealEquipment() {
   const pool = [...EQ_CARDS, ...EQ_CARDS, ...EQ_CARDS];
   for (let i = pool.length - 1; i > 0; i--) {
@@ -1422,12 +1448,15 @@ function newGame(names, portraits, placedMap) {
     const equipment = eqDeck
       .splice(0, 3)
       .map((c) => ({ ...c, uid: ++cardUid }));
-    const portrait =
-      (portraits && portraits[i]) ||
-      CREW_PORTRAITS[i % CREW_PORTRAITS.length].name;
+    const fallbackPortrait = CREW_PORTRAITS[i % CREW_PORTRAITS.length].name;
+    const portrait = SignalGameLogic.enumeratedValue(
+      portraits && portraits[i],
+      CREW_PORTRAITS.map((crew) => crew.name),
+      fallbackPortrait,
+    );
     return {
       id: i,
-      name,
+      name: SignalGameLogic.playerName(name, portrait),
       color: PCOLORS[i],
       portrait,
       q: 0,
@@ -1485,7 +1514,7 @@ function newGame(names, portraits, placedMap) {
       deactivated: false,
     });
   }
-  const evtDeck = buildEventDeck();
+  const evtDeck = buildEventDeck(names.length);
   G = {
     players,
     currentPlayer: 0,
@@ -1775,7 +1804,7 @@ function showTileRevealModal(t, onDismiss) {
         p.skipO2 = true;
         addLog("Bioluminescent Fen: O\u2082 flip skipped this turn.", "good");
       }
-      updateUI();
+      updateUI(true);
       render();
     } else {
       if (t.pois?.includes("Cave")) {
@@ -1854,7 +1883,7 @@ function showTileRevealModal(t, onDismiss) {
           "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
         outEl.textContent = outcome;
         actionsEl.appendChild(outEl);
-        updateUI();
+        updateUI(true);
         const cont = document.createElement("button");
         cont.className = "mbtn";
         cont.textContent = "Continue";
@@ -1885,7 +1914,7 @@ function showTileRevealModal(t, onDismiss) {
           "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
         outEl.textContent = outcome;
         actionsEl.appendChild(outEl);
-        updateUI();
+        updateUI(true);
         const cont = document.createElement("button");
         cont.className = "mbtn";
         cont.textContent = "Continue";
@@ -1926,7 +1955,7 @@ function showTileRevealModal(t, onDismiss) {
           "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
         outEl.textContent = outcome;
         actionsEl.appendChild(outEl);
-        updateUI();
+        updateUI(true);
         const cont = document.createElement("button");
         cont.className = "mbtn";
         cont.textContent = "Continue";
@@ -2001,7 +2030,7 @@ function showTileRevealModal(t, onDismiss) {
           "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
         outEl.textContent = outcome;
         actionsEl.appendChild(outEl);
-        updateUI();
+        updateUI(true);
         const cont = document.createElement("button");
         cont.className = "mbtn";
         cont.textContent = "Continue";
@@ -2112,7 +2141,7 @@ function showTileRevealModal(t, onDismiss) {
               resultEl.textContent = "Pulled free.";
               addLog(`Antimatter Chamber: ${pl.name} pulled free.`);
             }
-            updateUI();
+            updateUI(true);
             if (++rolled === alivePlayers.length) ackBtn.style.display = "";
           }, 1500);
         };
@@ -2132,7 +2161,7 @@ function showTileRevealModal(t, onDismiss) {
       G.movementLeft = 0;
       G.phase = "action";
       addLog(`${p.name} used Portal — returned to Crash Site.`);
-      updateUI();
+      updateUI(true);
       render();
     };
     const decBtn = document.createElement("button");
@@ -2141,14 +2170,14 @@ function showTileRevealModal(t, onDismiss) {
     decBtn.onclick = () => {
       dismiss();
       addLog(`${p.name} declined the Portal.`);
-      updateUI();
+      updateUI(true);
     };
     actionsEl.appendChild(decBtn);
     actionsEl.appendChild(useBtn);
   } else if (isAnomaly && t.anomaly === "Inversion Field") {
     deck.style.display = "none";
     const p = cp();
-    const others = G.players.filter((pl) => pl.alive && pl.id !== p.id);
+    const others = SignalGameLogic.inversionFieldTargets(G.players, p.id);
     if (!others.length) {
       const decBtn = document.createElement("button");
       decBtn.className = "mbtn";
@@ -2156,37 +2185,28 @@ function showTileRevealModal(t, onDismiss) {
       decBtn.onclick = () => {
         dismiss();
         addLog("Inversion Field: no other players to swap with.", "act");
-        updateUI();
+        updateUI(true);
       };
       actionsEl.appendChild(decBtn);
     } else {
+      // Mandatory swap — the crew member cannot refuse (docs/FieldGuide.md),
+      // so no Decline option is offered here.
       others.forEach((other) => {
         const b = document.createElement("button");
         b.className = "mbtn pri";
         b.textContent = `Swap with ${other.name} (${other.food} Food)`;
         b.onclick = () => {
           dismiss();
-          const tmp = p.food;
-          p.food = other.food;
-          other.food = tmp;
+          SignalGameLogic.swapFood(p, other);
           addLog(
             `Inversion Field: ${p.name} swapped Food with ${other.name}.`,
             "crit",
           );
-          updateUI();
+          updateUI(true);
           render();
         };
         actionsEl.appendChild(b);
       });
-      const decBtn = document.createElement("button");
-      decBtn.className = "mbtn";
-      decBtn.textContent = "Decline";
-      decBtn.onclick = () => {
-        dismiss();
-        addLog(`${p.name} declined the Inversion Field.`);
-        updateUI();
-      };
-      actionsEl.appendChild(decBtn);
     }
   } else if (isAnomaly && t.anomaly === "Stasis Pod") {
     deck.style.display = "none";
@@ -2199,7 +2219,7 @@ function showTileRevealModal(t, onDismiss) {
         dismiss();
         p.inStasis = false;
         addLog(`${p.name} exited stasis.`, "act");
-        updateUI();
+        updateUI(true);
         render();
       };
       const stayBtn = document.createElement("button");
@@ -2207,7 +2227,7 @@ function showTileRevealModal(t, onDismiss) {
       stayBtn.textContent = "Stay in Stasis";
       stayBtn.onclick = () => {
         dismiss();
-        updateUI();
+        updateUI(true);
         render();
       };
       actionsEl.appendChild(stayBtn);
@@ -2220,7 +2240,7 @@ function showTileRevealModal(t, onDismiss) {
         dismiss();
         p.inStasis = true;
         addLog(`${p.name} entered stasis.`, "act");
-        updateUI();
+        updateUI(true);
         render();
       };
       const decBtn = document.createElement("button");
@@ -2228,7 +2248,7 @@ function showTileRevealModal(t, onDismiss) {
       decBtn.textContent = "Decline";
       decBtn.onclick = () => {
         dismiss();
-        updateUI();
+        updateUI(true);
         render();
       };
       actionsEl.appendChild(decBtn);
@@ -2295,7 +2315,7 @@ function showTileRevealModal(t, onDismiss) {
           "color:#a0c8e8;font-size:.8rem;margin-top:10px;text-align:center;";
         outEl.textContent = outcome;
         actionsEl.appendChild(outEl);
-        updateUI();
+        updateUI(true);
         const cont = document.createElement("button");
         cont.className = "mbtn";
         cont.textContent = "Continue";
@@ -2329,13 +2349,13 @@ function showTileRevealModal(t, onDismiss) {
             if (needsDraw) showTileRevealModal(newTile);
             else if (onDismiss) onDismiss();
             else {
-              updateUI();
+              updateUI(true);
               render();
             }
           } else {
             if (onDismiss) onDismiss();
             else {
-              updateUI();
+              updateUI(true);
               render();
             }
           }
@@ -2411,7 +2431,7 @@ function showTileRevealModal(t, onDismiss) {
         };
         actionsEl.appendChild(enterBtn);
       } else {
-        _play("reject.wav");
+        _play("reject.mp3");
         const leaveBtn = document.createElement("button");
         leaveBtn.className = "mbtn";
         leaveBtn.textContent = "Leave";
@@ -2447,7 +2467,7 @@ function showTileRevealModal(t, onDismiss) {
         };
         actionsEl.appendChild(fragBtn);
       } else {
-        _play("reject.wav");
+        _play("reject.mp3");
         const leaveBtn = document.createElement("button");
         leaveBtn.className = "mbtn";
         leaveBtn.textContent = "Leave";
@@ -2542,7 +2562,7 @@ function drawTileEvent(t) {
     );
     if (synth) {
       synth.corrupted = true;
-      _play("corrupt.wav");
+      _play("corrupt.mp3");
       addLog(
         "> IRIS threat assessment updated. She considers one fewer crew member optimal.",
         "crit",
@@ -2618,7 +2638,7 @@ function drawTileEvent(t) {
     evt,
     locName,
     () => {
-      updateUI();
+      updateUI(true);
       render();
       if (drawnEqCard)
         openCardModal(p.id, drawnEqCard, evImg ? `url(${evImg})` : "");
@@ -2841,7 +2861,7 @@ function rollTableDice() {
       G.reach = bfsReach(cp().q, cp().r, r);
       addLog(`${cp().name} rolled ${r}.`);
       renderTableDice();
-      updateUI();
+      updateUI(true);
       render();
       guidance("first_roll", () => {
         e7Seq([
@@ -2887,7 +2907,7 @@ function doMove(q, r) {
     if (occupant) {
       if (G.tileActionUsed) {
         addLog("Already contested the Signal Array this turn.", "act");
-        updateUI();
+        updateUI(true);
         render();
         return;
       }
@@ -2916,7 +2936,7 @@ function doMove(q, r) {
         () => {
           // Defender holds — challenger stays put
           addLog(`${occupant.name} holds the Signal Array.`, "act");
-          updateUI();
+          updateUI(true);
           render();
         },
       );
@@ -3097,7 +3117,7 @@ function applyLanding(p, q, r, path, wasRevealed) {
   G.phase = "action";
   G.reach = bfsReach(p.q, p.r, G.movementLeft);
   addLog(`${p.name} → ${p.location}`);
-  updateUI();
+  updateUI(true);
   render();
   const selfContainedAnomaly =
     t?.type === "anomaly" &&
@@ -3112,7 +3132,7 @@ function applyLanding(p, q, r, path, wasRevealed) {
       t,
       selfContainedAnomaly
         ? () => {
-            updateUI();
+            updateUI(true);
             render();
           }
         : () => triggerAnomaly(t),
@@ -3144,6 +3164,7 @@ function drawEqCard(player) {
 }
 
 function useCard(playerIdx, uid) {
+  if (!isMyTurn()) return;
   const p = G.players[playerIdx];
   const ci = p.equipment.findIndex((c) => c.uid === uid);
   if (ci < 0) return;
@@ -3172,7 +3193,7 @@ function useCard(playerIdx, uid) {
       );
       if (target.incapacitated && target.health > 0) target.incapacitated = 0;
       closeCardModal();
-      updateUI();
+      updateUI(true);
       render();
     };
     if (targets.length === 1) {
@@ -3195,7 +3216,7 @@ function useCard(playerIdx, uid) {
     targets.forEach((tgt) => {
       const b = document.createElement("button");
       b.className = "mbtn";
-      b.innerHTML = `<span style="color:${tgt.color};font-weight:bold">${tgt.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">\u2665 ${tgt.health}/3</span>`;
+      appendPlayerChoiceContent(b, tgt, `\u2665 ${tgt.health}/3`);
       b.onclick = () => {
         document.getElementById("mov").classList.remove("show");
         applyMed(tgt);
@@ -3242,7 +3263,7 @@ function useCard(playerIdx, uid) {
         "good",
       );
       closeCardModal();
-      updateUI();
+      updateUI(true);
       render();
     };
     if (incap.length === 1) {
@@ -3265,7 +3286,7 @@ function useCard(playerIdx, uid) {
     incap.forEach((pl) => {
       const b = document.createElement("button");
       b.className = "mbtn";
-      b.innerHTML = `<span style="color:${pl.color};font-weight:bold">${pl.name}</span>`;
+      appendPlayerChoiceContent(b, pl);
       b.onclick = () => {
         document.getElementById("mov").classList.remove("show");
         applyStretcher(pl);
@@ -3315,7 +3336,7 @@ function useCard(playerIdx, uid) {
     }
     closeCardModal();
     render();
-    updateUI();
+    updateUI(true);
     return;
   } else if (c.use === "stun_baton") {
     const targets = G.players.filter(
@@ -3350,7 +3371,7 @@ function useCard(playerIdx, uid) {
         "crit",
       );
       closeCardModal();
-      updateUI();
+      updateUI(true);
       render();
     };
     if (targets.length === 1) {
@@ -3403,7 +3424,7 @@ function useCard(playerIdx, uid) {
         "crit",
       );
       closeCardModal();
-      updateUI();
+      updateUI(true);
       render();
     };
     if (targets.length === 1) {
@@ -3447,7 +3468,7 @@ function useCard(playerIdx, uid) {
     addLog(`${p.name} placed a Shock Trap on this tile.`, "act");
     closeCardModal();
     markTilesDirty();
-    updateUI();
+    updateUI(true);
     render();
     return;
   } else if (c.use === "walkie") {
@@ -3473,7 +3494,11 @@ function useCard(playerIdx, uid) {
     adjacent.forEach((pl) => {
       const b = document.createElement("button");
       b.className = "mbtn";
-      b.innerHTML = `<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
+      appendPlayerChoiceContent(
+        b,
+        pl,
+        `Food ${pl.food} \u00a0 O\u2082 ${pl.o2} \u00a0 \u2665 ${pl.health}`,
+      );
       b.onclick = () => {
         document.getElementById("mov").classList.remove("show");
         openWith(pl);
@@ -3500,11 +3525,11 @@ function useCard(playerIdx, uid) {
       "act",
     );
     closeCardModal();
-    updateUI();
+    updateUI(true);
     return;
   }
   closeCardModal();
-  updateUI();
+  updateUI(true);
 }
 
 function doActivateFrag() {
@@ -3548,7 +3573,7 @@ function doActivateFrag() {
       ...moreMsg,
     ]);
   });
-  updateUI();
+  updateUI(true);
   render();
 }
 
@@ -3583,7 +3608,7 @@ function doSignalRoll() {
       "",
       true,
       () => {
-        updateUI();
+        updateUI(true);
       },
       undefined,
       undefined,
@@ -3622,7 +3647,7 @@ function doSignalRoll() {
     _sigAir.pause();
     _sigAir.currentTime = 0;
     document.getElementById("sig-ov").classList.remove("show");
-    updateUI();
+    updateUI(true);
     render();
   }
   _sigAir.currentTime = 0;
@@ -3670,7 +3695,7 @@ function doSignalRoll() {
             "",
             true,
             () => {
-              updateUI();
+              updateUI(true);
             },
             undefined,
             undefined,
@@ -3732,10 +3757,10 @@ function doEquipLocker() {
   }
   cancelTooltip();
   const trov = document.getElementById("trov");
-  trov.style.backgroundImage = "url(img/tiles/locker_overlay.png)";
+  trov.style.backgroundImage = "url(img/tiles/locker_overlay.webp)";
   trov.style.setProperty(
     "--trov-blur-img",
-    "url(img/tiles/locker_overlay_blur.png)",
+    "url(img/tiles/locker_overlay_blur.webp)",
   );
   trov.classList.add("equip-locker", "blur-baked");
   sfx("equip");
@@ -3778,7 +3803,7 @@ function doEquipLocker() {
           d.className = `eqcard exchange-target cc-${card.cat}`;
           d.innerHTML = cardFaceHTML(card.cat, card.name, card.txt);
           d.onclick = () => {
-            _play("next.wav");
+            _play("next.mp3");
             const ci = p.equipment.findIndex((c) => c.uid === card.uid);
             if (ci >= 0) {
               p.equipment.splice(ci, 1);
@@ -3795,12 +3820,12 @@ function doEquipLocker() {
               openCardModal(
                 p.id,
                 newCard,
-                "url(img/tiles/locker_overlay_blur.png)",
+                "url(img/tiles/locker_overlay_blur.webp)",
               );
             } else {
               addLog(`${p.name} discarded ${card.name} — deck is now empty.`);
             }
-            updateUI();
+            updateUI(true);
           };
           actionsEl.appendChild(d);
         });
@@ -3816,17 +3841,17 @@ function doEquipLocker() {
     document.getElementById("tr-deck-lbl").textContent = "Draw Equipment Card";
     deck.style.display = deckEmpty ? "none" : "";
     deck.onclick = () => {
-      _play("next.wav");
+      _play("next.mp3");
       dismiss();
       const c = drawEqCard(p);
       p.lockerUsedThisVisit = true;
       if (c) {
         addLog(`${p.name} drew ${c.name} from Equipment Locker.`, "good");
-        openCardModal(p.id, c, "url(img/tiles/locker_overlay_blur.png)");
+        openCardModal(p.id, c, "url(img/tiles/locker_overlay_blur.webp)");
       } else {
         addLog("Equipment Locker: deck empty.");
       }
-      updateUI();
+      updateUI(true);
     };
   }
   trov.style.display = "flex";
@@ -3861,7 +3886,7 @@ function renderCargoModal() {
       p.food--;
       G.cargoHold = (G.cargoHold || 0) + 1;
       addLog(`${p.name} deposited 1 Food. Hold: ${G.cargoHold}.`);
-      updateUI();
+      updateUI(true);
     }
     renderCargoModal();
   };
@@ -3875,7 +3900,7 @@ function renderCargoModal() {
       G.cargoHold--;
       p.food++;
       addLog(`${p.name} withdrew 1 Food. Hold: ${G.cargoHold}.`);
-      updateUI();
+      updateUI(true);
     }
     renderCargoModal();
   };
@@ -3923,14 +3948,14 @@ function doWatchTower() {
     );
     msg = `From this vantage point, you can see the terrain around ${names}. As you ping their locations, you are able to survey the surrounding area, revealing \n\n${revealed} tile${revealed !== 1 ? "s" : ""}.`;
     render();
-    updateUI();
+    updateUI(true);
   }
   cancelTooltip();
   const trov = document.getElementById("trov");
-  trov.style.backgroundImage = "url(img/tiles/watch-tower_overlay.png)";
+  trov.style.backgroundImage = "url(img/tiles/watch-tower_overlay.webp)";
   trov.style.setProperty(
     "--trov-blur-img",
-    "url(img/tiles/watch-tower_overlay_blur.png)",
+    "url(img/tiles/watch-tower_overlay_blur.webp)",
   );
   trov.classList.add("watch-tower", "blur-baked");
   document.getElementById("tr-name").textContent = "WATCH TOWER";
@@ -3956,17 +3981,19 @@ function doWatchTower() {
 }
 
 function doStasisEndTurn() {
+  if (!isMyTurn()) return;
   sfx("end_turn");
   addLog(`${cp().name} remains in stasis.`, "act");
   advanceTurn();
 }
 function doStasisLeave() {
+  if (!isMyTurn()) return;
   const p = cp();
   p.inStasis = false;
   addLog(`${p.name} left stasis.`, "act");
   G.phase = "roll";
   showTableDice("move");
-  updateUI();
+  updateUI(true);
   render();
 }
 function doEndTurn() {
@@ -4140,7 +4167,7 @@ function doEndTurn() {
   advanceTurn();
 }
 
-function advanceTurn() {
+function advanceTurn(writerTurnOwner = G.currentPlayer) {
   const alive = G.players.filter((p) => p.alive && !p.isSynth);
   if (!alive.length) {
     _alarmCrit.pause();
@@ -4179,10 +4206,7 @@ function advanceTurn() {
     );
     return;
   }
-  let next = (G.currentPlayer + 1) % G.players.length,
-    tries = 0;
-  while (!G.players[next].alive && tries++ < G.players.length)
-    next = (next + 1) % G.players.length;
+  const next = SignalGameLogic.nextLivingPlayer(G.players, G.currentPlayer);
   if (next <= G.currentPlayer) {
     G.turn++;
     G.jammerActive = false;
@@ -4203,8 +4227,11 @@ function advanceTurn() {
     G.players[next].alive &&
     !G.players[next].isSynth
   ) {
-    G.players[next].incapacitated++;
-    if (G.players[next].incapacitated >= 3) {
+    const incapacitation = SignalGameLogic.incapacitationAfterSkippedTurn(
+      G.players[next],
+    );
+    G.players[next].incapacitated = incapacitation.incapacitated;
+    if (incapacitation.died) {
       const dying = G.players[next];
       dying.alive = false;
       sfx("death");
@@ -4222,9 +4249,9 @@ function advanceTurn() {
         );
         dying.radioFragments = 0;
       }
-      updateUI();
+      updateUI(true, writerTurnOwner);
       render();
-      advanceTurn();
+      advanceTurn(writerTurnOwner);
       return;
     }
     addLog(
@@ -4241,15 +4268,15 @@ function advanceTurn() {
         "sys",
       );
     }
-    updateUI();
+    updateUI(true, writerTurnOwner);
     render();
-    advanceTurn();
+    advanceTurn(writerTurnOwner);
     return;
   }
   if (G.players[next].stunned) {
     G.players[next].stunned = false;
     addLog(`${G.players[next].name} is stunned — skipping turn.`, "crit");
-    advanceTurn();
+    advanceTurn(writerTurnOwner);
     return;
   }
   addLog(`Turn ${G.turn}: ${G.players[next].name}.`, "act");
@@ -4260,7 +4287,7 @@ function advanceTurn() {
     if (_ap.health === 1) {
       _alarmCrit.play().catch(() => {});
     } else if (_ap.isSynth ? _ap.battery <= 3 : _ap.o2 <= 1) {
-      _play("alarm-act.wav");
+      _play("alarm-act.mp3");
     }
   }
   // Stasis: frozen players skip the roll — choose Stay or Leave instead
@@ -4272,20 +4299,18 @@ function advanceTurn() {
     G.phase = "stasis";
     addLog(`${G.players[next].name} is in stasis.`, "act");
     hideTableDice();
-    updateUI();
+    updateUI(true, writerTurnOwner);
     render();
     panToPlayer(G.players[next]);
     return;
   }
   showTableDice("move");
-  updateUI();
+  updateUI(true, writerTurnOwner);
   render();
   panToPlayer(G.players[next]);
   if (
     G.players[next].isSynth &&
-    (!_isOnlineMode ||
-      !window.Sync?.isActive() ||
-      window.Sync.myPlayerIndex() === 0)
+    (!window.Sync?.isActive() || window.Sync.myPlayerIndex() === 0)
   ) {
     setTimeout(doSynthTurn, 1800);
   }
@@ -4304,7 +4329,7 @@ function toggleIrisDeactivation() {
       "act",
     );
   else addLog(cp().name + " reactivated IRIS.", "act");
-  updateUI();
+  updateUI(true);
   render();
 }
 function synthFindTile(name) {
@@ -4517,7 +4542,7 @@ function synthApplyStep(p, q, r, onInterrupted) {
       "crit",
     );
     markTilesDirty();
-    updateUI();
+    updateUI(true);
     render();
     setTimeout(() => doEndTurn(), 1000);
     return true;
@@ -4584,7 +4609,7 @@ function synthApplyStep(p, q, r, onInterrupted) {
         "IRIS contests the Signal Array with " + occupant.name + ".",
         "act",
       );
-      updateUI();
+      updateUI(true);
       render();
       panToPlayer(p);
       showContestModal(
@@ -4599,7 +4624,7 @@ function synthApplyStep(p, q, r, onInterrupted) {
           occupant.r = 0;
           const ct = G.tiles.get(hk(0, 0));
           occupant.location = tileName(ct);
-          updateUI();
+          updateUI(true);
           render();
           onInterrupted();
         },
@@ -4609,7 +4634,7 @@ function synthApplyStep(p, q, r, onInterrupted) {
           p.r = prevR;
           p.location = prevLoc;
           G.movementLeft = 0;
-          updateUI();
+          updateUI(true);
           render();
           onInterrupted();
         },
@@ -4619,7 +4644,7 @@ function synthApplyStep(p, q, r, onInterrupted) {
   }
   G.reach = bfsReach(p.q, p.r, G.movementLeft);
   addLog("IRIS → " + p.location);
-  updateUI();
+  updateUI(true);
   render();
   panToPlayer(p);
   return false;
@@ -4660,7 +4685,7 @@ function synthTakeAction(p, target, onDone) {
             "frag",
           );
         }
-        updateUI();
+        updateUI(true);
         render();
       }
       onDone();
@@ -4686,7 +4711,7 @@ function synthTakeAction(p, target, onDone) {
           if (card) addLog("IRIS acquired " + card.name + ".", "good");
         }
         G.tileActionUsed = true;
-        updateUI();
+        updateUI(true);
       }
       onDone();
       break;
@@ -4706,10 +4731,10 @@ function synthTakeAction(p, target, onDone) {
             "IRIS used " + tool.name + " to recover a Radio Fragment.",
             "frag",
           );
-          updateUI();
+          updateUI(true);
           render();
         } else {
-          _play("reject.wav");
+          _play("reject.mp3");
         }
       }
       if (
@@ -4745,13 +4770,13 @@ function synthTakeAction(p, target, onDone) {
               occupant.r = 0;
               const ct = G.tiles.get(hk(0, 0));
               occupant.location = tileName(ct);
-              updateUI();
+              updateUI(true);
               render();
               onDone();
             },
             () => {
               addLog(occupant.name + " holds the Signal Array.", "act");
-              updateUI();
+              updateUI(true);
               render();
               onDone();
             },
@@ -4826,7 +4851,7 @@ function synthTakeAction(p, target, onDone) {
               "crit",
             );
           }
-          updateUI();
+          updateUI(true);
           render();
         }
       }
@@ -4850,7 +4875,7 @@ function synthTakeAction(p, target, onDone) {
               " is back on their feet.",
             "good",
           );
-          updateUI();
+          updateUI(true);
           render();
         }
       }
@@ -4890,10 +4915,10 @@ function synthTakeAction(p, target, onDone) {
           if (ci >= 0) p.equipment.splice(ci, 1);
           t.investigatedCount = t.pois ? t.pois.length : 1;
           markTilesDirty();
-          updateUI();
+          updateUI(true);
           render();
         } else {
-          _play("reject.wav");
+          _play("reject.mp3");
         }
       }
       onDone();
@@ -5006,13 +5031,13 @@ function triggerAnomaly(t) {
   switch (t.anomaly) {
     case "Temporal Rift":
       showTileRevealModal(t, () => {
-        updateUI();
+        updateUI(true);
         render();
       });
       break;
     case "Portal":
       showTileRevealModal(t, () => {
-        updateUI();
+        updateUI(true);
         render();
       });
       break;
@@ -5020,11 +5045,11 @@ function triggerAnomaly(t) {
       addLog(
         "Dead Zone: transmission blocked. No Signal Roll can be made while this tile is occupied.",
       );
-      updateUI();
+      updateUI(true);
       break;
     case "Gravity Well":
       showTileRevealModal(t, () => {
-        updateUI();
+        updateUI(true);
         render();
       });
       break;
@@ -5086,7 +5111,7 @@ function triggerAnomaly(t) {
         );
         if (synth) {
           synth.corrupted = true;
-          _play("corrupt.wav");
+          _play("corrupt.mp3");
           addLog("> IRIS threat assessment updated. (Echo Chamber)", "crit");
         }
       }
@@ -5121,20 +5146,20 @@ function triggerAnomaly(t) {
       }
       const ecOv = document.getElementById("evc-ov");
       ecOv.style.backgroundImage =
-        "url(img/tiles/echo-chamber_overlay_blur.png)";
+        "url(img/tiles/echo-chamber_overlay_blur.webp)";
       ecOv.style.backgroundSize = "cover";
       ecOv.style.backgroundPosition = "center";
       showEventCard(
         evt,
         "Echo Chamber",
         () => {
-          updateUI();
+          updateUI(true);
           render();
           if (ecDrawnCard)
             openCardModal(
               p.id,
               ecDrawnCard,
-              "url(img/tiles/echo-chamber_overlay_blur.png)",
+              "url(img/tiles/echo-chamber_overlay_blur.webp)",
             );
         },
         rollCb,
@@ -5144,13 +5169,14 @@ function triggerAnomaly(t) {
       break;
     }
     case "Inversion Field": {
-      const others = G.players.filter((pl) => pl.alive && pl.id !== p.id);
+      const others = SignalGameLogic.inversionFieldTargets(G.players, p.id);
       if (!others.length) {
         addLog("Inversion Field: no other players to swap with.", "act");
         break;
       }
-      const body =
-        "Gravity inversion — choose a crew member to swap Food with, or decline.";
+      // Mandatory swap — the crew member cannot refuse (docs/FieldGuide.md),
+      // so no Decline option is offered here.
+      const body = "Gravity inversion — choose a crew member to swap Food with.";
       const extraBtns = document.createElement("div");
       extraBtns.style.cssText =
         "display:flex;flex-direction:column;gap:8px;margin-top:12px;";
@@ -5160,33 +5186,20 @@ function triggerAnomaly(t) {
         b.textContent = `Swap with ${other.name} (${other.food} Food)`;
         b.onclick = () => {
           document.getElementById("mov").classList.remove("show");
-          const tmp = p.food;
-          p.food = other.food;
-          other.food = tmp;
+          SignalGameLogic.swapFood(p, other);
           addLog(
             `Inversion Field: ${p.name} swapped Food with ${other.name}.`,
             "crit",
           );
-          updateUI();
+          updateUI(true);
           render();
         };
         extraBtns.appendChild(b);
       });
-      showModal(
-        "INVERSION FIELD",
-        body,
-        true,
-        () => {
-          addLog(`${p.name} declined the Inversion Field.`);
-          updateUI();
-          render();
-        },
-        "Decline",
-        undefined,
-        undefined,
-        "",
-      );
-      document.getElementById("mact").prepend(extraBtns);
+      showModal("INVERSION FIELD", body, true, () => {}, "", undefined, undefined, "");
+      const mact = document.getElementById("mact");
+      mact.innerHTML = "";
+      mact.appendChild(extraBtns);
       break;
     }
     case "Stasis Pod": {
@@ -5198,12 +5211,12 @@ function triggerAnomaly(t) {
           () => {
             p.inStasis = false;
             addLog(`${p.name} exited stasis.`, "act");
-            updateUI();
+            updateUI(true);
             render();
           },
           "Exit Stasis",
           () => {
-            updateUI();
+            updateUI(true);
             render();
           },
           "Stay in Stasis",
@@ -5216,12 +5229,12 @@ function triggerAnomaly(t) {
           () => {
             p.inStasis = true;
             addLog(`${p.name} entered stasis.`, "act");
-            updateUI();
+            updateUI(true);
             render();
           },
           "Enter Stasis",
           () => {
-            updateUI();
+            updateUI(true);
             render();
           },
           "Decline",
@@ -5259,7 +5272,11 @@ function openTrade() {
   here.forEach((pl) => {
     const b = document.createElement("button");
     b.className = "mbtn";
-    b.innerHTML = `<span style="color:${pl.color};font-weight:bold">${pl.name}</span><span style="color:var(--dim);font-size:.75em;margin-left:10px">Food ${pl.food} &nbsp; O\u2082 ${pl.o2} &nbsp; \u2665 ${pl.health}</span>`;
+    appendPlayerChoiceContent(
+      b,
+      pl,
+      `Food ${pl.food} \u00a0 O\u2082 ${pl.o2} \u00a0 \u2665 ${pl.health}`,
+    );
     b.onclick = () => {
       document.getElementById("mov").classList.remove("show");
       initTradeModal(p, pl);
@@ -5528,12 +5545,12 @@ function confirmTrade() {
   addLog(`Trade completed: ${pA.name} ↔ ${pB.name}.`, "good");
   closeTrade(false);
   viewedPlayer = G.currentPlayer;
-  updateUI();
+  updateUI(true);
   render();
 }
 
 function closeTrade(playBack = true) {
-  if (playBack) _play("back.wav");
+  if (playBack) _play("back.mp3");
   tradeState = null;
   document.getElementById("trademodal").classList.remove("show");
 }
@@ -5625,9 +5642,21 @@ function panToPlayer(p, duration = 600) {
   _panAnimId = requestAnimationFrame(step);
 }
 function preloadTileImages() {
+  // The board renders the small hex-cropped variants — getTileImg(t, "hex")
+  // resolves to `img/tiles/<base>_hex.webp` (see render()). The full-resolution
+  // art (`img/tiles/<base>.webp`) is only shown on demand by tile hero/detail/
+  // tooltip views (setTileHeroSprite, tileImgHtml, tooltip hero), which fetch it
+  // lazily when the element is displayed. Eagerly preloading full-res art here
+  // therefore warms ~150 MB of PNGs (and forces ~410 MB of RGBA decode) that
+  // the board never uses. Preload only the compressed hex set the board actually
+  // needs; dedupe because some names share a file (e.g. signal-tower.webp).
+  const seen = new Set();
   Object.values(TILE_IMAGE_MAP).forEach((f) => {
+    const hexSrc = `img/tiles/${tileAssetBase(f)}_hex.webp`;
+    if (seen.has(hexSrc)) return;
+    seen.add(hexSrc);
     const i = new Image();
-    i.src = `img/tiles/${f}`;
+    i.src = hexSrc;
   });
 }
 let sbPan = { x: 0, y: 0 },
@@ -6258,13 +6287,13 @@ function buildCrewTabs() {
       t.onclick = () => {
         viewedPlayer = pl.id;
         eqGalleryOffset = 0;
-        updateUI();
+        updateUI(false);
       };
     tabs.appendChild(t);
   });
 }
 
-function saveGame() {
+function saveGame(publishState = false, writerTurnOwner) {
   if (!G) return;
   try {
     const n = G.players.length;
@@ -6282,14 +6311,60 @@ function saveGame() {
         _pendingLogs: pendingLogs,
       },
       cardUid,
-      viewedPlayer,
       pendingNames,
       pendingPortraits,
     };
     s.G.players = G.players.map((p) => ({ ...p, equipment: [...p.equipment] }));
-    G._pendingLogs = []; // reset after capture
-    localStorage.setItem("signal_save", JSON.stringify(s));
-    if (window.Sync?.isActive()) window.Sync.pushState(s);
+    if (publishState) G._pendingLogs = []; // reset after capture
+    localStorage.setItem(
+      "signal_save",
+      JSON.stringify({ ...s, viewedPlayer }),
+    );
+    if (
+      publishState &&
+      window.Sync?.isActive() &&
+      SignalGameLogic.canWriteState({
+        online: true,
+        active: true,
+        receiving: window.Sync.isReceiving(),
+        playerIndex: window.Sync.myPlayerIndex(),
+        currentPlayer: G.currentPlayer,
+        writerTurnOwner,
+        writerIsSynth:
+          !!G.players[writerTurnOwner ?? G.currentPlayer]?.isSynth,
+      })
+    ) {
+      const writerIndex = SignalGameLogic.controllingPlayerIndex(
+        G.players,
+        writerTurnOwner ?? G.currentPlayer,
+      );
+      const deckOwnerIndex = SignalGameLogic.controllingPlayerIndex(
+        G.players,
+        G.currentPlayer,
+      );
+      const privateState = SignalGameLogic.privateGameState(s.G, writerIndex);
+      const publishedGame = G;
+      const push = window.Sync.pushState(
+        { ...s, G: SignalGameLogic.publicGameState(s.G) },
+        privateState,
+        writerIndex,
+        deckOwnerIndex,
+      );
+      if (writerIndex !== deckOwnerIndex && push?.then) {
+        push
+          .then((committed) => {
+            if (
+              committed &&
+              G === publishedGame &&
+              G.currentPlayer === deckOwnerIndex
+            ) {
+              G.evtDeck = [];
+              saveGame(false);
+            }
+          })
+          .catch((error) => console.error("[saveGame:pushState]", error));
+      }
+    }
   } catch (e) {
     console.error("[saveGame]", e);
   }
@@ -6299,10 +6374,8 @@ function loadGame() {
     const raw = localStorage.getItem("signal_save");
     if (!raw) return false;
     const s = JSON.parse(raw);
-    const sg = s.G;
-    sg.tiles = new Map(Object.entries(sg.tiles || {}));
-    sg.reach = new Map();
-    G = sg;
+    SignalGameLogic.normalizeSavedGame(s);
+    G = s.G;
     cardUid = s.cardUid || 0;
     viewedPlayer = s.viewedPlayer || 0;
     pendingNames = s.pendingNames || [];
@@ -6321,27 +6394,25 @@ function receiveRemoteState(data) {
   try {
     window.Sync?.beginReceive();
     // Firebase converts every array to a numeric-keyed object; normalize them all back
-    const _fa = (v) => {
-      if (!v) return [];
-      if (Array.isArray(v)) return v;
-      return Object.keys(v)
-        .sort((a, b) => +a - +b)
-        .map((k) => v[k]);
-    };
+    const existingGame = G;
+    SignalGameLogic.normalizeSavedGame(data);
     const sg = data.G;
-    sg.tiles = new Map(Object.entries(sg.tiles || {}));
-    sg.reach = new Map();
-    sg.terrainDeck = _fa(sg.terrainDeck);
-    sg.eqDeck = _fa(sg.eqDeck);
-    sg.evtDeck = _fa(sg.evtDeck);
-    sg.players = _fa(sg.players).map((p) => ({
-      ...p,
-      equipment: _fa(p.equipment),
-    }));
+    SignalGameLogic.normalizePlayerIdentities(
+      sg,
+      [...PCOLORS, SYNTH_COLOR],
+      [...CREW_PORTRAITS.map((portrait) => portrait.name), "iris"],
+    );
+    if (window.Sync?.isActive())
+      SignalGameLogic.mergePrivateGameState(
+        sg,
+        data._privateState,
+        existingGame,
+        window.Sync.myPlayerIndex(),
+      );
     const prevPlayer = G?.currentPlayer;
     const prevPositions = G?.players?.map((p) => ({ q: p.q, r: p.r })) || [];
     const prevFragments = G?.players?.map((p) => p.radioFragments) || [];
-    const incomingLogs = _fa(sg._pendingLogs);
+    const incomingLogs = SignalGameLogic.firebaseArray(sg._pendingLogs);
     delete sg._pendingLogs;
     G = sg;
     cardUid = data.cardUid || 0;
@@ -6358,7 +6429,7 @@ function receiveRemoteState(data) {
         G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
       markTilesDirty();
       render();
-      updateUI();
+      updateUI(false);
       const myIdx = window.Sync?.myPlayerIndex() ?? -1;
       G.players.forEach((p, i) => {
         if (i === myIdx) return;
@@ -6400,7 +6471,7 @@ function receiveRemoteState(data) {
         G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
       markTilesDirty();
       render();
-      updateUI();
+      updateUI(false);
       showTableDice("move");
       document.getElementById("e7panel").classList.add("show");
       const myName = G.players[idx]?.name || "crew";
@@ -6496,13 +6567,13 @@ function confirmNewGame() {
     }, 900);
   }, introMs);
 }
-function updateUI() {
+function updateUI(gameplayMutation = false, writerTurnOwner) {
   if (!G) return;
   if (cp().health > 1 && !_alarmCrit.paused) {
     _alarmCrit.pause();
     _alarmCrit.currentTime = 0;
   }
-  saveGame();
+  saveGame(gameplayMutation, writerTurnOwner);
   const p = cp(); // active player (actions)
   const v = G.players[viewedPlayer] || p; // viewed player (card display)
   document.getElementById("hturn").textContent = `Turn ${G.turn} · ${p.name}`;
@@ -6725,6 +6796,8 @@ function updateUI() {
       "bsig",
       "btrd",
       "biris",
+      "bstay",
+      "bleave",
     ].forEach((id) => {
       const b = document.getElementById(id);
       if (b) b.disabled = true;
@@ -6814,11 +6887,18 @@ function buildEqHand(p) {
       continue;
     }
     if (c.eventCard) {
+      const canView = SignalGameLogic.ownsPrivateCard({
+        online: !!window.Sync?.isActive(),
+        active: !!window.Sync?.isActive(),
+        playerIndex: window.Sync?.myPlayerIndex(),
+        currentPlayer: G.currentPlayer,
+        cardPlayerIndex: p.id,
+      });
       d.className = "eqcard eqcard-event-priv";
       d.dataset.uid = c.uid;
       if (c.uid === selectedCardUid) d.classList.add("selected");
       d.innerHTML = `<div class="eqcard-inner eqcard-event-back"><span class="evc-cat-icon" style="--eq-icon-url:url('img/icons/person-solid-full.svg')"></span><div class="eqcard-event-back-lbl">PRIVATE<br>EVENT</div></div>`;
-      d.onclick = () => {
+      d.onclick = canView ? () => {
         sfx("select");
         selectedCardUid = c.uid;
         showEventCard(
@@ -6826,12 +6906,12 @@ function buildEqHand(p) {
           null,
           () => {
             selectedCardUid = null;
-            updateUI();
+            updateUI(false);
           },
           null,
           true,
         );
-      };
+      } : null;
     } else {
       d.className = `eqcard cc-${c.cat}`;
       d.dataset.uid = c.uid;
@@ -6860,7 +6940,7 @@ function buildEqHand(p) {
 // ═══════════════════════════════════════════════════════════════
 let selectedCardUid = null;
 function openCardModal(playerIdx, c, bgImage) {
-  const isOwner = playerIdx === G.currentPlayer;
+  const isOwner = playerIdx === G.currentPlayer && isMyTurn();
   // set category CSS vars on the overlay card
   const card = document.getElementById("evc");
   const ov = document.getElementById("evc-ov");
@@ -7168,7 +7248,7 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount = 1) {
         outEl.textContent = outcome;
         outEl.style.display = "";
       }
-      updateUI();
+      updateUI(true);
       btn.disabled = false;
       btn.style.opacity = "";
     }, 1500);
@@ -7178,7 +7258,7 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount = 1) {
     document.getElementById("evc-ov").style.backgroundImage = "";
     if (onDismiss) onDismiss();
     else {
-      updateUI();
+      updateUI(true);
       render();
     }
   };
@@ -7260,7 +7340,7 @@ function showEventCard(
           outEl.textContent = outcome;
           outEl.style.display = "";
         }
-        updateUI();
+        updateUI(true);
         btn.disabled = false;
         btn.style.opacity = "";
       }, 1500);
@@ -7390,7 +7470,7 @@ function addE7(msg, cls = "", charDelay = 15) {
 function addLog(msg, cls = "", charDelay = 15) {
   termAppend(document.getElementById("e7log"), msg, cls, charDelay, "le");
   // Queue for sync to other players (skip during receive to avoid echo)
-  if (G && _isOnlineMode && !window.Sync?.isReceiving()) {
+  if (G && window.Sync?.isActive() && !window.Sync.isReceiving()) {
     if (!G._pendingLogs) G._pendingLogs = [];
     G._pendingLogs.push({ msg, cls });
   }
@@ -7503,7 +7583,7 @@ fetch("docs/FieldGuide.md")
 
 function toggleE7() {
   const p = document.getElementById("e7panel");
-  if (p.classList.contains("show")) _play("back.wav");
+  if (p.classList.contains("show")) _play("back.mp3");
   p.classList.toggle("show");
   if (p.classList.contains("show")) {
     const l = document.getElementById("e7log");
@@ -7537,7 +7617,7 @@ function openRulebook() {
   renderRulebookSection(RULEBOOK_SECTIONS[0]);
 }
 function closeRulebook() {
-  _play("back.wav");
+  _play("back.mp3");
   document.getElementById("rbmodal").classList.remove("show");
 }
 
@@ -7875,7 +7955,7 @@ function _centerTourCard() {
 }
 
 function tourStep(dir) {
-  if (dir < 0) _play("back.wav");
+  if (dir < 0) _play("back.mp3");
   _tourStep += dir;
   if (_tourStep >= TOUR_STEPS.length) {
     endTour();
@@ -8168,7 +8248,7 @@ function placeBuilderTile(q, r) {
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
-  if (_isOnlineMode)
+  if (window.Sync?.isActive())
     window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 function removeBuilderTile(q, r) {
@@ -8190,7 +8270,7 @@ function removeBuilderTile(q, r) {
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
-  if (_isOnlineMode)
+  if (window.Sync?.isActive())
     window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
@@ -8205,7 +8285,7 @@ function resetBuilder() {
   if (_builderReadOnly) return;
   initBuilder();
   updateBuilderProgress();
-  if (_isOnlineMode)
+  if (window.Sync?.isActive())
     window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
@@ -8238,7 +8318,7 @@ function randomBuilder() {
   renderPalette();
   renderSiteBuilder();
   updateBuilderProgress();
-  if (_isOnlineMode)
+  if (window.Sync?.isActive())
     window.Sync?.pushBuilderState(Object.fromEntries(builderState.placed));
 }
 
@@ -8358,7 +8438,7 @@ function renderSiteBuilder() {
       const img = document.createElementNS(ns, "image");
       img.setAttribute(
         "href",
-        `img/tiles/${bFile.replace(".png", "")}_hex.png`,
+        `img/tiles/${tileAssetBase(bFile)}_hex.webp`,
       );
       img.setAttribute("x", cx - hw / 2);
       img.setAttribute("y", cy - hh / 2);
@@ -8476,13 +8556,13 @@ function finalizeGame() {
   document.getElementById("setup-site").classList.remove("show");
   document.getElementById("setup-site").style.display = "none";
   document.getElementById("game").className = "running";
-  _play("start.wav");
+  _play("start.mp3");
   clearSave();
   _updateMpBadge();
   guidanceSeen = new Set(); // reset guidance milestones for new game
   newGame(pendingNames, pendingPortraits, placedMap);
   // For online games, push state immediately so the client doesn't wait for the setTimeout
-  if (_isOnlineMode && window.Sync?.isActive()) saveGame();
+  if (window.Sync?.isActive()) saveGame(true);
   // Sync guidance toggle button state
   const gtBtn = document.getElementById("e7guidance-toggle");
   if (gtBtn) {
@@ -8492,7 +8572,7 @@ function finalizeGame() {
     preloadTileImages();
     initBoard();
     render();
-    updateUI();
+    updateUI(true);
     showTableDice("move");
     // Open E7 panel and seed with mission controls + game log
     document.getElementById("e7panel").classList.add("show");
@@ -8548,7 +8628,7 @@ let setupPortraits = (() => {
 })(); // shuffled so all 10 crew rotate in
 
 function buildSetup() {
-  if (_isOnlineMode) {
+  if (window.Sync?.isActive()) {
     buildOnlineSetup();
     return;
   }
@@ -8586,7 +8666,7 @@ function buildSetup() {
       <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
       <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
       <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
-    </div><input class="pi" type="text" id="pn-${i}" value="${prev[i] !== undefined ? prev[i] : pname}" maxlength="16" placeholder="crew ${i + 1}">`;
+    </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prev[i] !== undefined ? prev[i] : pname)}" maxlength="16" placeholder="crew ${i + 1}">`;
     nl.appendChild(d);
   }
 }
@@ -8598,7 +8678,10 @@ function cyclePortrait(i, dir) {
   const newName = CREW_PORTRAITS[setupPortraits[i]].name;
   const input = document.getElementById(`pn-${i}`);
   if (input && input.value === oldName) input.value = newName;
-  if (_isOnlineMode && i === (window.Sync?.myPlayerIndex() ?? 0)) {
+  if (
+    window.Sync?.isActive() &&
+    i === (window.Sync.myPlayerIndex() ?? 0)
+  ) {
     _onlinePushMySlot();
     buildSetup();
     return;
@@ -8613,7 +8696,7 @@ function toggleSynth(v) {
 }
 
 function goToSiteBuilder() {
-  if (_isOnlineMode) {
+  if (window.Sync?.isActive()) {
     const players = Object.values(_onlineLobbyData).sort(
       (a, b) => a.connectionSlot - b.connectionSlot,
     );
@@ -8679,7 +8762,7 @@ function _startMusicOnInteraction() {
   document.removeEventListener("keydown", _startMusicOnInteraction);
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   window.addEventListener(
     "wheel",
     (e) => {
@@ -8717,7 +8800,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const parent = tab.parentElement;
     tab.addEventListener("click", () => {
       parent?.classList.toggle("hud-collapsed");
-      _play("hud.wav");
+      _play("hud.mp3");
     });
   });
 
@@ -8734,40 +8817,46 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("wake-screen").style.display = "none";
   };
 
-  if (mpSession && window.Sync?.init()) {
-    if (mpSession.playerIndex === 0) {
-      // HOST: restore from localStorage (always current), then reattach Firebase sync
-      if (loadGame()) {
-        window.Sync.onStateUpdate(receiveRemoteState);
-        window.Sync.reconnect(mpSession.joinCode, 0).catch(() =>
-          window.Sync?.clearSession(),
-        );
+  if (mpSession) {
+    let syncReady = false;
+    try {
+      syncReady = await window.Sync?.init();
+    } catch (_) {}
+    if (syncReady) {
+      if (mpSession.playerIndex === 0) {
+        // HOST: restore from localStorage (always current), then reattach Firebase sync
+        if (loadGame()) {
+          window.Sync.onStateUpdate(receiveRemoteState);
+          window.Sync.reconnect(mpSession.joinCode, 0).catch(() =>
+            window.Sync?.clearSession(),
+          );
+          _dismissWake();
+          document.getElementById("intro").style.display = "none";
+          document.getElementById("game").className = "running";
+          preloadTileImages();
+          initBoard();
+          render();
+          updateUI(false);
+          showTableDice(
+            G.phase === "roll" ? "move" : G.phase === "move" ? "move" : null,
+          );
+          if (G.phase === "move" && G.movementLeft > 0)
+            G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
+          document.getElementById("e7panel").classList.add("show");
+          _updateMpBadge();
+          addE7("> Session restored.", "sys");
+          document.addEventListener("click", _startMusicOnInteraction);
+          document.addEventListener("keydown", _startMusicOnInteraction);
+          return;
+        }
+      } else {
+        // JOINER: no local save — reattach Firebase and restore crew setup or game state
         _dismissWake();
-        document.getElementById("intro").style.display = "none";
-        document.getElementById("game").className = "running";
-        preloadTileImages();
-        initBoard();
-        render();
-        updateUI();
-        showTableDice(
-          G.phase === "roll" ? "move" : G.phase === "move" ? "move" : null,
-        );
-        if (G.phase === "move" && G.movementLeft > 0)
-          G.reach = bfsReach(cp().q, cp().r, G.movementLeft);
-        document.getElementById("e7panel").classList.add("show");
-        _updateMpBadge();
-        addE7("> Session restored.", "sys");
-        document.addEventListener("click", _startMusicOnInteraction);
-        document.addEventListener("keydown", _startMusicOnInteraction);
+        window.Sync.reconnect(mpSession.joinCode, mpSession.playerIndex)
+          .then(() => enterOnlineCrewSetup())
+          .catch(() => window.Sync?.clearSession());
         return;
       }
-    } else {
-      // JOINER: no local save — reattach Firebase and restore crew setup or game state
-      _dismissWake();
-      window.Sync.reconnect(mpSession.joinCode, mpSession.playerIndex)
-        .then(() => enterOnlineCrewSetup())
-        .catch(() => window.Sync?.clearSession());
-      return;
     }
     // Session found but restore failed — clear and fall through to intro
     window.Sync?.clearSession();
@@ -8781,7 +8870,7 @@ window.addEventListener("DOMContentLoaded", () => {
     preloadTileImages();
     initBoard();
     render();
-    updateUI();
+    updateUI(false);
     showTableDice(
       G.phase === "roll" ? "move" : G.phase === "move" ? "move" : null,
     );
@@ -8801,9 +8890,9 @@ window.addEventListener("DOMContentLoaded", () => {
     // Show intro — CSS animation on signal-intro-glow starts fresh from display:none
     document.getElementById("intro").style.display = "flex";
     _music.play().catch(() => {});
-    // startup.wav + hdd1 play simultaneously at 0.5 volume.
+    // startup.mp3 + hdd1 play simultaneously at 0.5 volume.
     // hdd1 crossfades into hdd2 (1.5s overlap); hdd2 loops 3× while fading out.
-    const _sndStartup = new Audio("sfx/startup.wav");
+    const _sndStartup = new Audio("sfx/startup.mp3");
     const _sndHdd1 = new Audio("sfx/startup-hdd1.mp3");
     const _sndHdd2 = new Audio("sfx/startup-hdd2.mp3");
     _sndStartup.volume = 0.3;
@@ -8918,15 +9007,16 @@ const _escHtml = (s) =>
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-let _isOnlineMode = false;
 let _onlineLobbyData = {}; // keyed by connectionSlot (0–5)
 let _builderReadOnly = false;
 function isMyTurn() {
-  return (
-    !_isOnlineMode ||
-    !window.Sync?.isActive() ||
-    window.Sync.myPlayerIndex() === G?.currentPlayer
-  );
+  const online = !!window.Sync?.isActive();
+  return SignalGameLogic.isTurnOwner({
+    online,
+    active: online,
+    playerIndex: window.Sync?.myPlayerIndex(),
+    currentPlayer: G?.currentPlayer,
+  });
 }
 
 function _lobbyShowPanel(id) {
@@ -8943,8 +9033,8 @@ function _lobbyShowPanel(id) {
   });
 }
 
-function showOnlineLobby() {
-  if (!window.Sync?.init()) {
+async function showOnlineLobby() {
+  if (!await window.Sync?.init()) {
     alert(
       "Firebase SDK failed to load. Check your internet connection and try again.",
     );
@@ -8964,7 +9054,7 @@ function showOnlineLobby() {
 }
 
 function lobbyBack() {
-  _play("back.wav");
+  _play("back.mp3");
   document.getElementById("online-lobby").style.display = "none";
   document.getElementById("intro").style.display = "flex";
   _lobbyShowPanel("lobby-mode-sel");
@@ -9012,7 +9102,6 @@ function lobbyJoinConnect() {
 
 // Called by host "Continue →" button and by joiners after connecting
 function enterOnlineCrewSetup() {
-  _isOnlineMode = true;
   _onlineLobbyData = {};
   document.getElementById("online-lobby").style.display = "none";
   const badge = document.getElementById("su-mp-badge");
@@ -9026,14 +9115,28 @@ function enterOnlineCrewSetup() {
   window.Sync.onLobbyUpdate((rawData) => {
     _onlineLobbyData = {};
     Object.values(rawData).forEach((entry) => {
-      if (entry && typeof entry.connectionSlot === "number") {
-        _onlineLobbyData[entry.connectionSlot] = entry;
+      if (
+        entry &&
+        Number.isInteger(entry.connectionSlot) &&
+        entry.connectionSlot >= 0 &&
+        entry.connectionSlot < 6
+      ) {
+        const safeEntry = {
+          ...entry,
+          name: SignalGameLogic.playerName(entry.name),
+          portraitIndex: SignalGameLogic.enumeratedValue(
+            entry.portraitIndex,
+            CREW_PORTRAITS.map((_, index) => index),
+            entry.connectionSlot % CREW_PORTRAITS.length,
+          ),
+        };
+        _onlineLobbyData[safeEntry.connectionSlot] = safeEntry;
         const mySlot = window.Sync?.myPlayerIndex() ?? 0;
-        if (entry.connectionSlot !== mySlot && entry.portraitIndex >= 0)
-          setupPortraits[entry.connectionSlot] = entry.portraitIndex;
+        if (safeEntry.connectionSlot !== mySlot)
+          setupPortraits[safeEntry.connectionSlot] = safeEntry.portraitIndex;
       }
     });
-    if (_isOnlineMode) buildSetup();
+    if (window.Sync?.isActive()) buildSetup();
   });
   // Clients (non-host) watch for the host's site builder state
   if (window.Sync.myPlayerIndex() !== 0) {
@@ -9075,7 +9178,6 @@ function enterOnlineCrewSetup() {
 function leaveOnlineSetup() {
   _crewMsgPlayed = false;
   _sbMsgPlayed = false;
-  _isOnlineMode = false;
   _onlineLobbyData = {};
   const badge = document.getElementById("su-mp-badge");
   if (badge) {
@@ -9194,7 +9296,7 @@ function _allOnlineReady() {
 function showCrewSetup() {
   document.getElementById("intro").style.display = "none";
   document.getElementById("setup").style.display = "flex";
-  if (!_isOnlineMode)
+  if (!window.Sync?.isActive())
     document.getElementById("su-back").style.display = "block";
   buildSetup();
   if (!_crewMsgPlayed) {
@@ -9213,7 +9315,7 @@ function showCrewSetup() {
 }
 
 function backToIntro() {
-  _play("back.wav");
+  _play("back.mp3");
   _crewMsgPlayed = false;
   _sbMsgPlayed = false;
   document.getElementById("setup").style.display = "none";
@@ -9222,12 +9324,12 @@ function backToIntro() {
 }
 
 function backToCrewSetup() {
-  _play("back.wav");
+  _play("back.mp3");
   const ss = document.getElementById("setup-site");
   ss.style.display = "none";
   ss.classList.remove("show");
   document.getElementById("setup").style.display = "flex";
-  if (!_isOnlineMode)
+  if (!window.Sync?.isActive())
     document.getElementById("su-back").style.display = "block";
   else document.getElementById("su-leave").style.display = "block";
   buildSetup();
