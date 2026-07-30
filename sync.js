@@ -18,9 +18,23 @@ const FIREBASE_CONFIG = {
   appId:             '1:856688466444:web:22f65380f65c8412756c29',
 };
 
+// App Check (attestation): the public reCAPTCHA v3 SITE key for this domain.
+// This is safe to ship in the client; the matching secret lives in the Firebase
+// console. Enforce App Check on the Realtime Database in the console so only
+// attested clients can read/write. See docs/FirebaseSetup.md.
+const APP_CHECK_RECAPTCHA_SITE_KEY = 'REPLACE_WITH_RECAPTCHA_V3_SITE_KEY';
+
 // ── Internal state ──────────────────────────────────────────────────
 const SESSION_KEY = 'signal_mp_session';
 const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
+// Minimum server-time gap between two room creations by the same uid. Kept in
+// sync with the `hosts/$uid/lastCreated` throttle in database.rules.json.
+const ROOM_CREATE_MIN_INTERVAL_MS = 15 * 1000;
+// Room-code length and alphabet. 8 chars over a 32-symbol alphabet is ~40 bits
+// of entropy (32^8 ≈ 1.1e12), drawn from a CSPRNG, so brute-forcing a live code
+// through the auth-gated read rule is impractical.
+const JOIN_CODE_LENGTH = 8;
+const JOIN_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 let _clientId = null;
 let _presenceId = null;
@@ -56,6 +70,7 @@ window.Sync = {
       return false;
     }
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _activateAppCheck();
     if (typeof firebase.auth !== 'function') {
       console.error('Sync: Firebase Auth SDK not loaded. Check your <script> tags.');
       return false;
@@ -72,11 +87,23 @@ window.Sync = {
   },
 
   generateJoinCode() {
-    // Excludes ambiguous characters: I, O, 0, 1
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    // Excludes ambiguous characters: I, O, 0, 1. Draws each symbol from a
+    // CSPRNG so codes are unpredictable — Math.random() is not cryptographically
+    // secure. The 32-symbol alphabet divides 256 evenly, so byte % 32 is
+    // unbiased with no rejection sampling required.
+    const chars = JOIN_CODE_ALPHABET;
+    const crypto = _crypto();
     let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars[Math.floor(Math.random() * chars.length)];
+    if (crypto) {
+      const bytes = crypto.getRandomValues(new Uint8Array(JOIN_CODE_LENGTH));
+      for (let i = 0; i < JOIN_CODE_LENGTH; i++) {
+        code += chars[bytes[i] % chars.length];
+      }
+    } else {
+      // Fallback for environments without Web Crypto (very old browsers).
+      for (let i = 0; i < JOIN_CODE_LENGTH; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
+      }
     }
     return code;
   },
@@ -93,11 +120,21 @@ window.Sync = {
     let ownsRoom = false;
     try {
       const created = Date.now();
-      await _gameRef.child('meta').set({
-        hostId:  _clientId,
-        created,
-        expiresAt: created + ROOM_TTL_MS,
-        started: false,
+      // Atomic write: the room meta and the per-uid throttle token commit
+      // together. database.rules.json ties room creation to this token and
+      // rejects it when the same uid created a room < ROOM_CREATE_MIN_INTERVAL_MS
+      // ago, rate-limiting room-creation spam.
+      await _db.ref().update({
+        [`games/${joinCode}/meta`]: {
+          hostId:  _clientId,
+          created,
+          expiresAt: created + ROOM_TTL_MS,
+          started: false,
+        },
+        [`hosts/${_clientId}/lastCreated`]: {
+          created,
+          roomCode: joinCode,
+        },
       });
       ownsRoom = true;
       await _attachPresence(0);
@@ -134,6 +171,7 @@ window.Sync = {
       throw new Error('Game not found. Check the join code and try again.');
     }
     if (_isExpired(metaSnap.val())) {
+      _pruneExpiredRoom(_gameRef);
       _gameRef = null;
       _joinCode = null;
       throw new Error('This game room has expired.');
@@ -212,6 +250,9 @@ window.Sync = {
     _gameRef       = _db.ref(`games/${joinCode}`);
     const metaSnap = await _gameRef.child('meta').once('value');
     if (!metaSnap.exists() || _isExpired(metaSnap.val())) {
+      if (metaSnap.exists() && _isExpired(metaSnap.val())) {
+        _pruneExpiredRoom(_gameRef);
+      }
       _gameRef = null;
       _joinCode = null;
       _active = false;
@@ -312,6 +353,43 @@ window.Sync = {
 };
 
 // ── Private helpers ─────────────────────────────────────────────────
+
+function _crypto() {
+  return (typeof globalThis !== 'undefined' &&
+    globalThis.crypto &&
+    typeof globalThis.crypto.getRandomValues === 'function')
+    ? globalThis.crypto
+    : null;
+}
+
+let _appCheckActivated = false;
+function _activateAppCheck() {
+  if (_appCheckActivated) return;
+  // App Check SDK optional at runtime: if the script tag is absent the game
+  // still works, but production must load it and enforce App Check on the
+  // Realtime Database in the Firebase console (see docs/FirebaseSetup.md).
+  if (typeof firebase.appCheck !== 'function') return;
+  if (!APP_CHECK_RECAPTCHA_SITE_KEY ||
+      APP_CHECK_RECAPTCHA_SITE_KEY === 'REPLACE_WITH_RECAPTCHA_V3_SITE_KEY') {
+    console.warn('Sync: App Check reCAPTCHA site key not configured; skipping activation.');
+    return;
+  }
+  try {
+    // Second arg enables automatic token refresh so long sessions stay attested.
+    firebase.appCheck().activate(APP_CHECK_RECAPTCHA_SITE_KEY, true);
+    _appCheckActivated = true;
+  } catch (error) {
+    console.error('Sync: App Check activation failed.', error);
+  }
+}
+
+function _pruneExpiredRoom(gameRef) {
+  // The rules permit any authenticated client to delete a room once it has
+  // expired, so clients opportunistically clean up abandoned rooms they land
+  // on. A scheduled trusted job still handles rooms no client ever revisits.
+  if (!gameRef) return Promise.resolve();
+  return gameRef.remove().catch(() => {});
+}
 
 function _saveSession() {
   localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -596,6 +674,9 @@ function _startListening() {
     const gameRef = _gameRef;
     const sessionGeneration = _sessionGeneration;
     const data = snap.val();
+    // Ingress guard: state must be an object. Revisions are validated by
+    // _revisionOf; game.js sanitizes every consumed field before applying.
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return;
     if (data._pending) return;
     const revision = _revisionOf(data);
     if (_hasState && revision <= _stateRevision) return;

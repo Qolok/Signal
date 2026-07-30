@@ -69,7 +69,7 @@ Each player has 3 Health tokens. Health is lost through starvation and conflict.
 
 When a player's Health reaches 0, they become **incapacitated** and cannot move or take actions. A fellow crew member may use a [MedPack](#equipment_cards) to restore them to 1 Health, or a [Stretcher](#equipment_cards) to transport them directly to the [Medical Bay](#game_board) (which also restores 1 Health).
 
-After 2 consecutive rounds of incapacitation, a player dies. **Death** removes players from the game. Any [Radio Fragments](#radio_fragments) they were carrying are left behind at their final location.
+After 3 consecutive rounds of incapacitation, a player dies. **Death** removes players from the game. Any [Radio Fragments](#radio_fragments) they were carrying are left behind at their final location.
 
 ## Crew Members
 
@@ -109,7 +109,7 @@ Base Camp is a 7-hex cluster — your anchor point on the planet. The layout of 
 |---|---|---|
 | <img src="img/tiles/crash-site_overlay.webp" class="fg-tile"> | **Crash Site** | All players begin here. No specific action — this is your anchor point. |
 | <img src="img/tiles/medbay_overlay.webp" class="fg-tile"> | **Medical Bay** | Passive: Restore 1 Health automatically when entering. Refills IRIS's Battery to full on entry. |
-| <img src="img/tiles/locker_overlay.webp" class="fg-tile"> | **Equipment Locker** | Action: Draw 1 [Equipment card](#equipment_cards) per visit. Move away and return to draw again. |
+| <img src="img/tiles/locker_overlay.webp" class="fg-tile"> | **Equipment Locker** | Action: Choose Tool, Supply, Tech, or Weapon, then draw 1 random [Equipment card](#equipment_cards) from that category per visit. Move away and return to draw again. |
 | <img src="img/tiles/cargo_overlay.webp" class="fg-tile"> | **Cargo Hold** | Action: Deposit or withdraw [Food](#crew) from communal storage. Starts with 5 Food per human player, up to a maximum of 15 (3+ players). |
 | <img src="img/tiles/signal-array_overlay.webp" class="fg-tile"> | **Signal Array** | Action: Activate [Radio Fragments](#radio_fragments) and roll for rescue. Only one player may enter at a time. The occupant decides each round whether to roll — they are never required to. If another player wants the occupant out, both roll 1 die and keep rolling until one wins. |
 | <img src="img/tiles/watch-tower_overlay.webp" class="fg-tile"> | **Watch Tower** | Action: Reveal all face-down tiles adjacent to any crew members currently in the field. |

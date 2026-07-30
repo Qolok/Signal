@@ -4,9 +4,10 @@
     ".write": false,
     "games": {
       "$code": {
+        ".write": "auth != null && !newData.exists() && data.child('meta/expiresAt').isNumber() && data.child('meta/expiresAt').val() <= now",
         "meta": {
           ".read": "auth != null",
-          ".write": "auth != null && ((!data.exists() && newData.child('hostId').val() === auth.uid) || (data.child('hostId').val() === auth.uid && newData.child('hostId').val() === auth.uid && newData.child('created').val() === data.child('created').val() && newData.child('expiresAt').val() === data.child('expiresAt').val()))",
+          ".write": "auth != null && ((!data.exists() && newData.child('hostId').val() === auth.uid && newData.parent().parent().parent().child('hosts').child(auth.uid).child('lastCreated/created').val() === newData.child('created').val() && newData.parent().parent().parent().child('hosts').child(auth.uid).child('lastCreated/roomCode').val() === $code) || (data.child('hostId').val() === auth.uid && newData.child('hostId').val() === auth.uid && newData.child('created').val() === data.child('created').val() && newData.child('expiresAt').val() === data.child('expiresAt').val()))",
           ".validate": "newData.hasChildren(['hostId', 'created', 'expiresAt']) && newData.child('hostId').isString() && newData.child('created').isNumber() && newData.child('created').val() <= now && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > now && newData.child('expiresAt').val() <= now + 86400000 && newData.child('expiresAt').val() <= newData.child('created').val() + 86400000 && (!newData.child('started').exists() || newData.child('started').isBoolean())",
           "$other": {
             ".validate": "$other === 'hostId' || $other === 'created' || $other === 'expiresAt' || $other === 'started'"
@@ -48,6 +49,27 @@
             ".read": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now && root.child('games').child($code).child('connections/bySlot').child($slot).val() === auth.uid",
             ".write": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now && root.child('games').child($code).child('state/_pending').val() === auth.uid && ($slot === root.child('games').child($code).child('state/_privateOwner').val() + '' || $slot === root.child('games').child($code).child('state/_deckOwner').val() + '') && newData.child('_revision').val() === root.child('games').child($code).child('state/_revision').val()",
             ".validate": "newData.hasChildren(['ownerIndex', '_revision']) && newData.child('ownerIndex').val() + '' === $slot"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "hosts": {
+      "$uid": {
+        ".read": "auth != null && $uid === auth.uid",
+        "lastCreated": {
+          ".write": "auth != null && $uid === auth.uid && newData.hasChildren(['created', 'roomCode']) && newData.child('created').isNumber() && newData.child('created').val() <= now && newData.child('roomCode').isString() && (!data.exists() || newData.child('created').val() >= data.child('created').val() + 15000)",
+          ".validate": "newData.hasChildren(['created', 'roomCode'])",
+          "created": {
+            ".validate": "newData.isNumber()"
+          },
+          "roomCode": {
+            ".validate": "newData.isString() && newData.val().length === 8"
+          },
+          "$other": {
+            ".validate": false
           }
         },
         "$other": {

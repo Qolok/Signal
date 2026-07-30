@@ -22,7 +22,6 @@ function _play(path) {
 function sfx(name) {
   const picks = {
     dice_roll: "dice.mp3",
-    dice_land: "plink.mp3",
     move: "pop.mp3",
     card: ["card1.mp3", "card2.mp3", "card3.mp3", "card4.mp3"],
     equip: "base-equip.mp3",
@@ -439,7 +438,7 @@ const ANOMALIES = [
 // ═══════════════════════════════════════════════════════════════
 // FIXED 43-TILE TERRAIN DECK SPEC
 // ═══════════════════════════════════════════════════════════════
-function buildTerrainDeck() {
+function buildTerrainDeck(shuffle = true) {
   const deck = [];
   // 3 Ship Sections — alternate image variants
   const shipImgs = [
@@ -541,10 +540,11 @@ function buildTerrainDeck() {
       deck.push(tile);
     }
   });
-  // shuffle
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = 0 | (Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+  if (shuffle) {
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = 0 | (Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
   }
   return deck;
 }
@@ -779,7 +779,7 @@ const EQ_CARDS = [
   },
 ];
 
-function buildEventDeck(humanPlayerCount) {
+function buildEventDeck(humanPlayerCount, withSynth = addSynth, shuffle = true) {
   // Solo Play (Field Guide): a single human player removes all Private
   // Event cards from the deck before the game begins.
   const solo = humanPlayerCount === 1;
@@ -789,7 +789,7 @@ function buildEventDeck(humanPlayerCount) {
     for (let i = 0; i < n; i++) deck.push(card);
   }
   // Public — yield
-  add(addSynth ? 3 : 4, {
+  add(withSynth ? 3 : 4, {
     text: "Emergency supplies found, partially intact. Roll 1 die for Food yield.",
     pub: true,
     rollFood: true,
@@ -824,7 +824,7 @@ function buildEventDeck(humanPlayerCount) {
     pub: true,
     loseHealth: 1,
   });
-  add(addSynth ? 3 : 4, {
+  add(withSynth ? 3 : 4, {
     text: "Natural shelter here. The terrain blocks atmospheric sensors. Skip your O\u2082 flip this round.",
     pub: true,
     skipO2: true,
@@ -865,7 +865,7 @@ function buildEventDeck(humanPlayerCount) {
     pub: true,
   });
   // Public — IRIS threat (only when IRIS is in the game)
-  if (addSynth)
+  if (withSynth)
     add(2, {
       text: "IRIS's last data upload is concerning. She appears to think the odds of survival would be higher with one fewer crew member. Keep an eye on her.",
       pub: true,
@@ -926,15 +926,16 @@ function buildEventDeck(humanPlayerCount) {
   });
   const composition = SignalGameLogic.eventDeckComposition(deck);
   const expected = SignalGameLogic.expectedEventDeckComposition(
-    addSynth,
+    withSynth,
     humanPlayerCount,
   );
   if (JSON.stringify(composition) !== JSON.stringify(expected))
     console.warn("[buildEventDeck] Unexpected deck composition", composition);
-  // shuffle
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = 0 | (Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+  if (shuffle) {
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = 0 | (Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
   }
   return deck;
 }
@@ -1987,7 +1988,6 @@ function showTileRevealModal(t, onDismiss) {
       ];
       wraps.forEach((w, i) => rollDie3D(w, vals[i]));
       setTimeout(() => {
-        sfx("dice_land");
         const p = cp();
         const hits = vals.filter((v) => v >= 4).length;
         const suitCount = p.equipment.filter(
@@ -2849,7 +2849,6 @@ function rollTableDice() {
     diceState.spinning = false;
     diceState.values = finalValues;
     diceState.rolled = true;
-    sfx("dice_land");
     if (diceState.mode === "move") {
       const r = finalValues[0];
       if (!G || G.phase !== "roll") {
@@ -3139,9 +3138,9 @@ function applyLanding(p, q, r, path, wasRevealed) {
     );
 }
 
-function drawEqCard(player) {
-  if (!G.eqDeck.length) return null;
-  const card = G.eqDeck.pop();
+function drawEqCard(player, category = null, id = null) {
+  const card = SignalGameLogic.takeEquipmentCard(G.eqDeck, { category, id });
+  if (!card) return null;
   sfx("card");
   player.equipment.push({ ...card, uid: ++cardUid });
   G.eqDeckCount = G.eqDeck.length;
@@ -3161,6 +3160,14 @@ function drawEqCard(player) {
     });
   }
   return card;
+}
+
+function returnEqCard(card) {
+  const canonical = EQ_CARDS.find((candidate) => candidate.id === card.id);
+  if (!canonical) return;
+  const index = 0 | (Math.random() * (G.eqDeck.length + 1));
+  G.eqDeck.splice(index, 0, canonical);
+  G.eqDeckCount = G.eqDeck.length;
 }
 
 function useCard(playerIdx, uid) {
@@ -3776,6 +3783,7 @@ function doEquipLocker() {
     cancelBtn.style.display = "none";
     actionsEl.innerHTML = "";
     actionsEl.style.cssText = "";
+    actionsEl.classList.remove("locker-category-grid");
     trov.classList.remove("show", "equip-locker", "blur-baked");
     trov.style.display = "none";
     trov.style.backgroundImage = "";
@@ -3783,38 +3791,68 @@ function doEquipLocker() {
   };
   cancelBtn.onclick = dismiss;
   trov.onclick = null;
-  const hasCards = p.equipment && p.equipment.length > 0;
-  const deckEmpty = G.eqDeckCount <= 0;
+  const exchangeableCards = (p.equipment || []).filter((card) => !card.eventCard);
+  const hasCards = exchangeableCards.length > 0;
+  const deckEmpty = G.eqDeck.length <= 0;
+  const categories = ["Tool", "Supply", "Tech", "Weapon"];
+  const showCategoryChoices = (returnedCard, onChoose) => {
+    deck.style.display = "none";
+    actionsEl.innerHTML = "";
+    actionsEl.style.cssText = "";
+    actionsEl.classList.add("locker-category-grid");
+    trDesc(
+      "Choose an equipment category. You will draw a random card from that category.",
+    );
+    categories.forEach((category) => {
+      const count =
+        G.eqDeck.filter((card) => card.cat === category).length +
+        (returnedCard?.cat === category ? 1 : 0);
+      const button = document.createElement("button");
+      button.className = `locker-category-btn cc-${category}`;
+      button.disabled = count === 0;
+      const name = document.createElement("span");
+      name.className = "locker-category-name";
+      name.textContent = category;
+      const available = document.createElement("span");
+      available.className = "locker-category-count";
+      available.textContent = `${count} available`;
+      button.append(name, available);
+      button.onclick = () => {
+        if (button.disabled) return;
+        _play("next.mp3");
+        onChoose(category);
+      };
+      actionsEl.appendChild(button);
+    });
+  };
   if (hasCards) {
-    // Exchange mode: select a card to discard, then draw a replacement
+    // Exchange mode: select a card to discard, then choose its replacement category.
     deck.style.display = "none";
     trDesc(
       deckEmpty
         ? "The equipment deck is empty — nothing to exchange."
-        : "Select a card to discard. It will be replaced with a new one.",
+        : "Select a card to discard, then choose a category for its replacement.",
     );
     if (!deckEmpty) {
       actionsEl.style.cssText =
         "display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px;";
-      p.equipment
-        .filter((c) => !c.eventCard)
-        .forEach((card) => {
-          const d = document.createElement("div");
-          d.className = `eqcard exchange-target cc-${card.cat}`;
-          d.innerHTML = cardFaceHTML(card.cat, card.name, card.txt);
-          d.onclick = () => {
-            _play("next.mp3");
+      exchangeableCards.forEach((card) => {
+        const d = document.createElement("div");
+        d.className = `eqcard exchange-target cc-${card.cat}`;
+        d.innerHTML = cardFaceHTML(card.cat, card.name, card.txt);
+        d.onclick = () => {
+          _play("next.mp3");
+          showCategoryChoices(card, (category) => {
             const ci = p.equipment.findIndex((c) => c.uid === card.uid);
-            if (ci >= 0) {
-              p.equipment.splice(ci, 1);
-              G.eqDeckCount++;
-            } // return card to deck
-            dismiss();
-            const newCard = drawEqCard(p);
+            if (ci < 0) return;
+            p.equipment.splice(ci, 1);
+            returnEqCard(card);
+            const newCard = drawEqCard(p, category);
             p.lockerUsedThisVisit = true;
+            dismiss();
             if (newCard) {
               addLog(
-                `${p.name} exchanged ${card.name} → ${newCard.name}.`,
+                `${p.name} exchanged ${card.name} → ${newCard.name} (${category}).`,
                 "good",
               );
               openCardModal(
@@ -3823,36 +3861,36 @@ function doEquipLocker() {
                 "url(img/tiles/locker_overlay_blur.webp)",
               );
             } else {
-              addLog(`${p.name} discarded ${card.name} — deck is now empty.`);
+              addLog(`Equipment Locker: no ${category} cards available.`);
             }
             updateUI(true);
-          };
-          actionsEl.appendChild(d);
-        });
+          });
+        };
+        actionsEl.appendChild(d);
+      });
     }
   } else {
-    // Draw mode: no existing cards, just draw one
-    trDesc(
-      deckEmpty
-        ? "The equipment deck is empty."
-        : "Draw 1 card from the equipment deck.",
-    );
-    document.getElementById("tr-evtn").textContent = G.eqDeckCount;
-    document.getElementById("tr-deck-lbl").textContent = "Draw Equipment Card";
-    deck.style.display = deckEmpty ? "none" : "";
-    deck.onclick = () => {
-      _play("next.mp3");
-      dismiss();
-      const c = drawEqCard(p);
-      p.lockerUsedThisVisit = true;
-      if (c) {
-        addLog(`${p.name} drew ${c.name} from Equipment Locker.`, "good");
-        openCardModal(p.id, c, "url(img/tiles/locker_overlay_blur.webp)");
-      } else {
-        addLog("Equipment Locker: deck empty.");
-      }
-      updateUI(true);
-    };
+    // Draw mode: no existing cards, choose a category and draw one.
+    if (deckEmpty) {
+      deck.style.display = "none";
+      trDesc("The equipment deck is empty.");
+    } else {
+      showCategoryChoices(null, (category) => {
+        const c = drawEqCard(p, category);
+        p.lockerUsedThisVisit = true;
+        dismiss();
+        if (c) {
+          addLog(
+            `${p.name} drew ${c.name} (${category}) from Equipment Locker.`,
+            "good",
+          );
+          openCardModal(p.id, c, "url(img/tiles/locker_overlay_blur.webp)");
+        } else {
+          addLog(`Equipment Locker: no ${category} cards available.`);
+        }
+        updateUI(true);
+      });
+    }
   }
   trov.style.display = "flex";
   trov.classList.add("show");
@@ -4255,7 +4293,7 @@ function advanceTurn(writerTurnOwner = G.currentPlayer) {
       return;
     }
     addLog(
-      `${G.players[next].name} is INCAPACITATED (${G.players[next].incapacitated}/2 rounds). Turn skipped.`,
+      `${G.players[next].name} is INCAPACITATED (${G.players[next].incapacitated}/${SignalGameLogic.INCAPACITATION_ROUNDS} rounds). Turn skipped.`,
       "crit",
     );
     const synth = G.players.find(
@@ -4700,14 +4738,8 @@ function synthTakeAction(p, target, onDone) {
         const spec = ids.length
           ? EQ_CARDS.find((c) => ids.includes(c.id))
           : null;
-        if (spec && G.eqDeckCount > 0) {
-          p.equipment.push({ ...spec, uid: ++cardUid });
-          G.eqDeckCount = Math.max(0, G.eqDeckCount - 1);
-          const el = document.getElementById("equpn");
-          if (el) el.textContent = G.eqDeckCount;
-          addLog("IRIS acquired " + spec.name + ".", "good");
-        } else if (G.eqDeckCount > 0) {
-          const card = drawEqCard(p);
+        if (G.eqDeck.length > 0) {
+          const card = spec ? drawEqCard(p, null, spec.id) : drawEqCard(p);
           if (card) addLog("IRIS acquired " + card.name + ".", "good");
         }
         G.tileActionUsed = true;
@@ -5463,23 +5495,23 @@ function renderTradeModal() {
     resDiv.style.marginTop = "10px";
     resDiv.innerHTML = `
       <div class="trresrow"><label>Give Food</label>
-        <button class="trbtn" onclick="trAdj('${isA ? "aFood" : "bFood"}',-1)">−</button>
+        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFood" : "bFood"}",-1]'>−</button>
         <span class="trcnt">${ratGive}</span>
-        <button class="trbtn" onclick="trAdj('${isA ? "aFood" : "bFood"}',1)">+</button>
+        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFood" : "bFood"}",1]'>+</button>
         <span style="font-size:.58rem;color:var(--dim)">/ ${foodMax}</span>
       </div>
       <div class="trresrow" style="margin-top:6px"><label>Give O₂</label>
-        <button class="trbtn" onclick="trAdj('${isA ? "aO2" : "bO2"}',-1)">−</button>
+        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aO2" : "bO2"}",-1]'>−</button>
         <span class="trcnt">${o2Give}</span>
-        <button class="trbtn" onclick="trAdj('${isA ? "aO2" : "bO2"}',1)">+</button>
+        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aO2" : "bO2"}",1]'>+</button>
         <span style="font-size:.58rem;color:var(--dim)">/ ${o2Max}</span>
       </div>
       ${
         p.radioFragments > 0
           ? `<div class="trresrow" style="margin-top:6px"><label>Give ◈</label>
-        <button class="trbtn" onclick="trAdj('${isA ? "aFrags" : "bFrags"}',-1)">−</button>
+        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFrags" : "bFrags"}",-1]'>−</button>
         <span class="trcnt">${isA ? aFrags : bFrags}</span>
-        <button class="trbtn" onclick="trAdj('${isA ? "aFrags" : "bFrags"}',1)">+</button>
+        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFrags" : "bFrags"}",1]'>+</button>
         <span style="font-size:.58rem;color:var(--dim)">/ ${p.radioFragments}</span>
       </div>`
           : ""
@@ -6296,7 +6328,9 @@ function buildCrewTabs() {
 function saveGame(publishState = false, writerTurnOwner) {
   if (!G) return;
   try {
-    const n = G.players.length;
+    const humanPlayerCount = G.players.filter(
+      (player) => !player.isSynth,
+    ).length;
     const pendingLogs = G._pendingLogs || [];
     const s = {
       G: {
@@ -6306,7 +6340,9 @@ function saveGame(publishState = false, writerTurnOwner) {
         terrainDeck: [...G.terrainDeck],
         eqDeck: [...G.eqDeck],
         evtDeck: G.evtDeck.map((c) =>
-          typeof c.text === "function" ? { ...c, text: c.text(n) } : c,
+          typeof c.text === "function"
+            ? { ...c, text: c.text(humanPlayerCount) }
+            : c,
         ),
         _pendingLogs: pendingLogs,
       },
@@ -6314,7 +6350,20 @@ function saveGame(publishState = false, writerTurnOwner) {
       pendingNames,
       pendingPortraits,
     };
-    s.G.players = G.players.map((p) => ({ ...p, equipment: [...p.equipment] }));
+    s.G.players = G.players.map((p) => ({
+      ...p,
+      equipment: p.equipment.map((card) =>
+        card.eventCard && typeof card.eventCard.text === "function"
+          ? {
+              ...card,
+              eventCard: {
+                ...card.eventCard,
+                text: card.eventCard.text(humanPlayerCount),
+              },
+            }
+          : card,
+      ),
+    }));
     if (publishState) G._pendingLogs = []; // reset after capture
     localStorage.setItem(
       "signal_save",
@@ -6389,6 +6438,51 @@ function clearSave() {
   localStorage.removeItem("signal_save");
 }
 
+function remoteStateIngressOptions(game, trustedGame) {
+  const tileDefinitions = buildTerrainDeck(false);
+  const incomingPlayers = SignalGameLogic.firebaseArray(game.players);
+  const trustedPlayers = SignalGameLogic.firebaseArray(trustedGame?.players);
+  const expectedPlayerLayout = trustedPlayers.length
+    ? trustedPlayers.map((player) => player?.isSynth === true)
+    : null;
+  const incomingSynthIndices = incomingPlayers.flatMap((player, index) =>
+    player?.isSynth === true ? [index] : [],
+  );
+  const hasSynth = expectedPlayerLayout
+    ? expectedPlayerLayout.includes(true)
+    : incomingSynthIndices.length === 1 &&
+      incomingSynthIndices[0] === incomingPlayers.length - 1;
+  const expectedHumanPlayerCount =
+    !expectedPlayerLayout &&
+    typeof _onlineLobbyData !== "undefined" &&
+    Object.keys(_onlineLobbyData).length
+      ? Object.keys(_onlineLobbyData).length
+      : undefined;
+  const humanPlayerCount =
+    expectedPlayerLayout?.filter((isSynth) => !isSynth).length ||
+    expectedHumanPlayerCount ||
+    Math.max(1, incomingPlayers.length - (hasSynth ? 1 : 0));
+  return {
+    strict: true,
+    expectedPlayerLayout,
+    expectedHumanPlayerCount,
+    equipmentCards: EQ_CARDS,
+    eventCards: buildEventDeck(humanPlayerCount, hasSynth, false),
+    tileDefinitions,
+    crashTiles: CRASH_HEXES_DEFAULT.map((tile) => ({
+      ...tile,
+      type: "crash_site",
+      revealed: true,
+    })),
+    allowedTileImages: [
+      ...new Set([
+        ...Object.values(TILE_IMAGE_MAP),
+        ...tileDefinitions.map((tile) => tile.imgOverride).filter(Boolean),
+      ]),
+    ],
+  };
+}
+
 // Applies a game state received from Firebase (remote player's turn ended)
 function receiveRemoteState(data) {
   try {
@@ -6397,11 +6491,11 @@ function receiveRemoteState(data) {
     const existingGame = G;
     SignalGameLogic.normalizeSavedGame(data);
     const sg = data.G;
-    SignalGameLogic.normalizePlayerIdentities(
-      sg,
-      [...PCOLORS, SYNTH_COLOR],
-      [...CREW_PORTRAITS.map((portrait) => portrait.name), "iris"],
-    );
+    const ingressOptions = remoteStateIngressOptions(sg, existingGame);
+    if (!SignalGameLogic.sanitizeIncomingGameState(sg, ingressOptions)) {
+      console.warn("receiveRemoteState: rejected malformed remote snapshot");
+      return;
+    }
     if (window.Sync?.isActive())
       SignalGameLogic.mergePrivateGameState(
         sg,
@@ -6409,13 +6503,33 @@ function receiveRemoteState(data) {
         existingGame,
         window.Sync.myPlayerIndex(),
       );
+    // Private cards/decks are a second untrusted Firebase ingress. Validate
+    // the merged result before adopting any part of it.
+    if (!SignalGameLogic.sanitizeIncomingGameState(sg, ingressOptions)) {
+      console.warn("receiveRemoteState: rejected malformed private snapshot");
+      return;
+    }
+    SignalGameLogic.normalizePlayerIdentities(
+      sg,
+      [...PCOLORS, SYNTH_COLOR],
+      [...CREW_PORTRAITS.map((portrait) => portrait.name), "iris"],
+    );
     const prevPlayer = G?.currentPlayer;
     const prevPositions = G?.players?.map((p) => ({ q: p.q, r: p.r })) || [];
     const prevFragments = G?.players?.map((p) => p.radioFragments) || [];
     const incomingLogs = SignalGameLogic.firebaseArray(sg._pendingLogs);
     delete sg._pendingLogs;
     G = sg;
-    cardUid = data.cardUid || 0;
+    const maxInventoryUid = Math.max(
+      0,
+      ...G.players.flatMap((player) =>
+        player.equipment.map((card) => card.uid),
+      ),
+    );
+    cardUid = Math.max(
+      SignalGameLogic.safeRevision(data.cardUid),
+      maxInventoryUid,
+    );
     const gameEl = document.getElementById("game");
     const alreadyRunning = gameEl.className === "running";
     if (alreadyRunning) {
@@ -7235,7 +7349,6 @@ function showDieRoll(prompt, onRoll, onDismiss, bgImage, diceCount = 1) {
     const vals = wraps.map(() => 1 + (0 | (Math.random() * 6)));
     wraps.forEach((w, i) => rollDie3D(w, vals[i]));
     setTimeout(() => {
-      sfx("dice_land");
       if (diceCount > 1) {
         const tot = document.createElement("div");
         tot.style.cssText =
@@ -7334,7 +7447,6 @@ function showEventCard(
       const finalVal = 1 + (0 | (Math.random() * 6));
       rollDie3D(wrap, finalVal);
       setTimeout(() => {
-        sfx("dice_land");
         const outcome = rollCallback(finalVal);
         if (outcome) {
           outEl.textContent = outcome;
@@ -8191,7 +8303,7 @@ const BUILDER_TILE_DETAIL = {
   "Signal Array":
     "Your rescue transmitter — the only way off this planet. Activate RADIO FRAGMENTS here, then roll to establish a signal.",
   "Equipment Locker":
-    "Draw EQUIPMENT cards here: tools, supplies, and weapons. Visit early to gear up before exploring the field.",
+    "Choose a category, then draw an EQUIPMENT card from it: Tool, Supply, Tech, or Weapon. Visit early to gear up before exploring the field.",
   "Cargo Hold":
     "Communal FOOD storage shared by all crew. Deposit surplus FOOD so teammates can withdraw it.",
   "Watch Tower":
@@ -8663,9 +8775,9 @@ function buildSetup() {
     const d = document.createElement("div");
     d.className = "prow";
     d.innerHTML = `<div class="ppick">
-      <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
+      <button class="parr" data-action="cyclePortrait" data-args="[${i},-1]">&#8249;</button>
       <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
-      <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
+      <button class="parr" data-action="cyclePortrait" data-args="[${i},1]">&#8250;</button>
     </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prev[i] !== undefined ? prev[i] : pname)}" maxlength="16" placeholder="crew ${i + 1}">`;
     nl.appendChild(d);
   }
@@ -8786,6 +8898,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (
       (_movEl.classList.contains("cargo") ||
         _movEl.classList.contains("rescue") ||
+        _movEl.classList.contains("all-dead") ||
         _movEl.classList.contains("new-game")) &&
       !e.target.closest(".mbox")
     )
@@ -9084,9 +9197,9 @@ function lobbyJoinConnect() {
   const code = (document.getElementById("lobby-code-input").value || "")
     .trim()
     .toUpperCase();
-  if (code.length !== 6) {
+  if (code.length !== 8) {
     document.getElementById("lobby-join-status").textContent =
-      "Enter a 6-character code.";
+      "Enter an 8-character code.";
     return;
   }
   const btn = document.getElementById("lobby-join-btn");
@@ -9236,11 +9349,11 @@ function buildOnlineSetup() {
       const prevName =
         document.getElementById(`pn-${i}`)?.value || entry?.name || pname;
       d.innerHTML = `<div class="ppick">
-        <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
+        <button class="parr" data-action="cyclePortrait" data-args="[${i},-1]">&#8249;</button>
         <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
-        <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
-      </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prevName)}" maxlength="16" oninput="_onlineNameChange()">
-      <button class="online-ready-btn${ready ? " active" : ""}" onclick="onlineToggleReady()">${ready ? "Ready ✓" : "Ready?"}</button>`;
+        <button class="parr" data-action="cyclePortrait" data-args="[${i},1]">&#8250;</button>
+      </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prevName)}" maxlength="16" data-input="_onlineNameChange">
+      <button class="online-ready-btn${ready ? " active" : ""}" data-action="onlineToggleReady">${ready ? "Ready ✓" : "Ready?"}</button>`;
     } else {
       const dname = _escHtml(entry?.name || pname);
       d.innerHTML = `<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>

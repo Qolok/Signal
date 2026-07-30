@@ -2,15 +2,60 @@
 
 # SIGNAL
 
+[![CI](https://github.com/Qolok/Signal/actions/workflows/ci.yml/badge.svg)](https://github.com/Qolok/Signal/actions/workflows/ci.yml)
+
 ## Tests
 
-Run the deterministic regression suite locally with:
+Every push and pull request runs the checks below via
+[GitHub Actions](.github/workflows/ci.yml); the badge above reflects the latest
+run on the default branch. A red badge means `npm test` or `npm run test:rules`
+failed — those steps block the build, while `npm audit` runs as a reported,
+non-blocking step.
+
+Run the same checks locally:
 
 ```sh
-npm test
+npm ci             # install dev tooling from package-lock.json
+npm test           # game-logic regression suite (Node test runner, no Firebase)
+npm run test:rules # Firebase database rules suite against the emulator
+npm audit          # reported only — advisories don't fail the build
 ```
 
-The tests use Node's built-in test runner and do not connect to Firebase.
+`npm test` uses Node's built-in test runner and does not connect to Firebase.
+`npm run test:rules` boots the Firebase Realtime Database emulator (a Java
+process — install a JDK 17+ / `java` on your PATH) via `firebase-tools`, so it
+needs no live Firebase project.
+
+## Dependencies & Security
+
+The game itself ships no npm dependencies to the browser — `index.html`, `game.js`,
+`game-logic.js`, `sync.js`, and `style.css` are served as-is by any static host. The
+npm packages are dev-only tooling: `serve` (local dev server via `npm start`),
+`firebase-tools` (rules deploy + database emulator), and `@firebase/rules-unit-testing`
+(the emulator rules suite). None of them reach the served bundle.
+
+`firebase-tools@15` pulls in transitive packages that carried published advisories
+(a `brace-expansion` DoS cascade plus `uuid` and `@opentelemetry/core` issues), and
+there is no patched `firebase-tools` release that resolves them — `npm audit fix --force`
+only offers a breaking downgrade to `firebase-tools@14`. Instead, the affected transitive
+packages are pinned to their patched versions via `overrides` in `package.json`:
+
+```json
+"overrides": {
+  "brace-expansion": "5.0.9",
+  "gaxios@6.7.1": {
+    "uuid": "11.1.1"
+  },
+  "@opentelemetry/core": "2.8.0"
+}
+```
+
+With these in place `npm audit` reports **0 vulnerabilities**, while `firebase-tools`
+stays on the current `15.x` line. The `uuid` override is limited to the affected
+`gaxios@6.7.1` dependency, leaving packages that require newer `uuid` releases on
+their compatible versions. `npm test`, `npm run test:rules` (the Java emulator suite),
+and `npm start` all pass with the overrides applied. If a future `firebase-tools`
+upgrade adopts these patched versions natively, the `overrides` block can be removed.
 
 *A game of survival, exploration, and eroding trust — where rescue is uncertain, and the greatest threat may be sitting across the table.*
 

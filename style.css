@@ -1417,6 +1417,46 @@ body {
 #trov.equip-locker #tr-desc {
   height: 50px;
 }
+#tr-actions.locker-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.locker-category-btn {
+  min-height: 66px;
+  padding: 10px 12px;
+  border: 1px solid var(--cc-bdr);
+  border-radius: 3px;
+  background: var(--cc-bg);
+  color: var(--cc-loc);
+  font-family: inherit;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.locker-category-btn:hover:not(:disabled) {
+  border-color: var(--cc-loc);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--cc-badge) 45%, transparent);
+}
+.locker-category-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+.locker-category-name,
+.locker-category-count {
+  display: block;
+}
+.locker-category-name {
+  font-size: 15px;
+  letter-spacing: 0.16em;
+}
+.locker-category-count {
+  margin-top: 7px;
+  color: var(--cc-body);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
 #trov.watch-tower #tr-desc {
   height: 100px;
 }
@@ -2544,10 +2584,10 @@ body {
   -webkit-backdrop-filter: none;
 }
 #mov.all-dead {
-  background: url(img/tiles/all-dead_overlay_blur.webp) center/cover no-repeat;
+  background: url(img/tiles/all-dead_overlay.webp) center/cover no-repeat;
 }
 #mov.all-dead::before {
-  background: rgba(2, 5, 10, 0.2);
+  background: rgba(2, 5, 10, 0.2) url(img/tiles/all-dead_overlay_blur.webp) center/cover no-repeat;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -2594,11 +2634,13 @@ body {
 }
 #mov.cargo.peeking::before,
 #mov.rescue.peeking::before,
+#mov.all-dead.peeking::before,
 #mov.new-game.peeking::before {
   opacity: 0;
 }
 #mov.cargo.peeking .mbox,
 #mov.rescue.peeking .mbox,
+#mov.all-dead.peeking .mbox,
 #mov.new-game.peeking .mbox {
   opacity: 0;
 }
