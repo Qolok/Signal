@@ -2536,15 +2536,15 @@ body {
   transition: opacity 0.25s;
 }
 #mov.rescue {
-  background: url(img/tiles/rescue_overlay.png) center/cover no-repeat;
+  background: url(img/tiles/rescue_overlay.webp) center/cover no-repeat;
 }
 #mov.rescue::before {
-  background: rgba(2, 5, 10, 0.2) url(img/tiles/rescue_overlay_blur.png) center/cover no-repeat;
+  background: rgba(2, 5, 10, 0.2) url(img/tiles/rescue_overlay_blur.webp) center/cover no-repeat;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 #mov.all-dead {
-  background: url(img/tiles/all-dead_overlay_blur.png) center/cover no-repeat;
+  background: url(img/tiles/all-dead_overlay_blur.webp) center/cover no-repeat;
 }
 #mov.all-dead::before {
   background: rgba(2, 5, 10, 0.2);
@@ -2552,23 +2552,23 @@ body {
   -webkit-backdrop-filter: none;
 }
 #mov.new-game {
-  background: url(img/tiles/all-dead_overlay.png) center/cover no-repeat;
+  background: url(img/tiles/all-dead_overlay.webp) center/cover no-repeat;
 }
 #mov.new-game::before {
-  background: rgba(2, 5, 10, 0.2) url(img/tiles/all-dead_overlay_blur.png) center/cover no-repeat;
+  background: rgba(2, 5, 10, 0.2) url(img/tiles/all-dead_overlay_blur.webp) center/cover no-repeat;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 #mov.cargo {
-  background: url(img/tiles/cargo_overlay.png) center/cover no-repeat;
+  background: url(img/tiles/cargo_overlay.webp) center/cover no-repeat;
 }
 #mov.cargo::before {
-  background: rgba(2, 5, 10, 0.2) url(img/tiles/cargo_overlay_blur.png) center/cover no-repeat;
+  background: rgba(2, 5, 10, 0.2) url(img/tiles/cargo_overlay_blur.webp) center/cover no-repeat;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 #mov.equip-locker {
-  background: url(img/tiles/locker_overlay_blur.png) center/cover no-repeat;
+  background: url(img/tiles/locker_overlay_blur.webp) center/cover no-repeat;
 }
 #mov.equip-locker::before {
   background: rgba(2, 5, 10, 0.2);
@@ -2576,7 +2576,7 @@ body {
   -webkit-backdrop-filter: none;
 }
 #mov.stasis-pod {
-  background: url(img/tiles/stasis_overlay_blur.png) center/cover no-repeat;
+  background: url(img/tiles/stasis_overlay_blur.webp) center/cover no-repeat;
 }
 #mov.stasis-pod::before {
   background: rgba(2, 5, 10, 0.2);
@@ -2584,7 +2584,7 @@ body {
   -webkit-backdrop-filter: none;
 }
 #mov.inversion-field {
-  background: url(img/tiles/inversion-field_overlay_blur.png) center/cover
+  background: url(img/tiles/inversion-field_overlay_blur.webp) center/cover
     no-repeat;
 }
 #mov.inversion-field::before {
@@ -3501,13 +3501,13 @@ body {
   z-index: 107;
   align-items: center;
   justify-content: center;
-  background: url(img/tiles/signal-array_overlay.png) center/cover no-repeat;
+  background: url(img/tiles/signal-array_overlay.webp) center/cover no-repeat;
 }
 #sig-ov::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(2, 5, 10, 0.2) url(img/tiles/signal-array_overlay_blur.png) center/cover no-repeat;
+  background: rgba(2, 5, 10, 0.2) url(img/tiles/signal-array_overlay_blur.webp) center/cover no-repeat;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   transition: opacity 0.25s;
@@ -3630,7 +3630,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: url(img/tiles/cockpit.png) center/cover no-repeat;
+  background: url(img/tiles/cockpit.webp) center/cover no-repeat;
   filter: blur(2px);
   opacity: 0.3;
   z-index: -1;
@@ -3710,7 +3710,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: url(img/tiles/cockpit.png) center/cover no-repeat;
+  background: url(img/tiles/cockpit.webp) center/cover no-repeat;
   filter: blur(2px);
   opacity: 0.3;
   z-index: -1;
@@ -4047,7 +4047,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: url(img/tiles/cockpit.png) center/cover no-repeat;
+  background: url(img/tiles/cockpit.webp) center/cover no-repeat;
   filter: blur(2px);
   opacity: 0.3;
   z-index: -1;
