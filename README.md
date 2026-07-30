@@ -2,6 +2,16 @@
 
 # SIGNAL
 
+## Tests
+
+Run the deterministic regression suite locally with:
+
+```sh
+npm test
+```
+
+The tests use Node's built-in test runner and do not connect to Firebase.
+
 *A game of survival, exploration, and eroding trust — where rescue is uncertain, and the greatest threat may be sitting across the table.*
 
 **1–6 Players · Ages 14+ · 30–60 Minutes**
