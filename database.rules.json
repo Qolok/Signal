@@ -1,0 +1,59 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "games": {
+      "$code": {
+        "meta": {
+          ".read": "auth != null",
+          ".write": "auth != null && ((!data.exists() && newData.child('hostId').val() === auth.uid) || (data.child('hostId').val() === auth.uid && newData.child('hostId').val() === auth.uid && newData.child('created').val() === data.child('created').val() && newData.child('expiresAt').val() === data.child('expiresAt').val()))",
+          ".validate": "newData.hasChildren(['hostId', 'created', 'expiresAt']) && newData.child('hostId').isString() && newData.child('created').isNumber() && newData.child('created').val() <= now && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > now && newData.child('expiresAt').val() <= now + 86400000 && newData.child('expiresAt').val() <= newData.child('created').val() + 86400000 && (!newData.child('started').exists() || newData.child('started').isBoolean())",
+          "$other": {
+            ".validate": "$other === 'hostId' || $other === 'created' || $other === 'expiresAt' || $other === 'started'"
+          }
+        },
+        "connections": {
+          ".read": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now",
+          "bySlot": {
+            "$slot": {
+              ".write": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now && ($slot === '1' || $slot === '2' || $slot === '3' || $slot === '4' || $slot === '5' || ($slot === '0' && root.child('games').child($code).child('meta/hostId').val() === auth.uid)) && ((!data.exists() && newData.val() === auth.uid && newData.parent().parent().child('byUid').child(auth.uid).val() + '' === $slot) || (data.val() === auth.uid && ((newData.val() === auth.uid && newData.parent().parent().child('byUid').child(auth.uid).val() + '' === $slot) || (!newData.exists() && !newData.parent().parent().child('byUid').child(auth.uid).exists()))))",
+              ".validate": "!newData.exists() || newData.isString()"
+            }
+          },
+          "byUid": {
+            "$uid": {
+              ".write": "auth != null && $uid === auth.uid && root.child('games').child($code).child('meta/expiresAt').val() > now && ((!data.exists() && newData.isNumber() && newData.val() >= 0 && newData.val() <= 5 && newData.parent().parent().child('bySlot').child(newData.val() + '').val() === auth.uid && (newData.val() !== 0 || root.child('games').child($code).child('meta/hostId').val() === auth.uid)) || (data.isNumber() && ((newData.val() === data.val() && newData.parent().parent().child('bySlot').child(newData.val() + '').val() === auth.uid) || (!newData.exists() && !newData.parent().parent().child('bySlot').child(data.val() + '').exists()))))",
+              ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 5)"
+            }
+          }
+        },
+        "lobby": {
+          ".read": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now",
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid && root.child('games').child($code).child('meta/expiresAt').val() > now",
+            ".validate": "!newData.exists() || (newData.hasChildren(['name', 'portraitIndex', 'ready', 'connectionSlot']) && newData.child('name').isString() && newData.child('name').val().length <= 40 && newData.child('portraitIndex').isNumber() && newData.child('ready').isBoolean() && newData.child('connectionSlot').isNumber() && newData.child('connectionSlot').val() >= 0 && newData.child('connectionSlot').val() <= 5 && root.child('games').child($code).child('connections/bySlot').child(newData.child('connectionSlot').val() + '').val() === auth.uid)"
+          }
+        },
+        "builder": {
+          ".read": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now",
+          ".write": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now && root.child('games').child($code).child('connections/bySlot/0').val() === auth.uid"
+        },
+        "state": {
+          ".read": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now",
+          ".write": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now && newData.child('_source').val() === auth.uid && ((data.exists() && data.child('_pending').val() === auth.uid && newData.child('_pending').val() === null && newData.child('_privateOwner').val() === null && newData.child('_deckOwner').val() === null && newData.child('_revision').val() === data.child('_revision').val()) || (newData.child('_pending').val() === auth.uid && newData.child('_revision').isNumber() && newData.child('_privateOwner').isNumber() && newData.child('_deckOwner').isNumber() && ((!data.exists() && root.child('games').child($code).child('connections/bySlot/0').val() === auth.uid && newData.child('_revision').val() === 1 && newData.child('_privateOwner').val() === 0 && newData.child('_deckOwner').val() === (newData.child('G/players').child(newData.child('G/currentPlayer').val() + '').child('isSynth').val() === true ? 0 : newData.child('G/currentPlayer').val())) || (data.exists() && newData.child('_revision').val() === data.child('_revision').val() + 1 && (root.child('games').child($code).child('connections/bySlot').child(data.child('G/currentPlayer').val() + '').val() === auth.uid || (root.child('games').child($code).child('connections/bySlot/0').val() === auth.uid && data.child('G/players').child(data.child('G/currentPlayer').val() + '').child('isSynth').val() === true)) && newData.child('_privateOwner').val() === (data.child('G/players').child(data.child('G/currentPlayer').val() + '').child('isSynth').val() === true ? 0 : data.child('G/currentPlayer').val()) && newData.child('_deckOwner').val() === (newData.child('G/players').child(newData.child('G/currentPlayer').val() + '').child('isSynth').val() === true ? 0 : newData.child('G/currentPlayer').val())))))",
+          ".validate": "newData.hasChildren(['G', '_source', '_revision']) && newData.child('G/currentPlayer').isNumber() && (newData.child('G/currentPlayer').val() === 0 || newData.child('G/currentPlayer').val() === 1 || newData.child('G/currentPlayer').val() === 2 || newData.child('G/currentPlayer').val() === 3 || newData.child('G/currentPlayer').val() === 4 || newData.child('G/currentPlayer').val() === 5) && newData.child('G/players').child(newData.child('G/currentPlayer').val() + '').exists()"
+        },
+        "private": {
+          "$slot": {
+            ".read": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now && root.child('games').child($code).child('connections/bySlot').child($slot).val() === auth.uid",
+            ".write": "auth != null && root.child('games').child($code).child('meta/expiresAt').val() > now && root.child('games').child($code).child('state/_pending').val() === auth.uid && ($slot === root.child('games').child($code).child('state/_privateOwner').val() + '' || $slot === root.child('games').child($code).child('state/_deckOwner').val() + '') && newData.child('_revision').val() === root.child('games').child($code).child('state/_revision').val()",
+            ".validate": "newData.hasChildren(['ownerIndex', '_revision']) && newData.child('ownerIndex').val() + '' === $slot"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}

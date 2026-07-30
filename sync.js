@@ -3,14 +3,8 @@
 // SIGNAL — Online Multiplayer Sync (Firebase Realtime Database)
 // ═══════════════════════════════════════════════════════════════════
 //
-// FIRST-TIME SETUP:
-// 1. Go to https://console.firebase.google.com
-// 2. Create a new project (e.g. "signal-game")
-// 3. Click "Add app" → Web → register the app
-// 4. Copy your config values into FIREBASE_CONFIG below
-// 5. In the Firebase console, go to Build → Realtime Database
-// 6. Click "Create database" → choose a region → start in TEST MODE
-//    (test mode allows read/write without auth — fine for friends)
+// Deploy database.rules.json and enable Firebase Anonymous Authentication before
+// hosting this client. See docs/FirebaseSetup.md for setup and migration details.
 //
 // ═══════════════════════════════════════════════════════════════════
 
@@ -25,11 +19,11 @@ const FIREBASE_CONFIG = {
 };
 
 // ── Internal state ──────────────────────────────────────────────────
-const _clientId = (typeof crypto !== 'undefined' && crypto.randomUUID)
-  ? crypto.randomUUID()
-  : Math.random().toString(36).slice(2);
-
 const SESSION_KEY = 'signal_mp_session';
+const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
+
+let _clientId = null;
+let _presenceId = null;
 
 let _db             = null;
 let _gameRef        = null;
@@ -38,6 +32,14 @@ let _myPlayerIndex  = null;
 let _active         = false;
 let _receivingState = false;
 let _onStateUpdate  = null;
+let _stateRevision  = 0;
+let _hasState       = false;
+let _writeQueue     = Promise.resolve();
+let _sessionGeneration = 0;
+let _disconnectCleanup = null;
+let _connectedRef = null;
+let _lobbyData = null;
+const _SUPERSEDED_PRIVATE_STATE = {};
 
 // ── Public API ──────────────────────────────────────────────────────
 window.Sync = {
@@ -48,12 +50,23 @@ window.Sync = {
   isReceiving()   { return _receivingState; },
 
   // Call once on page load before using any other Sync method
-  init() {
+  async init() {
     if (typeof firebase === 'undefined') {
       console.error('Sync: Firebase SDK not loaded. Check your <script> tags.');
       return false;
     }
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    if (typeof firebase.auth !== 'function') {
+      console.error('Sync: Firebase Auth SDK not loaded. Check your <script> tags.');
+      return false;
+    }
+    const auth = firebase.auth();
+    const credential = auth.currentUser
+      ? null
+      : await auth.signInAnonymously();
+    _clientId = auth.currentUser?.uid || credential?.user?.uid;
+    if (!_clientId) throw new Error('Firebase anonymous authentication failed.');
+    _presenceId = _clientId;
     _db = firebase.database();
     return true;
   },
@@ -70,17 +83,36 @@ window.Sync = {
 
   // HOST: register a game room in Firebase and claim player slot 0
   async hostGame(joinCode) {
+    if (_gameRef) await _removePresence(_gameRef);
+    _resetStateTracking();
     _joinCode      = joinCode;
     _myPlayerIndex = 0;
     _active        = true;
     _gameRef       = _db.ref(`games/${joinCode}`);
 
-    await _gameRef.child('meta').set({
-      hostId:  _clientId,
-      created: Date.now(),
-      started: false,
-    });
-    await _gameRef.child('connections').child(_clientId).set(0);
+    let ownsRoom = false;
+    try {
+      const created = Date.now();
+      await _gameRef.child('meta').set({
+        hostId:  _clientId,
+        created,
+        expiresAt: created + ROOM_TTL_MS,
+        started: false,
+      });
+      ownsRoom = true;
+      await _attachPresence(0);
+    } catch (error) {
+      if (ownsRoom) {
+        await _removePresence(_gameRef, 0).catch(() => {});
+      }
+      _gameRef?.off();
+      _gameRef = null;
+      _joinCode = null;
+      _myPlayerIndex = null;
+      _active = false;
+      await _cancelDisconnectCleanup().catch(() => {});
+      throw error;
+    }
 
     _saveSession();
     _startListening();
@@ -88,33 +120,74 @@ window.Sync = {
 
   // JOIN: connect to an existing game and claim the next open slot (1–5)
   async joinGame(joinCode) {
+    if (_gameRef) await _removePresence(_gameRef);
+    _resetStateTracking();
+    _myPlayerIndex = null;
+    _active = false;
     _joinCode = joinCode.toUpperCase().trim();
-    _active   = true;
     _gameRef  = _db.ref(`games/${_joinCode}`);
 
     const metaSnap = await _gameRef.child('meta').once('value');
-    if (!metaSnap.exists()) throw new Error('Game not found. Check the join code and try again.');
+    if (!metaSnap.exists()) {
+      _gameRef = null;
+      _joinCode = null;
+      throw new Error('Game not found. Check the join code and try again.');
+    }
+    if (_isExpired(metaSnap.val())) {
+      _gameRef = null;
+      _joinCode = null;
+      throw new Error('This game room has expired.');
+    }
 
-    const connSnap  = await _gameRef.child('connections').once('value');
-    const takenSlots = Object.values(connSnap.val() || {});
-    let slot = 1;
-    while (takenSlots.includes(slot) && slot <= 5) slot++;
-    if (slot > 5) throw new Error('Game is full (6 players maximum).');
-
+    let slot;
+    try {
+      slot = await _claimPlayerSlot(_gameRef);
+      const presenceRefs = _getPresenceRefs(_gameRef);
+      await _armDisconnectCleanup(
+        presenceRefs.connectionRef,
+        presenceRefs.lobbyRef,
+        slot,
+      );
+      await _removeStaleLobbyEntries(_gameRef);
+      _monitorPresence(
+        _gameRef,
+        presenceRefs.connectionRef,
+        presenceRefs.lobbyRef,
+        slot,
+      );
+    } catch (error) {
+      if (Number.isInteger(slot)) {
+        await _removePresence(_gameRef, slot).catch(() => {});
+      }
+      await _cancelDisconnectCleanup();
+      throw error;
+    }
     _myPlayerIndex = slot;
-    await _gameRef.child('connections').child(_clientId).set(slot);
-
+    _active = true;
     _saveSession();
     _startListening();
     return slot;
   },
 
-  // Called by saveGame() to broadcast the new state to all other players.
-  // Suppressed during reception to prevent echo loops; game.js guards prevent
-  // non-active players from mutating state via isMyTurn() checks on all actions.
-  pushState(serializedState) {
+  // Called only for explicit gameplay mutations. A pending marker hides the
+  // public revision until its owner-private state has been written.
+  pushState(serializedState, privateState, privateOwner, deckOwner) {
     if (!_active || !_gameRef || _receivingState) return;
-    _gameRef.child('state').set({ ...serializedState, _source: _clientId });
+    const gameRef = _gameRef;
+    const sessionGeneration = _sessionGeneration;
+    const write = () =>
+      sessionGeneration === _sessionGeneration
+        ? _transactionalStateWrite(
+          gameRef,
+          sessionGeneration,
+          serializedState,
+          privateState,
+          privateOwner,
+          deckOwner,
+        )
+        : false;
+    _writeQueue = _writeQueue.then(write, write);
+    return _writeQueue;
   },
 
   // Register the callback that game.js calls with incoming remote state
@@ -132,11 +205,43 @@ window.Sync = {
 
   // Re-attach to an existing Firebase room after a page reload
   async reconnect(joinCode, playerIndex) {
+    _resetStateTracking();
     _joinCode      = joinCode;
     _myPlayerIndex = playerIndex;
     _active        = true;
     _gameRef       = _db.ref(`games/${joinCode}`);
-    await _gameRef.child('connections').child(_clientId).set(playerIndex);
+    const metaSnap = await _gameRef.child('meta').once('value');
+    if (!metaSnap.exists() || _isExpired(metaSnap.val())) {
+      _gameRef = null;
+      _joinCode = null;
+      _active = false;
+      localStorage.removeItem(SESSION_KEY);
+      throw new Error('This game room is no longer available.');
+    }
+    const presenceRefs = _getPresenceRefs(_gameRef);
+    const result = await _restorePresence(_gameRef, playerIndex);
+    if (_slotForUid(result.snapshot.val(), _presenceId) !== playerIndex) {
+      await _removeStaleLobbyEntries(_gameRef);
+      await _cancelDisconnectCleanup();
+      _gameRef = null;
+      _joinCode = null;
+      _active = false;
+      localStorage.removeItem(SESSION_KEY);
+      throw new Error('Your previous player slot is no longer available.');
+    }
+    await _armDisconnectCleanup(
+      presenceRefs.connectionRef,
+      presenceRefs.lobbyRef,
+      playerIndex,
+    );
+    await _removeStaleLobbyEntries(_gameRef);
+    _monitorPresence(
+      _gameRef,
+      presenceRefs.connectionRef,
+      presenceRefs.lobbyRef,
+      playerIndex,
+    );
+    _saveSession();
     _startListening();
   },
 
@@ -147,7 +252,8 @@ window.Sync = {
   // Write this client's lobby selection (portrait + name)
   updateLobbySlot(data) {
     if (!_active || !_gameRef) return;
-    _gameRef.child('lobby').child(_clientId).set(data);
+    _lobbyData = data;
+    _gameRef.child('lobby').child(_presenceId).set(data);
   },
 
   // Listen for any lobby change (fires immediately with current data)
@@ -166,22 +272,28 @@ window.Sync = {
   async leaveLobby() {
     if (_gameRef) {
       try {
-        await Promise.all([
-          _gameRef.child('lobby').child(_clientId).remove(),
-          _gameRef.child('connections').child(_clientId).remove(),
-        ]);
+        await _removePresence(_gameRef);
       } catch(_) {}
       _gameRef.off();
       _gameRef = null;
     }
     localStorage.removeItem(SESSION_KEY);
     _active = false;
+    _lobbyData = null;
+    _resetStateTracking();
   },
 
   clearSession() {
+    const gameRef = _gameRef;
     localStorage.removeItem(SESSION_KEY);
     _active = false;
-    if (_gameRef) { _gameRef.off(); _gameRef = null; }
+    _lobbyData = null;
+    _resetStateTracking();
+    if (gameRef) {
+      gameRef.off();
+      _gameRef = null;
+      _removePresence(gameRef).catch(() => {});
+    }
   },
 
   // HOST: push site builder placed-tile snapshot for clients to watch
@@ -208,12 +320,302 @@ function _saveSession() {
   }));
 }
 
+function _isExpired(meta) {
+  return Number.isFinite(meta?.expiresAt) && meta.expiresAt <= Date.now();
+}
+
+async function _attachPresence(playerIndex) {
+  const { connectionRef, lobbyRef } = _getPresenceRefs(_gameRef);
+  const result = await _restorePresence(_gameRef, playerIndex);
+  if (_slotForUid(result.snapshot.val(), _presenceId) !== playerIndex) {
+    throw new Error('The host player slot is unavailable.');
+  }
+  await _armDisconnectCleanup(connectionRef, lobbyRef, playerIndex);
+  _monitorPresence(_gameRef, connectionRef, lobbyRef, playerIndex);
+}
+
+function _getPresenceRefs(gameRef) {
+  return {
+    connectionRef: gameRef.child('connections'),
+    lobbyRef: gameRef.child('lobby').child(_presenceId),
+  };
+}
+
+function _monitorPresence(gameRef, connectionRef, lobbyRef, playerIndex) {
+  _connectedRef = _db.ref('.info/connected');
+  let seenConnectionState = false;
+  let wasConnected = false;
+  _connectedRef.on('value', snap => {
+    const connected = !!snap.val();
+    const reconnected = seenConnectionState && connected && !wasConnected;
+    seenConnectionState = true;
+    wasConnected = connected;
+    if (!reconnected || !_active || !_gameRef) return;
+    _handleReconnect(gameRef, connectionRef, lobbyRef, playerIndex)
+      .catch(() => {});
+  });
+}
+
+async function _handleReconnect(gameRef, connectionRef, lobbyRef, playerIndex) {
+  if (!_active || gameRef !== _gameRef) return;
+  const result = await _restorePresence(gameRef, playerIndex);
+  if (_slotForUid(result.snapshot.val(), _presenceId) !== playerIndex) {
+    await lobbyRef.remove();
+    localStorage.removeItem(SESSION_KEY);
+    _active = false;
+    return;
+  }
+  await _armDisconnectCleanup(connectionRef, lobbyRef, playerIndex);
+  await _removeStaleLobbyEntries(gameRef);
+  if (_lobbyData !== null) await lobbyRef.set(_lobbyData);
+}
+
+function _restorePresence(gameRef, playerIndex) {
+  return gameRef.child('connections').transaction(connectionsValue => {
+    const connections = _normalizedConnections(connectionsValue);
+    const existingSlot = _slotForUid(connections, _presenceId);
+    const slotOwner = connections.bySlot[playerIndex];
+    if (
+      (existingSlot !== null && existingSlot !== playerIndex) ||
+      (slotOwner && slotOwner !== _presenceId)
+    )
+      return;
+    return {
+      bySlot: {
+        ...connections.bySlot,
+        [playerIndex]: _presenceId,
+      },
+      byUid: {
+        ...connections.byUid,
+        [_presenceId]: playerIndex,
+      },
+    };
+  }, undefined, false);
+}
+
+function _isOwnPresenceId(presenceId) {
+  return presenceId === _clientId;
+}
+
+async function _removeStaleLobbyEntries(gameRef) {
+  const lobbyRef = gameRef.child('lobby');
+  const snapshot = await lobbyRef.once('value');
+  const stalePresenceIds = Object.keys(snapshot.val() || {})
+    .filter(presenceId =>
+      presenceId !== _presenceId && _isOwnPresenceId(presenceId));
+  await Promise.all(
+    stalePresenceIds.map(presenceId => lobbyRef.child(presenceId).remove()),
+  );
+}
+
+async function _armDisconnectCleanup(connectionRef, lobbyRef, playerIndex) {
+  const cleanup = {
+    connection: connectionRef.onDisconnect(),
+    lobby: lobbyRef.onDisconnect(),
+  };
+  await Promise.all([
+    cleanup.connection.update({
+      [`bySlot/${playerIndex}`]: null,
+      [`byUid/${_presenceId}`]: null,
+    }),
+    cleanup.lobby.remove(),
+  ]);
+  _disconnectCleanup = cleanup;
+}
+
+async function _cancelDisconnectCleanup(
+  cleanup = _disconnectCleanup,
+  connectedRef = _connectedRef,
+) {
+  if (connectedRef) {
+    connectedRef.off();
+    if (_connectedRef === connectedRef) _connectedRef = null;
+  }
+  const cleanups = [cleanup?.connection, cleanup?.lobby]
+    .filter(Boolean)
+    .map(cleanup => cleanup.cancel());
+  if (_disconnectCleanup === cleanup) _disconnectCleanup = null;
+  await Promise.all(cleanups);
+}
+
+async function _removePresence(gameRef, playerIndex = _myPlayerIndex) {
+  const cleanup = _disconnectCleanup;
+  const connectedRef = _connectedRef;
+  if (connectedRef) connectedRef.off();
+  if (_disconnectCleanup === cleanup) _disconnectCleanup = null;
+  if (_connectedRef === connectedRef) _connectedRef = null;
+  const removals = [
+    gameRef.child('lobby').child(_presenceId).remove(),
+  ];
+  if (Number.isInteger(playerIndex)) {
+    removals.push(gameRef.child('connections').update({
+      [`bySlot/${playerIndex}`]: null,
+      [`byUid/${_presenceId}`]: null,
+    }));
+  }
+  await Promise.all(removals);
+  await _cancelDisconnectCleanup(cleanup, connectedRef);
+}
+
+function _resetStateTracking() {
+  _sessionGeneration++;
+  _stateRevision = 0;
+  _hasState = false;
+  _writeQueue = Promise.resolve();
+}
+
+function _claimPlayerSlot(gameRef) {
+  return gameRef.child('connections').transaction(connectionsValue => {
+    const connections = _normalizedConnections(connectionsValue);
+    const existingSlot = _slotForUid(connections, _presenceId);
+    if (
+      Number.isInteger(existingSlot) &&
+      existingSlot >= 1 &&
+      existingSlot <= 5 &&
+      connections.bySlot[existingSlot] === _presenceId
+    )
+      return connections;
+    if (existingSlot !== null) return;
+    let slot = 1;
+    while (connections.bySlot[slot] && slot <= 5) slot++;
+    if (slot > 5) return;
+    return {
+      bySlot: {
+        ...connections.bySlot,
+        [slot]: _presenceId,
+      },
+      byUid: {
+        ...connections.byUid,
+        [_presenceId]: slot,
+      },
+    };
+  }, undefined, false).then(result => {
+    const slot = _slotForUid(result.snapshot.val(), _presenceId);
+    if (!result.committed || !Number.isInteger(slot)) {
+      _gameRef = null;
+      _joinCode = null;
+      throw new Error('Game is full (6 players maximum).');
+    }
+    return slot;
+  }, error => {
+    _gameRef = null;
+    _joinCode = null;
+    throw error;
+  });
+}
+
+function _normalizedConnections(value) {
+  return {
+    bySlot: { ...(value?.bySlot || {}) },
+    byUid: { ...(value?.byUid || {}) },
+  };
+}
+
+function _slotForUid(connections, uid) {
+  const slot = connections?.byUid?.[uid];
+  return Number.isInteger(slot) ? slot : null;
+}
+
+function _revisionOf(state) {
+  const revision = Number(state?._revision);
+  return Number.isSafeInteger(revision) && revision >= 0 ? revision : 0;
+}
+
+function _transactionalStateWrite(
+  gameRef,
+  sessionGeneration,
+  serializedState,
+  privateState,
+  privateOwner,
+  deckOwner,
+) {
+  if (
+    !_active ||
+    gameRef !== _gameRef ||
+    sessionGeneration !== _sessionGeneration ||
+    _receivingState
+  )
+    return Promise.resolve(false);
+  const expectedRevision = _stateRevision;
+  const nextRevision = expectedRevision + 1;
+  return gameRef.child('state').transaction(stateValue => {
+    if (_revisionOf(stateValue) !== expectedRevision) return;
+    return {
+      ...serializedState,
+      _source: _clientId,
+      _revision: nextRevision,
+      _pending: _clientId,
+      _privateOwner: privateOwner,
+      _deckOwner: deckOwner,
+    };
+  }, undefined, false).then(result => {
+    if (!result.committed) return false;
+    const updates = {
+      'state/_pending': null,
+      'state/_privateOwner': null,
+      'state/_deckOwner': null,
+    };
+    if (Number.isInteger(privateOwner)) {
+      updates[`private/${privateOwner}`] = {
+        ...privateState,
+        evtDeck:
+          privateOwner === deckOwner ? privateState.evtDeck : [],
+        _revision: nextRevision,
+      };
+    }
+    if (Number.isInteger(deckOwner) && deckOwner !== privateOwner) {
+      updates[`private/${deckOwner}/ownerIndex`] = deckOwner;
+      updates[`private/${deckOwner}/evtDeck`] = privateState.evtDeck;
+      updates[`private/${deckOwner}/_revision`] = nextRevision;
+    }
+    return gameRef.update(updates)
+      .then(() => {
+        if (sessionGeneration === _sessionGeneration) {
+          _stateRevision = nextRevision;
+          _hasState = true;
+        }
+        return true;
+      });
+  });
+}
+
+function _readPrivateState(gameRef, ownerIndex, revision) {
+  return gameRef.child('private').child(ownerIndex).once('value').then(snap => {
+    const privateState = snap.val() || null;
+    const privateRevision = _revisionOf(privateState);
+    if (privateRevision > revision) return _SUPERSEDED_PRIVATE_STATE;
+    return privateState;
+  });
+}
+
 function _startListening() {
   if (!_gameRef) return;
   _gameRef.child('state').on('value', snap => {
     if (!snap.exists()) return;
+    if (!_onStateUpdate) return;
+    const gameRef = _gameRef;
+    const sessionGeneration = _sessionGeneration;
     const data = snap.val();
+    if (data._pending) return;
+    const revision = _revisionOf(data);
+    if (_hasState && revision <= _stateRevision) return;
+    _stateRevision = revision;
+    _hasState = true;
     if (data._source === _clientId) return;
-    if (_onStateUpdate) _onStateUpdate(data);
+    if (!Number.isInteger(_myPlayerIndex)) {
+      _onStateUpdate(data);
+      return;
+    }
+    _readPrivateState(gameRef, _myPlayerIndex, revision).then(privateState => {
+      if (
+        sessionGeneration !== _sessionGeneration ||
+        gameRef !== _gameRef ||
+        revision !== _stateRevision ||
+        privateState === _SUPERSEDED_PRIVATE_STATE
+      )
+        return;
+      data._privateState = privateState;
+      _onStateUpdate(data);
+    });
   });
 }
