@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-315a2eb8b2d3fdbf3218",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-28T22:43:12.834Z",
+  "updatedAt": "2026-07-28T22:45:42.946Z",
+  "taskId": "atomic-multiplayer-slot-claims",
+  "runId": "agent-atomic-multiplayer-slot-claims",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 38744,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 35968,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019faae5-79cd-7311-a4ed-e08b9552fccf",
+    "waitingSince": "2026-07-28T22:43:12.909Z",
+    "establishedAt": "2026-07-28T22:43:13.643Z"
+  },
+  "stderrTail": "Reading additional input from stdin...\n2026-07-28T22:43:13.151450Z ERROR codex_models_manager::cache: failed to load models cache: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:43:20.484254Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:43:25.426317Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:43:30.503061Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:43:36.184357Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:43:55.143370Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:44:08.498769Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:44:38.341828Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:44:42.944061Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:45:10.312854Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:45:15.369514Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:45:20.724354Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:45:26.282807Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:45:29.512035Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:45:40.173726Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-28T22:43:12.834Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-28T22:43:12.840Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-28T22:43:12.854Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 38744
+    },
+    {
+      "at": "2026-07-28T22:43:12.893Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 38744
+    },
+    {
+      "at": "2026-07-28T22:43:12.911Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 35968
+    },
+    {
+      "at": "2026-07-28T22:43:12.915Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-28T22:43:13.644Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-28T22:45:42.931Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-28T22:45:42.946Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

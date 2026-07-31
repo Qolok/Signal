@@ -1,0 +1,699 @@
+{
+  "version": 3,
+  "state_version": 681,
+  "features": {
+    "chat_pro": true
+  },
+  "epics": [
+    {
+      "id": "epic-multiplayer-sync-reliabi",
+      "name": "Multiplayer Sync Reliability",
+      "order": 2
+    },
+    {
+      "id": "epic-security-hardening",
+      "name": "Security Hardening",
+      "order": 3
+    },
+    {
+      "id": "epic-field-guide-compliance",
+      "name": "Field Guide Compliance",
+      "order": 4
+    },
+    {
+      "id": "epic-field-guide-alignment",
+      "name": "Field Guide Alignment",
+      "order": 5
+    }
+  ],
+  "execution_policy": {
+    "tier": "pro",
+    "free_execution_model": null,
+    "models_inherit_tasker": false,
+    "sequential": false,
+    "cross_provider_orchestration": true
+  },
+  "run_queue": {
+    "sequence": [
+      "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+      "add-content-security-policy-and-security-headers-7858"
+    ],
+    "conflicts": [],
+    "rationale": "Built from your Ready tasks — toggle which ones to run.",
+    "decided_by": "tasker",
+    "decided_at": "2026-07-30T17:10:49.237Z",
+    "approved_order": true,
+    "validated_at": "2026-07-30T17:12:48.837Z"
+  },
+  "run_queue_active": false,
+  "tasker_tool_log": [
+    {
+      "timestamp": "2026-07-29T04:42:16.279Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "controller",
+        "run_id": "chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946",
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "controller chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-29T04:42:16.605Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "controller",
+        "run_id": "chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946",
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "controller chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-29T22:55:32.285Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "controller",
+        "run_id": "chat-77e3ddac-5e18-4b95-b8ca-2e3b21334708-ee85122e",
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "controller chat-77e3ddac-5e18-4b95-b8ca-2e3b21334708-ee85122e called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T07:26:22.103Z",
+      "type": "actor",
+      "tool": "mcp__tasker__agent_stop",
+      "actor": {
+        "kind": "ui",
+        "run_id": null,
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "ui called mcp__tasker__agent_stop"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:09.711Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:18.230Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:23.183Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:29.661Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:35.643Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:40.561Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T16:44:54.855Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T16:47:25.546Z",
+      "type": "actor",
+      "tool": "mcp__tasker__agent_dispatch",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243 called mcp__tasker__agent_dispatch"
+    },
+    {
+      "timestamp": "2026-07-30T17:04:52.421Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.253Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.294Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.332Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.368Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.399Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.432Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.464Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.496Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.536Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.567Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.598Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.414Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.468Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.498Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.521Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.548Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.568Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.590Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.621Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T19:09:43.375Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T19:09:43.417Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_move"
+    }
+  ],
+  "role_usage_caps": {},
+  "tasks": [
+    {
+      "id": "add-regression-test-harness",
+      "title": "Add automated regression test harness",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:17:13.820Z",
+      "file": "active/add-regression-test-harness/add-regression-test-harness.json"
+    },
+    {
+      "id": "atomic-multiplayer-slot-claims",
+      "title": "Make multiplayer slot claims atomic",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:17:10.475Z",
+      "file": "active/atomic-multiplayer-slot-claims/atomic-multiplayer-slot-claims.json"
+    },
+    {
+      "id": "cleanup-ghost-multiplayer-sessions",
+      "title": "Clean up ghost multiplayer connections and lobby entries",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:17:00.770Z",
+      "file": "active/cleanup-ghost-multiplayer-sessions/cleanup-ghost-multiplayer-sessions.json"
+    },
+    {
+      "id": "eliminate-player-name-html-injection",
+      "title": "Eliminate stored HTML injection through player names",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:57.192Z",
+      "file": "active/eliminate-player-name-html-injection/eliminate-player-name-html-injection.json"
+    },
+    {
+      "id": "fix-dice-landing-audio-mapping",
+      "title": "Fix dice landing sound mapping and stale audio reference",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "low",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:53.555Z",
+      "file": "active/fix-dice-landing-audio-mapping/fix-dice-landing-audio-mapping.json"
+    },
+    {
+      "id": "fix-incapacitation-death-timing",
+      "title": "Fix incapacitation death timing off-by-one",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:47.600Z",
+      "file": "active/fix-incapacitation-death-timing/fix-incapacitation-death-timing.json"
+    },
+    {
+      "id": "fix-multiplayer-state-overwrites",
+      "title": "Prevent stale multiplayer clients from overwriting game state",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:44.352Z",
+      "file": "active/fix-multiplayer-state-overwrites/fix-multiplayer-state-overwrites.json"
+    },
+    {
+      "id": "harden-firebase-access-control",
+      "title": "Harden Firebase authentication and database rules",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "researcher",
+      "updated_at": "2026-07-30T16:16:40.722Z",
+      "file": "active/harden-firebase-access-control/harden-firebase-access-control.json"
+    },
+    {
+      "id": "implement-solo-event-deck-rules",
+      "title": "Remove private event cards in solo games",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:37.407Z",
+      "file": "active/implement-solo-event-deck-rules/implement-solo-event-deck-rules.json"
+    },
+    {
+      "id": "optimize-game-asset-loading",
+      "title": "Reduce game asset payload and preload cost",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "medium",
+      "agent_id": "designer",
+      "updated_at": "2026-07-30T14:47:15.523Z",
+      "file": "active/optimize-game-asset-loading/optimize-game-asset-loading.json"
+    },
+    {
+      "id": "protect-private-multiplayer-data",
+      "title": "Keep private event cards and objectives private",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:34.317Z",
+      "file": "active/protect-private-multiplayer-data/protect-private-multiplayer-data.json"
+    },
+    {
+      "id": "resolve-inversion-field-rule-mismatch",
+      "title": "Resolve Inversion Field rule mismatch",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "medium",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:31.445Z",
+      "file": "active/resolve-inversion-field-rule-mismatch/resolve-inversion-field-rule-mismatch.json"
+    },
+    {
+      "id": "restore-host-online-mode-on-reload",
+      "title": "Restore multiplayer turn guards after host reload",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T16:16:27.439Z",
+      "file": "active/restore-host-online-mode-on-reload/restore-host-online-mode-on-reload.json"
+    },
+    {
+      "id": "update-vulnerable-dev-dependencies",
+      "title": "Update vulnerable development dependencies",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "medium",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T14:47:19.872Z",
+      "file": "active/update-vulnerable-dev-dependencies/update-vulnerable-dev-dependencies.json"
+    },
+    {
+      "id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+      "title": "Persist all in-review task work to main and prune stale worktrees",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T17:05:15.253Z",
+      "file": "active/persist-all-in-review-task-work-to-main-and-prun-fb51/persist-all-in-review-task-work-to-main-and-prun-fb51.json"
+    },
+    {
+      "id": "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+      "title": "Reconcile npm audit after firebase-tools reintroduced vulnerabilities",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "deps": [
+        "persist-all-in-review-task-work-to-main-and-prun-fb51"
+      ],
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T18:21:57.468Z",
+      "file": "active/reconcile-npm-audit-after-firebase-tools-reintro-3849/reconcile-npm-audit-after-firebase-tools-reintro-3849.json"
+    },
+    {
+      "id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+      "title": "Add CI to run game-logic and Firebase rules tests on every push",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "high",
+      "deps": [
+        "persist-all-in-review-task-work-to-main-and-prun-fb51"
+      ],
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T17:05:15.332Z",
+      "file": "active/add-ci-to-run-game-logic-and-firebase-rules-test-d8dd/add-ci-to-run-game-logic-and-firebase-rules-test-d8dd.json"
+    },
+    {
+      "id": "add-content-security-policy-and-security-headers-7858",
+      "title": "Add Content-Security-Policy and security headers to the served game",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "medium",
+      "deps": [
+        "persist-all-in-review-task-work-to-main-and-prun-fb51"
+      ],
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T18:21:57.521Z",
+      "file": "active/add-content-security-policy-and-security-headers-7858/add-content-security-policy-and-security-headers-7858.json"
+    },
+    {
+      "id": "validate-all-remote-firebase-state-at-ingress-no-881b",
+      "title": "Validate all remote Firebase state at ingress, not just names",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "medium",
+      "deps": [
+        "persist-all-in-review-task-work-to-main-and-prun-fb51"
+      ],
+      "agent_id": "coder",
+      "updated_at": "2026-07-30T19:09:43.417Z",
+      "file": "active/validate-all-remote-firebase-state-at-ingress-no-881b/validate-all-remote-firebase-state-at-ingress-no-881b.json"
+    },
+    {
+      "id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "title": "Add Firebase App Check and room-creation abuse limits",
+      "status": "done",
+      "trashed": false,
+      "trashed_at": null,
+      "priority": "medium",
+      "deps": [
+        "persist-all-in-review-task-work-to-main-and-prun-fb51"
+      ],
+      "agent_id": "researcher",
+      "updated_at": "2026-07-30T18:21:57.568Z",
+      "file": "active/add-firebase-app-check-and-room-creation-abuse-l-7a59/add-firebase-app-check-and-room-creation-abuse-l-7a59.json"
+    }
+  ]
+}

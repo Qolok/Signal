@@ -1,0 +1,574 @@
+diff --git a/game.js b/game.js
+index 658c569d6eab9ceff3edf2a66652bb8e7eca31b2..19c4a3d58cb34d4b5f787aafa1680e3a4ea38667 100644
+--- a/game.js
++++ b/game.js
+@@ -5463,23 +5463,23 @@ function renderTradeModal() {
+     resDiv.style.marginTop = "10px";
+     resDiv.innerHTML = `
+       <div class="trresrow"><label>Give Food</label>
+-        <button class="trbtn" onclick="trAdj('${isA ? "aFood" : "bFood"}',-1)">−</button>
++        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFood" : "bFood"}",-1]'>−</button>
+         <span class="trcnt">${ratGive}</span>
+-        <button class="trbtn" onclick="trAdj('${isA ? "aFood" : "bFood"}',1)">+</button>
++        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFood" : "bFood"}",1]'>+</button>
+         <span style="font-size:.58rem;color:var(--dim)">/ ${foodMax}</span>
+       </div>
+       <div class="trresrow" style="margin-top:6px"><label>Give O₂</label>
+-        <button class="trbtn" onclick="trAdj('${isA ? "aO2" : "bO2"}',-1)">−</button>
++        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aO2" : "bO2"}",-1]'>−</button>
+         <span class="trcnt">${o2Give}</span>
+-        <button class="trbtn" onclick="trAdj('${isA ? "aO2" : "bO2"}',1)">+</button>
++        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aO2" : "bO2"}",1]'>+</button>
+         <span style="font-size:.58rem;color:var(--dim)">/ ${o2Max}</span>
+       </div>
+       ${
+         p.radioFragments > 0
+           ? `<div class="trresrow" style="margin-top:6px"><label>Give ◈</label>
+-        <button class="trbtn" onclick="trAdj('${isA ? "aFrags" : "bFrags"}',-1)">−</button>
++        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFrags" : "bFrags"}",-1]'>−</button>
+         <span class="trcnt">${isA ? aFrags : bFrags}</span>
+-        <button class="trbtn" onclick="trAdj('${isA ? "aFrags" : "bFrags"}',1)">+</button>
++        <button class="trbtn" data-action="trAdj" data-args='["${isA ? "aFrags" : "bFrags"}",1]'>+</button>
+         <span style="font-size:.58rem;color:var(--dim)">/ ${p.radioFragments}</span>
+       </div>`
+           : ""
+@@ -8663,9 +8663,9 @@ function buildSetup() {
+     const d = document.createElement("div");
+     d.className = "prow";
+     d.innerHTML = `<div class="ppick">
+-      <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
++      <button class="parr" data-action="cyclePortrait" data-args="[${i},-1]">&#8249;</button>
+       <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+-      <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
++      <button class="parr" data-action="cyclePortrait" data-args="[${i},1]">&#8250;</button>
+     </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prev[i] !== undefined ? prev[i] : pname)}" maxlength="16" placeholder="crew ${i + 1}">`;
+     nl.appendChild(d);
+   }
+@@ -9236,11 +9236,11 @@ function buildOnlineSetup() {
+       const prevName =
+         document.getElementById(`pn-${i}`)?.value || entry?.name || pname;
+       d.innerHTML = `<div class="ppick">
+-        <button class="parr" onclick="cyclePortrait(${i},-1)">&#8249;</button>
++        <button class="parr" data-action="cyclePortrait" data-args="[${i},-1]">&#8249;</button>
+         <div style="${portBg(pname, 80, 90, 0, 3, "pawn")}border:1px solid ${PCOLORS[i]};border-radius:2px;"></div>
+-        <button class="parr" onclick="cyclePortrait(${i},1)">&#8250;</button>
+-      </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prevName)}" maxlength="16" oninput="_onlineNameChange()">
+-      <button class="online-ready-btn${ready ? " active" : ""}" onclick="onlineToggleReady()">${ready ? "Ready ✓" : "Ready?"}</button>`;
++        <button class="parr" data-action="cyclePortrait" data-args="[${i},1]">&#8250;</button>
++      </div><input class="pi" type="text" id="pn-${i}" value="${_escHtml(prevName)}" maxlength="16" data-input="_onlineNameChange">
++      <button class="online-ready-btn${ready ? " active" : ""}" data-action="onlineToggleReady">${ready ? "Ready ✓" : "Ready?"}</button>`;
+     } else {
+       const dname = _escHtml(entry?.name || pname);
+       d.innerHTML = `<div class="ppick"><button class="parr" style="visibility:hidden" tabindex="-1">&#8249;</button>
+diff --git a/index.html b/index.html
+index a53d5e4b3b670eb203ab9793dda22dd5c18690cc..600eb73805e39c42b8ab018b351812ceeea4c96b 100644
+--- a/index.html
++++ b/index.html
+@@ -2,6 +2,23 @@
+ <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
++    <!--
++      Content-Security-Policy (defense-in-depth for stored-HTML injection).
++      Enumerated origins the game actually loads:
++        script-src : self + Firebase compat SDK (www.gstatic.com) + marked (cdn.jsdelivr.net)
++        connect-src: self + Firebase Auth/Installations (*.googleapis.com),
++                     Realtime Database (*.firebaseio.com over https + wss),
++                     auth domain (signal-serve.firebaseapp.com)
++        img/media/font-src: self (all art, audio and the favicon are same-origin)
++      No 'unsafe-inline' in script-src — inline handlers were refactored into
++      ui-events.js. 'unsafe-inline' is kept only for style-src (inline style="").
++      frame-ancestors / X-Content-Type-Options / Referrer-Policy are delivered as
++      HTTP headers (see serve.json) since a <meta> CSP cannot carry them.
++    -->
++    <meta
++      http-equiv="Content-Security-Policy"
++      content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://signal-serve.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'"
++    />
+     <meta
+       name="viewport"
+       content="width=device-width, initial-scale=1.0, user-scalable=no"
+@@ -25,7 +42,7 @@
+             <input
+               type="checkbox"
+               id="e7guidance-toggle"
+-              onchange="toggleGuidance()"
++              data-change="toggleGuidance"
+             />
+             <span class="e7toggle-track"
+               ><span class="e7toggle-thumb"></span
+@@ -34,7 +51,7 @@
+           </label>
+         </div>
+         <div class="e7sub">SHIP COMPUTER</div>
+-        <button class="e7close back-btn" onclick="toggleE7()">✕</button>
++        <button class="e7close back-btn" data-action="toggleE7">✕</button>
+       </div>
+       <div id="e7log"></div>
+       <div id="e7prompt"></div>
+@@ -71,10 +88,10 @@
+         </div>
+         <div id="e7-intro-msg" class="e7-screen-msg"></div>
+         <div class="sbox-footer">
+-          <button class="sbtn secondary next-btn" onclick="showCrewSetup()">
++          <button class="sbtn secondary next-btn" data-action="showCrewSetup">
+             Local Game
+           </button>
+-          <button class="sbtn next-btn" onclick="showOnlineLobby()">
++          <button class="sbtn next-btn" data-action="showOnlineLobby">
+             Online Game
+           </button>
+         </div>
+@@ -117,37 +134,37 @@
+             class="lobby-input"
+             maxlength="6"
+             placeholder="ABC123"
+-            oninput="this.value = this.value.toUpperCase()"
+-            onkeydown="if (event.key === 'Enter') lobbyJoinConnect();"
++            data-input="upperCaseInput"
++            data-keydown="lobbyJoinEnter"
+           />
+           <div id="lobby-join-status" class="lobby-status"></div>
+         </div>
+ 
+         <!-- Footers: one per panel, pinned to bottom of card -->
+         <div id="lobby-footer-sel" class="sbox-footer" style="display: none">
+-          <button class="sbtn next-btn" onclick="lobbyHost()">
++          <button class="sbtn next-btn" data-action="lobbyHost">
+             Host a Game
+           </button>
+-          <button class="sbtn next-btn" onclick="lobbyJoinMode()">
++          <button class="sbtn next-btn" data-action="lobbyJoinMode">
+             Join a Game
+           </button>
+         </div>
+         <div id="lobby-footer-host" class="sbox-footer" style="display: none">
+-          <button class="sbtn secondary back-btn" onclick="lobbyBack()">
++          <button class="sbtn secondary back-btn" data-action="lobbyBack">
+             ← Back
+           </button>
+-          <button class="sbtn next-btn" onclick="enterOnlineCrewSetup()">
++          <button class="sbtn next-btn" data-action="enterOnlineCrewSetup">
+             Continue →
+           </button>
+         </div>
+         <div id="lobby-footer-join" class="sbox-footer" style="display: none">
+-          <button class="sbtn secondary back-btn" onclick="lobbyBack()">
++          <button class="sbtn secondary back-btn" data-action="lobbyBack">
+             ← Back
+           </button>
+           <button
+             class="sbtn next-btn"
+             id="lobby-join-btn"
+-            onclick="lobbyJoinConnect()"
++            data-action="lobbyJoinConnect"
+           >
+             Connect
+           </button>
+@@ -189,7 +206,7 @@
+                   <input
+                     type="checkbox"
+                     id="addSynthCbx"
+-                    onchange="toggleSynth(this.checked)"
++                    data-change="toggleSynthFromEl"
+                   />
+                   <span
+                     >Add IRIS to crew<span class="synth-subtext"
+@@ -214,16 +231,16 @@
+         </div>
+       </div>
+       <div id="sufooter">
+-        <button id="su-back" class="mbtn back-btn" onclick="backToIntro()">
++        <button id="su-back" class="mbtn back-btn" data-action="backToIntro">
+           ← Back
+         </button>
+-        <button id="su-leave" class="mbtn" onclick="leaveOnlineSetup()">
++        <button id="su-leave" class="mbtn" data-action="leaveOnlineSetup">
+           ← Leave Game
+         </button>
+         <button
+           id="su-confirm"
+           class="mbtn pri next-btn"
+-          onclick="goToSiteBuilder()"
++          data-action="goToSiteBuilder"
+         >
+           Confirm Crew
+         </button>
+@@ -236,7 +253,7 @@
+         <div class="signal-hdr-icon"></div>
+         <h1 class="hlogo">SIGNAL · ESTABLISH BASE CAMP</h1>
+         <span id="sbprogress">0 / 6 placed</span>
+-        <span class="sbreset" onclick="resetBuilder()">Reset</span>
++        <span class="sbreset" data-action="resetBuilder">Reset</span>
+       </div>
+       <div id="sbmain">
+         <div id="sbsvg-wrap">
+@@ -261,7 +278,7 @@
+               <button
+                 class="sbtn"
+                 style="padding: 12px 18px; font-size: 0.72rem"
+-                onclick="randomBuilder()"
++                data-action="randomBuilder"
+               >
+                 Random Layout
+               </button>
+@@ -273,7 +290,7 @@
+         <button
+           class="mbtn back-btn"
+           style="max-width: 180px; flex-shrink: 0"
+-          onclick="backToCrewSetup()"
++          data-action="backToCrewSetup"
+         >
+           ← Back
+         </button>
+@@ -281,7 +298,7 @@
+           id="sblaunbtn"
+           class="mbtn dng next-btn"
+           disabled
+-          onclick="finalizeGame()"
++          data-action="finalizeGame"
+           style="flex: 1"
+         >
+           Launch Mission
+@@ -309,9 +326,9 @@
+             data-tooltip="Roll the die to determine how many hexes you can move this turn."
+             >Roll</span
+           >
+-          <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
+-          <button class="hbtn" onclick="openRulebook()">Field Guide</button>
+-          <button class="hbtn" onclick="confirmNewGame()">New Game</button>
++          <button class="hbtn" id="e7btn" data-action="toggleE7">E7</button>
++          <button class="hbtn" data-action="openRulebook">Field Guide</button>
++          <button class="hbtn" data-action="confirmNewGame">New Game</button>
+         </div>
+       </div>
+ 
+@@ -376,7 +393,7 @@
+                     type="button"
+                     class="eq-filt"
+                     id="eq-filt-Tool"
+-                    onclick="toggleEqFilter('Tool')"
++                    data-action="toggleEqFilter" data-args='["Tool"]'
+                     data-tooltip="Filter: Tools"
+                   >
+                     <span
+@@ -390,7 +407,7 @@
+                     type="button"
+                     class="eq-filt"
+                     id="eq-filt-Supply"
+-                    onclick="toggleEqFilter('Supply')"
++                    data-action="toggleEqFilter" data-args='["Supply"]'
+                     data-tooltip="Filter: Supplies"
+                   >
+                     <span
+@@ -404,7 +421,7 @@
+                     type="button"
+                     class="eq-filt"
+                     id="eq-filt-Tech"
+-                    onclick="toggleEqFilter('Tech')"
++                    data-action="toggleEqFilter" data-args='["Tech"]'
+                     data-tooltip="Filter: Tech"
+                   >
+                     <span
+@@ -418,7 +435,7 @@
+                     type="button"
+                     class="eq-filt"
+                     id="eq-filt-Weapon"
+-                    onclick="toggleEqFilter('Weapon')"
++                    data-action="toggleEqFilter" data-args='["Weapon"]'
+                     data-tooltip="Filter: Weapons"
+                   >
+                     <span
+@@ -432,7 +449,7 @@
+                     type="button"
+                     class="eq-filt"
+                     id="eq-filt-Event"
+-                    onclick="toggleEqFilter('Event')"
++                    data-action="toggleEqFilter" data-args='["Event"]'
+                     data-tooltip="Filter: Private Events"
+                   >
+                     <span
+@@ -449,7 +466,7 @@
+                   type="button"
+                   class="eq-nav"
+                   id="eq-prev"
+-                  onclick="eqNav(-1)"
++                  data-action="eqNav" data-args='[-1]'
+                   disabled
+                 >
+                   &#9664;
+@@ -459,7 +476,7 @@
+                   type="button"
+                   class="eq-nav"
+                   id="eq-next"
+-                  onclick="eqNav(1)"
++                  data-action="eqNav" data-args='[1]'
+                   disabled
+                 >
+                   &#9654;
+@@ -519,22 +536,22 @@
+             >
+               Actions
+             </div>
+-            <button class="btn" id="bequip" onclick="doEquipLocker()" disabled>
++            <button class="btn" id="bequip" data-action="doEquipLocker" disabled>
+               Open Locker
+             </button>
+-            <button class="btn" id="bcargo" onclick="doCargo()" disabled>
++            <button class="btn" id="bcargo" data-action="doCargo" disabled>
+               Cargo Hold
+             </button>
+-            <button class="btn" id="bwatch" onclick="doWatchTower()" disabled>
++            <button class="btn" id="bwatch" data-action="doWatchTower" disabled>
+               Watch Tower
+             </button>
+-            <button class="btn trd" id="btrd" onclick="openTrade()" disabled>
++            <button class="btn trd" id="btrd" data-action="openTrade" disabled>
+               Trade
+             </button>
+             <button
+               class="btn"
+               id="biris"
+-              onclick="toggleIrisDeactivation()"
++              data-action="toggleIrisDeactivation"
+               style="display: none"
+             >
+               Deactivate IRIS
+@@ -542,18 +559,18 @@
+             <button
+               class="btn wrn"
+               id="bfrag"
+-              onclick="doActivateFrag()"
++              data-action="doActivateFrag"
+               disabled
+             >
+               Activate Fragment
+             </button>
+-            <button class="btn wrn" id="bsig" onclick="doSignalRoll()" disabled>
++            <button class="btn wrn" id="bsig" data-action="doSignalRoll" disabled>
+               Roll Signal
+             </button>
+             <button
+               class="btn"
+               id="bstay"
+-              onclick="doStasisEndTurn()"
++              data-action="doStasisEndTurn"
+               style="display: none"
+             >
+               Stay in Stasis
+@@ -561,23 +578,23 @@
+             <button
+               class="btn pri"
+               id="bleave"
+-              onclick="doStasisLeave()"
++              data-action="doStasisLeave"
+               style="display: none"
+             >
+               Leave Stasis
+             </button>
+-            <button class="btn" id="bend" onclick="doEndTurn()" disabled>
++            <button class="btn" id="bend" data-action="doEndTurn" disabled>
+               End Turn
+             </button>
+             <div class="hud-media">
+               <button
+                 class="hud-media-btn"
+                 id="btn-music"
+-                onclick="toggleMusic()"
++                data-action="toggleMusic"
+               >
+                 <span class="hud-media-icon vol-on" id="icon-music"></span>Music
+               </button>
+-              <button class="hud-media-btn" id="btn-sfx" onclick="toggleSfx()">
++              <button class="hud-media-btn" id="btn-sfx" data-action="toggleSfx">
+                 <span class="hud-media-icon vol-on" id="icon-sfx"></span>SFX
+               </button>
+             </div>
+@@ -646,10 +663,10 @@
+           id="rbsearch"
+           type="text"
+           placeholder="Search guide..."
+-          oninput="rbSearch(this.value)"
++          data-input="rbSearchFromEl"
+         />
+-        <button id="rbtour" onclick="startTour()">Interface Tour</button>
+-        <button id="rbclose" class="back-btn" onclick="closeRulebook()">
++        <button id="rbtour" data-action="startTour">Interface Tour</button>
++        <button id="rbclose" class="back-btn" data-action="closeRulebook">
+           ✕
+         </button>
+       </div>
+@@ -673,19 +690,19 @@
+         <div id="tour-title" class="tour-title"></div>
+         <div id="tour-body" class="tour-body"></div>
+         <div class="tour-footer" id="tour-footer-prompt">
+-          <button type="button" class="tour-skip next-btn" onclick="endTour()">
++          <button type="button" class="tour-skip next-btn" data-action="endTour">
+             Skip
+           </button>
+           <button
+             type="button"
+             class="tour-btn tour-btn-primary next-btn"
+-            onclick="_startTourSteps()"
++            data-action="_startTourSteps"
+           >
+             Yes, show me →
+           </button>
+         </div>
+         <div class="tour-footer" id="tour-footer-nav">
+-          <button type="button" class="tour-skip next-btn" onclick="endTour()">
++          <button type="button" class="tour-skip next-btn" data-action="endTour">
+             Skip Tour
+           </button>
+           <div class="tour-nav">
+@@ -693,7 +710,7 @@
+               type="button"
+               class="tour-btn back-btn"
+               id="tour-prev"
+-              onclick="tourStep(-1)"
++              data-action="tourStep" data-args='[-1]'
+             >
+               ← Back
+             </button>
+@@ -701,7 +718,7 @@
+               type="button"
+               class="tour-btn tour-btn-primary next-btn"
+               id="tour-next"
+-              onclick="tourStep(1)"
++              data-action="tourStep" data-args='[1]'
+             >
+               Next →
+             </button>
+@@ -792,14 +809,14 @@
+     <div id="trademodal">
+       <div id="trhdr">
+         <h2>TRADE</h2>
+-        <button id="trclose" class="back-btn" onclick="closeTrade()">✕</button>
++        <button id="trclose" class="back-btn" data-action="closeTrade">✕</button>
+       </div>
+       <div id="trbody"><!-- built by renderTradeModal() --></div>
+       <div id="trfooter">
+-        <button class="mbtn pri next-btn" onclick="confirmTrade()">
++        <button class="mbtn pri next-btn" data-action="confirmTrade">
+           Confirm Trade
+         </button>
+-        <button class="mbtn back-btn" onclick="closeTrade()">Cancel</button>
++        <button class="mbtn back-btn" data-action="closeTrade">Cancel</button>
+       </div>
+     </div>
+ 
+@@ -826,5 +843,7 @@
+     <script src="game-logic.js"></script>
+     <script src="sync.js"></script>
+     <script src="game.js"></script>
++    <!-- CSP-safe event delegation (replaces former inline on* handlers) -->
++    <script src="ui-events.js"></script>
+   </body>
+ </html>
+diff --git a/serve.json b/serve.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..4cd348c589a9fc74986059c0842f75ee2de42253
+--- /dev/null
++++ b/serve.json
+@@ -0,0 +1,17 @@
++{
++  "headers": [
++    {
++      "source": "**",
++      "headers": [
++        {
++          "key": "Content-Security-Policy",
++          "value": "default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://signal-serve.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
++        },
++        { "key": "X-Content-Type-Options", "value": "nosniff" },
++        { "key": "Referrer-Policy", "value": "no-referrer" },
++        { "key": "X-Frame-Options", "value": "DENY" },
++        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=()" }
++      ]
++    }
++  ]
++}
+diff --git a/ui-events.js b/ui-events.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..5e3f5ffe7e24479a00c33e2fc5f926dcda619826
+--- /dev/null
++++ b/ui-events.js
+@@ -0,0 +1,78 @@
++'use strict';
++// ═══════════════════════════════════════════════════════════════════
++// SIGNAL — CSP-safe UI event delegation
++// ═══════════════════════════════════════════════════════════════════
++//
++// The Content-Security-Policy served with this game uses a strict
++// `script-src` with NO `'unsafe-inline'`, which blocks inline event-handler
++// attributes (onclick, onchange, ...). To keep behaviour identical without
++// inline handlers, markup declares its intent with data-* attributes and this
++// module dispatches to the corresponding global function via delegation:
++//
++//   <button data-action="fnName">              → fnName()
++//   <button data-action="fnName" data-args='["x",-1]'> → fnName("x", -1)
++//   <input  data-change="fnName">              → fnName()   on "change"
++//   <input  data-input="fnName">               → fnName()   on "input"
++//   <input  data-keydown="fnName">             → fnName(event) on "keydown"
++//
++// Functions are looked up on `window` at dispatch time, so this file may load
++// before or after the scripts that define them.
++// ═══════════════════════════════════════════════════════════════════
++
++(function () {
++  function parseArgs(el) {
++    const raw = el.getAttribute('data-args');
++    if (!raw) return [];
++    try {
++      const parsed = JSON.parse(raw);
++      return Array.isArray(parsed) ? parsed : [parsed];
++    } catch (_) {
++      return [];
++    }
++  }
++
++  function invoke(el, name, extraArgs) {
++    const fn = window[name];
++    if (typeof fn !== 'function') return;
++    fn.apply(el, extraArgs || parseArgs(el));
++  }
++
++  // Click delegation — skip disabled controls (native buttons already suppress
++  // their own click, but delegation could otherwise match a disabled ancestor).
++  document.addEventListener('click', function (e) {
++    const el = e.target.closest('[data-action]');
++    if (el && !el.disabled) invoke(el, el.getAttribute('data-action'));
++  });
++
++  document.addEventListener('change', function (e) {
++    const el = e.target.closest('[data-change]');
++    if (el) invoke(el, el.getAttribute('data-change'));
++  });
++
++  document.addEventListener('input', function (e) {
++    const el = e.target.closest('[data-input]');
++    if (el) invoke(el, el.getAttribute('data-input'));
++  });
++
++  document.addEventListener('keydown', function (e) {
++    const el = e.target.closest('[data-keydown]');
++    if (el) invoke(el, el.getAttribute('data-keydown'), [e]);
++  });
++
++  // ── Wrappers for handlers that previously read `this`/`event` inline ──
++  // (defined globally so delegation can resolve them by name)
++  window.upperCaseInput = function () {
++    this.value = this.value.toUpperCase();
++  };
++  window.lobbyJoinEnter = function (e) {
++    if (e.key === 'Enter' && typeof window.lobbyJoinConnect === 'function') {
++      window.lobbyJoinConnect();
++    }
++  };
++  window.toggleSynthFromEl = function () {
++    if (typeof window.toggleSynth === 'function') window.toggleSynth(this.checked);
++  };
++  window.rbSearchFromEl = function () {
++    if (typeof window.rbSearch === 'function') window.rbSearch(this.value);
++  };
++})();

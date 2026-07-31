@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-05063c7b7f4ae025aaa2",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-28T22:15:28.094Z",
+  "updatedAt": "2026-07-28T22:22:45.156Z",
+  "taskId": "add-regression-test-harness",
+  "runId": "agent-add-regression-test-harness",
+  "kind": "peer",
+  "roleSlug": "reviewer",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 21896,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 40608,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019faacc-11ee-7ef3-ae23-d22e0bec432c",
+    "waitingSince": "2026-07-28T22:15:28.225Z",
+    "establishedAt": "2026-07-28T22:15:28.904Z"
+  },
+  "stderrTail": "Reading additional input from stdin...\n2026-07-28T22:15:42.608561Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:15:46.398350Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:15:55.377686Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:15:59.082273Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:16:03.773512Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:16:17.815183Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:16:53.941568Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:16:59.070619Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:17:08.455703Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:17:40.741193Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:18:09.986378Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:18:48.170999Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:18:54.505553Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:19:28.414611Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:19:49.551329Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:19:59.811063Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:20:04.369473Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:20:08.584012Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:21:08.271396Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:21:46.533467Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:21:53.714919Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:21:58.835666Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:22:14.333757Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:22:20.642321Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.3 seconds\nOutput:\nAn empty pipe element is not allowed.\r\n    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException\r\n    + FullyQualifiedErrorId : EmptyPipeElement\r\n \r\n\n2026-07-28T22:22:20.672071Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:22:27.568363Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.2 seconds\nOutput:\nrg: the: The system cannot find the file specified. (os error 2)\nrg: active|test\\(private state|test\\(event: The filename, directory name, or volume label syntax is incorrect. (os error 123)\nrg: deck|test\\(incapacitated|test\\(turn: The filename, directory name, or volume label syntax is incorrect. (os error 123)\nrg: ownership|test|##: The filename, directory name, or volume label syntax is incorrect. (os error 123)\nrg: Tests game-logic.js game.js sync.js test/game-logic.test.js package.json README.md: The system cannot find the path specified. (os error 3)\n\n2026-07-28T22:22:27.591409Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:22:34.123402Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-28T22:15:28.094Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-28T22:15:28.102Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-28T22:15:28.116Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 21896
+    },
+    {
+      "at": "2026-07-28T22:15:28.172Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 21896
+    },
+    {
+      "at": "2026-07-28T22:15:28.226Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 40608
+    },
+    {
+      "at": "2026-07-28T22:15:28.230Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-28T22:15:28.905Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-28T22:22:45.141Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-28T22:22:45.156Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

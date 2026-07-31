@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-471c3aa96e566b8297eb",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-28T22:45:51.089Z",
+  "updatedAt": "2026-07-28T22:49:35.433Z",
+  "taskId": "restore-host-online-mode-on-reload",
+  "runId": "agent-restore-host-online-mode-on-reload",
+  "kind": "peer",
+  "roleSlug": "reviewer",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 33736,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 34476,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019faae7-e3f0-7923-8aa3-2c9004838c9a",
+    "waitingSince": "2026-07-28T22:45:51.174Z",
+    "establishedAt": "2026-07-28T22:45:52.159Z"
+  },
+  "stderrTail": "ender = restoreSource.indexOf(\"render();\", hostReconnect);\r\ntest\\game-logic.test.js:356:  assert.doesNotMatch(gameSource, /\\b_isOnlineMode\\b/);\r\ntest\\game-logic.test.js:387:      G: { currentPlayer: 1, turn: 4 },\r\ntest\\game-logic.test.js:399:    G: { currentPlayer: 2, turn: 5 },\r\ntest\\game-logic.test.js:406:    G: { currentPlayer: 1, turn: 4 },\r\ntest\\game-logic.test.js:409:  assert.deepEqual(harness.room().state.G, { currentPlayer: 2, turn: 5 });\r\ntest\\game-logic.test.js:415:    G: { currentPlayer: 2, turn: 5, movementLeft: 3 },\r\ntest\\game-logic.test.js:422:    G: { currentPlayer: 2, turn: 5, movementLeft: 2 },\r\ntest\\game-logic.test.js:425:    G: { currentPlayer: 2, turn: 5, movementLeft: 1 },\r\ntest\\game-logic.test.js:437:    online: true, active: true, playerIndex: 2, currentPlayer: 1, cardPlayerIndex: 2,\r\ntest\\game-logic.test.js:440:    online: true, active: true, playerIndex: 2, currentPlayer: 1, cardPlayerIndex: 1,\r\ntest\\game-logic.test.js:443:    online: false, active: false, currentPlayer: 1, cardPlayerIndex: 1,\r\ntest\\game-logic.test.js:446:    online: false, active: false, currentPlayer: 1, cardPlayerIndex: 2,\r\ntest\\game-logic.test.js:480:test(\"private state is owner-targeted and restores only that owner's secrets\", () => {\r\ntest\\game-logic.test.js:538:      G: { currentPlayer: 1, turn: 2 },\r\ntest\\game-logic.test.js:568:    { G: { currentPlayer: 2, turn: 2 } },\r\ntest\\game-logic.test.js:641:    online: true, active: true, playerIndex: 2, currentPlayer: 2,\r\ngame.js:1391:  return G.players[G.currentPlayer];\r\ngame.js:1495:    currentPlayer: 0,\r\ngame.js:1846:            outcome = `Rolled ${val} — Health restored.`;\r\ngame.js:2947:        `${p.name} passed through Airlock. Oxygen fully restored.`,\r\ngame.js:2957:            \"Oxygen has been fully restored. Pass through the Airlock whenever you return to base — it is the only way to refill O\\u2082 without equipment.\",\r\ngame.js:2985:            \"Emergency medical equipment salvaged from the wreckage. Entering automatically restores 1 Health — return here any time you are injured.\",\r\ngame.js:3056:            \"You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.\",\r\ngame.js:4028:            \"You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.\",\r\ngame.js:4050:              \"O\\u2082 depletes by 1 each turn you spend outside the crash site. If it reaches zero, you will lose Health instead. Pass through the Airlock to fully restore your O\\u2082.\",\r\ngame.js:4065:                \"You have lost Health. If Health reaches 0, you will be incapacitated. After 2 rounds of incapacitation, you will die. The Medical Bay restores your health.\",\r\ngame.js:4147:function advanceTurn(writerTurnOwner = G.currentPlayer) {\r\ngame.js:4186:  const next = SignalGameLogic.nextLivingPlayer(G.players, G.currentPlayer);\r\ngame.js:4187:  if (next <= G.currentPlayer) {\r\ngame.js:4191:  G.currentPlayer = next;\r\ngame.js:5532:  viewedPlayer = G.currentPlayer;\r\ngame.js:6026:  if (p.id === G.currentPlayer) {\r\ngame.js:6240:    const isCurrent = pl.id === G.currentPlayer;\r\ngame.js:6304:        currentPlayer: G.currentPlayer,\r\ngame.js:6307:          !!G.players[writerTurnOwner ?? G.currentPlayer]?.isSynth,\r\ngame.js:6312:        writerTurnOwner ?? G.currentPlayer,\r\ngame.js:6316:        G.currentPlayer,\r\ngame.js:6332:              G.currentPlayer === deckOwnerIndex\r\ngame.js:6380:    const prevPlayer = G?.currentPlayer;\r\ngame.js:6390:      const turnChanged = prevPlayer !== G.currentPlayer;\r\ngame.js:6393:        if (viewedPlayer === prevPlayer) viewedPlayer = G.currentPlayer;\r\ngame.js:6417:          G.players[G.currentPlayer]?.isSynth &&\r\ngame.js:6623:    v.id === G.currentPlayer &&\r\ngame.js:6636:    v.id === G.currentPlayer &&\r\ngame.js:6860:        currentPlayer: G.currentPlayer,\r\ngame.js:6909:  const isOwner = playerIdx === G.currentPlayer;\r\ngame.js:7786:  // Deck expansion: expand when on deck step, restore when leaving it\r\ngame.js:8048:    desc: \"On entry: restore 1 Health token automatically.\",\r\ngame.js:8156:    \"Entering this tile restores 1 HEALTH token every turn. Place it for fast access during emergencies.\",\r\ngame.js:8781:  const mpSession = window.Sync?.restoreSession();\r\ngame.js:8788:      // HOST: restore from localStorage (always current), then reattach Firebase sync\r\ngame.js:8808:        addE7(\"> Session restored.\", \"sys\");\r\ngame.js:8814:      // JOINER: no local save — reattach Firebase and restore crew setup or game state\r\ngame.js:8821:    // Session found but restore failed — clear and fall through to intro\r\ngame.js:8840:    addE7(\"> Session restored.\", \"sys\");\r\ngame.js:8942:          \"You must search the planet for RADIO FRAGMENTS and restore the SIGNAL ARRAY before your resources expire.\",\r\ngame.js:8978:    currentPlayer: G?.currentPlayer,\r\n\n2026-07-28T22:46:23.537205Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:46:32.375785Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:46:40.701199Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:46:48.426697Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:46:58.085035Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:47:08.542307Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:47:17.075242Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:47:25.029031Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:47:43.514042Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:47:59.444815Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.2 seconds\nOutput:\nid=\\bleave|bstay|bleave|function doEndTurn|function doEquipLocker|function doCargo|function doWatchTower|function \r\ndoActivateFrag|function doSignalRoll|function doTrade : The module 'id=' could not be loaded. For more information, \r\nrun 'Import-Module id='.\r\nAt line:2 char:69\r\n+ ... |id=\\\"bstay|id=\\\"bleave|bstay|bleave|function doEndTurn|function doEq ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (id=\\bleave|bsta...unction doTrade:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CouldNotAutoLoadModule\r\n \r\n\n2026-07-28T22:47:59.468409Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:48:03.833627Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:48:31.482337Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:48:45.151263Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:48:50.787336Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:49:20.602887Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:49:29.533382Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-28T22:45:51.089Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-28T22:45:51.097Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-28T22:45:51.109Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 33736
+    },
+    {
+      "at": "2026-07-28T22:45:51.154Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 33736
+    },
+    {
+      "at": "2026-07-28T22:45:51.175Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 34476
+    },
+    {
+      "at": "2026-07-28T22:45:51.179Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-28T22:45:52.160Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-28T22:49:35.417Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-28T22:49:35.433Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

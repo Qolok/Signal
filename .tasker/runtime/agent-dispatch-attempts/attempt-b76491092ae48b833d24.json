@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-b76491092ae48b833d24",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-30T17:18:23.833Z",
+  "updatedAt": "2026-07-30T17:32:13.732Z",
+  "taskId": "validate-all-remote-firebase-state-at-ingress-no-881b",
+  "runId": "agent-validate-all-remote-firebase-state-at-ingress-no-881b",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 23484,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 504,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019fb408-dcf0-78f0-b065-bd13306d3a70",
+    "waitingSince": "2026-07-30T17:18:23.968Z",
+    "establishedAt": "2026-07-30T17:18:27.815Z"
+  },
+  "stderrTail": ":1:1\n✖ test\\database-rules.test.js (54.065ms)\n  'test failed'\n!  Script exited unsuccessfully (code 1) \r\ni  emulators: Shutting down emulators. {\"metadata\":{\"emulator\":{\"name\":\"hub\"},\"message\":\"Shutting down emulators.\"}}\r\ni  database: Stopping Database Emulator {\"metadata\":{\"emulator\":{\"name\":\"database\"},\"message\":\"Stopping Database Emulator\"}}\r\n!  Database Emulator has exited upon receiving signal: SIGINT \r\ni  hub: Stopping emulator hub {\"metadata\":{\"emulator\":{\"name\":\"hub\"},\"message\":\"Stopping emulator hub\"}}\r\ni  logging: Stopping Logging Emulator {\"metadata\":{\"emulator\":{\"name\":\"logging\"},\"message\":\"Stopping Logging Emulator\"}}\r\n[2026-07-30T17:29:52.538Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.\r\n\r\nError: Script \"node --test test/database-rules.test.js\" exited with code 1\r\n[2026-07-30T17:29:53.034Z] Found emulator hub locator: {\"version\":\"15.11.0\",\"origins\":[\"http://127.0.0.1:4400\",\"http://[::1]:4400\"],\"pid\":39768}\r\n[2026-07-30T17:29:53.034Z] Delete emulator hub locator file: C:\\Users\\russp\\AppData\\Local\\Temp\\hub-demo-signal-rules.json\r\n\n2026-07-30T17:29:53.122369Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:29:59.187717Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:30:04.939961Z ERROR codex_core::tools::router: error=`\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command '$workspace = (Resolve-Path -LiteralPath '\"'.').Path; \"'$targets = @('\"'database-debug.log', 'firebase-debug.log') | ForEach-Object { (Resolve-Path -LiteralPath \"'$_).Path }; foreach ($target in $targets) { if (-not $target.StartsWith($workspace + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw \"Refusing to remove path outside workspace\" } }; foreach ($target in $targets) { Remove-Item -LiteralPath $target -Force }; git status --short'` rejected: blocked by policy\n2026-07-30T17:30:05.078412Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:30:09.719377Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:30:17.504268Z ERROR codex_core::tools::router: error=`\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command \"Remove-Item -LiteralPath 'C:\\\\Users\\\\russp\\\\AppData\\\\Local\\\\Temp\\\\tasker-task-worktrees\\\\72e53c15871c\\\\validate-all-remote-firebase-state-at-ingress-no-acc4fc05770b5220\\\\database-debug.log' -Force; Remove-Item -LiteralPath 'C:\\\\Users\\\\russp\\\\AppData\\\\Local\\\\Temp\\\\tasker-task-worktrees\\\\72e53c15871c\\\\validate-all-remote-firebase-state-at-ingress-no-acc4fc05770b5220\\\\firebase-debug.log' -Force; git status --short\"` rejected: blocked by policy\n2026-07-30T17:30:17.647821Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:30:20.771518Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:30:26.713865Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.3 seconds\nOutput:\n M game-logic.js\n M game.js\n M test/game-logic.test.js\n\n2026-07-30T17:30:26.737477Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:31:50.601420Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 1.4 seconds\nOutput:\n\n> test\n> node --test test/game-logic.test.js\n\n✔ hostile local player names are length-limited and rendered as text (3.0446ms)\n✔ hostile online player identity fields are normalized before rendering (2.4237ms)\n✔ simultaneous joiners atomically claim different player slots (5.4573ms)\n✔ an atomic join reports a full room without activating the client (1.8732ms)\n✔ leaving releases an atomically claimed slot for the next joiner (2.5269ms)\n✔ disconnect cleanup releases connection and lobby records (1.2928ms)\n✔ a page reload reuses its authenticated identity and player slot (2.1773ms)\n✔ joining an expired room rejects and prunes it (0.9811ms)\n✔ normalizes local and Firebase-shaped saved state (0.3302ms)\n✔ hostile remote snapshot fields are clamped to safe types/ranges/enums (1.3405ms)\n✔ structurally unusable remote snapshots are rejected outright (0.1585ms)\n✔ valid remote snapshot fields pass through unchanged (0.2848ms)\n✔ canonical collections reject hostile cards, tiles, events, and logs (0.9201ms)\n✔ remote revision/cardUid counters reject unsafe values (0.1186ms)\n✔ the remote apply path sanitizes the snapshot before adopting it (1.1119ms)\n✔ the real remote apply path rejects hostile public and private snapshots (16.7655ms)\n✔ the real remote apply path reconstructs canonical inventory cards (4.1297ms)\n✔ only the active multiplayer turn owner may write state (0.1718ms)\n✔ restoring a host session guards another player's turn before rendering (3.4587ms)\n✔ viewing another crew member is local UI state and does not publish (1.459ms)\n✔ a stale waiting client cannot replace a newer multiplayer revision (10.89ms)\n✔ private event cards are visible only to their local owner (0.1515ms)\n✔ online public state excludes the deck and every player's private data (0.1932ms)\n✔ private state is owner-targeted and restores only that owner's secrets (0.2472ms)\n✔ multiplayer sync reads only the current owner's private path (3.1765ms)\n✔ local hot-seat saves retain all private cards and future deck order (1.3807ms)\n✔ event deck has stable public/private composition (10.7668ms)\n✔ solo play (1 human) removes all private event cards, multiplayer keeps them (10.3052ms)\n✔ incapacitated crew die after two consecutive skipped turns (0.1744ms)\n✔ MedPack/Stretcher recovery resets the incapacitation counter (0.1065ms)\n✔ advanceTurn: consecutive incapacitated rounds kill on the second round and drop fragments (2.1716ms)\n✔ advanceTurn: recovery before the second incapacitated round prevents death (1.7002ms)\n✔ turn ownership advances to the next living player and wraps (0.1409ms)\n✔ inversionFieldTargets excludes the acting player and the dead (0.1204ms)\n✔ swapFood exchanges Food between exactly the two given players (0.0874ms)\n✔ Inversion Field: first-landing resolution offers no Decline, only mandatory swaps (3.2928ms)\n✔ Inversion Field: with no other living players, first landing only offers Acknowledge (1.5895ms)\n✔ Inversion Field: repeat/re-landing resolution offers no Decline, only mandatory swaps (2.5329ms)\n✔ Inversion Field: repeat and first-landing resolution behave identically for the same matchup (3.9235ms)\nℹ tests 39\nℹ suites 0\nℹ pass 39\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 186.2579\n M game-logic.js\n M game.js\n M test/game-logic.test.js\n game-logic.js           | 454 ++++++++++++++++++++++++++++++++++++++++++++----\n game.js                 |  87 +++++++---\n test/game-logic.test.js | 410 +++++++++++++++++++++++++++++++++++++++----\n 3 files changed, 860 insertions(+), 91 deletions(-)\nwarning: in the working copy of 'game-logic.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'game.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'test/game-logic.test.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'game-logic.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'game.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'test/game-logic.test.js', LF will be replaced by CRLF the next time Git touches it\n\n2026-07-30T17:32:06.494253Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-30T17:18:23.833Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-30T17:18:23.845Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-30T17:18:23.863Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 23484
+    },
+    {
+      "at": "2026-07-30T17:18:23.936Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 23484
+    },
+    {
+      "at": "2026-07-30T17:18:23.970Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 504
+    },
+    {
+      "at": "2026-07-30T17:18:23.975Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-30T17:18:27.817Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-30T17:32:13.713Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-30T17:32:13.732Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

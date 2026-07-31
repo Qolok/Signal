@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-06002c3ca075409d27f9",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-29T22:50:43.065Z",
+  "updatedAt": "2026-07-29T22:51:57.917Z",
+  "taskId": null,
+  "runId": "agent-368655585e2a",
+  "kind": "orchestrator",
+  "roleSlug": "tasker",
+  "resolvedDriver": "claude",
+  "requestedModel": null,
+  "policyModel": null,
+  "resolvedModel": null,
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 26164,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 10244,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "6953a3ce-4288-4951-9ce1-ce21409249bc",
+    "waitingSince": "2026-07-29T22:50:43.140Z",
+    "establishedAt": "2026-07-29T22:50:44.669Z"
+  },
+  "stderrTail": "Ignoring 33 permissions.allow entries from .claude/settings.local.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects[\"c:/Users/russp/Documents/Signal\"].hasTrustDialogAccepted: true in C:\\Users\\russp\\.claude.json.\n",
+  "transitions": [
+    {
+      "at": "2026-07-29T22:50:43.065Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-29T22:50:43.072Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-29T22:50:43.083Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 26164
+    },
+    {
+      "at": "2026-07-29T22:50:43.121Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 26164
+    },
+    {
+      "at": "2026-07-29T22:50:43.142Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 10244
+    },
+    {
+      "at": "2026-07-29T22:50:43.145Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-29T22:50:44.670Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-29T22:51:57.899Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-29T22:51:57.917Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

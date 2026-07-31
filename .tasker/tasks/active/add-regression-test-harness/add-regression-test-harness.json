@@ -1,0 +1,108 @@
+{
+  "id": "add-regression-test-harness",
+  "status": "done",
+  "priority": "high",
+  "label": "Maintenance",
+  "title": "Add automated regression test harness",
+  "description": "Create an automated test setup and package.json test script for the browser game. Refactor only as needed to expose deterministic pure logic. Add initial coverage for save/restore normalization, multiplayer writer eligibility, private-card ownership, event-deck composition, incapacitation timing, and turn ownership. Tests must run locally with one documented command and must not require the live Firebase project.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:47.861Z",
+  "updated_at": "2026-07-30T16:17:13.820Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-28T21:48:47.861Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-28T21:52:56.405Z",
+      "type": "updated",
+      "content": "Roles assigned: coder ? reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T21:57:24.301Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T22:01:40.169Z",
+      "type": "output",
+      "content": "Implemented an automated Node regression harness with `npm test`.\n\n- Added `game-logic.js`, a browser/CommonJS-compatible pure-logic module.\n- Refactored persistence normalization, turn ownership, multiplayer writer eligibility, private-card ownership, event-deck composition checks, incapacitation timing, and living-player turn selection to use deterministic helpers.\n- Added six regression tests, including execution of the production event-deck builder in an isolated VM for both standard and IRIS games.\n- Prevented online players from opening another player's private event cards and prevented non-turn owners from broadcasting state.\n- Documented the single local command in `README.md`; tests do not load or connect to Firebase.\n\nVerification:\n- `npm test` - 6 passed, 0 failed\n- `node --check game.js`\n- `node --check game-logic.js`\n- `node --check test/game-logic.test.js`\n- `git diff --check`",
+      "attachment": "active/add-regression-test-harness/add-automated-regression-test-harness.md"
+    },
+    {
+      "timestamp": "2026-07-28T22:13:51.779Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T22:15:28.120Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T22:22:45.707Z",
+      "type": "output",
+      "content": "## Completed\n\nReviewed and corrected the automated regression harness and its production refactors.\n\n- Added the documented `npm test` command using Node's built-in test runner; no live Firebase connection is used.\n- Covered save/restore normalization, multiplayer writer eligibility, private-card ownership and persistence, event-deck composition, third-skip incapacitation death, and living-player/turn-controller selection.\n- Fixed turn handoff authorization so the outgoing owner can publish the completed transition.\n- Allowed the host to publish host-controlled IRIS turns and route the private event deck to the actual controller.\n- Prevented empty private hands/decks from restoring stale consumed cards.\n- Prevented outgoing clients from overwriting the next player's private hand; private-card and deck updates now use separate owner routing in one atomic Firebase update.\n- Removed revision-based writes that could reject rapid legitimate mutations from the sole eligible writer.\n\nVerification:\n\n- `npm test` - 10 passed, 0 failed\n- `node --check game.js`\n- `node --check game-logic.js`\n- `node --check sync.js`\n- `node --check test/game-logic.test.js`\n- `git diff --check origin/main...HEAD`\n- Clean worktree\n\nCommit: `cfd597f` (`Fix multiplayer state regression edge cases`)",
+      "attachment": "active/add-regression-test-harness/add-automated-regression-test-harness-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:04.933Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    },
+    {
+      "timestamp": "2026-07-30T16:17:13.820Z",
+      "type": "updated",
+      "content": "Task updated"
+    }
+  ],
+  "agent_id": "coder",
+  "pipeline": [
+    "reviewer"
+  ],
+  "pipeline_step": 1,
+  "routing": {
+    "rationale": "Free execution inherits Tasker's model (claude-claude-sonnet-5)",
+    "shape": "Maintenance",
+    "decided_by": "free-execution-driver",
+    "decided_at": "2026-07-28T22:14:30.322Z",
+    "auto_router_mode": null,
+    "floors": {
+      "minContextWindow": 0,
+      "requireVision": false,
+      "toolCallingFloor": "model_dependent",
+      "category": "everyday_coding"
+    },
+    "relaxed_floors": false,
+    "preflight": {
+      "dispatchable": true,
+      "severity": "ok",
+      "reasons": []
+    },
+    "parity": {
+      "provider": "codex",
+      "tier": "first_party_cli",
+      "systemPromptMode": "folded_into_prompt",
+      "toolSurface": "reliable",
+      "mcpSupported": true,
+      "permissionsModel": "skip_flag",
+      "resumeSupported": true,
+      "multimodal": true,
+      "notes": null
+    }
+  },
+  "agent_attempt_id": "attempt-05063c7b7f4ae025aaa2",
+  "agent_startup_started_at": "2026-07-28T22:15:28.094Z",
+  "agent_session_confirmed_run_id": "agent-add-regression-test-harness",
+  "agent_session_confirmed_at": "2026-07-28T22:15:28.904Z",
+  "role_docs": [
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/add-regression-test-harness.md",
+      "direction": "self",
+      "at": "2026-07-28T22:22:45.707Z"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "id": "cleanup-ghost-multiplayer-sessions",
+  "status": "done",
+  "priority": "high",
+  "label": "Bug",
+  "title": "Clean up ghost multiplayer connections and lobby entries",
+  "description": "Fix connection lifecycle handling in sync.js:28-30, 134-140 and 165-179. Register Firebase onDisconnect cleanup for connection and lobby records, avoid creating unrecoverable identities on every reload, clean up old records during reconnect/leave, and define room expiry/pruning. Verify reload, tab close, network loss, and graceful leave do not permanently occupy slots or leave ghost lobby players.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:48.333Z",
+  "updated_at": "2026-07-30T16:17:00.770Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-28T21:48:48.333Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-28T21:52:56.405Z",
+      "type": "updated",
+      "content": "Roles assigned: coder ? reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T22:25:17.548Z",
+      "type": "moved",
+      "content": "Moved from backlog to ready"
+    },
+    {
+      "timestamp": "2026-07-28T22:53:34.334Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T22:57:41.994Z",
+      "type": "output",
+      "content": "Implemented ghost-session cleanup in `sync.js`.\n\n- Reuses a per-tab client identity across reloads so reconnects reclaim the existing record.\n- Registers Firebase `onDisconnect().remove()` operations for both connection and lobby entries, and rearms them after network reconnects.\n- Restores presence only when the original player slot remains available, preventing duplicate slot ownership.\n- Removes presence and cancels pending disconnect handlers on graceful leave, session clearing, and room switching.\n- Gives hosted rooms a 24-hour expiry and prunes expired rooms during join/reconnect.\n- Added regression coverage for disconnect cleanup, reload identity reuse, graceful slot release, and expired-room pruning.\n\nValidation: `npm test` - 19/19 passing; `git diff --check` clean.",
+      "attachment": "active/cleanup-ghost-multiplayer-sessions/clean-up-ghost-multiplayer-connections-and-lobby-e.md"
+    },
+    {
+      "timestamp": "2026-07-28T22:57:52.344Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T23:02:26.399Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T23:08:37.258Z",
+      "type": "output",
+      "content": "## Review result\n\nNo unresolved findings.\n\nCorrected two high-severity lifecycle defects in the submitted implementation:\n\n- Armed Firebase disconnect cleanup before an atomic join can publish a slot, eliminating the failure/tab-close window that could leave an unprotected connection record.\n- Split stable reload identity from a per-page presence key. Reconnect now atomically replaces stale connection records and prunes stale lobby records, so an old page's delayed `onDisconnect` cannot delete the reloaded page's live presence.\n- Scoped disconnect handles during cleanup so an asynchronous old-session cleanup cannot cancel a newly attached session.\n- Extended regression coverage to verify claims are protected before publication and delayed old-page disconnect cleanup leaves the reloaded connection and lobby entry intact.\n\nValidation:\n\n- `npm test` - 19/19 passing\n- `node --check sync.js` - passing\n- `git diff --check` - clean\n- Worktree - clean\n\nCommit: `9320aef Fix reload-safe multiplayer presence cleanup`",
+      "attachment": "active/cleanup-ghost-multiplayer-sessions/clean-up-ghost-multiplayer-connections-and-lobby-e-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:07.114Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    },
+    {
+      "timestamp": "2026-07-30T16:17:00.770Z",
+      "type": "updated",
+      "content": "Task updated"
+    }
+  ],
+  "epic": "epic-multiplayer-sync-reliabi",
+  "agent_id": "coder",
+  "pipeline": [
+    "reviewer"
+  ],
+  "pipeline_step": 1,
+  "routing": {
+    "rationale": "Free execution inherits Tasker's model (claude-claude-sonnet-5)",
+    "decided_by": "free-execution-driver",
+    "decided_at": "2026-07-28T23:02:18.752Z",
+    "auto_router_mode": null
+  },
+  "agent_attempt_id": "attempt-3a8450199a2a4c2428b4",
+  "agent_startup_started_at": "2026-07-28T23:02:26.371Z",
+  "agent_session_confirmed_run_id": "agent-cleanup-ghost-multiplayer-sessions",
+  "agent_session_confirmed_at": "2026-07-28T23:02:27.184Z",
+  "role_docs": [
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/cleanup-ghost-multiplayer-sessions.md",
+      "direction": "self",
+      "at": "2026-07-28T23:08:37.258Z"
+    }
+  ]
+}

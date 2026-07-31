@@ -1,0 +1,11 @@
+{
+  "chatId": "aefec50b",
+  "title": "Assess the in-review tasks",
+  "summary": null,
+  "agents": [
+    "reviewer"
+  ],
+  "threadPath": ".tasker/chats/aefec50b",
+  "createdAt": "2026-07-30T16:56:41.622Z",
+  "updatedAt": "2026-07-30T17:09:52.665Z"
+}

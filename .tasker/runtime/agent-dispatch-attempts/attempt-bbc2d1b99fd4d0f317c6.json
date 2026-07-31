@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "attemptId": "attempt-bbc2d1b99fd4d0f317c6",
+  "status": "failed",
+  "spawnRequestedAt": "2026-07-30T17:32:16.060Z",
+  "updatedAt": "2026-07-30T18:07:59.258Z",
+  "taskId": "reconcile-npm-audit-after-firebase-tools-reintro-3849",
+  "runId": "agent-reconcile-npm-audit-after-firebase-tools-reintro-3849",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": "agent",
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 33308,
+    "status": "running"
+  },
+  "agent": {
+    "pid": 24648,
+    "status": "failed",
+    "exitCode": 1,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019fb415-8521-7690-a8f2-e4958da176ac",
+    "waitingSince": "2026-07-30T17:32:16.165Z",
+    "establishedAt": "2026-07-30T17:32:17.398Z"
+  },
+  "stderrTail": "Reading additional input from stdin...\n2026-07-30T17:32:16.440579Z ERROR codex_models_manager::cache: failed to load models cache: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:32:51.157821Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.4 seconds\nOutput:\nConvertFrom-Json : A parameter cannot be found that matches parameter name 'AsHashtable'.\r\nAt line:2 char:63\r\n+ ... ontent -Raw package-lock.json | ConvertFrom-Json -AsHashtable; $lock. ...\r\n+                                                      ~~~~~~~~~~~~\r\n    + CategoryInfo          : InvalidArgument: (:) [ConvertFrom-Json], ParameterBindingException\r\n    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.ConvertFromJsonCommand\r\n \r\nYou cannot call a method on a null-valued expression.\r\nAt line:2 char:77\r\n+ ... sHashtable; $lock.packages.GetEnumerator() | Where-Object { $_.Key -m ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException\r\n    + FullyQualifiedErrorId : InvokeMethodOnNull\r\n \r\n\n2026-07-30T17:32:58.238282Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 1.6 seconds\nOutput:\nsignal@ C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\reconcile-npm-audit-after-firebase-tools-reintro-2f1070664ecd9776\n`-- (empty)\n\n\n2026-07-30T17:33:58.856968Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 2.1 seconds\nOutput:\nsignal@ C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\reconcile-npm-audit-after-firebase-tools-reintro-2f1070664ecd9776\n`-- firebase-tools@15.24.0\n  +-- gaxios@6.7.1\n  | `-- uuid@11.1.1 overridden\n  `-- universal-analytics@0.5.4\n    `-- uuid@14.0.1 invalid: \"11.1.1\" from node_modules/universal-analytics\n\nnpm error code ELSPROBLEMS\nnpm error invalid: uuid@14.0.1 C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\reconcile-npm-audit-after-firebase-tools-reintro-2f1070664ecd9776\\node_modules\\universal-analytics\\node_modules\\uuid\nnpm error A complete log of this run can be found in: C:\\Users\\russp\\AppData\\Local\\npm-cache\\_logs\\2026-07-30T17_33_57_339Z-debug-0.log\n\n2026-07-30T17:34:54.848128Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T17:36:13.694146Z ERROR codex_core::tools::router: error=`\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command '$taskCwd = (Get-Location).Path\n$stdoutFile = New-TemporaryFile\n$stderrFile = New-TemporaryFile\n$serverProcess = $null\nfunction Stop-TaskProcessTree([int]$processId) {\n  $children = @(Get-CimInstance Win32_Process -Filter \"ParentProcessId = $processId\" -ErrorAction SilentlyContinue)\n  foreach ($child in $children) { Stop-TaskProcessTree -processId $child.ProcessId }\n  Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue\n}\ntry {\n  $serverProcess = Start-Process -FilePath '\"'npm.cmd' -ArgumentList 'start' -WorkingDirectory \"'$taskCwd -RedirectStandardOutput $stdoutFile.FullName -RedirectStandardError $stderrFile.FullName -WindowStyle Hidden -PassThru\n  $response = $null\n  for ($attempt = 0; $attempt -lt 40 -and $null -eq $response; $attempt++) {\n    Start-Sleep -Milliseconds 250\n    try { $response = Invoke-WebRequest -Uri '\"'http://127.0.0.1:3000/' -UseBasicParsing -TimeoutSec 2 } catch { }\n  }\n  if (\"'$null -eq $response) { throw '\"'npm start did not become reachable on port 3000' }\n  [pscustomobject]@{ status = \"'$response.StatusCode; contentType = $response.Headers['\"'Content-Type']; hasSignalTitle = (\"'$response.Content -match '\"'<title>SIGNAL</title>') } | ConvertTo-Json\n} finally {\n  if (\"'$null -ne $serverProcess) { Stop-TaskProcessTree -processId $serverProcess.Id }\n  $serverOutput = Get-Content -Raw -LiteralPath $stdoutFile.FullName -ErrorAction SilentlyContinue\n  $serverError = Get-Content -Raw -LiteralPath $stderrFile.FullName -ErrorAction SilentlyContinue\n  if ($serverOutput) { Write-Output $serverOutput }\n  if ($serverError) { Write-Error $serverError }\n  Remove-Item -LiteralPath $stdoutFile.FullName,$stderrFile.FullName -Force -ErrorAction SilentlyContinue\n}'` rejected: blocked by policy\n2026-07-30T17:36:32.658580Z ERROR codex_core::tools::router: error=`\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command '$existingListener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\nif ($existingListener) { throw '\"'Port 3000 was already in use before the npm start smoke test' }\n\"'$taskCwd = (Get-Location).Path\n$npmProcess = Start-Process -FilePath '\"'npm.cmd' -ArgumentList 'start' -WorkingDirectory \"'$taskCwd -WindowStyle Hidden -PassThru\ntry {\n  $response = $null\n  for ($attempt = 0; $attempt -lt 40 -and $null -eq $response; $attempt++) {\n    Start-Sleep -Milliseconds 250\n    try { $response = Invoke-WebRequest -Uri '\"'http://127.0.0.1:3000/' -UseBasicParsing -TimeoutSec 2 } catch { }\n  }\n  if (\"'$null -eq $response) { throw '\"'npm start did not become reachable on port 3000' }\n  [pscustomobject]@{ status = \"'$response.StatusCode; contentType = $response.Headers['\"'Content-Type']; hasSignalTitle = (\"'$response.Content -match '\"'<title>SIGNAL</title>') } | ConvertTo-Json\n} finally {\n  \"'$listener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\n  if ($listener) { Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue }\n  Stop-Process -Id $npmProcess.Id -Force -ErrorAction SilentlyContinue\n}'` rejected: blocked by policy\n2026-07-30T17:36:46.014304Z ERROR codex_core::tools::router: error=Exit code: 124\nWall time: 9.1 seconds\nOutput:\ncommand timed out after 9055 milliseconds\n\n2026-07-30T17:36:52.077383Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 1.1 seconds\nOutput:\n\r\nLocalAddress LocalPort OwningProcess\r\n------------ --------- -------------\r\n::                3000         39292\r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n                                    \r\n\r\n\r\n\n2026-07-30T17:37:07.720437Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 1.2 seconds\nOutput:\n\n2026-07-30T17:37:15.684888Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 1.1 seconds\nOutput:\n\n",
+  "transitions": [
+    {
+      "at": "2026-07-30T17:32:16.060Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-30T17:32:16.069Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-30T17:32:16.085Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 33308
+    },
+    {
+      "at": "2026-07-30T17:32:16.140Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 33308
+    },
+    {
+      "at": "2026-07-30T17:32:16.166Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 24648
+    },
+    {
+      "at": "2026-07-30T17:32:16.171Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-30T17:32:17.399Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-30T18:07:56.773Z",
+      "component": "agent",
+      "state": "stopped",
+      "signal": "user_stop"
+    },
+    {
+      "at": "2026-07-30T18:07:59.258Z",
+      "component": "agent",
+      "state": "failed",
+      "exitCode": 1,
+      "signal": null
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "chatId": "7f1122cd",
+  "title": "Take a look at the full codebase and report anything that",
+  "summary": "Removed Reviewer from the 5 batched tasks (solo deck, incapacitation timing, Inversion Field, dependency updates, dice audio) and created 2 dedicated review tasks — \"Review gameplay rules batch\" and \"Review maintenance batch\" — set to Reviewer only, dependent on their respective implementation tasks completing.\n\n**Board now: 3 Ready, 13 Backlog.** Next: start the first Ready batch (test harness, multiplayer state overwrites, private card leakage) or wait for further instructions?",
+  "agents": [
+    "reviewer"
+  ],
+  "threadPath": ".tasker/chats/7f1122cd",
+  "createdAt": "2026-07-28T21:34:08.148Z",
+  "updatedAt": "2026-07-28T21:55:05.577Z"
+}

@@ -1,0 +1,44 @@
+diff --git a/README.md b/README.md
+index f56c95d3e390c153b71bed4b4eefae920fdfb175..8bdfc126ba189d3e7562b0275767fbed5a59da5e 100644
+--- a/README.md
++++ b/README.md
+@@ -43,16 +43,19 @@ packages are pinned to their patched versions via `overrides` in `package.json`:
+ ```json
+ "overrides": {
+   "brace-expansion": "5.0.9",
+-  "uuid": "11.1.1",
++  "gaxios@6.7.1": {
++    "uuid": "11.1.1"
++  },
+   "@opentelemetry/core": "2.8.0"
+ }
+ ```
+ 
+ With these in place `npm audit` reports **0 vulnerabilities**, while `firebase-tools`
+-stays on the current `15.x` line. `npm test`, `npm run test:rules` (the Java emulator
+-suite), and `npm start` all pass with the overrides applied. If a future
+-`firebase-tools` upgrade adopts these patched versions natively, the `overrides` block
+-can be removed.
++stays on the current `15.x` line. The `uuid` override is limited to the affected
++`gaxios@6.7.1` dependency, leaving packages that require newer `uuid` releases on
++their compatible versions. `npm test`, `npm run test:rules` (the Java emulator suite),
++and `npm start` all pass with the overrides applied. If a future `firebase-tools`
++upgrade adopts these patched versions natively, the `overrides` block can be removed.
+ 
+ *A game of survival, exploration, and eroding trust — where rescue is uncertain, and the greatest threat may be sitting across the table.*
+ 
+diff --git a/package.json b/package.json
+index 9d22cb28b9d934dde6503ceff074242de66a3682..3c1ad47263b343c5f3a6008966f2d94f4eacff62 100644
+--- a/package.json
++++ b/package.json
+@@ -17,7 +17,9 @@
+   },
+   "overrides": {
+     "brace-expansion": "5.0.9",
+-    "uuid": "11.1.1",
++    "gaxios@6.7.1": {
++      "uuid": "11.1.1"
++    },
+     "@opentelemetry/core": "2.8.0"
+   }
+ }

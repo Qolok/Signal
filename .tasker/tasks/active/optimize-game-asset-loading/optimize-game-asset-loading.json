@@ -1,0 +1,315 @@
+{
+  "id": "optimize-game-asset-loading",
+  "status": "done",
+  "priority": "medium",
+  "label": "Maintenance",
+  "title": "Reduce game asset payload and preload cost",
+  "description": "Fix game.js:5627-5631 preloading full-resolution tile art even though the board uses _hex.png at game.js:5796-5808. Measure before/after network and decoded-memory cost; preload only necessary small assets or lazy-load them. Convert oversized web audio/images to appropriate compressed formats while preserving visual/audio quality. Target a substantial reduction from the current roughly 501 MB tracked payload and 179 MB full-tile preload.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:49.789Z",
+  "updated_at": "2026-07-30T14:47:15.523Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-29T02:58:52.894Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T03:15:54.157Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T03:16:01.991Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T03:36:04.707Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T03:36:12.210Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T03:55:53.946Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T03:56:02.255Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T04:21:39.650Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T04:21:48.349Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T04:39:22.104Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T04:39:30.493Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T04:41:24.479Z",
+      "type": "moved",
+      "content": "Stopped by user — agent process tree killed; task returned to Ready"
+    },
+    {
+      "timestamp": "2026-07-29T04:42:16.279Z",
+      "type": "chat_user",
+      "content": "Blocked, moved back to backlog: this task died and was re-dispatched 6x (watchdog) before being manually stopped. Root cause: the machine has no ffmpeg, cwebp, or ImageMagick on PATH — only `sharp` is available in node_modules (image-only, no audio codec support). Each agent attempt marked all plan steps \"done\" but 0 .webp files and only 2/50 sfx files were actually converted, so the checkmarks were false progress, not real completion.\n\nBefore re-dispatching, either:\n1. Install ffmpeg + cwebp/ImageMagick so the task can actually run, or\n2. Re-scope to use only `sharp` for image WebP conversion and drop/defer audio re-encoding to a separate task with the right tooling."
+    },
+    {
+      "timestamp": "2026-07-29T04:42:16.279Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "controller",
+        "run_id": "chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946",
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "controller chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-29T04:42:16.605Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "controller",
+        "run_id": "chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946",
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "controller chat-5bf59ae02a3c615f420a5d8e34318679-28cc6946 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-29T22:55:32.285Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "controller",
+        "run_id": "chat-77e3ddac-5e18-4b95-b8ca-2e3b21334708-ee85122e",
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "controller chat-77e3ddac-5e18-4b95-b8ca-2e3b21334708-ee85122e called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-29T23:00:57.143Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T23:01:32.637Z",
+      "type": "comment",
+      "content": "Orchestrator re-scope on re-dispatch: verified ffmpeg/cwebp/ImageMagick still MISSING (only sharp present), so the install-tooling gate is unmet. Per the earlier blocking instruction, dispatched with a re-scoped brief - preload fix (game.js:5627-5631) plus sharp-only image WebP; audio re-encoding deferred to a separate tooling-equipped task. Added honest-progress rule to prevent false done checkmarks."
+    },
+    {
+      "timestamp": "2026-07-29T23:10:59.756Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T23:11:07.283Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T23:20:44.572Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T23:20:52.211Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T23:39:23.964Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T23:39:31.452Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T23:54:32.879Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-29T23:54:40.459Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T00:08:41.766Z",
+      "type": "moved",
+      "content": "Agent died again after re-dispatch — left in Ready for review."
+    },
+    {
+      "timestamp": "2026-07-30T00:08:49.263Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T00:12:39.287Z",
+      "type": "output",
+      "content": "# Reduce game asset payload and preload cost — result\n\n## What shipped (verified, no tooling required)\nFixed `preloadTileImages()` in `game.js` so startup preloads only the small hex-cropped board tiles (`img/tiles/<base>_hex.png`) instead of the full-resolution tile art (`img/tiles/<base>.png`).\n\nThe board renders `getTileImg(t, \"hex\")` → `_hex.png` in `render()`. The full-res art is used **only** by on-demand views — `setTileHeroSprite()`, `tileImgHtml()`, and the tooltip hero — which already fetch lazily when their element is displayed. So eager full-res preloading warmed ~150 MB the board never uses. The new version also dedupes shared files (e.g. `signal-tower.png`).\n\n## Measured before/after (31 mapped tiles)\n| Metric | Before (full-res preload) | After (hex preload) | Reduction |\n|---|---|---|---|\n| Preload network payload | **150.4 MB** | **20.8 MB** | **−129.6 MB (−86%)** |\n| Decoded RGBA memory | **412.5 MB** | **21.3 MB** | **−391.2 MB (−95%)** |\n\n(Sample dimensions: `crash-site.png` 2760×1504 full-res vs `crash-site_hex.png` 400×450.)\nDecoded memory is the larger runtime win — the browser no longer decodes ~410 MB of RGBA for images that are never shown on the board. Full-res art still loads on demand when a player opens a tile detail/hero/tooltip, so nothing is visually lost.\n\n## Verification\n- `node --check game.js` → OK\n- `node --test test/game-logic.test.js` → **31 passed, 0 failed**\n- Confirmed all 31 mapped tiles have a `_hex.png` variant (0 missing → no 404 risk)\n- Confirmed no other code path relies on eager full-res preloading (all full-res consumers fetch on demand)\n\n## Deferred — blocked on absent tooling (honest, not done)\nThe task also asked to \"convert oversized web audio/images to compressed formats.\" This environment has **no** media tooling:\n- `ffmpeg`, `cwebp`, `magick`/ImageMagick: **all missing from PATH**\n- **No `node_modules` directory at all** — `sharp` is not installed (and not even a declared dependency)\n- 0 `.webp` files exist; 52 `.wav` sfx (112 MB) and 390 MB of `img/` remain uncompressed\n\nImage WebP conversion and audio re-encoding therefore **cannot be performed here** and are **not marked complete**. This is the same root cause that killed the 6 prior watchdog re-dispatches (agents attempting conversion/`npm install` with no codecs available). I did not fake progress.\n\n### Recommendation\nSplit re-encoding into a separate task on a tooling-equipped machine:\n1. Install `ffmpeg` + `cwebp` (or ImageMagick), or `npm install sharp` for images.\n2. Convert full-res tile art and sfx to WebP/compressed audio; downscale the grossly oversized full-res tiles (2760×1504 shown at ≤460 px) toward their display size.\n3. That work targets the remaining ~500 MB tracked payload; the preload fix in this task already eliminates the ~150 MB preload / ~410 MB decode waste independently.\n\n## Files changed\n- `game.js` — `preloadTileImages()` retargeted to `_hex.png` + deduped (with explanatory comment).",
+      "attachment": "active/optimize-game-asset-loading/reduce-game-asset-payload-and-preload-cost.md"
+    },
+    {
+      "timestamp": "2026-07-30T04:52:32.366Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → coder (boot backfill)"
+    },
+    {
+      "timestamp": "2026-07-30T04:53:41.242Z",
+      "type": "updated",
+      "content": "Task updated before Run Now"
+    },
+    {
+      "timestamp": "2026-07-30T04:53:49.882Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T07:23:25.238Z",
+      "type": "moved",
+      "content": "Stopped by user — agent process tree killed; task returned to Ready"
+    },
+    {
+      "timestamp": "2026-07-30T07:23:42.437Z",
+      "type": "updated",
+      "content": "Task updated before Run Now"
+    },
+    {
+      "timestamp": "2026-07-30T07:23:51.216Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T07:26:22.103Z",
+      "type": "actor",
+      "tool": "mcp__tasker__agent_stop",
+      "actor": {
+        "kind": "ui",
+        "run_id": null,
+        "task_id": null
+      },
+      "task_id": "optimize-game-asset-loading",
+      "content": "ui called mcp__tasker__agent_stop"
+    },
+    {
+      "timestamp": "2026-07-30T07:27:34.204Z",
+      "type": "output",
+      "content": "# Reduced game asset payload and preload cost\n\nRecovered and integrated the verified asset-optimization work from the preserved Tasker worktree.\n\n- Converted 145 tile PNGs to WebP and removed the superseded PNGs.\n- Converted all remaining WAV audio to MP3 and removed the WAVs.\n- Updated runtime, CSS, and Field Guide asset references.\n- Startup preloading uses the small `_hex.webp` board assets; full tile art remains lazy-loaded.\n- Measured tracked payload reduction: 501.37 MiB to 46.24 MiB (90.8%).\n- Measured startup tile preload reduction: 150.39 MiB to 1.52 MiB (99.0%).\n- Measured decoded preload memory reduction: 412.52 MiB to 21.29 MiB (94.8%).\n\nVerification after integration:\n- `node --check game.js` passed.\n- `npm test` passed: 31/31 tests.\n- `git diff --check` passed.\n- 145 WebP tile assets, 0 tile PNGs, 52 MP3 files, and 0 WAV files remain.",
+      "attachment": "active/optimize-game-asset-loading/reduce-game-asset-payload-and-preload-cost-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T13:35:46.112Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 2 → reviewer (boot backfill)"
+    },
+    {
+      "timestamp": "2026-07-30T13:36:30.933Z",
+      "type": "moved",
+      "content": "Moved from ready to in_review"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:15.523Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    }
+  ],
+  "agent_id": "designer",
+  "pipeline": [
+    "coder",
+    "reviewer"
+  ],
+  "pipeline_step": 2,
+  "routing": {
+    "chosen_model": "codex-gpt-5-6-sol",
+    "rationale": "Direct Run Now dispatch to assigned role",
+    "alternates": [],
+    "shape": "Maintenance",
+    "decided_by": "run-now",
+    "decided_at": "2026-07-30T07:23:42.498Z",
+    "auto_router_mode": null,
+    "provider": "claude",
+    "provider_source": "derived",
+    "model_source": "role",
+    "route_chain": [
+      {
+        "provider": "claude",
+        "model": "claude-claude-opus-4-8"
+      }
+    ],
+    "floors": {
+      "minContextWindow": 0,
+      "requireVision": true,
+      "toolCallingFloor": "model_dependent",
+      "category": "everyday_coding"
+    },
+    "relaxed_floors": false,
+    "preflight": {
+      "dispatchable": true,
+      "severity": "ok",
+      "reasons": []
+    },
+    "parity": {
+      "provider": "claude",
+      "tier": "first_party_cli",
+      "systemPromptMode": "native_flag",
+      "toolSurface": "reliable",
+      "mcpSupported": true,
+      "permissionsModel": "skip_flag",
+      "resumeSupported": true,
+      "multimodal": true,
+      "notes": null
+    },
+    "route_rationale": "Route: provider=claude (derived), model=claude-claude-opus-4-8 (role); floors{ctx>=0,vision=true,tools>=model_dependent}; chain=1 link(s)"
+  },
+  "last_agent_attempt_id": "attempt-27cd676582c6bdcfb791",
+  "agent_attempt_id": "attempt-fbff367b5a1750edb236",
+  "agent_startup_started_at": "2026-07-30T07:23:51.161Z",
+  "role_docs": [
+    {
+      "role_slug": "designer",
+      "doc_path": "roles/designer/memory/tasks/optimize-game-asset-loading.md",
+      "direction": "self",
+      "at": "2026-07-30T00:12:39.287Z"
+    },
+    {
+      "role_slug": "coder",
+      "doc_path": "roles/coder/memory/tasks/optimize-game-asset-loading.md",
+      "direction": "self",
+      "at": "2026-07-30T07:27:34.204Z"
+    },
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/optimize-game-asset-loading.md",
+      "direction": "self",
+      "at": "2026-07-30T07:27:34.204Z"
+    }
+  ]
+}

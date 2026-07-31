@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-e1840290867f133aed21",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-28T22:53:34.308Z",
+  "updatedAt": "2026-07-28T22:57:41.372Z",
+  "taskId": "cleanup-ghost-multiplayer-sessions",
+  "runId": "agent-cleanup-ghost-multiplayer-sessions",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 40452,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 10832,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019faaee-f581-73e1-85bc-3cc0e94618f0",
+    "waitingSince": "2026-07-28T22:53:34.391Z",
+    "establishedAt": "2026-07-28T22:53:35.389Z"
+  },
+  "stderrTail": "eir local owner (0.1733ms)\n✔ online public state excludes the deck and every player's private data (0.4123ms)\n✔ private state is owner-targeted and restores only that owner's secrets (0.3994ms)\n✖ multiplayer sync reads only the current owner's private path (1.1836ms)\n✔ local hot-seat saves retain all private cards and future deck order (1.3223ms)\n✔ event deck has stable public/private composition (2.7744ms)\n✔ incapacitated crew die after the third skipped turn (0.1957ms)\n✔ turn ownership advances to the next living player and wraps (0.143ms)\nℹ tests 16\nℹ suites 0\nℹ pass 11\nℹ fail 5\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 162.8512\n\n✖ failing tests:\n\ntest at test\\game-logic.test.js:237:1\n✖ simultaneous joiners atomically claim different player slots (5.4062ms)\n  TypeError: connectionRef.onDisconnect is not a function\n      at _attachPresence (evalmachine.<anonymous>:289:38)\n      at Object.joinGame (evalmachine.<anonymous>:124:11)\n      at async Promise.all (index 0)\n      at async TestContext.<anonymous> (C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\cleanup-ghost-multiplayer-sessions-04b97c969ed4014c\\test\\game-logic.test.js:245:17)\n      at async Test.run (node:internal/test_runner/test:1113:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3)\n\ntest at test\\game-logic.test.js:274:1\n✖ leaving releases an atomically claimed slot for the next joiner (1.1417ms)\n  TypeError: connectionRef.onDisconnect is not a function\n      at _attachPresence (evalmachine.<anonymous>:289:38)\n      at Object.joinGame (evalmachine.<anonymous>:124:11)\n      at async TestContext.<anonymous> (C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\cleanup-ghost-multiplayer-sessions-04b97c969ed4014c\\test\\game-logic.test.js:280:16)\n      at async Test.run (node:internal/test_runner/test:1113:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)\n\ntest at test\\game-logic.test.js:349:1\n✖ restoring a host session guards another player's turn before rendering (2.2022ms)\n  Error: This game room is no longer available.\n      at Object.reconnect (evalmachine.<anonymous>:183:13)\n      at async TestContext.<anonymous> (C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\cleanup-ghost-multiplayer-sessions-04b97c969ed4014c\\test\\game-logic.test.js:361:3)\n      at async Test.run (node:internal/test_runner/test:1113:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)\n\ntest at test\\game-logic.test.js:416:1\n✖ a stale waiting client cannot replace a newer multiplayer revision (1.1389ms)\n  Error: This game room is no longer available.\n      at Object.reconnect (evalmachine.<anonymous>:183:13)\n      at async TestContext.<anonymous> (C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\cleanup-ghost-multiplayer-sessions-04b97c969ed4014c\\test\\game-logic.test.js:425:3)\n      at async Test.run (node:internal/test_runner/test:1113:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)\n\ntest at test\\game-logic.test.js:567:1\n✖ multiplayer sync reads only the current owner's private path (1.1836ms)\n  Error: This game room is no longer available.\n      at Object.reconnect (evalmachine.<anonymous>:183:13)\n      at async TestContext.<anonymous> (C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\cleanup-ghost-multiplayer-sessions-04b97c969ed4014c\\test\\game-logic.test.js:592:3)\n      at async Test.run (node:internal/test_runner/test:1113:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)\n\n2026-07-28T22:55:00.159712Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:55:05.442158Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:55:22.257453Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:55:34.842964Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:55:40.883297Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:55:46.345241Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 1 seconds\nOutput:\n\n> test\n> node --test\n\n✔ simultaneous joiners atomically claim different player slots (5.367ms)\n✔ an atomic join reports a full room without activating the client (1.422ms)\n✔ leaving releases an atomically claimed slot for the next joiner (3.2452ms)\n✔ disconnect cleanup releases connection and lobby records (1.3322ms)\n✔ a page reload reuses its client identity instead of claiming another slot (2.1877ms)\n✔ joining prunes an expired room (1.2801ms)\n✔ normalizes local and Firebase-shaped saved state (0.334ms)\n✔ only the active multiplayer turn owner may write state (0.1838ms)\n✔ restoring a host session guards another player's turn before rendering (3.1577ms)\n✔ viewing another crew member is local UI state and does not publish (1.8724ms)\n✔ a stale waiting client cannot replace a newer multiplayer revision (7.7739ms)\n✔ private event cards are visible only to their local owner (0.1697ms)\n✔ online public state excludes the deck and every player's private data (0.2043ms)\n✔ private state is owner-targeted and restores only that owner's secrets (0.3165ms)\n✖ multiplayer sync reads only the current owner's private path (4.1006ms)\n✔ local hot-seat saves retain all private cards and future deck order (1.8092ms)\n✔ event deck has stable public/private composition (2.7445ms)\n✔ incapacitated crew die after the third skipped turn (0.1542ms)\n✔ turn ownership advances to the next living player and wraps (0.1204ms)\nℹ tests 19\nℹ suites 0\nℹ pass 18\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 178.8227\n\n✖ failing tests:\n\ntest at test\\game-logic.test.js:652:1\n✖ multiplayer sync reads only the current owner's private path (4.1006ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n  + actual - expected\n  \n    [\n  +   'meta',\n      'private/1'\n    ]\n  \n      at TestContext.<anonymous> (C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\cleanup-ghost-multiplayer-sessions-04b97c969ed4014c\\test\\game-logic.test.js:700:10)\n      at async Test.run (node:internal/test_runner/test:1113:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: [ 'meta', 'private/1' ],\n    expected: [ 'private/1' ],\n    operator: 'deepStrictEqual',\n    diff: 'simple'\n  }\n\n2026-07-28T22:55:46.368943Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:55:50.297026Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:55:56.211046Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:56:04.441398Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:56:19.958100Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\cleanup-ghost-multiplayer-sessions-04b97c969ed4014c\\sync.js:\n  // JOIN: connect to an existing game and claim the next open slot (1â€“5)\n  async joinGame(joinCode) {\n    _resetStateTracking();\n2026-07-28T22:56:19.981044Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:56:29.979178Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-28T22:53:34.308Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-28T22:53:34.315Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-28T22:53:34.330Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 40452
+    },
+    {
+      "at": "2026-07-28T22:53:34.375Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 40452
+    },
+    {
+      "at": "2026-07-28T22:53:34.393Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 10832
+    },
+    {
+      "at": "2026-07-28T22:53:34.397Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-28T22:53:35.390Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-28T22:57:41.357Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-28T22:57:41.372Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

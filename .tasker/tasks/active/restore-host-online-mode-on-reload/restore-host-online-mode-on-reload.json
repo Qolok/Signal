@@ -1,0 +1,100 @@
+{
+  "id": "restore-host-online-mode-on-reload",
+  "status": "done",
+  "priority": "high",
+  "label": "Bug",
+  "title": "Restore multiplayer turn guards after host reload",
+  "description": "Fix the host session restore path at game.js:8737-8762 so multiplayer mode and turn ownership are restored before rendering or accepting actions. Remove or consolidate the duplicate _isOnlineMode/Sync.isActive state so the host cannot act during another player's turn after a reload. Add a regression test for restoring as host while currentPlayer is not slot 0.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:48.163Z",
+  "updated_at": "2026-07-30T16:16:27.439Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-28T21:48:48.163Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-28T21:52:56.405Z",
+      "type": "updated",
+      "content": "Roles assigned: coder ? reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T22:13:51.453Z",
+      "type": "moved",
+      "content": "Moved from backlog to ready"
+    },
+    {
+      "timestamp": "2026-07-28T22:13:55.218Z",
+      "type": "moved",
+      "content": "Moved from ready to backlog"
+    },
+    {
+      "timestamp": "2026-07-28T22:25:08.954Z",
+      "type": "moved",
+      "content": "Moved from backlog to ready"
+    },
+    {
+      "timestamp": "2026-07-28T22:40:45.744Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T22:43:05.263Z",
+      "type": "output",
+      "content": "Implemented the host reload turn-guard fix.\n\n- Removed the duplicate `_isOnlineMode` state and made `Sync.isActive()` the single source of truth for multiplayer UI, writes, private state, setup, and action guards.\n- Host reconnect now activates sync synchronously before the restored game renders, so `isMyTurn()` correctly rejects slot 0 when another slot owns the saved turn.\n- Added a regression test for a restored host at slot 0 with `currentPlayer` at slot 2, including reconnect-before-render ordering.\n\nValidation:\n- `npm test` - 13/13 passing\n- `node --check game.js` - passing\n- `git diff --check` - passing",
+      "attachment": "active/restore-host-online-mode-on-reload/restore-multiplayer-turn-guards-after-host-reload.md"
+    },
+    {
+      "timestamp": "2026-07-28T22:43:14.563Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T22:45:51.112Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T22:49:36.092Z",
+      "type": "output",
+      "content": "## Review result\n\nFixed a confirmed turn-guard bypass left in the implementation.\n\n- `Sync.isActive()` remains the single multiplayer-mode source of truth and reconnect activation occurs before the host restore path renders.\n- Added handler-level ownership checks for equipment use and both stasis actions, preventing a reloaded slot-0 host from mutating another player's turn.\n- Disabled the stasis controls when the local client does not own the turn, and hid equipment-use controls from non-owners.\n- Strengthened the regression test so it fails if any host restore render precedes reconnect, while retaining the slot-0 host/currentPlayer-2 case.\n\n## Validation\n\n- Focused restored-host regression: 1/1 passing\n- `npm test`: 16/16 passing\n- `node --check game.js`: passing\n- `node --check sync.js`: passing\n- `git diff --check`: passing",
+      "attachment": "active/restore-host-online-mode-on-reload/restore-multiplayer-turn-guards-after-host-reload-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:18.822Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:27.439Z",
+      "type": "updated",
+      "content": "Task updated"
+    }
+  ],
+  "epic": "epic-multiplayer-sync-reliabi",
+  "agent_id": "coder",
+  "pipeline": [
+    "reviewer"
+  ],
+  "pipeline_step": 1,
+  "routing": {
+    "rationale": "Free execution inherits Tasker's model (claude-claude-sonnet-5)",
+    "decided_by": "free-execution-driver",
+    "decided_at": "2026-07-28T22:45:43.588Z",
+    "auto_router_mode": null
+  },
+  "agent_attempt_id": "attempt-471c3aa96e566b8297eb",
+  "agent_startup_started_at": "2026-07-28T22:45:51.089Z",
+  "agent_session_confirmed_run_id": "agent-restore-host-online-mode-on-reload",
+  "agent_session_confirmed_at": "2026-07-28T22:45:52.159Z",
+  "role_docs": [
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/restore-host-online-mode-on-reload.md",
+      "direction": "self",
+      "at": "2026-07-28T22:49:36.092Z"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-6f60d65549912af905b4",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-30T18:08:13.602Z",
+  "updatedAt": "2026-07-30T18:13:33.113Z",
+  "taskId": "add-content-security-policy-and-security-headers-7858",
+  "runId": "agent-add-content-security-policy-and-security-headers-7858",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 30968,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 26660,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019fb436-6f21-7e93-b0c8-6e1ef29eb192",
+    "waitingSince": "2026-07-30T18:08:13.734Z",
+    "establishedAt": "2026-07-30T18:08:14.426Z"
+  },
+  "stderrTail": "=\"mbtn\" onclick=\"leaveOnlineSetup()\">\r\n+        <button id=\"su-leave\" class=\"mbtn\" data-action=\"leaveOnlineSetup\">\r\n           ← Leave Game\r\n         </button>\r\n         <button\r\n           id=\"su-confirm\"\r\n           class=\"mbtn pri next-btn\"\r\n-          onclick=\"goToSiteBuilder()\"\r\n+          data-action=\"goToSiteBuilder\"\r\n         >\r\n           Confirm Crew\r\n         </button>\r\n@@ -236,7 +256,7 @@\r\n         <div class=\"signal-hdr-icon\"></div>\r\n         <h1 class=\"hlogo\">SIGNAL · ESTABLISH BASE CAMP</h1>\r\n         <span id=\"sbprogress\">0 / 6 placed</span>\r\n-        <span class=\"sbreset\" onclick=\"resetBuilder()\">Reset</span>\r\n+        <span class=\"sbreset\" data-action=\"resetBuilder\">Reset</span>\r\n       </div>\r\n       <div id=\"sbmain\">\r\n         <div id=\"sbsvg-wrap\">\r\n@@ -261,7 +281,7 @@\r\n               <button\r\n                 class=\"sbtn\"\r\n                 style=\"padding: 12px 18px; font-size: 0.72rem\"\r\n-                onclick=\"randomBuilder()\"\r\n+                data-action=\"randomBuilder\"\r\n               >\r\n                 Random Layout\r\n               </button>\r\n@@ -273,7 +293,7 @@\r\n         <button\r\n           class=\"mbtn back-btn\"\r\n           style=\"max-width: 180px; flex-shrink: 0\"\r\n-          onclick=\"backToCrewSetup()\"\r\n+          data-action=\"backToCrewSetup\"\r\n         >\r\n           ← Back\r\n         </button>\r\n@@ -281,7 +301,7 @@\r\n           id=\"sblaunbtn\"\r\n           class=\"mbtn dng next-btn\"\r\n           disabled\r\n-          onclick=\"finalizeGame()\"\r\n+          data-action=\"finalizeGame\"\r\n           style=\"flex: 1\"\r\n         >\r\n           Launch Mission\r\n@@ -309,9 +329,9 @@\r\n             data-tooltip=\"Roll the die to determine how many hexes you can move this turn.\"\r\n             >Roll</span\r\n           >\r\n-          <button class=\"hbtn\" id=\"e7btn\" onclick=\"toggleE7()\">E7</button>\r\n-          <button class=\"hbtn\" onclick=\"openRulebook()\">Field Guide</button>\r\n-          <button class=\"hbtn\" onclick=\"confirmNewGame()\">New Game</button>\r\n+          <button class=\"hbtn\" id=\"e7btn\" data-action=\"toggleE7\">E7</button>\r\n+          <button class=\"hbtn\" data-action=\"openRulebook\">Field Guide</button>\r\n+          <button class=\"hbtn\" data-action=\"confirmNewGame\">New Game</button>\r\n         </div>\r\n       </div>\r\n \r\n@@ -376,7 +396,7 @@\r\n                     type=\"button\"\r\n                     class=\"eq-filt\"\r\n                     id=\"eq-filt-Tool\"\r\n-                    onclick=\"toggleEqFilter('Tool')\"\r\n+                    data-action=\"toggleEqFilter\" data-args='[\"Tool\"]'\r\n                     data-tooltip=\"Filter: Tools\"\r\n                   >\r\n                     <span\r\n@@ -390,7 +410,7 @@\r\n                     type=\"button\"\r\n                     class=\"eq-filt\"\r\n                     id=\"eq-filt-Supply\"\r\n\n2026-07-30T18:09:19.730863Z ERROR codex_core::tools::router: error=`\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command '$taskTmp = Join-Path $env:TEMP '\"'tasker-marked-13.0.3'; if (Test-Path -LiteralPath \"'$taskTmp) { Remove-Item -LiteralPath $taskTmp -Recurse -Force }; New-Item -ItemType Directory -Path $taskTmp | Out-Null; npm pack marked@13.0.3 --pack-destination $taskTmp | Out-Null; tar -xf (Join-Path $taskTmp '\"'marked-13.0.3.tgz') -C \"'$taskTmp; $file = Join-Path $taskTmp '\"'package/marked.min.js'; Get-Item \"'$file | Select-Object FullName,Length; Get-Content $file -TotalCount 3; Get-FileHash $file -Algorithm SHA256 | Select-Object Algorithm,Hash'` rejected: blocked by policy\n2026-07-30T18:10:59.373752Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T18:11:31.199394Z ERROR codex_core::tools::router: error=`\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command '$port = 3037\n$stdout = Join-Path $env:TEMP '\"'tasker-csp-serve.out.log'\n\"'$stderr = Join-Path $env:TEMP '\"'tasker-csp-serve.err.log'\n\"'$proc = Start-Process -FilePath '\"'npx.cmd' -ArgumentList @('--yes','serve','.','--listen',\\\"\"'$port\",'\"'--no-clipboard') -WorkingDirectory (Get-Location).Path -WindowStyle Hidden -PassThru -RedirectStandardOutput \"'$stdout -RedirectStandardError $stderr\ntry {\n  $ready = $false\n  for ($attempt = 0; $attempt -lt 30; $attempt++) {\n    try {\n      $home = Invoke-WebRequest -UseBasicParsing -Uri \"http://localhost:$port/\" -TimeoutSec 2\n      $ready = $true\n      break\n    } catch {\n      Start-Sleep -Milliseconds 250\n    }\n  }\n  if (-not $ready) { throw '\"'serve did not become ready' }\n\n  \"'$csp = [string]$home.Headers['\"'Content-Security-Policy']\n  if (\"'$home.StatusCode -ne 200) { throw \"Unexpected index status $($home.StatusCode)\" }\n  if ($csp -notmatch \"script-src '\"'self' https://www\\\\.gstatic\\\\.com https://www\\\\.google\\\\.com;\\\") { throw \\\"Unexpected script-src: \"'$csp\" }\n  if ($csp -match '\"'cdn\\\\.jsdelivr\\\\.net') { throw 'Live CSP still permits jsDelivr' }\n  if (\"'$csp -notmatch \"frame-ancestors '\"'none'\\\") { throw 'Live CSP lacks frame-ancestors' }\n  if ([string]\"'$home.Headers['\"'X-Content-Type-Options'] -ne 'nosniff') { throw 'nosniff header missing' }\n  if ([string]\"'$home.Headers['\"'Referrer-Policy'] -ne 'no-referrer') { throw 'Referrer-Policy header missing' }\n  if ([string]\"'$home.Headers['\"'X-Frame-Options'] -ne 'DENY') { throw 'X-Frame-Options header missing' }\n\n  \"'$marked = Invoke-WebRequest -UseBasicParsing -Uri \"http://localhost:$port/vendor/marked-13.0.3.min.js\" -TimeoutSec 5\n  if ($marked.StatusCode -ne 200 -or $marked.Content -notmatch '\"'marked v13\\\\.0\\\\.3') { throw 'Vendored marked build did not load' }\n  if ([string]\"'$marked.Headers['\"'Content-Type'] -notmatch 'javascript') { throw \\\"Unexpected marked MIME: \"'$($marked.Headers['\"'Content-Type'])\\\" }\n\n  \"'$audio = Invoke-WebRequest -UseBasicParsing -Uri \"http://localhost:$port/sfx/activate.mp3\" -TimeoutSec 5\n  if ($audio.StatusCode -ne 200 -or [string]$audio.Headers['\"'Content-Type'] -notmatch 'audio') { throw 'Same-origin audio did not load with an audio MIME type' }\n\n  \"'$sync = Invoke-WebRequest -UseBasicParsing -Uri \"http://localhost:$port/sync.js\" -TimeoutSec 5\n  if ($sync.StatusCode -ne 200 -or $sync.Content -notmatch '\"'firebaseio\\\\.com') { throw 'Online multiplayer client script did not load' }\n\n  [pscustomobject]@{\n    index = \"'$home.StatusCode\n    marked = \"$($marked.StatusCode) $($marked.Headers['\"'Content-Type'])\\\"\n    audio = \\\"\"'$($audio.StatusCode) $($audio.Headers['\"'Content-Type'])\\\"\n    multiplayer_script = \\\"\"'$($sync.StatusCode) $($sync.Headers['\"'Content-Type'])\\\"\n    csp = \"'$csp\n    nosniff = [string]$home.Headers['\"'X-Content-Type-Options']\n    referrer_policy = [string]\"'$home.Headers['\"'Referrer-Policy']\n    x_frame_options = [string]\"'$home.Headers['\"'X-Frame-Options']\n  } | ConvertTo-Json -Depth 3\n} finally {\n  \"'$listeners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique\n  foreach ($listenerPid in $listeners) { Stop-Process -Id $listenerPid -Force -ErrorAction SilentlyContinue }\n  Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue\n}'` rejected: blocked by policy\n2026-07-30T18:11:41.079204Z ERROR codex_core::tools::router: error=Exit code: 124\nWall time: 5.1 seconds\nOutput:\ncommand timed out after 5065 milliseconds\n\n2026-07-30T18:12:45.489836Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.5 seconds\nOutput:\nui-events.js:7:// `script-src` with NO `'unsafe-inline'`, which blocks inline event-handler\r\ngame.js:9059:  const online = !!window.Sync?.isActive();\r\nwarning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'serve.json', LF will be replaced by CRLF the next time Git touches it\nInline script allowance or inline event handler remains\r\nAt line:6 char:28\r\n+ ... DE -eq 0) { throw 'Inline script allowance or inline event handler re ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : OperationStopped: (Inline script a...handler remains:String) [], RuntimeException\r\n    + FullyQualifiedErrorId : Inline script allowance or inline event handler remains\r\n \r\n\n",
+  "transitions": [
+    {
+      "at": "2026-07-30T18:08:13.602Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-30T18:08:13.615Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-30T18:08:13.636Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 30968
+    },
+    {
+      "at": "2026-07-30T18:08:13.700Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 30968
+    },
+    {
+      "at": "2026-07-30T18:08:13.736Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 26660
+    },
+    {
+      "at": "2026-07-30T18:08:13.741Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-30T18:08:14.429Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-30T18:13:33.099Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-30T18:13:33.113Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

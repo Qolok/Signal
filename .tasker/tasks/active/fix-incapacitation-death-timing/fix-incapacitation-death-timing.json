@@ -1,0 +1,114 @@
+{
+  "id": "fix-incapacitation-death-timing",
+  "status": "done",
+  "priority": "high",
+  "label": "Bug",
+  "title": "Fix incapacitation death timing off-by-one",
+  "description": "Align game.js:4206-4231 with docs/FieldGuide.md:70-72. A player must die after two consecutive rounds at zero Health, not three, and the displayed counter/log must match actual timing. Add turn-sequence tests including recovery by MedPack/Stretcher resetting the counter and fragment drops on death.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:48.872Z",
+  "updated_at": "2026-07-30T16:16:47.600Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-28T21:48:48.872Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-28T21:52:56.405Z",
+      "type": "updated",
+      "content": "Roles assigned: coder ? reviewer"
+    },
+    {
+      "timestamp": "2026-07-29T01:06:18.648Z",
+      "type": "moved",
+      "content": "Moved from backlog to ready"
+    },
+    {
+      "timestamp": "2026-07-29T01:06:54.133Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T01:11:01.768Z",
+      "type": "output",
+      "content": "## Fix: incapacitation death timing off-by-one\n\n**Root cause:** `game-logic.js` `incapacitationAfterSkippedTurn()` marked a player as dead when their skipped-round counter reached `>= 3`, but the in-game log/UI text and `docs/FieldGuide.md:70-72` both say death happens **after 2 consecutive rounds** at 0 Health. The displayed counter (`\"INCAPACITATED (N/2 rounds)\"` in `game.js`) already assumed a max of 2, so the counter/log and actual death timing were mismatched by one round.\n\n**Fix:** changed the death condition in `game-logic.js` from `incapacitated >= 3` to `incapacitated >= 2` (one-line change). No other logic needed adjustment — the death/fragment-drop handling and the MedPack/Stretcher/Medical Bay recovery paths in `game.js` (which already reset `player.incapacitated = 0` on heal) were verified correct as-is.\n\n**Tests added/updated in `test/game-logic.test.js`:**\n- Updated the existing off-by-one test to assert death on the *second* consecutive skipped turn (was asserting death on the third).\n- New pure-logic test verifying a MedPack/Stretcher-style reset (`incapacitated = 0`) makes a later relapse start the consecutive-round count over instead of resuming the old count.\n- New `advanceTurn`-level tests (extracting the real `advanceTurn` function from `game.js` into a sandboxed `vm` context, following the existing `buildEventDeck` test pattern) that:\n  - Drive two real turn cycles and confirm a player dies exactly on the second consecutive incapacitated round, with the correct `has DIED.` log and Radio Fragments dropped onto the tile they died on (`droppedFragments` updated, log message, and the player's `radioFragments` reset to 0).\n  - Confirm that healing (Health restored + `incapacitated` reset to 0, mirroring the real MedPack/Stretcher/Medical Bay code paths) before the second incapacitated round prevents death and lets the turn proceed normally.\n\n**Verification:** `npm test` — all 24 tests pass (20 previously existing + 4 new/updated for this fix).",
+      "attachment": "active/fix-incapacitation-death-timing/fix-incapacitation-death-timing-off-by-one.md"
+    },
+    {
+      "timestamp": "2026-07-29T01:11:10.551Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → reviewer"
+    },
+    {
+      "timestamp": "2026-07-29T01:13:41.473Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T01:16:47.610Z",
+      "type": "output",
+      "content": "## Result: already fixed on this branch — verified, no code changes needed\n\n**Investigation**\n\n`docs/FieldGuide.md:70-72` specifies: *\"After 2 consecutive rounds of incapacitation, a player dies... Radio Fragments... left behind at their final location.\"*\n\nI checked the current implementation against that spec:\n\n- `game-logic.js:178-183` (`incapacitationAfterSkippedTurn`): increments `player.incapacitated` each time the player's turn comes up while still at 0 Health, and returns `died: incapacitated >= 2`. This means the player is skipped once (counter=1, alive), then dies on the *second* consecutive skipped round (counter=2) — matching the spec's \"after 2 consecutive rounds,\" not three.\n- `game.js` `advanceTurn()` (now ~line 4233-4266, was 4206-4231 in the task description before an unrelated line shift): calls this helper when the incoming player is at 0 Health, sets `player.incapacitated` from the result, kills the player and drops Radio Fragments onto their tile (`dt.droppedFragments += dying.radioFragments`, then zeroes `radioFragments`) when `died` is true, and otherwise logs `\"<name> is INCAPACITATED (<n>/2 rounds). Turn skipped.\"` — the displayed counter matches the actual death threshold (2).\n- Recovery paths (`MedPack` use at game.js:3202, `Stretcher` use at game.js:3267, and Medical Bay auto-heal at game.js:2995) all reset `player.incapacitated = 0` on heal, so a relapse to 0 Health afterward restarts the consecutive-round count from zero rather than resuming.\n\n**Root cause of the discrepancy**: git history shows this exact bug was already fixed in commit `533087c` (\"...incapacitation fix...\"), which is an ancestor of this task's dispatch baseline (`10e924b`). The off-by-one no longer exists in the branch this task was dispatched against.\n\n**Tests**: `test/game-logic.test.js` already contains full turn-sequence coverage for this behavior:\n- `incapacitated crew die after two consecutive skipped turns` — unit-tests the logic helper's death threshold.\n- `MedPack/Stretcher recovery resets the incapacitation counter` — verifies a relapse after recovery restarts the count instead of resuming.\n- `advanceTurn: consecutive incapacitated rounds kill on the second round and drop fragments` — full `advanceTurn()` integration test: round 1 skip (alive, counter=1, log shows \"INCAPACITATED (1/2 rounds)\"), round 2 death with fragments dropped onto the tile and log message `\"<name> has DIED.\"` plus the fragment-drop log.\n- `advanceTurn: recovery before the second incapacitated round prevents death` — MedPack/Stretcher-style heal between rounds prevents death and resumes normal turn flow.\n\n**Verification performed this session**:\n- `node --check game.js` and `node --check game-logic.js` — both pass (no syntax errors).\n- `npm test` — 25/25 tests pass, including all 4 incapacitation/death-timing tests listed above.\n\nNo source changes were required — the working tree is clean and the behavior, display text, and test coverage all already satisfy the task's requirements.",
+      "attachment": "active/fix-incapacitation-death-timing/fix-incapacitation-death-timing-off-by-one-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:10.698Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:47.600Z",
+      "type": "updated",
+      "content": "Task updated"
+    }
+  ],
+  "epic": "epic-field-guide-compliance",
+  "agent_id": "coder",
+  "pipeline": [
+    "reviewer"
+  ],
+  "pipeline_step": 1,
+  "routing": {
+    "rationale": "Free execution inherits Tasker's model (claude-claude-sonnet-5)",
+    "shape": "Bug",
+    "decided_by": "free-execution-driver",
+    "decided_at": "2026-07-29T01:13:34.188Z",
+    "auto_router_mode": null,
+    "floors": {
+      "minContextWindow": 0,
+      "requireVision": false,
+      "toolCallingFloor": "model_dependent",
+      "category": "everyday_coding"
+    },
+    "relaxed_floors": true,
+    "preflight": {
+      "dispatchable": true,
+      "severity": "ok",
+      "reasons": []
+    },
+    "parity": {
+      "provider": "claude",
+      "tier": "first_party_cli",
+      "systemPromptMode": "native_flag",
+      "toolSurface": "reliable",
+      "mcpSupported": true,
+      "permissionsModel": "skip_flag",
+      "resumeSupported": true,
+      "multimodal": true,
+      "notes": null
+    }
+  },
+  "agent_attempt_id": "attempt-9a31ce2157e6a0f2b9f8",
+  "agent_startup_started_at": "2026-07-29T01:13:41.446Z",
+  "agent_session_confirmed_run_id": "agent-fix-incapacitation-death-timing",
+  "agent_session_confirmed_at": "2026-07-29T01:13:43.055Z",
+  "role_docs": [
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/fix-incapacitation-death-timing.md",
+      "direction": "self",
+      "at": "2026-07-29T01:16:47.610Z"
+    }
+  ]
+}

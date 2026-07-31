@@ -1,0 +1,90 @@
+{
+  "id": "implement-solo-event-deck-rules",
+  "status": "done",
+  "priority": "high",
+  "label": "Bug",
+  "title": "Remove private event cards in solo games",
+  "description": "Implement the Field Guide solo rule from docs/FieldGuide.md:47-49. buildEventDeck at game.js:780-926 must receive or derive the human player count and exclude every pub:false card for a one-human game while preserving correct multiplayer and IRIS deck composition. Add tests for deck size, public/private counts, radio fragments, and IRIS corruption cards across representative player counts.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:48.656Z",
+  "updated_at": "2026-07-30T16:16:37.407Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-28T21:48:48.656Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-28T21:52:56.405Z",
+      "type": "updated",
+      "content": "Roles assigned: coder ? reviewer"
+    },
+    {
+      "timestamp": "2026-07-29T01:06:21.361Z",
+      "type": "moved",
+      "content": "Moved from backlog to ready"
+    },
+    {
+      "timestamp": "2026-07-29T01:11:09.054Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T01:13:34.156Z",
+      "type": "output",
+      "content": "## Summary\n\nImplemented the Field Guide Solo Play rule (docs/FieldGuide.md:47-49): \"Remove all Private Event cards from the deck.\"\n\n### Changes\n\n**game.js**\n- `buildEventDeck()` now takes a `humanPlayerCount` parameter. When it equals `1` (solo), the internal `add()` helper skips every card with `pub === false`, so no Private Event card ever enters the deck. Public cards (yields, hazards, narrative, IRIS threat) are unaffected, and radio-fragment cards (`rf: true`) are always public so they still appear.\n- The deck-composition sanity check (`console.warn` guard) now compares against `SignalGameLogic.expectedEventDeckComposition(addSynth, humanPlayerCount)` so it validates correctly in both solo and multiplayer modes.\n- `newGame()` now calls `buildEventDeck(names.length)` — `names` is the human player list built before IRIS is appended, so this correctly derives the human player count regardless of whether IRIS is added.\n\n**game-logic.js**\n- `expectedEventDeckComposition(withSynth, humanPlayerCount)` gained a second parameter. When `humanPlayerCount === 1` it returns `{ total: 51, public: 51, private: 0, irisThreat }` (no private cards); otherwise it returns the original `{ total: 80, public: 51, private: 29, irisThreat }`. `irisThreat` is unaffected by player count — IRIS's 2 threat cards are public and appear whenever `addSynth` is true, in both solo and multiplayer.\n\n### Tests (test/game-logic.test.js)\n- Updated the existing composition test to extract `buildEventDeck(humanPlayerCount)` (new signature) and exercise multiplayer counts (2, 3, 4 humans) with and without IRIS.\n- Added a new test `solo play (1 human) removes all private event cards, multiplayer keeps them` covering representative player counts (1 solo, 2, 4) crossed with `addSynth` true/false, asserting:\n  - deck composition matches `expectedEventDeckComposition` exactly\n  - solo decks have zero private cards and no `pub === false` card ever appears (deck size 51)\n  - multiplayer decks retain all 29 private cards (deck size 80)\n  - both Radio Fragment cards (`rf: true`) survive in every mode, including solo\n  - IRIS corruption cards appear only when `addSynth` is true (2 cards), are always public, and are present in solo as well as multiplayer\n\n### Verification\n- `node --test test/game-logic.test.js` — all 25 tests pass, including the 2 new/updated event-deck tests.\n- `node --test` (full suite) — 25/26 pass; the sole failure (`test/database-rules.test.js`) is pre-existing and unrelated: it fails with `Cannot find module '@firebase/rules-unit-testing'` because that dependency isn't installed in this environment (confirmed via `git status`/`git diff` — that file was not touched).\n",
+      "attachment": "active/implement-solo-event-deck-rules/remove-private-event-cards-in-solo-games.md"
+    },
+    {
+      "timestamp": "2026-07-29T01:13:46.868Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → reviewer"
+    },
+    {
+      "timestamp": "2026-07-29T01:16:54.937Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T01:19:49.547Z",
+      "type": "output",
+      "content": "## Review Verdict: APPROVED — no defects found\n\n### What was verified\n\n**Rule implementation (`game.js:780-938`)**\n- `buildEventDeck(humanPlayerCount)` correctly derives `solo = humanPlayerCount === 1` and the `add()` helper skips any card with `pub === false` when solo, so every Private Event card (resource, competing-objective, and psychological groups — 29 cards total) is excluded from a 1-human deck. Matches Field Guide 47-49 (\"Remove all Private Event cards from the deck. All other rules apply unchanged.\").\n- Public cards (yield, hazard, narrative, radio fragments `rf: true`, and IRIS threat `irisCorruption: true`) are unaffected by the solo flag and remain in the deck.\n- `newGame()` calls `buildEventDeck(names.length)` at `game.js:1516`, and `names` is the human-player-names array built *before* IRIS is pushed onto `players` (confirmed at `game.js:1424-1516`), so `humanPlayerCount` correctly excludes IRIS in every code path — solo, solo+IRIS, and full multiplayer.\n- `buildEventDeck` is the sole production call site (`grep` confirmed) — no other caller needed updating for the new signature.\n- `loadGame()`/`receiveRemoteState()` restore a previously-built `evtDeck` from saved state rather than rebuilding it, so no restore path is affected by the signature change.\n- Manual arithmetic check of the `add()` counts confirms: non-solo public=51/private=29/total=80 (both `addSynth` true and false, since the yield-card counts are already balanced against the 2 IRIS threat cards); solo public=51/private=0/total=51. Matches `expectedEventDeckComposition`.\n\n**`expectedEventDeckComposition` (`game-logic.js:171-176`)**\n- New `humanPlayerCount` parameter returns `{total:51, public:51, private:0, irisThreat}` for solo and the original 80/51/29 split otherwise; `irisThreat` (2 when `addSynth`, else 0) is independent of player count, correctly reflecting that IRIS's threat cards are public and always present when IRIS is in the game, solo included.\n\n**Tests (`test/game-logic.test.js:940-1007`)**\n- `buildEventDeckFor` extraction correctly slices from the `buildEventDeck(humanPlayerCount)` declaration through its closing `}` (bounded by the following `// Note: The Event Cards` comment) — verified the slice boundary is exact, no truncation/overreach.\n- Existing composition test extended to multiplayer counts (2, 3, 4) × addSynth (true/false).\n- New test covers representative counts (1 solo, 2, 4) × addSynth (true/false), asserting: exact composition match, zero private cards / no `pub===false` card / deck size 51 in solo, 29 private / deck size 80 in multiplayer, both radio-fragment cards always present, and IRIS corruption cards present only with `addSynth`, always public, in both solo and multiplayer.\n- This covers all four dimensions the task asked for: deck size, public/private counts, radio fragments, IRIS corruption cards, across representative player counts.\n\n### Test run\n- `node --test test/game-logic.test.js`: 25/25 pass, including both event-deck tests.\n- `node --test` (full suite): 25/26 pass. The one failure (`test/database-rules.test.js`) is a pre-existing, unrelated environment issue — `Cannot find module '@firebase/rules-unit-testing'` — confirmed that dependency is simply not installed in this worktree; the file is untouched by this change.\n\n### Other checks performed (no issues found)\n- Every event card in `EVENT_CARDS`'s `buildEventDeck` has an explicit `pub: true|false` — no card silently falls through the `pub` check via `undefined`.\n- Private-card-only mechanics (`trackSignalArray`/`soloRescueActive`, `rfExtraction`/`rfExtractionActive`, `keep`) have no other code path that assumes a private card will always be drawn — they're purely reactive to a card draw, so their absence in solo decks is safe and requires no additional guarding.\n\nNo changes requested.",
+      "attachment": "active/implement-solo-event-deck-rules/remove-private-event-cards-in-solo-games-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:14.480Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:37.407Z",
+      "type": "updated",
+      "content": "Task updated"
+    }
+  ],
+  "epic": "epic-field-guide-compliance",
+  "agent_id": "coder",
+  "pipeline": [
+    "reviewer"
+  ],
+  "pipeline_step": 1,
+  "routing": {
+    "rationale": "Free execution inherits Tasker's model (claude-claude-sonnet-5)",
+    "decided_by": "free-execution-driver",
+    "decided_at": "2026-07-29T01:16:47.642Z",
+    "auto_router_mode": null
+  },
+  "agent_attempt_id": "attempt-2e36fbf7fe93ad493201",
+  "agent_startup_started_at": "2026-07-29T01:16:54.912Z",
+  "agent_session_confirmed_run_id": "agent-implement-solo-event-deck-rules",
+  "agent_session_confirmed_at": "2026-07-29T01:16:56.506Z",
+  "role_docs": [
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/implement-solo-event-deck-rules.md",
+      "direction": "self",
+      "at": "2026-07-29T01:19:49.547Z"
+    }
+  ]
+}

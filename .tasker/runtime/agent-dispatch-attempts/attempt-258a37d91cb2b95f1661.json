@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-258a37d91cb2b95f1661",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-28T21:57:24.189Z",
+  "updatedAt": "2026-07-28T22:01:39.413Z",
+  "taskId": "add-regression-test-harness",
+  "runId": "agent-add-regression-test-harness",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 2900,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 26500,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019faabb-87f8-7bd1-95c4-ec46ba717a5c",
+    "waitingSince": "2026-07-28T21:57:24.363Z",
+    "establishedAt": "2026-07-28T21:57:24.819Z"
+  },
+  "stderrTail": "Reading additional input from stdin...\n2026-07-28T21:57:40.674153Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:57:45.874708Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:57:50.437996Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:57:56.513836Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:58:01.563401Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:58:18.644696Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:59:14.497469Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\add-regression-test-harness-219ffc299711c087\\README.md:\n*A game of survival, exploration, and eroding trust â€” where rescue is uncertain, and the greatest threat may be sitting across the table.*\n2026-07-28T21:59:14.519813Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:59:19.164460Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:59:37.721146Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T21:59:47.594965Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:00:10.926987Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:00:20.647904Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in C:\\Users\\russp\\AppData\\Local\\Temp\\tasker-task-worktrees\\72e53c15871c\\add-regression-test-harness-219ffc299711c087\\game.js:\n  let next = (G.currentPlayer + 1) % G.players.length,\n    tries = 0;\n  while (!G.players[next].alive && tries++ < G.players.length)\n    next = (next + 1) % G.players.length;\n2026-07-28T22:00:51.753368Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:00:56.762132Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:01:02.808253Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:01:08.421238Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:01:13.797335Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:01:19.560945Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:01:24.716134Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:01:36.555128Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-28T21:57:24.189Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-28T21:57:24.196Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-28T21:57:24.297Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 2900
+    },
+    {
+      "at": "2026-07-28T21:57:24.342Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 2900
+    },
+    {
+      "at": "2026-07-28T21:57:24.365Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 26500
+    },
+    {
+      "at": "2026-07-28T21:57:24.369Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-28T21:57:24.820Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-28T22:01:39.399Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-28T22:01:39.413Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-c7c52b4897f8b5c4d3e7",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-28T22:40:45.720Z",
+  "updatedAt": "2026-07-28T22:43:04.621Z",
+  "taskId": "restore-host-online-mode-on-reload",
+  "runId": "agent-restore-host-online-mode-on-reload",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 39076,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 6660,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019faae3-3b68-77b0-adce-a98761a9607e",
+    "waitingSince": "2026-07-28T22:40:45.797Z",
+    "establishedAt": "2026-07-28T22:40:46.791Z"
+  },
+  "stderrTail": "Reading additional input from stdin...\n2026-07-28T22:40:46.032528Z ERROR codex_models_manager::cache: failed to load models cache: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:42:47.433568Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:42:53.229982Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T22:43:01.247211Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-28T22:40:45.720Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-28T22:40:45.727Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-28T22:40:45.741Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 39076
+    },
+    {
+      "at": "2026-07-28T22:40:45.782Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 39076
+    },
+    {
+      "at": "2026-07-28T22:40:45.798Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 6660
+    },
+    {
+      "at": "2026-07-28T22:40:45.802Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-28T22:40:46.792Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-28T22:43:04.607Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-28T22:43:04.621Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

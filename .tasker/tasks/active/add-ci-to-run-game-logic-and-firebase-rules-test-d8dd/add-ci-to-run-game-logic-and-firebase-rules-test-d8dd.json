@@ -1,0 +1,91 @@
+{
+  "id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+  "title": "Add CI to run game-logic and Firebase rules tests on every push",
+  "description": "No CI exists, so the new regression harness (npm test, 31/31) and the emulator-based Firebase rules tests (npm run test:rules) can silently rot and were never verified end-to-end in this review. Add a CI workflow (e.g. GitHub Actions) that on every push/PR runs `npm ci`, `npm test`, and `npm run test:rules` against the Firebase emulator (firebase-tools is already a devDependency), and runs `npm audit` as a reported (non-blocking) step. Fail the build on test failures. Document the badge/status and how to run the same checks locally. This also closes the review gap that test:rules was never executed.",
+  "status": "done",
+  "priority": "high",
+  "label": "Maintenance",
+  "agent_id": "coder",
+  "deps": [
+    "persist-all-in-review-task-work-to-main-and-prun-fb51"
+  ],
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-30T14:22:23.183Z",
+  "updated_at": "2026-07-30T17:05:15.332Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-30T14:22:23.183Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:23.183Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T15:54:47.148Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T15:57:57.147Z",
+      "type": "output",
+      "content": "## Added CI to run game-logic and Firebase rules tests on every push\n\nCreated a GitHub Actions workflow that runs the full test suite on every push and pull request, and documented the badge plus how to reproduce the checks locally.\n\n### Files changed\n\n- **`.github/workflows/ci.yml`** (new) — CI workflow.\n- **`README.md`** — added the CI badge and a local-checks section.\n\n### Workflow (`.github/workflows/ci.yml`)\n\nTriggers on `push` and `pull_request`. Single `ubuntu-latest` job with least-privilege `permissions: contents: read`:\n\n1. `actions/checkout@v4`\n2. `actions/setup-node@v4` (Node 20, npm cache keyed off `package-lock.json`)\n3. `actions/setup-java@v4` (Temurin JDK 17) — the Firebase Realtime Database emulator is a Java process\n4. `npm ci`\n5. `npm test` — game-logic regression suite (**blocking**)\n6. `npm run test:rules` — Firebase database rules suite against the emulator (**blocking**)\n7. `npm audit` — **reported, non-blocking** via `continue-on-error: true`\n\nTest failures fail the build; the audit step surfaces advisories without blocking.\n\n### README documentation\n\n- Added a status badge linking to the workflow: `https://github.com/Qolok/Signal/actions/workflows/ci.yml/badge.svg`.\n- Documented the local equivalents (`npm ci`, `npm test`, `npm run test:rules`, `npm audit`) and noted that `test:rules` boots the emulator and needs a JDK 17+ on PATH but no live Firebase project.\n\n### Verification (run locally in this worktree)\n\n- `npm ci` → 782 packages installed, **0 vulnerabilities**.\n- `npm test` → **31/31 pass**.\n- `npm run test:rules` → emulator booted, **9/9 pass**, script exited code 0. This closes the review gap that `test:rules` had never been executed end-to-end.\n- Workflow YAML parsed successfully: triggers `push`/`pull_request`; steps in order; `npm audit` confirmed `continue-on-error: true`.\n\nNote: `node_modules/` created by `npm ci` is already covered by `.gitignore` and is not part of the change set.",
+      "attachment": "active/add-ci-to-run-game-logic-and-firebase-rules-test-d8dd/add-ci-to-run-game-logic-and-firebase-rules-tests-.md"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:20.224Z",
+      "type": "updated",
+      "content": "Task updated"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.294Z",
+      "type": "chat_user",
+      "content": "Review PASS. .github/workflows/ci.yml triggers on push/PR, uses least-privilege contents:read, runs npm ci with Node 20/JDK 17, blocks on npm test and npm run test:rules, and reports npm audit non-blockingly. README local instructions and badge match. Independent verification after npm ci: npm test 36/36, emulator rules 12/12, npm audit 0."
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.294Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.332Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    }
+  ],
+  "routing": {
+    "chosen_model": "claude-claude-opus-4-8",
+    "rationale": "Direct approved queue dispatch to assigned role",
+    "decided_by": "run-queue",
+    "decided_at": "2026-07-30T15:54:43.340Z",
+    "auto_router_mode": null
+  },
+  "agent_attempt_id": "attempt-c7d79eb18cba91e4b9b5",
+  "agent_startup_started_at": "2026-07-30T15:54:47.098Z",
+  "agent_session_confirmed_run_id": "agent-add-ci-to-run-game-logic-and-firebase-rules-test-d8dd",
+  "agent_session_confirmed_at": "2026-07-30T15:54:49.517Z"
+}

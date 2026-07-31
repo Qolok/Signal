@@ -1,0 +1,85 @@
+{
+  "id": "fix-multiplayer-state-overwrites",
+  "status": "done",
+  "priority": "high",
+  "label": "Bug",
+  "title": "Prevent stale multiplayer clients from overwriting game state",
+  "description": "Fix the shared-state publishing path around game.js:6233-6262, 6292, 6505 and sync.js:115-117. UI-only actions such as viewing crew tabs must never publish game state. Persist/broadcast only explicit gameplay mutations by an authorized actor, and add revision or transaction protection so stale snapshots cannot replace newer state. Include regression tests for a waiting client interacting with local UI while another player advances the game.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:47.876Z",
+  "updated_at": "2026-07-30T16:16:44.352Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-28T21:48:47.876Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-28T21:52:56.405Z",
+      "type": "updated",
+      "content": "Roles assigned: coder ? reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T22:01:47.826Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T22:05:33.369Z",
+      "type": "output",
+      "content": "Implemented stale-state protection for multiplayer saves.\n\n- Crew-tab viewing and remote-state rendering now use local-only UI saves; `viewedPlayer` is excluded from shared state.\n- Shared writes require the existing active-player authorization check and an explicit publish request.\n- Firebase state writes now use an atomic revision transaction, rejecting stale client snapshots.\n- Multiplayer revision tracking resets cleanly across host/join/reconnect/leave sessions.\n- Added regression coverage for stale waiting-client writes and crew-tab interactions.\n\nValidation:\n- `node --check game.js game-logic.js sync.js` (run individually): passed\n- `npm test`: 8/8 passed\n- `git diff --check`: passed",
+      "attachment": "active/fix-multiplayer-state-overwrites/prevent-stale-multiplayer-clients-from-overwriting.md"
+    },
+    {
+      "timestamp": "2026-07-28T22:13:51.780Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → reviewer"
+    },
+    {
+      "timestamp": "2026-07-28T22:22:53.628Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-28T22:31:26.867Z",
+      "type": "output",
+      "content": "## Review outcome\n\nCorrected one high-severity defect in the submitted implementation:\n\n- **High — stale writes were still unconditional.** `sync.js` used an atomic multi-location `update`, but atomicity alone did not compare the client's snapshot revision with the server revision. Replaced it with a room-level Firebase transaction that commits public and private state only when revisions match, increments the revision on success, serializes legitimate local writes, ignores out-of-order reads, and resets tracking safely between sessions.\n\nAlso tightened the publish boundary:\n\n- `updateUI` is now local-only by default; all gameplay publishing callsites explicitly pass `true`.\n- Crew-tab viewing, remote-state rendering, private-card dismissal, and save restoration explicitly remain local-only.\n- The existing active-player authorization check remains required before `Sync.pushState` is reached.\n\nRegression coverage now exercises a waiting client at revision 3 attempting to replace an advanced revision 4 snapshot, verifies the transaction aborts without changing shared state, then verifies a current client and queued legitimate mutations can commit revisions 5 through 7. Static coverage also prevents implicit `updateUI()` publishing from being reintroduced.\n\nNo remaining confirmed defects in the task scope.\n\n## Validation\n\n- `node --check game.js`\n- `node --check game-logic.js`\n- `node --check sync.js`\n- `node --check test/game-logic.test.js`\n- `npm test` — 11/11 passed\n- `git diff --check` — passed",
+      "attachment": "active/fix-multiplayer-state-overwrites/prevent-stale-multiplayer-clients-from-overwriting-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:11.779Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:44.352Z",
+      "type": "updated",
+      "content": "Task updated"
+    }
+  ],
+  "epic": "epic-multiplayer-sync-reliabi",
+  "agent_id": "coder",
+  "pipeline": [
+    "reviewer"
+  ],
+  "pipeline_step": 1,
+  "routing": {
+    "rationale": "Free execution inherits Tasker's model (claude-claude-sonnet-5)",
+    "decided_by": "free-execution-driver",
+    "decided_at": "2026-07-28T22:22:45.725Z",
+    "auto_router_mode": null
+  },
+  "agent_attempt_id": "attempt-37ebe36e68956b3c88cf",
+  "agent_startup_started_at": "2026-07-28T22:22:53.602Z",
+  "agent_session_confirmed_run_id": "agent-fix-multiplayer-state-overwrites",
+  "agent_session_confirmed_at": "2026-07-28T22:22:54.685Z",
+  "role_docs": [
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/fix-multiplayer-state-overwrites.md",
+      "direction": "self",
+      "at": "2026-07-28T22:31:26.867Z"
+    }
+  ]
+}

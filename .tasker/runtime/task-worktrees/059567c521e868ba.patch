@@ -1,0 +1,18 @@
+diff --git a/game.js b/game.js
+index e01f8ce8a54394d7f299125092f5bf62a575df5f..d04184f8e3f91e50a00024045a9e770a3d6422f6 100644
+--- a/game.js
++++ b/game.js
+@@ -22,11 +22,12 @@ function _play(path) {
+ function sfx(name) {
+   const picks = {
+     dice_roll: "dice.wav",
++    dice_land: "plink.wav",
+     move: "pop.wav",
+     card: ["card1.wav", "card2.wav", "card3.wav", "card4.wav"],
+     equip: "base-equip.wav",
+     damage: "shock.wav",
+-    heal: "base-medbay.wav",
++    heal: "health-up.wav",
+     signal_success: "signal-yes.wav",
+     signal_fail: "signal-no.wav",
+     fragment: "radio-fragment.wav",

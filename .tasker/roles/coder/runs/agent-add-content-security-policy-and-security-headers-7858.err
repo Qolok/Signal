@@ -1,0 +1,317 @@
+Reading additional input from stdin...
+2026-07-30T18:08:50.742175Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.5 seconds
+Output:
+False
+index.html:32:    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+game.js:7726:  if (typeof marked !== "undefined") return marked.parse(md);
+defd0e0 Tasker dispatch baseline for add-content-security-policy-and-security-headers-7858
+ .github/workflows/ci.yml    |  44 ++++
+ README.md                   |  51 ++++-
+ database.rules.json         |  24 ++-
+ docs/FirebaseSetup.md       |  75 ++++++-
+ game-logic.js               | 497 ++++++++++++++++++++++++++++++++++++++++++++
+ game.js                     | 114 +++++++---
+ index.html                  | 135 +++++++-----
+ package-lock.json           |  88 ++------
+ package.json                |   7 +
+ serve.json                  |  17 ++
+ sync.js                     |  99 ++++++++-
+ test/database-rules.test.js | 118 +++++++++++
+ test/game-logic.test.js     | 474 +++++++++++++++++++++++++++++++++++++++++-
+ ui-events.js                |  78 +++++++
+ 14 files changed, 1640 insertions(+), 181 deletions(-)
+commit defd0e092b26fc25f52b587849416e7ba874c652
+Author:     Tasker <tasker@localhost>
+AuthorDate: Thu Jul 30 14:08:12 2026 -0400
+Commit:     Tasker <tasker@localhost>
+CommitDate: Thu Jul 30 14:08:12 2026 -0400
+
+    Tasker dispatch baseline for add-content-security-policy-and-security-headers-7858
+
+diff --git a/index.html b/index.html
+index a53d5e4..402fdd6 100644
+--- a/index.html
++++ b/index.html
+@@ -2,6 +2,26 @@
+ <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
++    <!--
++      Content-Security-Policy (defense-in-depth for stored-HTML injection).
++      Enumerated origins the game actually loads:
++        script-src : self + Firebase compat SDK (www.gstatic.com) + marked (cdn.jsdelivr.net)
++                     + reCAPTCHA (www.google.com + www.gstatic.com) used by Firebase
++                     App Check when a production reCAPTCHA v3 site key is configured
++        connect-src: self + Firebase Auth/Installations/App Check (*.googleapis.com),
++                     Realtime Database (*.firebaseio.com over https + wss),
++                     auth domain (signal-serve.firebaseapp.com)
++        frame-src  : self + reCAPTCHA challenge iframe (www.google.com)
++        img/media/font-src: self (all art, audio and the favicon are same-origin)
++      No 'unsafe-inline' in script-src — inline handlers were refactored into
++      ui-events.js. 'unsafe-inline' is kept only for style-src (inline style="").
++      frame-ancestors / X-Content-Type-Options / Referrer-Policy are delivered as
++      HTTP headers (see serve.json) since a <meta> CSP cannot carry them.
++    -->
++    <meta
++      http-equiv="Content-Security-Policy"
++      content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net https://www.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://signal-serve.firebaseapp.com; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"
++    />
+     <meta
+       name="viewport"
+       content="width=device-width, initial-scale=1.0, user-scalable=no"
+@@ -25,7 +45,7 @@
+             <input
+               type="checkbox"
+               id="e7guidance-toggle"
+-              onchange="toggleGuidance()"
++              data-change="toggleGuidance"
+             />
+             <span class="e7toggle-track"
+               ><span class="e7toggle-thumb"></span
+@@ -34,7 +54,7 @@
+           </label>
+         </div>
+         <div class="e7sub">SHIP COMPUTER</div>
+-        <button class="e7close back-btn" onclick="toggleE7()">✕</button>
++        <button class="e7close back-btn" data-action="toggleE7">✕</button>
+       </div>
+       <div id="e7log"></div>
+       <div id="e7prompt"></div>
+@@ -71,10 +91,10 @@
+         </div>
+         <div id="e7-intro-msg" class="e7-screen-msg"></div>
+         <div class="sbox-footer">
+-          <button class="sbtn secondary next-btn" onclick="showCrewSetup()">
++          <button class="sbtn secondary next-btn" data-action="showCrewSetup">
+             Local Game
+           </button>
+-          <button class="sbtn next-btn" onclick="showOnlineLobby()">
++          <button class="sbtn next-btn" data-action="showOnlineLobby">
+             Online Game
+           </button>
+         </div>
+@@ -103,7 +123,7 @@
+         <!-- Host: show join code -->
+         <div id="lobby-hosting" style="display: none">
+           <div class="lobby-code-label">Your join code</div>
+-          <div class="lobby-code" id="lobby-code-display">------</div>
++          <div class="lobby-code" id="lobby-code-display">--------</div>
+           <div class="lobby-code-hint">
+             Share this with up to 5 other players.
+           </div>
+@@ -115,39 +135,39 @@
+           <input
+             id="lobby-code-input"
+             class="lobby-input"
+-            maxlength="6"
+-            placeholder="ABC123"
+-            oninput="this.value = this.value.toUpperCase()"
+-            onkeydown="if (event.key === 'Enter') lobbyJoinConnect();"
++            maxlength="8"
++            placeholder="ABCD2345"
++            data-input="upperCaseInput"
++            data-keydown="lobbyJoinEnter"
+           />
+           <div id="lobby-join-status" class="lobby-status"></div>
+         </div>
+ 
+         <!-- Footers: one per panel, pinned to bottom of card -->
+         <div id="lobby-footer-sel" class="sbox-footer" style="display: none">
+-          <button class="sbtn next-btn" onclick="lobbyHost()">
++          <button class="sbtn next-btn" data-action="lobbyHost">
+             Host a Game
+           </button>
+-          <button class="sbtn next-btn" onclick="lobbyJoinMode()">
++          <button class="sbtn next-btn" data-action="lobbyJoinMode">
+             Join a Game
+           </button>
+         </div>
+         <div id="lobby-footer-host" class="sbox-footer" style="display: none">
+-          <button class="sbtn secondary back-btn" onclick="lobbyBack()">
++          <button class="sbtn secondary back-btn" data-action="lobbyBack">
+             ← Back
+           </button>
+-          <button class="sbtn next-btn" onclick="enterOnlineCrewSetup()">
++          <button class="sbtn next-btn" data-action="enterOnlineCrewSetup">
+             Continue →
+           </button>
+         </div>
+         <div id="lobby-footer-join" class="sbox-footer" style="display: none">
+-          <button class="sbtn secondary back-btn" onclick="lobbyBack()">
++          <button class="sbtn secondary back-btn" data-action="lobbyBack">
+             ← Back
+           </button>
+           <button
+             class="sbtn next-btn"
+             id="lobby-join-btn"
+-            onclick="lobbyJoinConnect()"
++            data-action="lobbyJoinConnect"
+           >
+             Connect
+           </button>
+@@ -189,7 +209,7 @@
+                   <input
+                     type="checkbox"
+                     id="addSynthCbx"
+-                    onchange="toggleSynth(this.checked)"
++                    data-change="toggleSynthFromEl"
+                   />
+                   <span
+                     >Add IRIS to crew<span class="synth-subtext"
+@@ -214,16 +234,16 @@
+         </div>
+       </div>
+       <div id="sufooter">
+-        <button id="su-back" class="mbtn back-btn" onclick="backToIntro()">
++        <button id="su-back" class="mbtn back-btn" data-action="backToIntro">
+           ← Back
+         </button>
+-        <button id="su-leave" class="mbtn" onclick="leaveOnlineSetup()">
++        <button id="su-leave" class="mbtn" data-action="leaveOnlineSetup">
+           ← Leave Game
+         </button>
+         <button
+           id="su-confirm"
+           class="mbtn pri next-btn"
+-          onclick="goToSiteBuilder()"
++          data-action="goToSiteBuilder"
+         >
+           Confirm Crew
+         </button>
+@@ -236,7 +256,7 @@
+         <div class="signal-hdr-icon"></div>
+         <h1 class="hlogo">SIGNAL · ESTABLISH BASE CAMP</h1>
+         <span id="sbprogress">0 / 6 placed</span>
+-        <span class="sbreset" onclick="resetBuilder()">Reset</span>
++        <span class="sbreset" data-action="resetBuilder">Reset</span>
+       </div>
+       <div id="sbmain">
+         <div id="sbsvg-wrap">
+@@ -261,7 +281,7 @@
+               <button
+                 class="sbtn"
+                 style="padding: 12px 18px; font-size: 0.72rem"
+-                onclick="randomBuilder()"
++                data-action="randomBuilder"
+               >
+                 Random Layout
+               </button>
+@@ -273,7 +293,7 @@
+         <button
+           class="mbtn back-btn"
+           style="max-width: 180px; flex-shrink: 0"
+-          onclick="backToCrewSetup()"
++          data-action="backToCrewSetup"
+         >
+           ← Back
+         </button>
+@@ -281,7 +301,7 @@
+           id="sblaunbtn"
+           class="mbtn dng next-btn"
+           disabled
+-          onclick="finalizeGame()"
++          data-action="finalizeGame"
+           style="flex: 1"
+         >
+           Launch Mission
+@@ -309,9 +329,9 @@
+             data-tooltip="Roll the die to determine how many hexes you can move this turn."
+             >Roll</span
+           >
+-          <button class="hbtn" id="e7btn" onclick="toggleE7()">E7</button>
+-          <button class="hbtn" onclick="openRulebook()">Field Guide</button>
+-          <button class="hbtn" onclick="confirmNewGame()">New Game</button>
++          <button class="hbtn" id="e7btn" data-action="toggleE7">E7</button>
++          <button class="hbtn" data-action="openRulebook">Field Guide</button>
++          <button class="hbtn" data-action="confirmNewGame">New Game</button>
+         </div>
+       </div>
+ 
+@@ -376,7 +396,7 @@
+                     type="button"
+                     class="eq-filt"
+                     id="eq-filt-Tool"
+-                    onclick="toggleEqFilter('Tool')"
++                    data-action="toggleEqFilter" data-args='["Tool"]'
+                     data-tooltip="Filter: Tools"
+                   >
+                     <span
+@@ -390,7 +410,7 @@
+                     type="button"
+                     class="eq-filt"
+                     id="eq-filt-Supply"
+
+2026-07-30T18:09:19.730863Z ERROR codex_core::tools::router: error=`"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$taskTmp = Join-Path $env:TEMP '"'tasker-marked-13.0.3'; if (Test-Path -LiteralPath "'$taskTmp) { Remove-Item -LiteralPath $taskTmp -Recurse -Force }; New-Item -ItemType Directory -Path $taskTmp | Out-Null; npm pack marked@13.0.3 --pack-destination $taskTmp | Out-Null; tar -xf (Join-Path $taskTmp '"'marked-13.0.3.tgz') -C "'$taskTmp; $file = Join-Path $taskTmp '"'package/marked.min.js'; Get-Item "'$file | Select-Object FullName,Length; Get-Content $file -TotalCount 3; Get-FileHash $file -Algorithm SHA256 | Select-Object Algorithm,Hash'` rejected: blocked by policy
+2026-07-30T18:10:59.373752Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5
+2026-07-30T18:11:31.199394Z ERROR codex_core::tools::router: error=`"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$port = 3037
+$stdout = Join-Path $env:TEMP '"'tasker-csp-serve.out.log'
+"'$stderr = Join-Path $env:TEMP '"'tasker-csp-serve.err.log'
+"'$proc = Start-Process -FilePath '"'npx.cmd' -ArgumentList @('--yes','serve','.','--listen',\""'$port",'"'--no-clipboard') -WorkingDirectory (Get-Location).Path -WindowStyle Hidden -PassThru -RedirectStandardOutput "'$stdout -RedirectStandardError $stderr
+try {
+  $ready = $false
+  for ($attempt = 0; $attempt -lt 30; $attempt++) {
+    try {
+      $home = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:$port/" -TimeoutSec 2
+      $ready = $true
+      break
+    } catch {
+      Start-Sleep -Milliseconds 250
+    }
+  }
+  if (-not $ready) { throw '"'serve did not become ready' }
+
+  "'$csp = [string]$home.Headers['"'Content-Security-Policy']
+  if ("'$home.StatusCode -ne 200) { throw "Unexpected index status $($home.StatusCode)" }
+  if ($csp -notmatch "script-src '"'self' https://www\\.gstatic\\.com https://www\\.google\\.com;\") { throw \"Unexpected script-src: "'$csp" }
+  if ($csp -match '"'cdn\\.jsdelivr\\.net') { throw 'Live CSP still permits jsDelivr' }
+  if ("'$csp -notmatch "frame-ancestors '"'none'\") { throw 'Live CSP lacks frame-ancestors' }
+  if ([string]"'$home.Headers['"'X-Content-Type-Options'] -ne 'nosniff') { throw 'nosniff header missing' }
+  if ([string]"'$home.Headers['"'Referrer-Policy'] -ne 'no-referrer') { throw 'Referrer-Policy header missing' }
+  if ([string]"'$home.Headers['"'X-Frame-Options'] -ne 'DENY') { throw 'X-Frame-Options header missing' }
+
+  "'$marked = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:$port/vendor/marked-13.0.3.min.js" -TimeoutSec 5
+  if ($marked.StatusCode -ne 200 -or $marked.Content -notmatch '"'marked v13\\.0\\.3') { throw 'Vendored marked build did not load' }
+  if ([string]"'$marked.Headers['"'Content-Type'] -notmatch 'javascript') { throw \"Unexpected marked MIME: "'$($marked.Headers['"'Content-Type'])\" }
+
+  "'$audio = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:$port/sfx/activate.mp3" -TimeoutSec 5
+  if ($audio.StatusCode -ne 200 -or [string]$audio.Headers['"'Content-Type'] -notmatch 'audio') { throw 'Same-origin audio did not load with an audio MIME type' }
+
+  "'$sync = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:$port/sync.js" -TimeoutSec 5
+  if ($sync.StatusCode -ne 200 -or $sync.Content -notmatch '"'firebaseio\\.com') { throw 'Online multiplayer client script did not load' }
+
+  [pscustomobject]@{
+    index = "'$home.StatusCode
+    marked = "$($marked.StatusCode) $($marked.Headers['"'Content-Type'])\"
+    audio = \""'$($audio.StatusCode) $($audio.Headers['"'Content-Type'])\"
+    multiplayer_script = \""'$($sync.StatusCode) $($sync.Headers['"'Content-Type'])\"
+    csp = "'$csp
+    nosniff = [string]$home.Headers['"'X-Content-Type-Options']
+    referrer_policy = [string]"'$home.Headers['"'Referrer-Policy']
+    x_frame_options = [string]"'$home.Headers['"'X-Frame-Options']
+  } | ConvertTo-Json -Depth 3
+} finally {
+  "'$listeners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+  foreach ($listenerPid in $listeners) { Stop-Process -Id $listenerPid -Force -ErrorAction SilentlyContinue }
+  Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+}'` rejected: blocked by policy
+2026-07-30T18:11:41.079204Z ERROR codex_core::tools::router: error=Exit code: 124
+Wall time: 5.1 seconds
+Output:
+command timed out after 5065 milliseconds
+
+2026-07-30T18:12:45.489836Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.5 seconds
+Output:
+ui-events.js:7:// `script-src` with NO `'unsafe-inline'`, which blocks inline event-handler
+game.js:9059:  const online = !!window.Sync?.isActive();
+warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'serve.json', LF will be replaced by CRLF the next time Git touches it
+Inline script allowance or inline event handler remains
+At line:6 char:28
++ ... DE -eq 0) { throw 'Inline script allowance or inline event handler re ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Inline script a...handler remains:String) [], RuntimeException
+    + FullyQualifiedErrorId : Inline script allowance or inline event handler remains
+ 
+

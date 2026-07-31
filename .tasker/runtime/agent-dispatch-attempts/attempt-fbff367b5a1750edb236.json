@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "attemptId": "attempt-fbff367b5a1750edb236",
+  "status": "failed",
+  "spawnRequestedAt": "2026-07-30T07:23:51.161Z",
+  "updatedAt": "2026-07-30T07:26:22.275Z",
+  "taskId": "optimize-game-asset-loading",
+  "runId": "agent-optimize-game-asset-loading",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": "agent",
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 564,
+    "status": "running"
+  },
+  "agent": {
+    "pid": 39164,
+    "status": "failed",
+    "exitCode": 1,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "failed",
+    "sessionId": "019fb15f-243c-7391-a1ab-eff4e231afd4",
+    "establishedAt": "2026-07-30T07:23:51.208Z",
+    "waitingSince": "2026-07-30T07:23:51.299Z",
+    "failure": "process_exited_before_session"
+  },
+  "stderrTail": "Reading additional input from stdin...\n2026-07-30T07:24:53.695281Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T07:24:59.484952Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T07:25:10.920980Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T07:25:27.353749Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.2 seconds\nOutput:\nAt line:2 char:1021\r\n+ ... treams[0].channels;Bits=$meta.streams[0].bits_per_sample} } | Format- ...\r\n+                                                                 ~\r\nAn empty pipe element is not allowed.\r\n    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException\r\n    + FullyQualifiedErrorId : EmptyPipeElement\r\n \r\n\n2026-07-30T07:25:27.467691Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T07:25:40.659383Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T07:25:58.264018Z ERROR codex_core::tools::router: error=Exit code: 1\nWall time: 0.2 seconds\nOutput:\nAt line:2 char:984\r\n+ ... ($ssim -match 'All:([0-9.]+)'){$matches[1]}else{'n/a'}} } } | Format- ...\r\n+                                                                 ~\r\nAn empty pipe element is not allowed.\r\n    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException\r\n    + FullyQualifiedErrorId : EmptyPipeElement\r\n \r\n\n2026-07-30T07:25:58.387437Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-30T07:26:18.623659Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-30T07:23:51.161Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-30T07:23:51.173Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-30T07:23:51.197Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 564
+    },
+    {
+      "at": "2026-07-30T07:23:51.210Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-30T07:23:51.271Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 564
+    },
+    {
+      "at": "2026-07-30T07:23:51.300Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 39164
+    },
+    {
+      "at": "2026-07-30T07:23:51.305Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-30T07:26:22.100Z",
+      "component": "agent",
+      "state": "stopped",
+      "signal": "user_stop"
+    },
+    {
+      "at": "2026-07-30T07:26:22.275Z",
+      "component": "agent",
+      "state": "failed",
+      "exitCode": 1,
+      "signal": null
+    }
+  ]
+}

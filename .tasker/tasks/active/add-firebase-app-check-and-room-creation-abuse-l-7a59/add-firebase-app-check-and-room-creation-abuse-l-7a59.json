@@ -1,0 +1,166 @@
+{
+  "id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+  "title": "Add Firebase App Check and room-creation abuse limits",
+  "description": "The hardened database rules require auth != null but do not prevent an authenticated client from spamming room creation or brute-forcing room codes. Add Firebase App Check (attestation) so only the real game client can talk to the Realtime Database, and add abuse controls on room creation: rate-limit rooms per uid, enforce the existing expiresAt pruning so abandoned rooms are cleaned, and make room codes high-enough entropy that enumeration via the auth-gated read rule is impractical. Document setup (App Check provider, keys) alongside the existing Firebase rules deployment docs. Add emulator rule tests where practical for the per-uid room limits.",
+  "status": "done",
+  "priority": "medium",
+  "label": "Maintenance",
+  "agent_id": "researcher",
+  "deps": [
+    "persist-all-in-review-task-work-to-main-and-prun-fb51"
+  ],
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-30T14:22:40.561Z",
+  "updated_at": "2026-07-30T18:21:57.568Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-30T14:22:40.561Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:40.561Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:07.234Z",
+      "type": "updated",
+      "content": "Task updated"
+    },
+    {
+      "timestamp": "2026-07-30T16:19:16.285Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T16:30:51.840Z",
+      "type": "output",
+      "content": "# Firebase App Check + room-creation abuse limits\n\nAdded client attestation and per-uid room-creation abuse controls to the Signal\nmultiplayer stack, hardened room codes, enforced expiry pruning, documented the\nsetup, and added emulator rule tests. All unit tests (31) and emulator rule\ntests (12) pass.\n\n## What changed\n\n### 1. Firebase App Check (attestation)\n- **`index.html`** — loads `firebase-app-check-compat.js` alongside the other\n  Firebase SDKs.\n- **`sync.js`** — `Sync.init()` now calls `_activateAppCheck()` right after\n  `initializeApp` and before authentication. It activates the **reCAPTCHA v3**\n  provider using a public site key (`APP_CHECK_RECAPTCHA_SITE_KEY`, placeholder\n  to be filled per deployment) with automatic token refresh. If the SDK or key\n  is absent it logs a warning and continues, so local play still works.\n- Enforcement itself is a console setting (App Check → Realtime Database →\n  Enforced); documented, including the `localhost` debug-token flow. The\n  `@firebase/rules-unit-testing` emulator does not evaluate App Check, so rule\n  tests are unaffected.\n\n### 2. Per-uid room-creation rate limit (rules-enforced)\n- **`database.rules.json`** — new top-level `hosts/$uid/lastCreated` throttle\n  token that a uid may advance at most once every **15 s**\n  (`newData.val() >= data.val() + 15000`). The `games/$code/meta` create branch\n  now requires that the *same atomic write* set `hosts/$uid/lastCreated` equal to\n  `meta.created`, so room creation and the throttle commit or fail together —\n  a uid cannot reuse a stale token to create many rooms.\n- **`sync.js`** — `hostGame()` now writes room meta and the throttle token in one\n  root-level multi-path `update()`. Constant `ROOM_CREATE_MIN_INTERVAL_MS`\n  mirrors the rules value.\n\n### 3. Expiry pruning enforcement\n- **`database.rules.json`** — a `$code`-level `.write` permits any authenticated\n  client to delete a whole room **only once it has expired**\n  (`!newData.exists() && meta/expiresAt <= now`); live rooms still cannot be\n  deleted wholesale.\n- **`sync.js`** — `joinGame()` and `reconnect()` opportunistically prune (delete)\n  an expired room they land on via `_pruneExpiredRoom()`. A scheduled trusted job\n  (Admin SDK Cloud Function) is still documented for rooms no client revisits.\n\n### 4. Higher-entropy room codes\n- **`sync.js`** — `generateJoinCode()` now draws an **8-character** code (was 6)\n  from the 32-symbol unambiguous alphabet using the **Web Crypto CSPRNG**\n  (`crypto.getRandomValues`) instead of `Math.random()`. That is ~40 bits\n  (32^8 ≈ 1.1×10^12) of unpredictable entropy, making enumeration through the\n  auth-gated `meta` read rule impractical. Falls back to `Math.random` only where\n  Web Crypto is unavailable. The 32-symbol alphabet divides 256 evenly, so\n  `byte % 32` is unbiased (no rejection sampling needed).\n- **`index.html`** / **`game.js`** — join-code input `maxlength`, placeholder,\n  code display, and the length validation updated from 6 to 8 characters.\n\n### 5. Documentation\n- **`docs/FirebaseSetup.md`** — new **App Check** section (reCAPTCHA v3 provider,\n  public site key vs. secret, enforcement toggle, localhost debug token) and an\n  **Abuse controls** section (rate limit + code entropy), plus an updated\n  **Expiry and pruning** section describing the rule-permitted client deletion of\n  expired rooms and the scheduled cleanup for the rest.\n\n### 6. Tests\n- **`test/database-rules.test.js`** — 3 new emulator tests:\n  - room creation requires a matching per-uid throttle token (meta-only writes\n    and mismatched tokens are rejected; the correct atomic write succeeds);\n  - room creation is rate-limited to one per 15 s per uid, is independent across\n    uids, and one uid cannot advance another's token;\n  - expired rooms may be pruned by any authenticated client while live rooms\n    cannot.\n- **`test/game-logic.test.js`** — updated the obsolete\n  \"rejects an expired room without client-side deletion\" test to assert the new\n  intended behavior: joining an expired room rejects **and** prunes it.\n\n## Verification\n- `npm test` → **31 passed, 0 failed**.\n- `npm run test:rules` (Firebase database emulator, Java) → **12 passed,\n  0 failed** (the `permission_denied` log lines are the expected `assertFails`\n  cases).\n\n## Deployment notes / follow-ups (require console/project access, out of repo scope)\n- Register the web app under **App Check** with reCAPTCHA v3, put the real site\n  key in `APP_CHECK_RECAPTCHA_SITE_KEY`, and switch RTDB enforcement to\n  **Enforced** after confirming attestation metrics.\n- Deploy the updated rules (`npm run deploy:rules`) and client together — the new\n  `hosts/$uid` coupling means an old client (single meta write) can no longer\n  create rooms.\n- Add a scheduled Admin SDK cleanup to delete expired `/games` children and stale\n  `hosts/$uid` tokens that no client revisits.\n- The 15 s interval and 8-char code length are tunable constants (`sync.js` +\n  `database.rules.json` must stay in sync for the interval).\n",
+      "attachment": "active/add-firebase-app-check-and-room-creation-abuse-l-7a59/add-firebase-app-check-and-room-creation-abuse-lim.md"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.567Z",
+      "type": "chat_user",
+      "content": "Review RETURN - High security defect in database.rules.json:10,63. The throttle limits updates to hosts/$uid/lastCreated, but room creation merely checks that the existing token equals meta.created; it cannot require that the token changed in the same atomic write. Emulator reproduction confirmed one token can create ROOMAAAA and then immediately create ROOMBBBB with the same created value and no token update, allowing unlimited rooms for up to the expiry window. Bind the token to one unique room (for example {created, roomCode} and require roomCode === $code), update hostGame(), and add a regression test proving token reuse for a second code is denied."
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.567Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.598Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T17:12:50.428Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T17:18:21.401Z",
+      "type": "output",
+      "content": "# Fixed reusable room-creation throttle tokens\n\nThe per-uid throttle token is now an object containing `created` and `roomCode`. Database rules require both values to match the room metadata and `$code`, while retaining the 15-second timestamp advance guard. This prevents an accepted token for `ROOMAAAA` from authorizing `ROOMBBBB`.\n\n## Changes\n\n- `database.rules.json`: changed `hosts/$uid/lastCreated` from a scalar to the validated `{created, roomCode}` shape; room creation checks both fields, including `roomCode === $code`.\n- `sync.js`: `hostGame()` writes the room-bound token in the existing atomic root update.\n- `test/database-rules.test.js`: updated existing throttle fixtures and added the exact replay regression proving a token accepted for `ROOMAAAA` cannot create `ROOMBBBB` without advancing/rebinding the token.\n- `docs/FirebaseSetup.md`: documented the room binding and replay protection.\n\n## Verification\n\n- `npm test`: 36 passed, 0 failed.\n- `npm run test:rules`: 13 passed, 0 failed; the new replay regression passed.\n- `git diff --check`: passed.",
+      "attachment": "active/add-firebase-app-check-and-room-creation-abuse-l-7a59/add-firebase-app-check-and-room-creation-abuse-lim-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.548Z",
+      "type": "chat_user",
+      "content": "Review PASS. The throttle token now binds {created, roomCode}; room creation requires both values to match metadata and $code. The exact prior replay attack is covered and denied. Independent emulator run passes 13/13, including token reuse rejection; npm test passes 39/39."
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.548Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.568Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-firebase-app-check-and-room-creation-abuse-l-7a59",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_move"
+    }
+  ],
+  "routing": {
+    "chosen_model": "claude-claude-opus-4-8",
+    "rationale": "Model explicitly set on agent (claude-claude-opus-4-8)",
+    "alternates": [],
+    "shape": "Maintenance",
+    "decided_by": "explicit-role",
+    "decided_at": "2026-07-30T17:12:48.837Z",
+    "auto_router_mode": null,
+    "provider": "claude",
+    "provider_source": "derived",
+    "model_source": "role",
+    "route_chain": [
+      {
+        "provider": "claude",
+        "model": "claude-claude-opus-4-8"
+      }
+    ],
+    "floors": {
+      "minContextWindow": 0,
+      "requireVision": false,
+      "toolCallingFloor": "model_dependent",
+      "category": "everyday_coding"
+    },
+    "relaxed_floors": false,
+    "preflight": {
+      "dispatchable": true,
+      "severity": "ok",
+      "reasons": []
+    },
+    "parity": {
+      "provider": "claude",
+      "tier": "first_party_cli",
+      "systemPromptMode": "native_flag",
+      "toolSurface": "reliable",
+      "mcpSupported": true,
+      "permissionsModel": "skip_flag",
+      "resumeSupported": true,
+      "multimodal": true,
+      "notes": null
+    },
+    "route_rationale": "Route: provider=claude (derived), model=claude-claude-opus-4-8 (role); floors{ctx>=0,vision=false,tools>=model_dependent}; chain=1 link(s)"
+  },
+  "agent_attempt_id": "attempt-3fa1ad45866d8fb23b5d",
+  "agent_startup_started_at": "2026-07-30T17:12:50.401Z",
+  "agent_session_confirmed_run_id": "agent-add-firebase-app-check-and-room-creation-abuse-l-7a59",
+  "agent_session_confirmed_at": "2026-07-30T17:12:51.485Z"
+}

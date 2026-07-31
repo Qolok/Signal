@@ -1,0 +1,123 @@
+{
+  "id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+  "title": "Persist all in-review task work to main and prune stale worktrees",
+  "description": "CRITICAL/process. All 14 in-review tasks' output currently exists only as uncommitted working-tree state on main: 9 modified files, ~200 untracked new assets (webp/mp3), and 195 tracked deletions (old PNG/WAV). Nothing is committed and no history entry references any fix — a single `git reset --hard`/`git checkout .` destroys every task's work at once. Commit the working tree in coherent, reviewable chunks (logic/security fixes, test harness + game-logic.js, Firebase rules, asset conversion) with clear messages, verify `npm test` (31/31) still passes against the committed tree, and confirm index.html/game.js asset references resolve to the committed files. Then prune the 17 stale `optimize-game-asset-loading` and `update-vulnerable-dev-dependencies` worktrees under Temp/tasker-task-worktrees via `git worktree prune` and branch cleanup. Do not sign off any in-review task until its work is committed.",
+  "status": "done",
+  "priority": "high",
+  "label": "Maintenance",
+  "agent_id": "coder",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-30T14:22:09.711Z",
+  "updated_at": "2026-07-30T17:05:15.253Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-30T14:22:09.711Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:09.711Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T14:37:57.066Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T14:48:58.241Z",
+      "type": "output",
+      "content": "## Persisted all in-review work to `main` and pruned stale worktrees\n\nAll previously-uncommitted in-review output on `main` (9 modified files, 195 new WebP/MP3 assets, 195 deleted PNG/WAV, plus 6 new untracked files) is now committed in four coherent, reviewable chunks. Nothing was lost; `.tasker/` board data was deliberately left untracked and never staged.\n\n### Commits (on `main`, atop baseline `18f94d7`)\n1. `6d07e7a` **chore(assets): convert art to WebP and audio to MP3** — add 145 `img/**.webp` + 50 `sfx/*.mp3`, remove 145 PNG + 50 WAV, update `style.css` and `docs/FieldGuide.md` references.\n2. `d28f6cf` **test: add deterministic game-logic module and Node test harness** — new `game-logic.js` (shared `SignalGameLogic` module), `test/game-logic.test.js` (31 tests), `test/database-rules.test.js`, `package.json`/`package-lock.json` (test + rules dev-deps and scripts), `README.md`, and `index.html` wiring (loads `game-logic.js` + `firebase-auth-compat`).\n3. `d8be371` **fix(game): logic and security fixes, use shared rules module** — `game.js` routes turn-ownership, incapacitation/death, inversion-field swaps, event-deck building and identity normalization through `game-logic.js`, and points art/audio at the WebP/MP3 assets.\n4. `3ce27f0` **feat(firebase): lock down Realtime Database with auth-gated rules** — `sync.js` (anonymous auth, presence + onDisconnect cleanup, serialized/transactional writes, owner-private state, room TTL), `database.rules.json` (default-deny, auth-gated, slot/host/TTL validation), `firebase.json`, `docs/FirebaseSetup.md`, and `.gitignore` (emulator debug logs).\n\n### Verification\n- `npm test` → **31 passing / 0 failing** against the committed tree.\n- `git status` clean except the intentionally-untracked `.tasker/`.\n- `git fsck` reports no errors.\n- Asset references resolve: `style.css`, `game.js`, `index.html`, `docs/FieldGuide.md` point only to committed files. Remaining `.png` references are the intentionally-kept `img/crew/*.png` portraits and `img/screens/*` (not part of the conversion), all tracked.\n\n### Worktree / branch pruning\n- Removed all **16** stale `optimize-game-asset-loading-*` (14) and `update-vulnerable-dev-dependencies-*` (2) worktrees and force-deleted their branches. Their only commits were auto-generated `Tasker dispatch baseline` / `isolated snapshot` scaffolding (old pre-conversion state), not deliverables — the real task output is what is now committed on `main`.\n- `git worktree prune` run; `git worktree list` now shows only `main` and this task's own worktree. No `optimize`/`update` branches remain.\n- One leftover **empty** directory (`optimize-game-asset-loading-e7c1d13af7627a4f`, its `.git` link already broken before removal) could not be deleted from disk — Windows reports it busy (OS handle lock). It is de-registered and holds no data; it can be removed once the lock clears. Two out-of-scope `fix-dice-landing-audio-mapping-*` directories (never registered worktrees) were left untouched.\n\nNo in-review task should be signed off elsewhere until its corresponding work above is confirmed; all such work is now committed.",
+      "attachment": "active/persist-all-in-review-task-work-to-main-and-prun-fb51/persist-all-in-review-task-work-to-main-and-prune-.md"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:13.504Z",
+      "type": "updated",
+      "content": "Task updated"
+    },
+    {
+      "timestamp": "2026-07-30T17:04:52.421Z",
+      "type": "chat_user",
+      "content": "Review PASS. Verified commits 6d07e7a, d28f6cf, d8be371, and 3ce27f0 are present on main; current npm test passes 36/36; converted asset references resolve with remaining PNG references limited to intentionally retained crew/screens assets; no stale optimize-game-asset-loading or update-vulnerable-dev-dependencies branches/worktrees remain. The only extra worktree is the active CSP follow-up, outside this cleanup scope."
+    },
+    {
+      "timestamp": "2026-07-30T17:04:52.421Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.253Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "persist-all-in-review-task-work-to-main-and-prun-fb51",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    }
+  ],
+  "routing": {
+    "chosen_model": "claude-claude-opus-4-8",
+    "rationale": "Model explicitly set on agent (claude-claude-opus-4-8)",
+    "alternates": [],
+    "shape": "Maintenance",
+    "decided_by": "explicit-role",
+    "decided_at": "2026-07-30T14:37:20.953Z",
+    "auto_router_mode": null,
+    "provider": "claude",
+    "provider_source": "derived",
+    "model_source": "role",
+    "route_chain": [
+      {
+        "provider": "claude",
+        "model": "claude-claude-opus-4-8"
+      }
+    ],
+    "floors": {
+      "minContextWindow": 0,
+      "requireVision": false,
+      "toolCallingFloor": "model_dependent",
+      "category": "everyday_coding"
+    },
+    "relaxed_floors": false,
+    "preflight": {
+      "dispatchable": true,
+      "severity": "ok",
+      "reasons": []
+    },
+    "parity": {
+      "provider": "claude",
+      "tier": "first_party_cli",
+      "systemPromptMode": "native_flag",
+      "toolSurface": "reliable",
+      "mcpSupported": true,
+      "permissionsModel": "skip_flag",
+      "resumeSupported": true,
+      "multimodal": true,
+      "notes": null
+    },
+    "route_rationale": "Route: provider=claude (derived), model=claude-claude-opus-4-8 (role); floors{ctx>=0,vision=false,tools>=model_dependent}; chain=1 link(s)"
+  },
+  "agent_attempt_id": "attempt-e83cb3a91500ab4c48d0",
+  "agent_startup_started_at": "2026-07-30T14:37:57.040Z",
+  "agent_session_confirmed_run_id": "agent-persist-all-in-review-task-work-to-main-and-prun-fb51",
+  "agent_session_confirmed_at": "2026-07-30T14:37:58.901Z"
+}

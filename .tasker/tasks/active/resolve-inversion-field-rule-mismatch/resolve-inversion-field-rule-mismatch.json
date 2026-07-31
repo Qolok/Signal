@@ -1,0 +1,129 @@
+{
+  "id": "resolve-inversion-field-rule-mismatch",
+  "status": "done",
+  "priority": "medium",
+  "label": "Bug",
+  "title": "Resolve Inversion Field rule mismatch",
+  "description": "Decide and consistently implement whether the Inversion Field Food swap is mandatory. docs/FieldGuide.md:138 says it cannot be refused, while game.js:2181-2188 and 5146-5184 offer Decline in two resolution paths. Update both code paths, guidance text, and Field Guide to one rule and add coverage ensuring repeat/anomaly resolution behaves identically.",
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-28T21:48:51.350Z",
+  "updated_at": "2026-07-30T16:16:31.445Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-28T21:48:51.350Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-28T21:52:56.405Z",
+      "type": "updated",
+      "content": "Roles assigned: coder ? writer ? reviewer"
+    },
+    {
+      "timestamp": "2026-07-29T01:06:24.249Z",
+      "type": "moved",
+      "content": "Moved from backlog to ready"
+    },
+    {
+      "timestamp": "2026-07-29T01:19:57.267Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T01:28:14.506Z",
+      "type": "output",
+      "content": "## Resolution: Inversion Field swap is mandatory\n\n**Decision:** The Food swap cannot be declined, matching `docs/FieldGuide.md:138` (\"They cannot refuse\") and the in-game guidance tooltip (`game.js` TILE_TIPS: \"Resources change hands involuntarily\"). The two code paths that offered a `Decline` button were the bug, not the docs — Anomalies are described in the Field Guide as having \"strange and immediate effects,\" and Portal is the only anomaly explicitly marked optional (\"You may decline\"), so Inversion Field's mandatory framing is preserved.\n\n### Changes\n\n- **`game-logic.js`**: Added two small pure helpers shared by both resolution paths, so the rule can't drift out of sync again:\n  - `inversionFieldTargets(players, actingPlayerId)` — living players excluding the actor.\n  - `swapFood(playerA, playerB)` — the Food swap itself.\n- **`game.js`**:\n  - First-landing path (`showTileRevealModal`, ~line 2176): removed the `Decline` button; swap buttons now use the shared helpers. The \"no other players\" case still shows `Acknowledge` (that's a no-op fallback, not a refusal of the swap).\n  - Repeat/re-landing path (`triggerAnomaly`, ~line 5170): removed the `Decline`-labeled modal button and the \"declined\" log message; body text updated from \"...swap Food with, or decline\" to \"...swap Food with.\" The modal now only presents the mandatory swap-target buttons.\n- **`docs/FieldGuide.md`**: No change needed — already states the mandatory rule correctly.\n\n### Test coverage added (`test/game-logic.test.js`)\n\n- Unit tests for `inversionFieldTargets` and `swapFood`.\n- A DOM-stub harness that loads the real `showTileRevealModal` (first-landing path) and the real `triggerAnomaly` + `showModal` (repeat path) directly from `game.js` via `vm`, then asserts for both:\n  - No button/label containing \"Decline\" is ever rendered.\n  - Only mandatory `Swap with <name> (<food> Food)` buttons appear (or `Acknowledge` when there are no valid targets).\n  - Clicking a swap button correctly exchanges Food between the two players.\n- A cross-path parity test confirming the first-landing and repeat resolution paths produce the identical button set and identical resulting Food swap for the same matchup.\n\n### Verification\n\n- `node --check game.js game-logic.js test/game-logic.test.js` — no syntax errors.\n- `npm test` — 31/31 tests passing (27 pre-existing + 4 new), no regressions.",
+      "attachment": "active/resolve-inversion-field-rule-mismatch/resolve-inversion-field-rule-mismatch.md"
+    },
+    {
+      "timestamp": "2026-07-29T02:26:28.130Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 1 → writer"
+    },
+    {
+      "timestamp": "2026-07-29T02:27:09.693Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T02:28:55.153Z",
+      "type": "output",
+      "content": "## Inversion Field rule mismatch — already resolved, verified\n\nInvestigated the reported mismatch and found the codebase in this worktree (dispatch baseline) already contains a consistent, tested implementation of the rule as **mandatory, non-refusable**. No further edits were needed; I verified correctness and coverage rather than re-doing the fix.\n\n### Decision confirmed\nInversion Field Food swap is **mandatory** — the acting player must choose a target and swap; neither side may decline. This matches `docs/FieldGuide.md`'s existing wording (\"They cannot refuse\").\n\n### State of each location\n- **`docs/FieldGuide.md:138`** — \"Choose any other player. Swap your Food tokens with theirs. They cannot refuse.\" Correct, no changes needed.\n- **`game.js` first-landing path (`showTileRevealModal`, Inversion Field branch, ~line 2176-2209)** — Offers only per-target \"Swap with X\" buttons (or \"Acknowledge\" when no valid targets exist). No Decline button. Comment explicitly documents the mandatory rule and cites the Field Guide.\n- **`game.js` repeat/anomaly path (`triggerAnomaly`, Inversion Field case, ~line 5170-5203)** — Same: only \"Swap with X\" buttons, no Decline. Same explanatory comment.\n- **`game-logic.js`** — Both paths call shared helpers `inversionFieldTargets(players, actingPlayerId)` (excludes the actor and dead players) and `swapFood(playerA, playerB)`, so the eligibility and swap logic can't drift out of sync between the two resolution paths again.\n\n### Test coverage (`test/game-logic.test.js`)\nExisting tests explicitly cover this rule and pass:\n- `inversionFieldTargets excludes the acting player and the dead`\n- `swapFood exchanges Food between exactly the two given players`\n- `Inversion Field: first-landing resolution offers no Decline, only mandatory swaps`\n- `Inversion Field: with no other living players, first landing only offers Acknowledge`\n- `Inversion Field: repeat/re-landing resolution offers no Decline, only mandatory swaps`\n- `Inversion Field: repeat and first-landing resolution behave identically for the same matchup` (asserts both paths produce the same button set and the same resulting Food swap for an identical scenario)\n\n### Verification performed\nRan `node --test test/game-logic.test.js`: **31/31 tests pass**, including all 6 Inversion Field tests above.\n\n### Outcome\nNo code or doc changes were required — the rule mismatch described in the task was already fixed and covered by tests in the current branch state. Confirmed consistency across the Field Guide, both game.js resolution paths, and the shared game-logic.js helpers, and confirmed the full suite is green.",
+      "attachment": "active/resolve-inversion-field-rule-mismatch/resolve-inversion-field-rule-mismatch-2.md"
+    },
+    {
+      "timestamp": "2026-07-29T02:30:18.404Z",
+      "type": "moved",
+      "content": "Pipeline advanced to step 2 → reviewer"
+    },
+    {
+      "timestamp": "2026-07-29T02:31:17.114Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-29T02:34:00.074Z",
+      "type": "output",
+      "content": "## Resolved: Inversion Field Food-swap rule\n\n**Decision:** the Food swap is **mandatory** — the Field Guide wording (\"They cannot refuse.\") is the rule of record; no Decline option exists in either resolution path.\n\n### Findings\nAudited the worktree state against the task description (docs/FieldGuide.md:138, game.js first-landing path ~2176-2209, and repeat/anomaly path ~5170-5203). The dispatch baseline for this task already contains the full fix:\n\n- docs/FieldGuide.md:138 — \"Choose any other player. Swap your Food tokens with theirs. They cannot refuse.\"\n- game.js first-landing resolution (showTileRevealModal, Inversion Field branch) — offers only per-target 'Swap with <name>' buttons (or 'Acknowledge' when no valid target exists); no Decline button is rendered.\n- game.js repeat/anomaly resolution (triggerAnomaly, Inversion Field case) — same: only swap buttons via showModal(..., onOk = noop, okLbl = \"\", onCancel = undefined, cancelLbl = undefined, ...), so no Decline/Cancel button is created; the tile-tip text ('Choose any other player. Swap your Food with theirs.') matches too.\n- game-logic.js — shared inversionFieldTargets(players, actingPlayerId) (excludes the actor and the dead) and swapFood(a, b) are used by both code paths, so the eligible-target and swap logic can't drift between the two entry points. Comments in both call sites and in game-logic.js explicitly document the mandatory rule and point back to the Field Guide.\n\n### Test coverage verified\ntest/game-logic.test.js already includes the requested repeat/anomaly parity coverage:\n- inversionFieldTargets excludes the acting player and the dead\n- swapFood exchanges Food between exactly the two given players\n- Inversion Field: first-landing resolution offers no Decline, only mandatory swaps\n- Inversion Field: with no other living players, first landing only offers Acknowledge\n- Inversion Field: repeat/re-landing resolution offers no Decline, only mandatory swaps\n- Inversion Field: repeat and first-landing resolution behave identically for the same matchup (asserts identical button sets and identical resulting Food swap between the first-landing and repeat/anomaly paths for the same matchup)\n\n### Verification performed this session\n- `node --test test/game-logic.test.js` — 31/31 tests pass, including all six Inversion Field tests above.\n- `node -c game.js` and `node -c game-logic.js` — syntax OK.\n- Manual review of every other 'Inversion Field' / 'decline' reference in game.js, game-logic.js, and docs/ — no remaining contradiction (the unrelated Portal anomaly and the general corruption-flavor text in FieldGuide.md legitimately mention decline/optionality and are correctly untouched).\n\n### Outcome\nNo further code changes were needed — the rule (mandatory, no Decline) is already implemented identically in both resolution paths, documented consistently in the Field Guide and in-game tile tips, and covered by tests asserting first-landing/repeat parity. Working tree is clean (no diff produced by this session).",
+      "attachment": "active/resolve-inversion-field-rule-mismatch/resolve-inversion-field-rule-mismatch-3.md"
+    },
+    {
+      "timestamp": "2026-07-30T14:47:17.718Z",
+      "type": "moved",
+      "content": "Moved from in_review to done"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:31.445Z",
+      "type": "updated",
+      "content": "Task updated"
+    }
+  ],
+  "epic": "epic-field-guide-alignment",
+  "agent_id": "coder",
+  "pipeline": [
+    "writer",
+    "reviewer"
+  ],
+  "pipeline_step": 2,
+  "routing": {
+    "rationale": "Free execution inherits Tasker's model (claude-claude-sonnet-5)",
+    "shape": "Bug",
+    "decided_by": "free-execution-driver",
+    "decided_at": "2026-07-29T02:31:09.263Z",
+    "auto_router_mode": null,
+    "floors": {
+      "minContextWindow": 0,
+      "requireVision": false,
+      "toolCallingFloor": "model_dependent",
+      "category": "everyday_coding"
+    },
+    "relaxed_floors": true,
+    "preflight": {
+      "dispatchable": true,
+      "severity": "ok",
+      "reasons": []
+    },
+    "parity": {
+      "provider": "claude",
+      "tier": "first_party_cli",
+      "systemPromptMode": "native_flag",
+      "toolSurface": "reliable",
+      "mcpSupported": true,
+      "permissionsModel": "skip_flag",
+      "resumeSupported": true,
+      "multimodal": true,
+      "notes": null
+    }
+  },
+  "agent_attempt_id": "attempt-6839406c59af1d98a63a",
+  "agent_startup_started_at": "2026-07-29T02:31:17.085Z",
+  "role_docs": [
+    {
+      "role_slug": "reviewer",
+      "doc_path": "roles/reviewer/memory/tasks/resolve-inversion-field-rule-mismatch.md",
+      "direction": "self",
+      "at": "2026-07-29T02:34:00.074Z"
+    }
+  ]
+}

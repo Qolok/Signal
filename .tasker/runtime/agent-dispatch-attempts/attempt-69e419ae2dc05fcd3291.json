@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "attemptId": "attempt-69e419ae2dc05fcd3291",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-28T23:15:40.176Z",
+  "updatedAt": "2026-07-28T23:18:20.058Z",
+  "taskId": "eliminate-player-name-html-injection",
+  "runId": "agent-eliminate-player-name-html-injection",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "codex",
+  "requestedModel": "codex-gpt-5-6-sol",
+  "policyModel": "codex-gpt-5-6-sol",
+  "resolvedModel": "gpt-5.6-sol",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 35108,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null
+  },
+  "agent": {
+    "pid": 39868,
+    "status": "exited",
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "019fab03-2f3a-7861-84fd-5eaf381f9aa1",
+    "waitingSince": "2026-07-28T23:15:40.255Z",
+    "establishedAt": "2026-07-28T23:15:40.716Z"
+  },
+  "stderrTail": " CREW_PORTRAITS.length].name;\n+    const portrait = SignalGameLogic.enumeratedValue(\n+      portraits && portraits[i],\n+      CREW_PORTRAITS.map((crew) => crew.name),\n+      fallbackPortrait,\n+    );\n     return {\n       id: i,\n-      name,\n+      name: SignalGameLogic.playerName(name, portrait),\n       color: PCOLORS[i],\n       portrait,\n       q: 0,\n@@ -3200,7 +3217,7 @@ function useCard(playerIdx, uid) {\n     targets.forEach((tgt) => {\n       const b = document.createElement(\"button\");\n       b.className = \"mbtn\";\n-      b.innerHTML = `<span style=\"color:${tgt.color};font-weight:bold\">${tgt.name}</span><span style=\"color:var(--dim);font-size:.75em;margin-left:10px\">\\u2665 ${tgt.health}/3</span>`;\n+      appendPlayerChoiceContent(b, tgt, `\\u2665 ${tgt.health}/3`);\n       b.onclick = () => {\n         document.getElementById(\"mov\").classList.remove(\"show\");\n         applyMed(tgt);\n@@ -3270,7 +3287,7 @@ function useCard(playerIdx, uid) {\n     incap.forEach((pl) => {\n       const b = document.createElement(\"button\");\n       b.className = \"mbtn\";\n-      b.innerHTML = `<span style=\"color:${pl.color};font-weight:bold\">${pl.name}</span>`;\n+      appendPlayerChoiceContent(b, pl);\n       b.onclick = () => {\n         document.getElementById(\"mov\").classList.remove(\"show\");\n         applyStretcher(pl);\n@@ -3478,7 +3495,11 @@ function useCard(playerIdx, uid) {\n     adjacent.forEach((pl) => {\n       const b = document.createElement(\"button\");\n       b.className = \"mbtn\";\n-      b.innerHTML = `<span style=\"color:${pl.color};font-weight:bold\">${pl.name}</span><span style=\"color:var(--dim);font-size:.75em;margin-left:10px\">Food ${pl.food} &nbsp; O\\u2082 ${pl.o2} &nbsp; \\u2665 ${pl.health}</span>`;\n+      appendPlayerChoiceContent(\n+        b,\n+        pl,\n+        `Food ${pl.food} \\u00a0 O\\u2082 ${pl.o2} \\u00a0 \\u2665 ${pl.health}`,\n+      );\n       b.onclick = () => {\n         document.getElementById(\"mov\").classList.remove(\"show\");\n         openWith(pl);\n@@ -5264,7 +5285,11 @@ function openTrade() {\n   here.forEach((pl) => {\n     const b = document.createElement(\"button\");\n     b.className = \"mbtn\";\n-    b.innerHTML = `<span style=\"color:${pl.color};font-weight:bold\">${pl.name}</span><span style=\"color:var(--dim);font-size:.75em;margin-left:10px\">Food ${pl.food} &nbsp; O\\u2082 ${pl.o2} &nbsp; \\u2665 ${pl.health}</span>`;\n+    appendPlayerChoiceContent(\n+      b,\n+      pl,\n+      `Food ${pl.food} \\u00a0 O\\u2082 ${pl.o2} \\u00a0 \\u2665 ${pl.health}`,\n+    );\n     b.onclick = () => {\n       document.getElementById(\"mov\").classList.remove(\"show\");\n       initTradeModal(p, pl);\n@@ -6373,6 +6398,11 @@ function receiveRemoteState(data) {\n     const existingGame = G;\n     SignalGameLogic.normalizeSavedGame(data);\n     const sg = data.G;\n+    SignalGameLogic.normalizePlayerIdentities(\n+      sg,\n+      [...PCOLORS, SYNTH_COLOR],\n+      [...CREW_PORTRAITS.map((portrait) => portrait.name), \"iris\"],\n+    );\n     if (window.Sync?.isActive())\n       SignalGameLogic.mergePrivateGameState(\n         sg,\n@@ -8637,7 +8667,7 @@ function buildSetup() {\n       <button class=\"parr\" onclick=\"cyclePortrait(${i},-1)\">&#8249;</button>\n       <div style=\"${portBg(pname, 80, 90, 0, 3, \"pawn\")}border:1px solid ${PCOLORS[i]};border-radius:2px;\"></div>\n       <button class=\"parr\" onclick=\"cyclePortrait(${i},1)\">&#8250;</button>\n-    </div><input class=\"pi\" type=\"text\" id=\"pn-${i}\" value=\"${prev[i] !== undefined ? prev[i] : pname}\" maxlength=\"16\" placeholder=\"crew ${i + 1}\">`;\n+    </div><input class=\"pi\" type=\"text\" id=\"pn-${i}\" value=\"${_escHtml(prev[i] !== undefined ? prev[i] : pname)}\" maxlength=\"16\" placeholder=\"crew ${i + 1}\">`;\n     nl.appendChild(d);\n   }\n }\n@@ -9080,11 +9110,25 @@ function enterOnlineCrewSetup() {\n   window.Sync.onLobbyUpdate((rawData) => {\n     _onlineLobbyData = {};\n     Object.values(rawData).forEach((entry) => {\n-      if (entry && typeof entry.connectionSlot === \"number\") {\n-        _onlineLobbyData[entry.connectionSlot] = entry;\n+      if (\n+        entry &&\n+        Number.isInteger(entry.connectionSlot) &&\n+        entry.connectionSlot >= 0 &&\n+        entry.connectionSlot < 6\n+      ) {\n+        const safeEntry = {\n+          ...entry,\n+          name: SignalGameLogic.playerName(entry.name),\n+          portraitIndex: SignalGameLogic.enumeratedValue(\n+            entry.portraitIndex,\n+            CREW_PORTRAITS.map((_, index) => index),\n+            entry.connectionSlot % CREW_PORTRAITS.length,\n+          ),\n+        };\n+        _onlineLobbyData[safeEntry.connectionSlot] = safeEntry;\n         const mySlot = window.Sync?.myPlayerIndex() ?? 0;\n-        if (entry.connectionSlot !== mySlot && entry.portraitIndex >= 0)\n-          setupPortraits[entry.connectionSlot] = entry.portraitIndex;\n+        if (safeEntry.connectionSlot !== mySlot)\n+          setupPortraits[safeEntry.connectionSlot] = safeEntry.portraitIndex;\n       }\n     });\n     if (window.Sync?.isActive()) buildSetup();\ndiff --git a/test/game-logic.test.js b/test/game-logic.test.js\nindex 95a4765..a592a83 100644\n--- a/test/game-logic.test.js\n+++ b/test/game-logic.test.js\n@@ -7,6 +7,76 @@ const path = require(\"node:path\");\n const vm = require(\"node:vm\");\n const logic = require(\"../game-logic\");\n \n+function loadPlayerChoiceRenderer() {\n+  const gameSource = fs.readFileSync(path.join(__dirname, \"..\", \"game.js\"), \"utf8\");\n+  const start = gameSource.indexOf(\"function appendPlayerChoiceContent\");\n+  const end = gameSource.indexOf(\"\\n}\\n\", start) + 3;\n+  const context = {\n+    document: {\n+      createElement(tagName) {\n+        return {\n+          tagName,\n+          style: {},\n+          children: [],\n+          appendChild(child) {\n+            this.children.push(child);\n+          },\n+        };\n+      },\n+    },\n+  };\n+  vm.runInNewContext(\n+    `${gameSource.slice(start, end)}; result = appendPlayerChoiceContent`,\n+    context,\n+  );\n+  return context.result;\n+}\n+\n+function fakeElement() {\n+  return {\n+    children: [],\n+    appendChild(child) {\n+      this.children.push(child);\n+    },\n+  };\n+}\n+\n+test(\"hostile local player names are length-limited and rendered as text\", () => {\n+  const renderChoice = loadPlayerChoiceRenderer();\n+  const button = fakeElement();\n+  const name = logic.playerName(\"<img src=x onerror=alert(1)>\");\n+\n+  renderChoice(button, { name, color: \"#abcdef\" }, \"♥ 3/3\");\n+\n+  assert.equal(name, \"<img src=x onerr\");\n+  assert.equal(button.children[0].textContent, name);\n+  assert.equal(button.children[0].innerHTML, undefined);\n+});\n+\n+test(\"hostile online player identity fields are normalized before rendering\", () => {\n+  const game = {\n+    players: [{\n+      name: \"<b>Eve</b>\",\n+      color: \"red;position:fixed\",\n+      portrait: \"../../payload\",\n+      equipment: [],\n+    }],\n+  };\n+  logic.normalizePlayerIdentities(\n+    game,\n+    [\"#112233\", \"#9ab0c0\"],\n+    [\"Avery\", \"iris\"],\n+  );\n+  const button = fakeElement();\n+  loadPlayerChoiceRenderer()(button, game.players[0]);\n+\n+  assert.equal(game.players[0].name, \"<b>Eve</b>\");\n+  assert.equal(game.players[0].color, \"#112233\");\n+  assert.equal(game.players[0].portrait, \"Avery\");\n+  assert.equal(button.children[0].textContent, \"<b>Eve</b>\");\n+  assert.equal(button.children[0].innerHTML, undefined);\n+});\n+\n function loadSyncHarness(initialRoom) {\n   const clone = (value) =>\n     value === undefined ? undefined : JSON.parse(JSON.stringify(value));\nwarning: in the working copy of 'game-logic.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'game.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'test/game-logic.test.js', LF will be replaced by CRLF the next time Git touches it\n\n2026-07-28T23:18:02.920353Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T23:18:09.162828Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n2026-07-28T23:18:17.175487Z ERROR codex_models_manager::manager: failed to renew cache TTL: missing field `supports_reasoning_summaries` at line 86 column 5\n",
+  "transitions": [
+    {
+      "at": "2026-07-28T23:15:40.176Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-28T23:15:40.183Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-28T23:15:40.196Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 35108
+    },
+    {
+      "at": "2026-07-28T23:15:40.237Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 35108
+    },
+    {
+      "at": "2026-07-28T23:15:40.256Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 39868
+    },
+    {
+      "at": "2026-07-28T23:15:40.259Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-28T23:15:40.717Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-28T23:18:20.043Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-07-28T23:18:20.058Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

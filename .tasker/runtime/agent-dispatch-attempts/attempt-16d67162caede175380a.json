@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "attemptId": "attempt-16d67162caede175380a",
+  "status": "completed",
+  "spawnRequestedAt": "2026-07-29T04:43:04.552Z",
+  "updatedAt": "2026-07-29T05:38:21.599Z",
+  "taskId": "update-vulnerable-dev-dependencies",
+  "runId": "agent-update-vulnerable-dev-dependencies",
+  "kind": "peer",
+  "roleSlug": "coder",
+  "resolvedDriver": "claude",
+  "requestedModel": "claude-claude-sonnet-5",
+  "policyModel": "claude-claude-sonnet-5",
+  "resolvedModel": "sonnet",
+  "failureStage": null,
+  "launcher": {
+    "type": "windows-supervisor",
+    "pid": 29616,
+    "status": "running"
+  },
+  "agent": {
+    "pid": 34100,
+    "status": "exited",
+    "exitCode": null,
+    "signal": null,
+    "error": null
+  },
+  "sessionHandshake": {
+    "status": "established",
+    "sessionId": "55d92292-817f-45cb-806d-7a56f3b71942",
+    "waitingSince": "2026-07-29T04:43:04.638Z",
+    "establishedAt": "2026-07-29T04:43:06.154Z"
+  },
+  "stderrTail": "",
+  "transitions": [
+    {
+      "at": "2026-07-29T04:43:04.552Z",
+      "component": "dispatch",
+      "state": "created"
+    },
+    {
+      "at": "2026-07-29T04:43:04.561Z",
+      "component": "dispatch",
+      "state": "resolved"
+    },
+    {
+      "at": "2026-07-29T04:43:04.574Z",
+      "component": "launcher",
+      "state": "spawned",
+      "pid": 29616
+    },
+    {
+      "at": "2026-07-29T04:43:04.619Z",
+      "component": "launcher",
+      "state": "started",
+      "pid": 29616
+    },
+    {
+      "at": "2026-07-29T04:43:04.639Z",
+      "component": "agent",
+      "state": "spawned",
+      "pid": 34100
+    },
+    {
+      "at": "2026-07-29T04:43:04.643Z",
+      "component": "session_handshake",
+      "state": "waiting"
+    },
+    {
+      "at": "2026-07-29T04:43:06.155Z",
+      "component": "session_handshake",
+      "state": "established"
+    },
+    {
+      "at": "2026-07-29T05:38:21.599Z",
+      "component": "agent",
+      "state": "exited",
+      "exitCode": null,
+      "signal": null
+    }
+  ]
+}

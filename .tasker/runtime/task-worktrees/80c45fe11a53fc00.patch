@@ -1,0 +1,221 @@
+diff --git a/README.md b/README.md
+index d163f7dc81e77932fbee4402efa1eb97b655b6c7..621ddb60bec458f7910285fbf68e944fc332f35f 100644
+--- a/README.md
++++ b/README.md
+@@ -12,6 +12,34 @@ npm test
+ 
+ The tests use Node's built-in test runner and do not connect to Firebase.
+ 
++## Dependencies & Security
++
++The game itself ships no npm dependencies to the browser — `index.html`, `game.js`,
++`game-logic.js`, `sync.js`, and `style.css` are served as-is by any static host. The
++npm packages are dev-only tooling: `serve` (local dev server via `npm start`),
++`firebase-tools` (rules deploy + database emulator), and `@firebase/rules-unit-testing`
++(the emulator rules suite). None of them reach the served bundle.
++
++`firebase-tools@15` pulls in transitive packages that carried published advisories
++(a `brace-expansion` DoS cascade plus `uuid` and `@opentelemetry/core` issues), and
++there is no patched `firebase-tools` release that resolves them — `npm audit fix --force`
++only offers a breaking downgrade to `firebase-tools@14`. Instead, the affected transitive
++packages are pinned to their patched versions via `overrides` in `package.json`:
++
++```json
++"overrides": {
++  "brace-expansion": "5.0.9",
++  "uuid": "11.1.1",
++  "@opentelemetry/core": "2.8.0"
++}
++```
++
++With these in place `npm audit` reports **0 vulnerabilities**, while `firebase-tools`
++stays on the current `15.x` line. `npm test`, `npm run test:rules` (the Java emulator
++suite), and `npm start` all pass with the overrides applied. If a future
++`firebase-tools` upgrade adopts these patched versions natively, the `overrides` block
++can be removed.
++
+ *A game of survival, exploration, and eroding trust — where rescue is uncertain, and the greatest threat may be sitting across the table.*
+ 
+ **1–6 Players · Ages 14+ · 30–60 Minutes**
+diff --git a/package-lock.json b/package-lock.json
+index d522923e16dc68957f1bde418a5239d63e2dbde6..c2a23b90944db370ad601f3ed7bb62185920f3d1 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1936,31 +1936,21 @@
+       }
+     },
+     "node_modules/@opentelemetry/core": {
+-      "version": "1.30.1",
+-      "resolved": "https://registry.npmjs.org/@opentelemetry/core/-/core-1.30.1.tgz",
+-      "integrity": "sha512-OOCM2C/QIURhJMuKaekP3TRBxBKxG/TWWA0TL2J6nXUtDnuCtccy49LUJF8xPFXMX+0LMcxFpCo8M9cGY1W6rQ==",
++      "version": "2.8.0",
++      "resolved": "https://registry.npmjs.org/@opentelemetry/core/-/core-2.8.0.tgz",
++      "integrity": "sha512-hd1Lfh8p545nNz+jq1Ejfz+Mn1hyLuxYn1YzTfFNrxr8urEWMNQLPf1Th8kjOH+HxwawCrtgBp8JpBUR4ZSgww==",
+       "dev": true,
+       "license": "Apache-2.0",
+       "dependencies": {
+-        "@opentelemetry/semantic-conventions": "1.28.0"
++        "@opentelemetry/semantic-conventions": "^1.29.0"
+       },
+       "engines": {
+-        "node": ">=14"
++        "node": "^18.19.0 || >=20.6.0"
+       },
+       "peerDependencies": {
+         "@opentelemetry/api": ">=1.0.0 <1.10.0"
+       }
+     },
+-    "node_modules/@opentelemetry/core/node_modules/@opentelemetry/semantic-conventions": {
+-      "version": "1.28.0",
+-      "resolved": "https://registry.npmjs.org/@opentelemetry/semantic-conventions/-/semantic-conventions-1.28.0.tgz",
+-      "integrity": "sha512-lp4qAiMTD4sNWW4DbKLBkfiMZ4jbAboJIGOQr5DvciMRI494OapieI9qiODpOt0XBr1LjIDy1xAGAnVs5supTA==",
+-      "dev": true,
+-      "license": "Apache-2.0",
+-      "engines": {
+-        "node": ">=14"
+-      }
+-    },
+     "node_modules/@opentelemetry/semantic-conventions": {
+       "version": "1.39.0",
+       "resolved": "https://registry.npmjs.org/@opentelemetry/semantic-conventions/-/semantic-conventions-1.39.0.tgz",
+@@ -2525,10 +2515,13 @@
+       }
+     },
+     "node_modules/balanced-match": {
+-      "version": "1.0.2",
+-      "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz",
+-      "integrity": "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==",
+-      "license": "MIT"
++      "version": "4.0.4",
++      "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz",
++      "integrity": "sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==",
++      "license": "MIT",
++      "engines": {
++        "node": "18 || 20 || >=22"
++      }
+     },
+     "node_modules/bare-events": {
+       "version": "2.9.1",
+@@ -2804,13 +2797,15 @@
+       }
+     },
+     "node_modules/brace-expansion": {
+-      "version": "1.1.17",
+-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.17.tgz",
+-      "integrity": "sha512-w+aeW/mkgM4PyRMOJCgi3fOrTm5Q8QY1OSfn2TO2iuDj3ezIHqejmuxbjfPrqUkgqRew1iqkyAn0tr0ZwHD9+w==",
++      "version": "5.0.9",
++      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.9.tgz",
++      "integrity": "sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==",
+       "license": "MIT",
+       "dependencies": {
+-        "balanced-match": "^1.0.0",
+-        "concat-map": "0.0.1"
++        "balanced-match": "^4.0.2"
++      },
++      "engines": {
++        "node": "20 || >=22"
+       }
+     },
+     "node_modules/braces": {
+@@ -3601,12 +3596,6 @@
+         "node": ">= 0.8.0"
+       }
+     },
+-    "node_modules/concat-map": {
+-      "version": "0.0.1",
+-      "resolved": "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz",
+-      "integrity": "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==",
+-      "license": "MIT"
+-    },
+     "node_modules/config-chain": {
+       "version": "1.1.13",
+       "resolved": "https://registry.npmjs.org/config-chain/-/config-chain-1.1.13.tgz",
+@@ -5130,16 +5119,6 @@
+         "toxic": "^1.0.0"
+       }
+     },
+-    "node_modules/glob/node_modules/brace-expansion": {
+-      "version": "2.1.3",
+-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-2.1.3.tgz",
+-      "integrity": "sha512-DRdx5neNsG/QXbniLFWi2YmC/68oeOOmKz6zOjVk6ZS1ZLXgLIKqVEc6hWsmkjBbgii0SwaBTcJ5XKj5gzY/4A==",
+-      "dev": true,
+-      "license": "MIT",
+-      "dependencies": {
+-        "balanced-match": "^1.0.0"
+-      }
+-    },
+     "node_modules/glob/node_modules/minimatch": {
+       "version": "9.0.9",
+       "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-9.0.9.tgz",
+@@ -7979,16 +7958,6 @@
+         "minimatch": "^5.1.0"
+       }
+     },
+-    "node_modules/readdir-glob/node_modules/brace-expansion": {
+-      "version": "2.1.3",
+-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-2.1.3.tgz",
+-      "integrity": "sha512-DRdx5neNsG/QXbniLFWi2YmC/68oeOOmKz6zOjVk6ZS1ZLXgLIKqVEc6hWsmkjBbgii0SwaBTcJ5XKj5gzY/4A==",
+-      "dev": true,
+-      "license": "MIT",
+-      "dependencies": {
+-        "balanced-match": "^1.0.0"
+-      }
+-    },
+     "node_modules/readdir-glob/node_modules/minimatch": {
+       "version": "5.1.9",
+       "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-5.1.9.tgz",
+@@ -8828,16 +8797,6 @@
+         "re2": "^1.17.7"
+       }
+     },
+-    "node_modules/superstatic/node_modules/brace-expansion": {
+-      "version": "2.1.3",
+-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-2.1.3.tgz",
+-      "integrity": "sha512-DRdx5neNsG/QXbniLFWi2YmC/68oeOOmKz6zOjVk6ZS1ZLXgLIKqVEc6hWsmkjBbgii0SwaBTcJ5XKj5gzY/4A==",
+-      "dev": true,
+-      "license": "MIT",
+-      "dependencies": {
+-        "balanced-match": "^1.0.0"
+-      }
+-    },
+     "node_modules/superstatic/node_modules/commander": {
+       "version": "10.0.1",
+       "resolved": "https://registry.npmjs.org/commander/-/commander-10.0.1.tgz",
+@@ -9647,10 +9606,9 @@
+       }
+     },
+     "node_modules/uuid": {
+-      "version": "9.0.1",
+-      "resolved": "https://registry.npmjs.org/uuid/-/uuid-9.0.1.tgz",
+-      "integrity": "sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==",
+-      "deprecated": "uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).",
++      "version": "11.1.1",
++      "resolved": "https://registry.npmjs.org/uuid/-/uuid-11.1.1.tgz",
++      "integrity": "sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==",
+       "dev": true,
+       "funding": [
+         "https://github.com/sponsors/broofa",
+@@ -9658,7 +9616,7 @@
+       ],
+       "license": "MIT",
+       "bin": {
+-        "uuid": "dist/bin/uuid"
++        "uuid": "dist/esm/bin/uuid"
+       }
+     },
+     "node_modules/valid-url": {
+diff --git a/package.json b/package.json
+index 497de0b3ef2b9e5a3f03a0e8ba687d5d7f7d8212..9d22cb28b9d934dde6503ceff074242de66a3682 100644
+--- a/package.json
++++ b/package.json
+@@ -14,5 +14,10 @@
+     "@firebase/rules-unit-testing": "^5.0.1",
+     "firebase": "^12.16.0",
+     "firebase-tools": "^15.24.0"
++  },
++  "overrides": {
++    "brace-expansion": "5.0.9",
++    "uuid": "11.1.1",
++    "@opentelemetry/core": "2.8.0"
+   }
+ }

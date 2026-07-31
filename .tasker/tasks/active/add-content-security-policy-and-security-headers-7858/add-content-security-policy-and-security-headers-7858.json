@@ -1,0 +1,170 @@
+{
+  "id": "add-content-security-policy-and-security-headers-7858",
+  "title": "Add Content-Security-Policy and security headers to the served game",
+  "description": "Defense-in-depth follow-up to the stored-HTML-injection fix. The game still builds DOM via innerHTML with template strings in many places (card faces, tile palette, scoreboard) using static game content; a CSP provides a second layer so any future or missed injection cannot execute script or exfiltrate. Add a restrictive Content-Security-Policy (script-src 'self' plus the Firebase CDN origins actually used; no unsafe-inline for scripts; object-src 'none'; base-uri 'self'), plus X-Content-Type-Options: nosniff, Referrer-Policy, and a frame-ancestors policy — delivered via a meta tag in index.html and/or serve/host headers. Enumerate the exact external origins the game loads (Firebase, fonts, audio) so the policy doesn't break loading. Verify the game, audio, and online multiplayer still function with the policy active.",
+  "status": "done",
+  "priority": "medium",
+  "label": "Maintenance",
+  "agent_id": "coder",
+  "deps": [
+    "persist-all-in-review-task-work-to-main-and-prun-fb51"
+  ],
+  "trashed": false,
+  "trashed_at": null,
+  "created_at": "2026-07-30T14:22:29.661Z",
+  "updated_at": "2026-07-30T18:21:57.521Z",
+  "activity": [
+    {
+      "timestamp": "2026-07-30T14:22:29.661Z",
+      "type": "created",
+      "content": "Task created"
+    },
+    {
+      "timestamp": "2026-07-30T14:22:29.661Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_create",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-7b52899b3ec3304eca8639608b55b560-f27336d1",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-7b52899b3ec3304eca8639608b55b560-f27336d1 called mcp__tasker__task_create"
+    },
+    {
+      "timestamp": "2026-07-30T16:16:00.634Z",
+      "type": "updated",
+      "content": "Task updated"
+    },
+    {
+      "timestamp": "2026-07-30T16:19:13.037Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T16:32:32.321Z",
+      "type": "error",
+      "content": "Task changes conflict with edits in the primary checkout. The primary checkout was not modified; the isolated task branch and worktree were preserved for reconciliation."
+    },
+    {
+      "timestamp": "2026-07-30T16:44:54.855Z",
+      "type": "chat_user",
+      "content": "Reviewer — reconciliation guidance for the write_conflict block (patch fails at index.html:117).\n\nROOT CAUSE: Not a code disagreement. This task's patch was cut against an older tree; the primary checkout now carries ~11 files of uncommitted in-review work (dep task `persist-all-in-review-task-work-to-main-and-prun-fb51`). Patch bounces because index.html moved underneath it. Fix the dependency ordering: the persist task should commit the working tree first, then this task reapplies cleanly onto the committed tree.\n\nVERIFIED CONFLICT DETAIL (3-way merge sim via `git stash create` + `git merge-tree`): exactly ONE real conflict, in index.html, at the lobby-code-input block (~lines 135–145). Everything else auto-merges — game.js (disjoint hunks), package.json/README.md/package-lock.json (identical edits on both sides).\n\nRESOLUTION — the conflict is the join-code length:\n- KEEP the CSP refactor (inline oninput/onkeydown -> data-input=\"upperCaseInput\" / data-keydown=\"lobbyJoinEnter\"). That's the point of this task (drops unsafe-inline). Confirm the delegated listener wiring in ui-events.js lands with it, or Enter-to-join and auto-uppercase break silently.\n- DISCARD this task's maxlength=\"6\" / placeholder=\"ABC123\". It is WRONG: sync.js:36 `JOIN_CODE_LENGTH = 8` and game.js:9094 rejects `code.length !== 8` (\"Enter an 8-character code\"). maxlength=6 makes every join fail. Also placeholder \"ABC123\" uses \"1\", which generateJoinCode() deliberately excludes (ambiguous I/O/0/1).\n- CORRECT merged block: maxlength=\"8\", placeholder=\"ABCD2345\", data-input=\"upperCaseInput\", data-keydown=\"lobbyJoinEnter\".\n\nDo NOT hand-edit the primary checkout to force this through — resolve via the persist-then-reapply path so board/worktree state stays consistent."
+    },
+    {
+      "timestamp": "2026-07-30T16:44:54.855Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T16:47:25.525Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T16:47:25.546Z",
+      "type": "actor",
+      "tool": "mcp__tasker__agent_dispatch",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb1a4-6bbb-7a13-92a4-a02766a9e816-693d3243 called mcp__tasker__agent_dispatch"
+    },
+    {
+      "timestamp": "2026-07-30T16:52:48.861Z",
+      "type": "output",
+      "content": "## Content-Security-Policy and security headers — added and reconciled\n\nDefense-in-depth for the served game is in place. The earlier `write_conflict` was resolved via the **persist-then-reapply** path: the dependency task committed the in-review working tree first, and this task's CSP work was reapplied cleanly onto the new committed baseline. Exactly one real conflict existed (the lobby join-code input); it was resolved per Reviewer guidance.\n\n### What changed\n\n**1. Strict CSP (no `unsafe-inline` for scripts)** — delivered two ways:\n- `<meta http-equiv=\"Content-Security-Policy\">` in `index.html` (covers the directives a meta tag can carry).\n- HTTP headers in `serve.json` (read by `npx serve`, the project's `npm start`), which additionally carry `frame-ancestors`, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, and `Permissions-Policy`.\n\nFinal policy:\n```\ndefault-src 'self';\nscript-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net https://www.google.com;\nstyle-src 'self' 'unsafe-inline';\nimg-src 'self' data:;\nfont-src 'self';\nmedia-src 'self';\nconnect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://signal-serve.firebaseapp.com;\nframe-src 'self' https://www.google.com;\nobject-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'\n```\n\n**2. Removed all inline event-handler attributes** so `script-src` needs no `'unsafe-inline'`:\n- `index.html`: every `onclick`/`onchange`/`oninput`/`onkeydown` attribute → `data-action` / `data-change` / `data-input` / `data-keydown`.\n- `game.js`: inline handlers inside generated HTML strings (trade modal `trAdj`, portrait pickers `cyclePortrait`, online lobby `onlineToggleReady` / `_onlineNameChange`) → `data-action` + `data-args`.\n- New `ui-events.js` does event delegation, dispatching `data-*` intents to the existing global functions (looked up on `window` at dispatch time). Wrappers added for handlers that read `this`/`event` (`upperCaseInput`, `lobbyJoinEnter`, `toggleSynthFromEl`, `rbSearchFromEl`).\n- Note: existing `el.onclick = fn` DOM-property assignments in `game.js` are **CSP-safe** (they run from an allowed external script) and were left as-is.\n\n### Enumerated external origins (why each is allowed)\n| Origin | Directive | Used by |\n|---|---|---|\n| `www.gstatic.com` | script-src | Firebase compat SDKs (app/app-check/auth/database 10.12.0) + reCAPTCHA assets |\n| `cdn.jsdelivr.net` | script-src | `marked` markdown renderer |\n| `www.google.com` | script-src, frame-src | reCAPTCHA v3 (Firebase App Check) script + challenge iframe |\n| `*.googleapis.com` | connect-src | Firebase Auth / Installations / App Check |\n| `*.firebaseio.com` (https + wss) | connect-src | Realtime Database (`signal-serve-default-rtdb`) |\n| `signal-serve.firebaseapp.com` | connect-src | Firebase auth domain |\n| self | img/media/font-src | all art (WebP), audio (MP3), favicon are same-origin |\n\nreCAPTCHA origins are included because `firebase-app-check-compat` is loaded and `docs/FirebaseSetup.md` mandates App Check in production; the site key is currently a placeholder, so App Check is a no-op in this build but the policy won't break online multiplayer once a real reCAPTCHA v3 key is set.\n\n### Conflict resolution (lobby join-code input)\nKept the CSP refactor (`data-input=\"upperCaseInput\"`, `data-keydown=\"lobbyJoinEnter\"`) and **discarded** this task's stale `maxlength=\"6\"`/`placeholder=\"ABC123\"`, using the baseline's correct `maxlength=\"8\"`/`placeholder=\"ABCD2345\"` — matching `sync.js` `JOIN_CODE_LENGTH = 8` and the 8-char validation in `game.js`. The delegated `lobbyJoinEnter`/`upperCaseInput` wiring lands in `ui-events.js`, so Enter-to-join and auto-uppercase keep working.\n\n### Verification\n- **Static audit:** no inline `on*=\"...\"` attributes remain in `index.html`/`game.js`/`sync.js`/`game-logic.js`; no `javascript:` URIs; no inline `<script>` blocks (all `<script src>` are external and allow-listed).\n- **Delegation wiring:** all 45 `data-*` handler names resolve to a defined global function.\n- **Tests:** `node --test test/game-logic.test.js` → 36 passed, 0 failed.\n- **Runtime smoke test:** started `npm start` (`npx serve`); `GET /` returns all five security headers, `index.html` and `ui-events.js` both serve `200`. Firebase/marked/reCAPTCHA script origins, Realtime DB connect/wss, and same-origin audio/art are all permitted by the policy.\n\n### Files\n- `index.html` — CSP meta tag + `data-*` handlers + `ui-events.js` include; conflict resolved.\n- `game.js` — inline handlers in HTML strings → `data-action`/`data-args`.\n- `serve.json` (new) — CSP + security headers for `serve`.\n- `ui-events.js` (new) — CSP-safe event delegation.\n\nChanges are staged in the task worktree for snapshot; no self-commit was made (commits require explicit approval).",
+      "attachment": "active/add-content-security-policy-and-security-headers-7858/add-content-security-policy-and-security-headers-t.md"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.432Z",
+      "type": "chat_user",
+      "content": "Review RETURN - Medium security defect at index.html:23,32 and serve.json:8. script-src allow-lists the entire cdn.jsdelivr.net origin for an unpinned marked script. Any future HTML injection can load an attacker-published npm package from that allowed CDN, so the CSP does not achieve its stated second-layer goal of preventing injected script execution. Self-host a pinned marked build and remove jsDelivr from script-src (preferred), then repeat the runtime/header checks."
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.432Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T17:05:15.464Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-cb3d3d85a203ce53549c1f3c2c8a638c-3d940307 called mcp__tasker__task_move"
+    },
+    {
+      "timestamp": "2026-07-30T18:08:13.641Z",
+      "type": "moved",
+      "content": "In progress"
+    },
+    {
+      "timestamp": "2026-07-30T18:13:33.853Z",
+      "type": "output",
+      "content": "## CSP reviewer defect resolved\n\nSelf-hosted the pinned **marked 13.0.3** browser build and removed the origin-wide jsDelivr allowance from both CSP delivery paths.\n\n### Changes\n\n- `index.html`\n  - Loads `vendor/marked-13.0.3.min.js` from `'self'`.\n  - Removes `https://cdn.jsdelivr.net` from `script-src`.\n  - Updates the external-origin inventory to identify marked as a same-origin vendored dependency.\n- `serve.json`\n  - Removes `https://cdn.jsdelivr.net` from the HTTP `Content-Security-Policy` header.\n  - Retains `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, and `Permissions-Policy`.\n- `vendor/marked-13.0.3.min.js`\n  - Exact pinned MIT-licensed browser build from the `marked@13.0.3` npm package.\n  - SHA-256: `5ADEA7D8EE41A700FCCC14BB9D503104F0470CC17A84AD3E167D3F5251EAE0DA`.\n- `vendor/marked-13.0.3.LICENSE.md`\n  - Upstream license retained beside the vendored build.\n\n### Allowed origins after the fix\n\n- Scripts: `'self'`, `https://www.gstatic.com` (pinned Firebase compat SDKs and App Check), `https://www.google.com` (reCAPTCHA).\n- Connections: `'self'`, `https://*.googleapis.com`, `https://*.firebaseio.com`, `wss://*.firebaseio.com`, `https://signal-serve.firebaseapp.com`.\n- Frames: `'self'`, `https://www.google.com`.\n- Images: `'self'` and `data:`; fonts, media/audio: `'self'`.\n- Objects are disabled and base/form targets remain restricted to `'self'`.\n\n### Verification\n\n- `npm test`: **39 passed, 0 failed**, including multiplayer join, reconnect, synchronization, sanitization, and privacy paths.\n- JavaScript syntax checks passed for `game.js`, `sync.js`, and `ui-events.js`.\n- Vendored marked build evaluated in a clean VM context and rendered Markdown successfully.\n- Static audit passed: no jsDelivr references, inline `on*` attributes, or `unsafe-inline` script allowance remain.\n- Live `serve` check:\n  - `/`: `200` with the expected CSP and security headers.\n  - `/vendor/marked-13.0.3.min.js`: `200 application/javascript`.\n  - `/sfx/activate.mp3`: `200 audio/mpeg`.\n  - `/sync.js`: `200 application/javascript`; Firebase HTTPS/WSS origins remain allowed by the active policy.\n- `git diff --check` passed.\n\nThe temporary validation server was stopped. Changes remain uncommitted in the isolated task worktree for Tasker snapshot/review.",
+      "attachment": "active/add-content-security-policy-and-security-headers-7858/add-content-security-policy-and-security-headers-t-2.md"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.498Z",
+      "type": "chat_user",
+      "content": "Review PASS. marked is vendored as same-origin 13.0.3, jsDelivr is absent from both CSP delivery paths, and the external script allow-list is limited to Firebase/reCAPTCHA origins. The vendored file identifies itself as marked 13.0.3; its LF-normalized SHA-256 matches the reported 5ADEA7D8EE41A700FCCC14BB9D503104F0470CC17A84AD3E167D3F5251EAE0DA. npm test passes 39/39."
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.498Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_comment",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_comment"
+    },
+    {
+      "timestamp": "2026-07-30T18:21:57.521Z",
+      "type": "actor",
+      "tool": "mcp__tasker__task_move",
+      "actor": {
+        "kind": "chat",
+        "run_id": "chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41",
+        "task_id": null
+      },
+      "task_id": "add-content-security-policy-and-security-headers-7858",
+      "content": "chat chat-019fb3f4-f3c9-7613-9f5e-4c33c25f5d0e-cdd1ed41 called mcp__tasker__task_move"
+    }
+  ],
+  "routing": {
+    "chosen_model": "codex-gpt-5-6-sol",
+    "rationale": "Direct approved queue dispatch to assigned role",
+    "decided_by": "run-queue",
+    "decided_at": "2026-07-30T18:08:11.291Z",
+    "auto_router_mode": null
+  },
+  "agent_attempt_id": "attempt-6f60d65549912af905b4",
+  "agent_startup_started_at": "2026-07-30T18:08:13.602Z",
+  "agent_session_confirmed_run_id": "agent-add-content-security-policy-and-security-headers-7858",
+  "agent_session_confirmed_at": "2026-07-30T18:08:14.426Z"
+}
